@@ -1,244 +1,558 @@
-export default function Home() {
-  const categories = [
-    { icon: "🧱", name: "آجر و بلوک" },
-    { icon: "🏗", name: "سیمان و بتن" },
-    { icon: ":black_large_square:", name: "کاشی و سرامیک" },
-    { icon: "🪨", name: "سنگ ساختمانی" },
-    { icon: "🪟", name: "درب و پنجره" },
-    { icon: ":nut_and_bolt:", name: "آهن و مصالح فلزی" },
-    { icon: ":art:", name: "رنگ و پوشش" },
-    { icon: ":wrench:", name: "تأسیسات ساختمانی" },
-  ];
+const materialCategories = [
+  { icon: "🧱", title: "آجر و بلوک", count: "۱۲۴ فروشنده" },
+  { icon: "🏗️", title: "سیمان و بتن", count: "۸۶ فروشنده" },
+  { icon: "⬛", title: "کاشی و سرامیک", count: "۲۱۸ فروشنده" },
+  { icon: "🪨", title: "سنگ ساختمانی", count: "۹۷ فروشنده" },
+  { icon: "🔩", title: "آهن و مصالح فلزی", count: "۱۵۶ فروشنده" },
+  { icon: "🪟", title: "درب و پنجره", count: "۷۴ فروشنده" },
+  { icon: "🎨", title: "رنگ و پوشش", count: "۶۳ فروشنده" },
+  { icon: "🔧", title: "تأسیسات و تجهیزات", count: "۱۴۲ فروشنده" },
+];
 
+const serviceCategories = [
+  { icon: "👷", title: "بنا و استادکار", text: "اجرای انواع عملیات ساختمانی" },
+  { icon: "🪟", title: "نصاب درب و پنجره", text: "UPVC، آلومینیوم و شیشه" },
+  { icon: "⬛", title: "نصاب کاشی و سرامیک", text: "اجرای حرفه‌ای و دقیق" },
+  { icon: "⚡", title: "برق‌کار", text: "تأسیسات و برق ساختمان" },
+  { icon: "🔧", title: "لوله‌کش", text: "تأسیسات آب و فاضلاب" },
+  { icon: "🔥", title: "جوشکار", text: "انواع جوشکاری ساختمانی" },
+  { icon: "🎨", title: "نقاش ساختمان", text: "رنگ‌آمیزی و دکوراسیون" },
+  { icon: "🧰", title: "سایر متخصصان", text: "متخصص مورد نظر خود را پیدا کنید" },
+];
+
+const popularServices = [
+  "نصاب کاشی و سرامیک",
+  "نصاب درب و پنجره",
+  "بنا",
+  "جوشکار",
+  "برق‌کار",
+  "لوله‌کش",
+];
+
+export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900" dir="rtl">
-      
+    <main
+      dir="rtl"
+      className="min-h-screen bg-slate-50 text-slate-900"
+    >
       {/* Header */}
-      <header className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           
-          <div className="flex items-center gap-3">
+          {/* Logo */}
+          <a href="#" className="flex items-center gap-3">
             <img
-  src="/logo.png"
-  alt="لوگوی سرچینو"
-  className="w-14 h-14 object-contain"
-/>
+              src="/logo.png"
+              alt="لوگوی سرچینو"
+              className="h-12 w-12 rounded-2xl object-contain"
+            />
 
             <div>
-              <h1 className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-black tracking-tight text-blue-700">
                 سرچینو
-              </h1>
-              <p className="text-xs text-gray-500">
-                بازار هوشمند مصالح ساختمانی
-              </p>
+              </div>
+              <div className="text-xs text-slate-500">
+                بازار هوشمند ساخت‌وساز
+              </div>
             </div>
-          </div>
+          </a>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm">
-            <a href="#" className="hover:text-blue-600">
-              صفحه اصلی
+          {/* Navigation */}
+          <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
+            <a href="#home" className="text-blue-700">
+              خانه
             </a>
-            <a href="#" className="hover:text-blue-600">
-              فروشندگان
+            <a href="#materials" className="hover:text-blue-700">
+              مصالح و تجهیزات
             </a>
-            <a href="#" className="hover:text-blue-600">
-              دسته‌بندی‌ها
+            <a href="#services" className="hover:text-blue-700">
+              خدمات ساختمانی
             </a>
-            <a href="#" className="hover:text-blue-600">
-              درباره سرچینو
+            <a href="#providers" className="hover:text-blue-700">
+              فروشندگان و متخصصان
             </a>
           </nav>
 
-          <button className="border border-blue-600 text-blue-600 px-5 py-2 rounded-xl hover:bg-blue-50">
-            ورود / ثبت‌نام
-          </button>
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            <button className="hidden rounded-xl px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 sm:block">
+              ورود
+            </button>
+
+            <button className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 hover:bg-blue-800">
+              ثبت‌نام
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="bg-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-20 text-center">
-          
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            هر چیزی برای ساختن،
-            <br />
-            در سرچینو پیدا کن
-          </h2>
+      <section
+        id="home"
+        className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600"
+      >
+        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
 
-          <p className="text-blue-100 text-lg mb-10">
-            جست‌وجو، مقایسه و تأمین مصالح و تجهیزات ساختمانی از فروشندگان معتبر
-          </p>
-
-          {/* Search Box */}
-          <div className="max-w-3xl mx-auto bg-white rounded-2xl p-2 flex flex-col md:flex-row gap-2 shadow-xl">
+        <div className="relative mx-auto max-w-7xl px-5 py-20 lg:py-28">
+          <div className="mx-auto max-w-4xl text-center text-white">
             
-            <select className="text-gray-700 px-4 py-4 rounded-xl outline-none bg-gray-50">
-              <option>تبریز</option>
-              <option>تهران</option>
-              <option>ارومیه</option>
-              <option>زنجان</option>
-            </select>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur">
+              <span>🚀</span>
+              <span>همه چیز برای ساخت‌وساز، در یکجا</span>
+            </div>
+<h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
+              هر چیزی برای ساختن،
+              <br />
+              <span className="text-cyan-300">در سرچینو پیدا کن</span>
+            </h1>
 
-            <input
-              type="text"
-              placeholder="چه مصالح یا تجهیزاتی نیاز دارید؟"
-              className="flex-1 text-gray-800 px-5 py-4 outline-none text-right"
-            />
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-blue-100 sm:text-lg">
+              مصالح ساختمانی، تجهیزات و متخصصان مورد نیاز پروژه‌تان را
+              جست‌وجو کنید، مقایسه کنید و با بهترین گزینه ارتباط بگیرید.
+            </p>
 
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold">
-              جست‌وجو :mag:
-            </button>
+            {/* Search Box */}
+            <div className="mx-auto mt-10 max-w-4xl rounded-3xl bg-white p-3 shadow-2xl">
+              
+              <div className="grid grid-cols-2 gap-2 border-b border-slate-100 p-2 sm:flex">
+                <button className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white">
+                  🧱 خرید مصالح
+                </button>
+
+                <button className="rounded-xl px-5 py-3 text-sm font-bold text-slate-600 hover:bg-slate-100">
+                  🛠️ دریافت خدمات
+                </button>
+              </div>
+
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
+                  <span className="text-xl">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="مثلاً کاشی، سیمان، پنجره یا نصاب..."
+                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
+                  />
+                </div>
+
+                <select className="rounded-2xl bg-slate-50 px-5 py-4 text-sm text-slate-700 outline-none">
+                  <option>📍 تبریز</option>
+                  <option>تهران</option>
+                  <option>ارومیه</option>
+                  <option>زنجان</option>
+                </select>
+
+                <button className="rounded-2xl bg-blue-700 px-8 py-4 font-bold text-white hover:bg-blue-800">
+                  جست‌وجو
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-blue-100">
+              <span>جست‌وجوهای محبوب:</span>
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                کاشی ۶۰×۱۲۰
+              </span>
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                پنجره UPVC
+              </span>
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                نصاب سرامیک
+              </span>
+            </div>
           </div>
-
-          <p className="text-sm text-blue-100 mt-5">
-            مثال: کاشی ۶۰×۱۲۰، سیمان، آجر، پنجره UPVC، سنگ نما
-          </p>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        
-        <div className="flex items-center justify-between mb-8">
+      {/* Quick Actions */}
+      <section className="relative z-10 mx-auto -mt-8 max-w-6xl px-5">
+        <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl sm:grid-cols-2">
+          
+          <div className="border-b border-slate-100 p-7 sm:border-b-0 sm:border-l">
+            <div className="flex items-center gap-5">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
+                🧱
+              </div>
+
+              <div className="flex-1">
+                <h3 className="font-black">مصالح و تجهیزات می‌خواهید؟</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  فروشندگان و تأمین‌کنندگان را پیدا کنید.
+                </p>
+              </div>
+
+              <button className="text-sm font-bold text-blue-700">
+                شروع ←
+              </button>
+            </div>
+          </div>
+
+          <div className="p-7">
+            <div className="flex items-center gap-5">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">
+                🛠️
+              </div>
+
+              <div className="flex-1">
+                <h3 className="font-black">نیروی متخصص می‌خواهید؟</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  استادکار و متخصص مناسب پروژه را پیدا کنید.
+                </p>
+              </div>
+<button className="text-sm font-bold text-emerald-700">
+                شروع ←
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Materials */}
+      <section id="materials" className="mx-auto max-w-7xl px-5 py-20">
+        <div className="mb-10 flex items-end justify-between">
           <div>
-            <h2 className="text-2xl font-bold">
-              دسته‌بندی‌های مصالح ساختمانی
+            <span className="text-sm font-bold text-blue-700">
+              بازار مصالح
+            </span>
+
+            <h2 className="mt-2 text-3xl font-black">
+              مصالح و تجهیزات ساختمانی
             </h2>
-            <p className="text-gray-500 mt-2">
-              محصولات مورد نیاز پروژه ساختمانی خود را پیدا کنید
+
+            <p className="mt-3 text-slate-500">
+              محصول مورد نیاز پروژه‌تان را از میان فروشندگان پیدا کنید.
             </p>
           </div>
 
-          <button className="text-blue-600 font-medium">
+          <button className="hidden font-bold text-blue-700 sm:block">
             مشاهده همه ←
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-5:45
-{categories.map((category) => (
-            <div
-              key={category.name}
-              className="bg-white border rounded-2xl p-5 text-center hover:shadow-lg hover:-translate-y-1 transition cursor-pointer"
-            >
-              <div className="text-4xl mb-4">
-                {category.icon}
-              </div>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
+          {materialCategories.map((item) => (
+            <div
+              key={item.title}
+              className="group cursor-pointer rounded-3xl border border-slate-200 bg-white p-5 text-center transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+            >
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-3xl transition group-hover:bg-blue-50">
+                {item.icon}
+              </div>
 
-              <h3 className="font-medium text-sm">
-                {category.name}
-              </h3>
-            </div>
-          ))}
-        </div>
-      </section>
+              <h3 className="mt-4 text-sm font-bold">
+                {item.title}
+              </h3>
 
-      {/* Features */}
-      <section className="bg-white border-y">
-        <div className="max-w-7xl mx-auto px-6 py-14">
-          
-          <h2 className="text-2xl font-bold text-center mb-12">
-            چرا سرچینو؟
-          </h2>
+              <p className="mt-2 text-xs text-slate-400">
+                {item.count}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            
-            <div className="text-center p-6">
-              <div className="text-4xl mb-4">:mag:</div>
-              <h3 className="font-bold text-lg mb-3">
-                جست‌وجوی هوشمند
-              </h3>
-              <p className="text-gray-500">
-                مصالح مورد نیاز خود را به‌سرعت در میان فروشندگان و تأمین‌کنندگان پیدا کنید.
-              </p>
-            </div>
+      {/* Services */}
+      <section id="services" className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-5">
+          
+          <div className="mb-10 flex items-end justify-between">
+            <div>
+              <span className="text-sm font-bold text-emerald-600">
+                خدمات ساختمانی
+              </span>
 
-            <div className="text-center p-6">
-              <div className="text-4xl mb-4">⚖</div>
-              <h3 className="font-bold text-lg mb-3">
-                مقایسه فروشندگان
-              </h3>
-              <p className="text-gray-500">
-                قیمت‌ها و شرایط فروش تأمین‌کنندگان مختلف را با یکدیگر مقایسه کنید.
-              </p>
-            </div>
+              <h2 className="mt-2 text-3xl font-black">
+                متخصص مورد نیاز پروژه‌تان را پیدا کنید
+              </h2>
 
-            <div className="text-center p-6">
-              <div className="text-4xl mb-4">🤝</div>
-              <h3 className="font-bold text-lg mb-3">
-                تأمین آسان
-              </h3>
-              <p className="text-gray-500">
-                درخواست خود را ثبت کنید و از فروشندگان معتبر پیشنهاد دریافت کنید.
-              </p>
-            </div>
+              <p className="mt-3 text-slate-500">
+                از استادکار و بنا تا نصاب، جوشکار و متخصصان فنی.
+              </p>
+            </div>
 
-          </div>
-        </div>
-      </section>
+            <button className="hidden font-bold text-emerald-600 sm:block">
+              همه خدمات ←
+            </button>
+          </div>
 
-      {/* CTA */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <div className="bg-gray-900 text-white rounded-3xl p-10 md:p-16 text-center">
-          
-          <h2 className="text-3xl font-bold mb-5">
-            فروشنده یا تأمین‌کننده مصالح هستید؟
-          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {serviceCategories.map((service) => (
+              <div
+                key={service.title}
+                className="group cursor-pointer rounded-3xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl"
+              >
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm">
+                  {service.icon}
+                </div>
 
-          <p className="text-gray-300 mb-8">
-            فروشگاه خود را در سرچینو ثبت کنید و مشتریان جدید پیدا کنید.
-          </p>
+                <h3 className="mt-5 font-black">
+                  {service.title}
+                </h3>
 
-          <button className="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl font-bold">
-            ثبت فروشگاه در سرچینو
-          </button>
+                <p className="mt-2 text-sm text-slate-500">
+                  {service.text}
+                </p>
 
-        </div>
-      </section>
+                <div className="mt-5 text-sm font-bold text-emerald-600">
+                  مشاهده متخصصان ←
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* Footer */}
-      <footer className="bg-white border-t">
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          
-          <div className="flex flex-col md:flex-row justify-between gap-8">
-            
-            <div>
-              <h2 className="text-xl font-bold text-blue-600 mb-3">
-                سرچینو
-              </h2>
-              <p className="text-gray-500 max-w-md">
-                پلتفرم جست‌وجو و تأمین مصالح و تجهیزات ساختمانی.
-              </p>
-            </div>
+      {/* Popular Services */}
+      <section className="mx-auto max-w-7xl px-5 py-20">
+        <div className="rounded-[2.5rem] bg-slate-900 p-8 text-white sm:p-12">
+          
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            
+            <div>
+              <span className="text-sm font-bold text-cyan-300">
+                خدمات پرتقاضا
+              </span>
 
-            <div className="flex gap-10 text-sm text-gray-500">
-              <div>
-                <h3 className="font-bold text-gray-900 mb-3">
-                  لینک‌های مفید
-                </h3>
-                <p>درباره ما</p>
-                <p>تماس با ما</p>
-                <p>قوانین و مقررات</p>
-              </div>
+              <h2 className="mt-4 text-3xl font-black leading-relaxed">
+                دنبال متخصص خاصی هستید؟
+              </h2>
+<p className="mt-4 leading-8 text-slate-300">
+                نوع خدمت مورد نیازتان را انتخاب کنید و متخصصان فعال در
+                شهر خود را پیدا کنید.
+              </p>
 
-              <div>
-                <h3 className="font-bold text-gray-900 mb-3">
-                  ارتباط با ما
-                </h3>
-                <p>تبریز، ایران</p>
-                <p>پشتیبانی سرچینو</p>
-              </div>
-            </div>
+              <div className="mt-7 flex flex-wrap gap-2">
+                {popularServices.map((service) => (
+                  <button
+                    key={service}
+                    className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm hover:bg-white/20"
+                  >
+                    {service}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          </div>
+            <div className="rounded-3xl bg-white p-7 text-slate-900">
+              <h3 className="text-xl font-black">
+                درخواست خدمات خود را ثبت کنید
+              </h3>
 
-          <div className="border-t mt-8 pt-6 text-center text-sm text-gray-400">
-            :copyright: ۱۴۰۵ سرچینو — تمامی حقوق محفوظ است.
-          </div>
+              <p className="mt-2 text-sm text-slate-500">
+                پروژه‌تان را توضیح دهید تا متخصصان مناسب شما را پیدا کنند.
+              </p>
 
-        </div>
-      </footer>
+              <div className="mt-5 space-y-3">
+                <input
+                  placeholder="مثلاً نصب ۲۰۰ متر کاشی"
+                  className="w-full rounded-xl bg-slate-100 px-4 py-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                />
 
-    </main>
-  );
+                <select className="w-full rounded-xl bg-slate-100 px-4 py-4 text-sm outline-none">
+                  <option>انتخاب شهر</option>
+                  <option>تبریز</option>
+                  <option>تهران</option>
+                  <option>ارومیه</option>
+                </select>
+
+                <button className="w-full rounded-xl bg-blue-700 py-4 font-bold text-white hover:bg-blue-800">
+                  ثبت درخواست خدمات
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Provider Section */}
+      <section id="providers" className="bg-blue-50 py-20">
+        <div className="mx-auto max-w-7xl px-5">
+          
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="text-sm font-bold text-blue-700">
+              به سرچینو بپیوندید
+            </span>
+
+            <h2 className="mt-3 text-3xl font-black">
+              کسب‌وکار یا مهارت خود را در سرچینو معرفی کنید
+            </h2>
+
+            <p className="mt-4 leading-8 text-slate-600">
+              چه فروشنده مصالح باشید و چه استادکار و متخصص ساختمانی،
+              می‌توانید در سرچینو خدمات و محصولات خود را به مشتریان
+              معرفی کنید.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            
+            {/* Seller */}
+            <div className="rounded-3xl bg-white p-8 shadow-sm">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
+                🏪
+              </div>
+
+              <h3 className="mt-6 text-2xl font-black">
+                فروشنده یا تأمین‌کننده هستید؟
+              </h3>
+
+              <p className="mt-3 leading-7 text-slate-500">
+                فروشگاه و محصولات خود را ثبت کنید و مشتریان جدید پیدا کنید.
+              </p>
+
+              <button className="mt-7 rounded-xl bg-blue-700 px-6 py-4 font-bold text-white">
+                ثبت فروشگاه
+              </button>
+            </div>
+
+            {/* Service Provider */}
+            <div className="rounded-3xl bg-white p-8 shadow-sm">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">
+                👷
+              </div>
+
+              <h3 className="mt-6 text-2xl font-black">
+                استادکار یا ارائه‌دهنده خدمات هستید؟
+              </h3>
+
+              <p className="mt-3 leading-7 text-slate-500">
+                تخصص، سابقه کار، نمونه‌کار و محدوده فعالیت خود را ثبت کنید
+                و مشتریان جدید بگیرید.
+              </p>
+
+              <button className="mt-7 rounded-xl bg-emerald-600 px-6 py-4 font-bold text-white">
+                ثبت خدمات و تخصص
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+{/* How it works */}
+      <section className="mx-auto max-w-7xl px-5 py-20">
+        <div className="text-center">
+          <span className="text-sm font-bold text-blue-700">
+            ساده و سریع
+          </span>
+
+          <h2 className="mt-3 text-3xl font-black">
+            سرچینو چطور کار می‌کند؟
+          </h2>
+        </div>
+
+        <div className="mt-12 grid gap-6 md:grid-cols-4">
+          {[
+            ["۱", "جست‌وجو کنید", "محصول یا خدمت مورد نیاز خود را جست‌وجو کنید."],
+            ["۲", "مقایسه کنید", "گزینه‌های مختلف را بررسی و مقایسه کنید."],
+            ["۳", "انتخاب کنید", "فروشنده یا متخصص مناسب را انتخاب کنید."],
+            ["۴", "ارتباط بگیرید", "برای خرید یا دریافت خدمات اقدام کنید."],
+          ].map(([number, title, text]) => (
+            <div
+              key={number}
+              className="rounded-3xl border border-slate-200 bg-white p-7 text-center"
+            >
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-700 font-black text-white">
+                {number}
+              </div>
+
+              <h3 className="mt-5 font-black">
+                {title}
+              </h3>
+
+              <p className="mt-3 text-sm leading-7 text-slate-500">
+                {text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="px-5 pb-20">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-gradient-to-l from-blue-700 to-blue-900 px-6 py-14 text-center text-white sm:px-12">
+          
+          <h2 className="text-3xl font-black">
+            پروژه ساخت‌وسازتان را ساده‌تر شروع کنید
+          </h2>
+
+          <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
+            در سرچینو، مصالح و تجهیزات مورد نیازتان را پیدا کنید و
+            متخصصان مناسب پروژه را به‌راحتی پیدا کنید.
+          </p>
+
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <button className="rounded-xl bg-white px-8 py-4 font-black text-blue-800">
+              جست‌وجوی مصالح
+            </button>
+
+            <button className="rounded-xl border border-white/30 bg-white/10 px-8 py-4 font-black text-white">
+              پیدا کردن متخصص
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-950 text-slate-300">
+        <div className="mx-auto max-w-7xl px-5 py-14">
+          
+          <div className="grid gap-10 md:grid-cols-4">
+            
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/logo.png"
+                  alt="سرچینو"
+                  className="h-12 w-12 rounded-xl object-contain"
+                />
+
+                <div>
+                  <div className="text-xl font-black text-white">
+                    سرچینو
+                  </div>
+
+                  <div className="text-xs text-slate-500">
+                    بازار هوشمند ساخت‌وساز
+                  </div>
+                </div>
+              </div>
+
+              <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
+                پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان مصالح،
+                تأمین‌کنندگان و متخصصان صنعت ساختمان.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-white">
+                خدمات سرچینو
+              </h3>
+
+              <div className="mt-5 space-y-3 text-sm">
+                <p>مصالح و تجهیزات</p>
+                <p>خدمات ساختمانی</p>
+                <p>ثبت فروشگاه</p>
+                <p>ثبت خدمات</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-white">
+                ارتباط با ما
+              </h3>
+<div className="mt-5 space-y-3 text-sm">
+                <p>درباره سرچینو</p>
+                <p>تماس با ما</p>
+                <p>قوانین و مقررات</p>
+                <p>پشتیبانی</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 border-t border-white/10 pt-7 text-center text-xs text-slate-500">
+            © ۱۴۰۵ سرچینو — تمامی حقوق محفوظ است.
+          </div>
+        </div>
+      </footer>
+    </main>
+  );
 }
