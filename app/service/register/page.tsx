@@ -114,11 +114,11 @@ export default function ServiceRegisterPage() {
 
                   {item < 5 && (
                     <div
-                      className={mx-2 h-1 flex-1 rounded-full ${
+                      className={`mx-2 h-1 flex-1 rounded-full ${
                         step > item
                           ? "bg-blue-700"
                           : "bg-slate-100"
-                      }}
+                      }`}
                     />
                   )}
                 </div>
