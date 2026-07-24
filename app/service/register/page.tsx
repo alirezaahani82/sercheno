@@ -388,11 +388,11 @@ export default function ServiceRegisterPage() {
                   type="button"
                   onClick={previousStep}
                   disabled={step === 1}
-                  className={rounded-xl px-6 py-3 font-bold ${
+                  className=`{rounded-xl px-6 py-3 font-bold ${
                     step === 1
                       ? "cursor-not-allowed text-slate-300"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }}
+                  }`}
                 >
                   مرحله قبل
                 </button>
