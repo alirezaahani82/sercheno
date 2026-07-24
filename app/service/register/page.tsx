@@ -77,8 +77,8 @@ export default function ServiceRegisterPage() {
       {/* Main */}
       <section className="px-5 py-12 sm:py-16">
         <div className="mx-auto max-w-4xl">
-          
-          {/* Title */}
+
+          {/* Page Title */}
           <div className="mx-auto max-w-2xl text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">
               🛠️
@@ -134,9 +134,9 @@ export default function ServiceRegisterPage() {
             </div>
           </div>
 
-          {/* Form Card */}
+          {/* Form */}
           <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm sm:p-10">
-            
+
             {/* Step 1 */}
             {step === 1 && (
               <div>
@@ -202,6 +202,7 @@ export default function ServiceRegisterPage() {
                   {services.map((service) => (
                     <button
                       key={service}
+                      type="button"
                       onClick={() => setSelectedService(service)}
                       className={rounded-2xl border p-4 text-sm font-bold transition ${
                         selectedService === service
@@ -317,11 +318,13 @@ export default function ServiceRegisterPage() {
                     </h3>
 
                     <p className="mt-2 text-sm text-slate-500">
-                      در نسخه نهایی می‌توانید تصاویر پروژه‌های خود را
-                      بارگذاری کنید.
+                      در نسخه نهایی می‌توانید تصاویر پروژه‌های خود را بارگذاری کنید.
                     </p>
 
-                    <button className="mt-4 rounded-xl bg-slate-100 px-5 py-3 text-sm font-bold">
+                    <button
+                      type="button"
+                      className="mt-4 rounded-xl bg-slate-100 px-5 py-3 text-sm font-bold"
+                    >
                       انتخاب تصاویر
                     </button>
                   </div>
@@ -341,8 +344,8 @@ export default function ServiceRegisterPage() {
                 </h2>
 
                 <p className="mx-auto mt-4 max-w-xl leading-8 text-slate-500">
-                  پس از ثبت نهایی، پروفایل خدمات شما در سرچینو ایجاد
-                  می‌شود و مشتریان می‌توانند تخصص شما را مشاهده کنند.
+                  پس از ثبت نهایی، پروفایل خدمات شما در سرچینو ایجاد می‌شود
+                  و مشتریان می‌توانند تخصص شما را مشاهده کنند.
                 </p>
 <div className="mx-auto mt-8 max-w-md rounded-2xl bg-slate-50 p-5 text-right">
                   <div className="flex justify-between border-b border-slate-200 pb-4">
@@ -367,7 +370,10 @@ export default function ServiceRegisterPage() {
                 </div>
 
                 <button
-                  onClick={() => alert("پروفایل شما با موفقیت ثبت شد.")}
+                  type="button"
+                  onClick={() =>
+                    alert("پروفایل شما با موفقیت ثبت شد.")
+                  }
                   className="mt-8 rounded-xl bg-emerald-600 px-10 py-4 font-black text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
                 >
                   ثبت پروفایل من در سرچینو
@@ -379,6 +385,7 @@ export default function ServiceRegisterPage() {
             {step < 5 && (
               <div className="mt-10 flex items-center justify-between border-t border-slate-100 pt-6">
                 <button
+                  type="button"
                   onClick={previousStep}
                   disabled={step === 1}
                   className={rounded-xl px-6 py-3 font-bold ${
@@ -391,6 +398,7 @@ export default function ServiceRegisterPage() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={nextStep}
                   className="rounded-xl bg-blue-700 px-8 py-3 font-bold text-white hover:bg-blue-800"
                 >
@@ -402,6 +410,7 @@ export default function ServiceRegisterPage() {
             {step === 5 && (
               <div className="mt-8 text-center">
                 <button
+                  type="button"
                   onClick={previousStep}
                   className="text-sm font-bold text-blue-700"
                 >
@@ -411,7 +420,7 @@ export default function ServiceRegisterPage() {
             )}
           </div>
 
-          {/* Trust Box */}
+          {/* Security Box */}
           <div className="mt-6 rounded-3xl border border-blue-100 bg-blue-50 p-6">
             <div className="flex gap-4">
               <div className="text-2xl">🔒</div>
@@ -422,9 +431,9 @@ export default function ServiceRegisterPage() {
                 </h3>
 
                 <p className="mt-2 text-sm leading-7 text-slate-600">
-                  اطلاعات ثبت‌شده شما برای ایجاد پروفایل حرفه‌ای
-                  متخصصان استفاده می‌شود. در نسخه نهایی، امکان تأیید
-                  هویت و اعتبارسنجی متخصصان نیز به سیستم اضافه خواهد شد.
+                  اطلاعات ثبت‌شده شما برای ایجاد پروفایل حرفه‌ای متخصصان
+                  استفاده می‌شود. در نسخه نهایی، امکان تأیید هویت و
+                  اعتبارسنجی متخصصان نیز به سیستم اضافه خواهد شد.
                 </p>
               </div>
             </div>
@@ -439,3 +448,4 @@ export default function ServiceRegisterPage() {
     </main>
   );
 }
+
