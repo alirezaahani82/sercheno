@@ -103,11 +103,11 @@ export default function ServiceRegisterPage() {
                   className="flex flex-1 items-center"
                 >
                   <div
-                    className={flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-black ${
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-black ${
                       step >= item
                         ? "bg-blue-700 text-white"
                         : "bg-slate-100 text-slate-400"
-                    }}
+                    }`}
                   >
                     {item}
                   </div>
