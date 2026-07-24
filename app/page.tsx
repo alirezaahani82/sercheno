@@ -49,7 +49,7 @@ export default function Home() {
 
             <div>
               <div className="text-2xl font-black tracking-tight text-blue-700">
-                سرچینو
+                سرچنو
               </div>
               <div className="text-xs text-slate-500">
                 بازار هوشمند ساخت‌وساز
