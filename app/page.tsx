@@ -419,9 +419,14 @@ export default function Home() {
                 و مشتریان جدید بگیرید.
               </p>
 
-              <button className="mt-7 rounded-xl bg-emerald-600 px-6 py-4 font-bold text-white">
-                ثبت خدمات و تخصص
-              </button>
+             <a
+  href="/service/register"
+  className="mt-7 inline-block rounded-xl bg-emerald-600 px-6 py-4 font-bold text-white transition hover:bg-emerald-700"
+>
+  ثبت خدمات و تخصص
+</a> 
+                
+              
             </div>
           </div>
         </div>
