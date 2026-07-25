@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const serviceCategories = [
+const categories = [
   "همه خدمات",
   "بنا و استادکار",
   "نصاب درب و پنجره",
@@ -11,96 +11,98 @@ const serviceCategories = [
   "لوله‌کش",
   "جوشکار",
   "نقاش ساختمان",
-  "سایر متخصصان",
 ];
 
-const specialists = [
+const cities = [
+  "همه شهرها",
+  "تبریز",
+  "تهران",
+  "ارومیه",
+  "زنجان",
+];
+
+const professionals = [
   {
-    name: "علی رضایی",
-    service: "نصاب درب و پنجره",
+    name: "استادکار احمدی",
+    category: "بنا و استادکار",
     city: "تبریز",
-    area: "ولیعصر و ائل‌گلی",
-    experience: "۱۲ سال سابقه",
     rating: "۴.۹",
-    projects: "۸۷ پروژه",
-    verified: true,
-    icon: "🪟",
-  },
-  {
-    name: "محمد احمدی",
-    service: "نصاب کاشی و سرامیک",
-    city: "تبریز",
-    area: "مرکز شهر و نصف‌راه",
-    experience: "۹ سال سابقه",
-    rating: "۴.۸",
-    projects: "۶۴ پروژه",
-    verified: true,
-    icon: "⬛",
-  },
-  {
-    name: "حسین کریمی",
-    service: "بنا و استادکار",
-    city: "تبریز",
-    area: "آبرسان و ولیعصر",
-    experience: "۱۵ سال سابقه",
-    rating: "۴.۹",
-    projects: "۱۱۲ پروژه",
-    verified: true,
+    jobs: "۱۲۸ پروژه",
     icon: "👷",
+    description: "اجرای انواع عملیات ساختمانی و بازسازی",
   },
   {
-    name: "رضا مرادی",
-    service: "برق‌کار",
+    name: "تیم نصب پنجره آریا",
+    category: "نصاب درب و پنجره",
     city: "تبریز",
-    area: "ائل‌گلی و باغمیشه",
-    experience: "۷ سال سابقه",
-    rating: "۴.۷",
-    projects: "۵۳ پروژه",
-    verified: false,
-    icon: "⚡",
-  },
-  {
-    name: "امیر حسینی",
-    service: "جوشکار",
-    city: "تبریز",
-    area: "شرق تبریز",
-    experience: "۱۰ سال سابقه",
     rating: "۴.۸",
-    projects: "۷۶ پروژه",
-    verified: true,
-    icon: "🔥",
+    jobs: "۹۴ پروژه",
+    icon: "🪟",
+    description: "نصب تخصصی درب و پنجره UPVC و آلومینیوم",
   },
   {
-    name: "مهدی موسوی",
-    service: "لوله‌کش",
+    name: "کاشی‌کار حرفه‌ای",
+    category: "نصاب کاشی و سرامیک",
     city: "تبریز",
-    area: "مرکز و غرب تبریز",
-    experience: "۸ سال سابقه",
-    rating: "۴.۶",
-    projects: "۴۱ پروژه",
-    verified: false,
+    rating: "۵.۰",
+    jobs: "۷۶ پروژه",
+    icon: "⬛",
+    description: "اجرای حرفه‌ای کاشی، سرامیک و سنگ",
+  },
+  {
+    name: "برق ساختمان تبریز",
+    category: "برق‌کار",
+    city: "تبریز",
+    rating: "۴.۷",
+    jobs: "۶۲ پروژه",
+    icon: "⚡",
+    description: "اجرای تأسیسات برق ساختمان و رفع عیب",
+  },
+  {
+    name: "تأسیسات نوین",
+    category: "لوله‌کش",
+    city: "تهران",
+    rating: "۴.۹",
+    jobs: "۱۱۰ پروژه",
     icon: "🔧",
+    description: "لوله‌کشی آب، فاضلاب و تأسیسات ساختمان",
+  },
+  {
+    name: "جوشکاری صنعتی آذربایجان",
+    category: "جوشکار",
+    city: "تبریز",
+    rating: "۴.۸",
+    jobs: "۸۳ پروژه",
+    icon: "🔥",
+    description: "انواع جوشکاری ساختمانی و صنعتی",
   },
 ];
 
-export default function ServicesPage() {
+export default function ServicePage() {
   const [selectedCategory, setSelectedCategory] =
     useState("همه خدمات");
 
-  const [search, setSearch] = useState("");
-  const [city, setCity] = useState("تبریز");
+  const [selectedCity, setSelectedCity] =
+    useState("همه شهرها");
 
-  const filteredSpecialists = specialists.filter((specialist) => {
+  const [search, setSearch] = useState("");
+
+  const filteredProfessionals = professionals.filter((person) => {
     const categoryMatch =
       selectedCategory === "همه خدمات" ||
-      specialist.service === selectedCategory;
+      person.category === selectedCategory;
+
+    const cityMatch =
+      selectedCity === "همه شهرها" ||
+      person.city === selectedCity;
 
     const searchMatch =
-      specialist.name.includes(search) ||
-      specialist.service.includes(search) ||
-      specialist.area.includes(search);
+      search.trim() === "" ||
+      person.name.includes(search) ||
+      person.category.includes(search) ||
+      person.city.includes(search);
 
-    return categoryMatch && searchMatch;
+    return categoryMatch && cityMatch && searchMatch;
   });
 
   return (
@@ -148,95 +150,85 @@ export default function ServicesPage() {
             </a>
 
             <a
-              href="/services"
+              href="/service"
               className="text-blue-700"
             >
               خدمات ساختمانی
             </a>
-
-            <a
-              href="/#providers"
-              className="text-slate-600 hover:text-blue-700"
-            >
-              ثبت خدمات
-            </a>
           </nav>
 
-          <a
-            href="/service/register"
-            className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
-          >
-            ثبت خدمات
-          </a>
+          <div className="flex items-center gap-2">
+            <button className="hidden rounded-xl px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 sm:block">
+              ورود
+            </button>
+
+            <button className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800">
+              ثبت‌نام
+            </button>
+          </div>
         </div>
       </header>
 {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
-        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
-
-        <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
-
-        <div className="relative mx-auto max-w-7xl px-5 py-16 sm:py-20">
+      <section className="bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
+        <div className="mx-auto max-w-7xl px-5 py-20">
           <div className="mx-auto max-w-4xl text-center text-white">
-            <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-bold backdrop-blur">
+            <div className="mb-5 inline-flex rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm">
               🛠️ خدمات ساختمانی سرچینو
-            </span>
+            </div>
 
-            <h1 className="mt-6 text-4xl font-black leading-tight sm:text-5xl">
+            <h1 className="text-4xl font-black leading-tight sm:text-5xl">
               متخصص مورد نیاز پروژه‌تان را
-              <span className="block text-cyan-300">
-                سریع پیدا کنید
+              <span className="text-cyan-300">
+                {" "}
+                پیدا کنید
               </span>
             </h1>
 
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-blue-100 sm:text-lg">
-              از بنا و استادکار تا نصاب، برق‌کار، جوشکار و سایر
-              متخصصان ساختمانی را در شهر خود پیدا کنید.
+            <p className="mx-auto mt-6 max-w-2xl leading-8 text-blue-100">
+              از بنا و استادکار تا نصاب، جوشکار، برق‌کار و
+              لوله‌کش؛ متخصص مورد نیاز خود را در شهر خود پیدا
+              کنید و با او ارتباط بگیرید.
             </p>
 
             {/* Search */}
             <div className="mx-auto mt-10 rounded-3xl bg-white p-3 shadow-2xl">
-              <div className="flex flex-col gap-3 lg:flex-row">
-                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
+              <div className="flex flex-col gap-3 md:flex-row">
+                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4">
                   <span className="text-xl">
                     🔍
                   </span>
 
                   <input
                     value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
+                    onChange={(event) =>
+                      setSearch(event.target.value)
                     }
-                    type="text"
-                    placeholder="مثلاً نصاب پنجره، بنا، برق‌کار..."
+                    placeholder="مثلاً نصاب کاشی، برق‌کار یا جوشکار..."
                     className="w-full bg-transparent text-sm text-slate-800 outline-none"
                   />
                 </div>
 
                 <select
-                  value={city}
-                  onChange={(e) =>
-                    setCity(e.target.value)
+                  value={selectedCity}
+                  onChange={(event) =>
+                    setSelectedCity(event.target.value)
                   }
-                  className="rounded-2xl bg-slate-50 px-5 py-4 text-sm font-bold text-slate-700 outline-none"
+                  className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none"
                 >
-                  <option>تبریز</option>
-                  <option>تهران</option>
-                  <option>ارومیه</option>
-                  <option>زنجان</option>
+                  {cities.map((city) => (
+                    <option
+                      key={city}
+                      value={city}
+                    >
+                      📍 {city}
+                    </option>
+                  ))}
                 </select>
 
-                <button className="rounded-2xl bg-blue-700 px-10 py-4 font-black text-white transition hover:bg-blue-800">
-                  جست‌وجو
+                <button className="rounded-2xl bg-blue-700 px-8 py-4 font-bold text-white hover:bg-blue-800">
+                  جست‌وجوی متخصص
                 </button>
               </div>
-            </div>
-
-            <div className="mt-6 text-sm text-blue-100">
-              متخصصان فعال در شهر:
-              <span className="mr-2 font-black text-white">
-                {city}
-              </span>
             </div>
           </div>
         </div>
@@ -244,181 +236,74 @@ export default function ServicesPage() {
 
       {/* Main */}
       <section className="mx-auto max-w-7xl px-5 py-16">
-        <div className="grid gap-10 lg:grid-cols-4">
-          
+        <div className="grid gap-8 lg:grid-cols-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-1">
-            <div className="sticky top-28 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-black">
-                دسته‌بندی خدمات
-              </h2>
+          <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="mb-5 text-lg font-black">
+              دسته‌بندی خدمات
+            </h2>
 
-              <div className="mt-5 space-y-2">
-                {serviceCategories.map(
-                  (category) => (
-                    <button
-                      key={category}
-                      onClick={() =>
-                        setSelectedCategory(category)
-                      }
-                      className={`w-full rounded-xl px-4 py-3 text-right text-sm font-bold transition ${
-                        selectedCategory === category
-                          ? "bg-blue-700 text-white shadow-lg shadow-blue-700/20"
-                          : "text-slate-600 hover:bg-slate-100"
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  )
-                )}
-              </div>
-<div className="mt-8 rounded-2xl bg-emerald-50 p-5">
-                <div className="text-2xl">
-                  👷
-                </div>
-
-                <h3 className="mt-3 font-black">
-                  متخصص هستید؟
-                </h3>
-
-                <p className="mt-2 text-xs leading-6 text-slate-500">
-                  تخصص و خدمات خود را در سرچینو ثبت کنید
-                  و مشتریان جدید پیدا کنید.
-                </p>
-
-                <a
-                  href="/service/register"
-                  className="mt-4 block rounded-xl bg-emerald-600 py-3 text-center text-sm font-bold text-white transition hover:bg-emerald-700"
+            <div className="space-y-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() =>
+                    setSelectedCategory(category)
+                  }
+                  className={`w-full rounded-xl px-4 py-3 text-right text-sm font-bold transition ${
+                    selectedCategory === category
+                      ? "bg-blue-700 text-white shadow-lg shadow-blue-700/20"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
                 >
-                  ثبت خدمات و تخصص
-                </a>
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-8 rounded-2xl bg-emerald-50 p-5">
+              <div className="text-3xl">
+                👷
               </div>
+
+              <h3 className="mt-3 font-black">
+                متخصص هستید؟
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                تخصص و خدمات خود را در سرچینو ثبت کنید
+                و مشتریان جدید پیدا کنید.
+              </p>
+<a
+                href="/service/register"
+                className="mt-5 block rounded-xl bg-emerald-600 px-4 py-3 text-center text-sm font-bold text-white hover:bg-emerald-700"
+              >
+                ثبت خدمات و تخصص
+              </a>
             </div>
           </aside>
 
-          {/* Specialists */}
+          {/* Results */}
           <div className="lg:col-span-3">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div>
                 <span className="text-sm font-bold text-blue-700">
                   متخصصان ساختمانی
                 </span>
 
                 <h2 className="mt-2 text-2xl font-black">
-                  {selectedCategory}
+                  متخصص مناسب خود را پیدا کنید
                 </h2>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  {filteredSpecialists.length} متخصص
-                  برای انتخاب شما
-                </p>
               </div>
 
-              <select className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none">
-                <option>
-                  مرتب‌سازی: پیشنهادی
-                </option>
-                <option>
-                  بالاترین امتیاز
-                </option>
-                <option>
-                  بیشترین سابقه
-                </option>
-              </select>
-            </div>
-
-            <div className="mt-8 grid gap-5 sm:grid-cols-2">
-              {filteredSpecialists.map(
-                (specialist) => (
-                  <div
-                    key={specialist.name}
-                    className="group rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
-                        {specialist.icon}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-black">
-                            {specialist.name}
-                          </h3>
-
-                          {specialist.verified && (
-                            <span
-                              title="متخصص تأیید شده"
-                              className="text-sm text-blue-600"
-                            >
-                              ✓
-                            </span>
-                          )}
-                        </div>
-
-                        <p className="mt-1 text-sm font-bold text-blue-700">
-                          {specialist.service}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 space-y-3 text-sm text-slate-500">
-                      <div className="flex items-center gap-2">
-                        <span>📍</span>
-                        <span>
-                          {specialist.city} —{" "}
-                          {specialist.area}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span>🕒</span>
-                        <span>
-                          {specialist.experience}
-                        </span>
-                      </div>
-<div className="text-xs text-slate-500">
-                  بازار هوشمند ساخت‌وساز
-                </div>
+              <div className="rounded-xl bg-white px-4 py-3 text-sm text-slate-500 shadow-sm">
+                {filteredProfessionals.length} متخصص پیدا شد
               </div>
-            </a>
-
-            <div className="text-center text-xs text-slate-500">
-              © ۱۴۰۵ سرچینو — تمامی حقوق محفوظ است.
-            </div>
-          </div>
-        </div>
-      </footer>
-    </main>
-  );
-}
-<div className="flex items-center gap-2">
-                        <span>⭐</span>
-                        <span className="font-bold text-slate-700">
-                          {specialist.rating}
-                        </span>
-
-                        <span>
-                          ({specialist.projects})
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 grid grid-cols-2 gap-3">
-                      <button className="rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
-                        مشاهده پروفایل
-                      </button>
-
-                      <button className="rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800">
-                        درخواست خدمات
-                      </button>
-                    </div>
-                  </div>
-                )
-              )}
             </div>
 
-            {filteredSpecialists.length === 0 && (
-              <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
+            {filteredProfessionals.length === 0 ? (
+              <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center">
                 <div className="text-5xl">
                   🔍
                 </div>
@@ -428,8 +313,57 @@ export default function ServicesPage() {
                 </h3>
 
                 <p className="mt-3 text-sm text-slate-500">
-                  عبارت جست‌وجو یا دسته‌بندی دیگری را امتحان کنید.
+                  فیلترها یا عبارت جست‌وجو را تغییر دهید.
                 </p>
+              </div>
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2">
+                {filteredProfessionals.map(
+                  (person) => (
+                    <div
+                      key={person.name}
+                      className="rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-xl"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
+                          {person.icon}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-black">
+                            {person.name}
+                          </h3>
+
+                          <p className="mt-1 text-sm font-bold text-blue-700">
+                            {person.category}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-400">
+                            📍 {person.city}
+                          </p>
+                        </div>
+
+                        <div className="rounded-lg bg-amber-50 px-2 py-1 text-xs font-bold text-amber-600">
+                          ⭐ {person.rating}
+                        </div>
+                      </div>
+
+                      <p className="mt-5 text-sm leading-7 text-slate-500">
+                        {person.description}
+                      </p>
+
+                      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-5">
+                        <span className="text-xs text-slate-400">
+                          {person.jobs}
+                        </span>
+
+                        <button className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800">
+                          مشاهده پروفایل
+                        </button>
+                      </div>
+                    </div>
+                  )
+                )}
               </div>
             )}
           </div>
@@ -438,25 +372,24 @@ export default function ServicesPage() {
 
       {/* Request Service */}
       <section className="px-5 pb-20">
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-slate-900 p-8 text-white sm:p-12">
+        <div className="mx-auto max-w-7xl rounded-[2.5rem] bg-slate-900 p-8 text-white sm:p-12">
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <div>
-              <span className="text-sm font-bold text-cyan-300">
-                متخصص مناسب پیدا نکردید؟
+              <span className="font-bold text-cyan-300">
+                متخصص پیدا نکردید؟
               </span>
-
-              <h2 className="mt-4 text-3xl font-black leading-relaxed">
+<h2 className="mt-4 text-3xl font-black leading-relaxed">
                 درخواست خدمات خود را ثبت کنید
               </h2>
 
               <p className="mt-4 leading-8 text-slate-300">
                 نوع پروژه و خدمت مورد نیازتان را ثبت کنید
-                تا بتوانید متخصص مناسب پروژه خود را پیدا کنید.
+                تا متخصصان مناسب بتوانند با شما ارتباط بگیرند.
               </p>
             </div>
 
             <div className="rounded-3xl bg-white p-6 text-slate-900">
-              <h3 className="text-lg font-black">
+              <h3 className="text-xl font-black">
                 چه خدمتی نیاز دارید؟
               </h3>
 
@@ -469,18 +402,21 @@ export default function ServicesPage() {
                 <option>
                   انتخاب شهر
                 </option>
+
                 <option>
                   تبریز
                 </option>
+
                 <option>
                   تهران
                 </option>
+
                 <option>
                   ارومیه
                 </option>
               </select>
 
-              <button className="mt-3 w-full rounded-xl bg-blue-700 py-4 font-black text-white transition hover:bg-blue-800">
+              <button className="mt-3 w-full rounded-xl bg-blue-700 py-4 font-bold text-white hover:bg-blue-800">
                 ثبت درخواست خدمات
               </button>
             </div>
@@ -488,33 +424,118 @@ export default function ServicesPage() {
         </div>
       </section>
 
+      {/* Provider CTA */}
+      <section className="bg-blue-50 px-5 py-20">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="text-5xl">
+            👷‍♂️
+          </div>
+
+          <h2 className="mt-5 text-3xl font-black">
+            استادکار یا متخصص هستید؟
+          </h2>
+
+          <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-600">
+            تخصص، سابقه کاری، شهر محل فعالیت و خدمات خود را
+            در سرچینو ثبت کنید تا مشتریان بیشتری شما را پیدا کنند.
+          </p>
+
+          <a
+            href="/service/register"
+            className="mt-8 inline-block rounded-xl bg-emerald-600 px-8 py-4 font-black text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
+          >
+            ثبت خدمات و تخصص
+          </a>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-slate-950 text-slate-300">
-        <div className="mx-auto max-w-7xl px-5 py-12">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <a
-              href="/"
-              className="flex items-center gap-3"
-            >
-              <img
-                src="/logo.png"
-                alt="سرچینو"
-                className="h-11 w-11 rounded-xl object-contain"
-              />
+        <div className="mx-auto max-w-7xl px-5 py-14">
+          <div className="grid gap-10 md:grid-cols-4">
+            <div className="md:col-span-2">
+              <a
+                href="/"
+                className="flex items-center gap-3"
+              >
+                <img
+                  src="/logo.png"
+                  alt="سرچینو"
+                  className="h-12 w-12 rounded-xl object-contain"
+                />
 
-              <div>
-                <div className="font-black text-white">
-                  سرچینو
-                </div>
-                <div className="text-xs text-slate-500">
-                  بازار هوشمند ساخت‌وساز
-                </div>
-              </div>
-            </a>
+                <div>
+                  <div className="text-xl font-black text-white">
+                    سرچینو
+                  </div>
 
-            <div className="text-center text-xs text-slate-500">
-              © ۱۴۰۵ سرچینو — تمامی حقوق محفوظ است.
+                  <div className="text-xs text-slate-500">
+                    بازار هوشمند ساخت‌وساز
+                  </div>
+                </div>
+              </a>
+
+              <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
+                پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان
+                مصالح، تأمین‌کنندگان و متخصصان صنعت ساختمان.
+              </p>
             </div>
+
+            <div>
+              <h3 className="font-bold text-white">
+                خدمات سرچینو
+              </h3>
+
+              <div className="mt-5 space-y-3 text-sm">
+                <a
+                  href="/"
+                  className="block hover:text-white"
+                >
+                  مصالح و تجهیزات
+                </a>
+
+                <a
+                  href="/service"
+                  className="block hover:text-white"
+                >
+                  خدمات ساختمانی
+                </a>
+
+                <a
+                  href="/service/register"
+                  className="block hover:text-white"
+                >
+                  ثبت خدمات
+                </a>
+              </div>
+            </div>
+<div>
+              <h3 className="font-bold text-white">
+                ارتباط با ما
+              </h3>
+
+              <div className="mt-5 space-y-3 text-sm">
+                <p>
+                  درباره سرچینو
+                </p>
+
+                <p>
+                  تماس با ما
+                </p>
+
+                <p>
+                  قوانین و مقررات
+                </p>
+
+                <p>
+                  پشتیبانی
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 border-t border-white/10 pt-7 text-center text-xs text-slate-500">
+            © ۱۴۰۵ سرچینو — تمامی حقوق محفوظ است.
           </div>
         </div>
       </footer>
