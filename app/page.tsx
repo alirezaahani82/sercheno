@@ -498,9 +498,14 @@ export default function Home() {
               جست‌وجوی مصالح
             </button>
 
-            <button className="rounded-xl border border-white/30 bg-white/10 px-8 py-4 font-black text-white">
-              پیدا کردن متخصص
-            </button>
+           <a
+  href="/service"
+  className="rounded-xl border border-white/30 bg-white/10 px-8 py-4 text-center font-black text-white"
+>
+  پیدا کردن متخصص
+</a> 
+              
+            
           </div>
         </div>
       </section>
