@@ -438,8 +438,7 @@ export default function Home() {
           </h2>
         </div>
 
-        <div cla
-ssName="mt-12 grid gap-6 md:grid-cols-4">
+        <div className="mt-12 grid gap-6 md:grid-cols-4">
           {[
             ["۱", "جست‌وجو کنید", "محصول یا خدمت مورد نیاز خود را جست‌وجو کنید."],
             ["۲", "مقایسه کنید", "گزینه‌های مختلف را بررسی و مقایسه کنید."],
