@@ -147,43 +147,73 @@ export default function ServiceRegisterPage() {
                   اطلاعات اولیه خود را وارد کنید.
                 </p>
 
-                <div className="mt-8 grid gap-5 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm font-bold">
-                      نام
-                    </label>
+                <<div className="mt-8 grid gap-5 sm:grid-cols-2">
+  {/* نام */}
+  <div>
+    <label className="mb-2 block text-sm font-bold">
+      نام
+    </label>
 
-                    <input
-                      type="text"
-                      placeholder="نام شما"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </div>
+    <input
+      type="text"
+      placeholder="نام شما"
+      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+    />
+  </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-bold">
-                      نام خانوادگی
-                    </label>
+  {/* نام خانوادگی */}
+  <div>
+    <label className="mb-2 block text-sm font-bold">
+      نام خانوادگی
+    </label>
 
-                    <input
-                      type="text"
-                      placeholder="نام خانوادگی شما"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </div>
+    <input
+      type="text"
+      placeholder="نام خانوادگی شما"
+      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+    />
+  </div>
 
-                  <div className="sm:col-span-2">
-                    <label className="mb-2 block text-sm font-bold">
-                      شماره موبایل
-                    </label>
+  {/* شماره موبایل */}
+  <div>
+    <label className="mb-2 block text-sm font-bold">
+      شماره موبایل
+    </label>
 
-                    <input
-                      type="tel"
-                      placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </div>
-                </div>
+    <input
+      type="tel"
+      placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷"
+      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+    />
+  </div>
+
+  {/* کد ملی */}
+  <div>
+    <label className="mb-2 block text-sm font-bold">
+      کد ملی
+    </label>
+
+    <input
+      type="text"
+      maxLength={10}
+      placeholder="کد ملی ۱۰ رقمی"
+      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+    />
+  </div>
+
+  {/* تاریخ تولد */}
+  <div className="sm:col-span-2">
+    <label className="mb-2 block text-sm font-bold">
+      تاریخ تولد
+    </label>
+
+    <input
+      type="text"
+      placeholder="مثلاً ۱۳۸۲/۰۱/۲۶"
+      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+    />
+  </div>
+</div>
               </div>
             )}
 
