@@ -120,9 +120,14 @@ export default function Home() {
                   🧱 خرید مصالح
                 </button>
 
-                <button className="rounded-xl px-5 py-3 text-sm font-bold text-slate-600 hover:bg-slate-100">
-                  🛠️ دریافت خدمات
-                </button>
+                <a
+  href="/service"
+  className="rounded-xl px-5 py-3 text-center text-sm font-bold text-slate-600 hover:bg-slate-100"
+>
+  🛠️ دریافت خدمات
+</a>
+                  
+                
               </div>
 
               <div className="mt-3 flex flex-col gap-3 sm:flex-row">
