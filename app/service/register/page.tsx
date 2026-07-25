@@ -370,14 +370,15 @@ export default function ServiceRegisterPage() {
                 </div>
 
                 <button
-                  type="button"
-                  onClick={() =>
-                    alert("پروفایل شما با موفقیت ثبت شد.")
-                  }
-                  className="mt-8 rounded-xl bg-emerald-600 px-10 py-4 font-black text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
-                >
-                  ثبت پروفایل من در سرچینو
-                </button>
+  type="button"
+  onClick={() => {
+    alert("پروفایل شما با موفقیت ثبت شد.");
+    window.location.href = "/service";
+  }}
+  className="mt-8 rounded-xl bg-emerald-600 px-10 py-4 font-black text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
+>
+  ثبت پروفایل من در سرچینو
+</button>
               </div>
             )}
 
