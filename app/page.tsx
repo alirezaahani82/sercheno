@@ -186,9 +186,14 @@ export default function Home() {
                 </p>
               </div>
 
-              <button className="text-sm font-bold text-blue-700">
-                شروع ←
-              </button>
+              <a
+  href="/service"
+  className="text-sm font-bold text-emerald-700"
+>
+  شروع ←
+</a>
+                
+              
             </div>
           </div>
 
