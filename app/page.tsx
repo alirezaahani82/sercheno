@@ -103,7 +103,7 @@ export default function Home() {
             </div>
 <h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
               هر چیزی برای ساختن،
-              <br />
+<br />
               <span className="text-cyan-300">در سرچینو پیدا کن</span>
             </h1>
 
@@ -206,8 +206,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Materials */}
+{/* Materials */}
       <section id="materials" className="mx-auto max-w-7xl px-5 py-20">
         <div className="mb-10 flex items-end justify-between">
           <div>
@@ -323,7 +322,7 @@ export default function Home() {
 
               <div className="mt-7 flex flex-wrap gap-2">
                 {popularServices.map((service) => (
-                  <button
+<button
                     key={service}
                     className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm hover:bg-white/20"
                   >
@@ -439,7 +438,8 @@ export default function Home() {
           </h2>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-4">
+        <div cla
+ssName="mt-12 grid gap-6 md:grid-cols-4">
           {[
             ["۱", "جست‌وجو کنید", "محصول یا خدمت مورد نیاز خود را جست‌وجو کنید."],
             ["۲", "مقایسه کنید", "گزینه‌های مختلف را بررسی و مقایسه کنید."],
