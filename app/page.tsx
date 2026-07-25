@@ -279,9 +279,14 @@ export default function Home() {
               </p>
             </div>
 
-            <button className="hidden font-bold text-emerald-600 sm:block">
-              همه خدمات ←
-            </button>
+            <a
+  href="/service"
+  className="hidden font-bold text-emerald-600 sm:block"
+>
+  همه خدمات ←
+</a>
+              
+            
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
