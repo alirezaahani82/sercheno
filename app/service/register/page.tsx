@@ -147,7 +147,7 @@ export default function ServiceRegisterPage() {
                   اطلاعات اولیه خود را وارد کنید.
                 </p>
 
-                <<div className="mt-8 grid gap-5 sm:grid-cols-2">
+                <div className="mt-8 grid gap-5 sm:grid-cols-2">
   {/* نام */}
   <div>
     <label className="mb-2 block text-sm font-bold">
