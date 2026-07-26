@@ -424,10 +424,32 @@ const [description, setDescription] = useState("");
 
                 <button
   type="button"
-  onClick={() => {
-    alert("پروفایل شما با موفقیت ثبت شد.");
-    window.location.href = "/service";
-  }}
+ onClick={async () => {
+  const { error } = await supabase
+    .from("professionals")
+    .insert({
+      first_name: firstName,
+      last_name: lastName,
+      phone: phone,
+      national_code: nationalCode,
+      birth_date: birthDate,
+      service: selectedService,
+      province: province,
+      city: city,
+      activity_area: serviceArea,
+      experience: experience,
+      description: description,
+    });
+
+  if (error) {
+    console.error("SUPABASE ERROR:", error);
+    alert("خطا در ثبت اطلاعات: " + error.message);
+    return;
+  }
+
+  alert("پروفایل شما با موفقیت ثبت شد.");
+  window.location.href = "/service";
+}}
   className="mt-8 rounded-xl bg-emerald-600 px-10 py-4 font-black text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
 >
   ثبت پروفایل من در سرچینو
