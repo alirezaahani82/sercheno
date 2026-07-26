@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 const services = [
   "بنا و استادکار",
@@ -24,6 +25,18 @@ const services = [
 ];
 
 export default function ServiceRegisterPage() {
+  const [firstName, setFirstName] = useState("");
+const [lastName, setLastName] = useState("");
+const [phone, setPhone] = useState("");
+const [nationalCode, setNationalCode] = useState("");
+const [birthDate, setBirthDate] = useState("");
+
+const [province, setProvince] = useState("آذربایجان شرقی");
+const [city, setCity] = useState("تبریز");
+const [serviceArea, setServiceArea] = useState("");
+
+const [experience, setExperience] = useState("");
+const [description, setDescription] = useState("");
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState("");
 
@@ -155,8 +168,12 @@ export default function ServiceRegisterPage() {
     </label>
 
     <input
-      type="text"
-      placeholder="نام شما"
+  type="text"
+  placeholder="نام شما"
+  value={firstName}
+  onChange={(e) => setFirstName(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+/>
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
@@ -168,8 +185,12 @@ export default function ServiceRegisterPage() {
     </label>
 
     <input
-      type="text"
-      placeholder="نام خانوادگی شما"
+  type="text"
+  placeholder="نام خانوادگی شما"
+  value={lastName}
+  onChange={(e) => setLastName(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+/>
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
@@ -181,8 +202,12 @@ export default function ServiceRegisterPage() {
     </label>
 
     <input
-      type="tel"
-      placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷"
+  type="tel"
+  placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷"
+  value={phone}
+  onChange={(e) => setPhone(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+/>
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
@@ -194,9 +219,13 @@ export default function ServiceRegisterPage() {
     </label>
 
     <input
-      type="text"
-      maxLength={10}
-      placeholder="کد ملی ۱۰ رقمی"
+  type="text"
+  maxLength={10}
+  placeholder="کد ملی ۱۰ رقمی"
+  value={nationalCode}
+  onChange={(e) => setNationalCode(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+/>
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
@@ -208,8 +237,12 @@ export default function ServiceRegisterPage() {
     </label>
 
     <input
-      type="text"
-      placeholder="مثلاً ۱۳۸۲/۰۱/۲۶"
+  type="text"
+  placeholder="مثلاً ۱۳۸۲/۰۱/۲۶"
+  value={birthDate}
+  onChange={(e) => setBirthDate(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+/>
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
