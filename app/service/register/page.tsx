@@ -160,7 +160,7 @@ const [description, setDescription] = useState("");
                   اطلاعات اولیه خود را وارد کنید.
                 </p>
 
-                <div className="mt-8 grid gap-5 sm:grid-cols-2">
+  <div className="mt-8 grid gap-5 sm:grid-cols-2">
   {/* نام */}
   <div>
     <label className="mb-2 block text-sm font-bold">
@@ -168,12 +168,10 @@ const [description, setDescription] = useState("");
     </label>
 
     <input
-  type="text"
-  placeholder="نام شما"
-  value={firstName}
-  onChange={(e) => setFirstName(e.target.value)}
-  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-/>
+      type="text"
+      placeholder="نام شما"
+      value={firstName}
+      onChange={(e) => setFirstName(e.target.value)}
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
@@ -185,12 +183,10 @@ const [description, setDescription] = useState("");
     </label>
 
     <input
-  type="text"
-  placeholder="نام خانوادگی شما"
-  value={lastName}
-  onChange={(e) => setLastName(e.target.value)}
-  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-/>
+      type="text"
+      placeholder="نام خانوادگی شما"
+      value={lastName}
+      onChange={(e) => setLastName(e.target.value)}
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
@@ -202,12 +198,10 @@ const [description, setDescription] = useState("");
     </label>
 
     <input
-  type="tel"
-  placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷"
-  value={phone}
-  onChange={(e) => setPhone(e.target.value)}
-  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-/>
+      type="tel"
+      placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷"
+      value={phone}
+      onChange={(e) => setPhone(e.target.value)}
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
@@ -219,13 +213,11 @@ const [description, setDescription] = useState("");
     </label>
 
     <input
-  type="text"
-  maxLength={10}
-  placeholder="کد ملی ۱۰ رقمی"
-  value={nationalCode}
-  onChange={(e) => setNationalCode(e.target.value)}
-  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-/>
+      type="text"
+      maxLength={10}
+      placeholder="کد ملی ۱۰ رقمی"
+      value={nationalCode}
+      onChange={(e) => setNationalCode(e.target.value)}
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
@@ -237,12 +229,10 @@ const [description, setDescription] = useState("");
     </label>
 
     <input
-  type="text"
-  placeholder="مثلاً ۱۳۸۲/۰۱/۲۶"
-  value={birthDate}
-  onChange={(e) => setBirthDate(e.target.value)}
-  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-/>
+      type="text"
+      placeholder="مثلاً ۱۳۸۲/۰۱/۲۶"
+      value={birthDate}
+      onChange={(e) => setBirthDate(e.target.value)}
       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
     />
   </div>
