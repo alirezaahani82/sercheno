@@ -574,8 +574,12 @@ export default function Home() {
   <Link href="/contact" className="block">
   تماس با ما
 </Link>
-  <p>قوانین و مقررات</p>
-  <p>پشتیبانی</p>
+  <Link href="/terms" className="block hover:text-white">
+    قوانین و مقررات
+  </Link>
+  <Link href="/support" className="block hover:text-white">
+    پشتیبانی
+  </Link>
 </div>
             </div>
           </div>
