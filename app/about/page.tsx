@@ -329,6 +329,10 @@ return (
               "خدمات تخصصی",
             ].map((item) => (
               <div
-                key={item}
-                className="flex items-center gap-3
+  key={item}
+  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-5"
+>
+  <CheckCircle2 className="h-5 w-5 text-cyan-400" />
+  <span className="font-bold">{item}</span>
+</div>
 
