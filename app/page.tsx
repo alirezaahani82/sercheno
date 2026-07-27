@@ -571,7 +571,9 @@ export default function Home() {
     درباره سرچینو
   </Link>
 
-  <p>تماس با ما</p>
+  <Link href="/contact" className="block">
+  تماس با ما
+</Link>
   <p>قوانین و مقررات</p>
   <p>پشتیبانی</p>
 </div>
