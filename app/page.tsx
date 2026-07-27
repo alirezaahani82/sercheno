@@ -564,11 +564,14 @@ export default function Home() {
                 ارتباط با ما
               </h3>
 <div className="mt-5 space-y-3 text-sm">
-                <p>درباره سرچینو</p>
-                <p>تماس با ما</p>
-                <p>قوانین و مقررات</p>
-                <p>پشتیبانی</p>
-              </div>
+  <Link href="/about" className="block">
+    درباره سرچینو
+  </Link>
+
+  <p>تماس با ما</p>
+  <p>قوانین و مقررات</p>
+  <p>پشتیبانی</p>
+</div>
             </div>
           </div>
 
