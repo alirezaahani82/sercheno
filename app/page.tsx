@@ -1,3 +1,6 @@
+"use client";
+
+import Link from "next/link";
 const materialCategories = [
   { icon: "🧱", title: "آجر و بلوک", count: "۱۲۴ فروشنده" },
   { icon: "🏗️", title: "سیمان و بتن", count: "۸۶ فروشنده" },
