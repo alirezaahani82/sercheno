@@ -443,8 +443,6 @@ export default function Home() {
   className="block rounded-3xl bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
 >
   <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
-    🏪
-  </div>
 
   <h3 className="mt-6 text-2xl font-black">
     فروشنده یا تأمین‌کننده هستید؟
