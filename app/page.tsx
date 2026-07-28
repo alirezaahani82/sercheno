@@ -65,13 +65,13 @@ export default function Home() {
             <a href="#home" className="text-blue-700">
               خانه
             </a>
-            <a href="#materials" className="hover:text-blue-700">
+            <a href="/materials" className="hover:text-blue-700">
               مصالح و تجهیزات
             </a>
             <a href="#services" className="hover:text-blue-700">
               خدمات ساختمانی
             </a>
-            <a href="#providers" className="hover:text-blue-700">
+            <a href="/materials" className="hover:text-blue-700">
               فروشندگان و متخصصان
             </a>
           </nav>
@@ -196,11 +196,11 @@ export default function Home() {
               </div>
 
               <a
-  href="/service"
+  href="//materials"
   className="text-sm font-bold text-emerald-700"
 >
   شروع ←
-</a>
+ <a
                 
               
             </div>
@@ -218,8 +218,11 @@ export default function Home() {
                   استادکار و متخصص مناسب پروژه را پیدا کنید.
                 </p>
               </div>
+               <a
+  href="//service"
 <button className="text-sm font-bold text-emerald-700">
                 شروع ←
+   <a
               </button>
             </div>
           </div>
@@ -242,9 +245,12 @@ export default function Home() {
             </p>
           </div>
 
-          <button className="hidden font-bold text-blue-700 sm:block">
-            مشاهده همه ←
-          </button>
+          <a
+  href="/materials"
+  className="hidden font-bold text-blue-700 sm:block"
+>
+  مشاهده همه ←
+</a>
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
@@ -508,9 +514,12 @@ export default function Home() {
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <button className="rounded-xl bg-white px-8 py-4 font-black text-blue-800">
-              جست‌وجوی مصالح
-            </button>
+            <a
+  href="/materials"
+  className="rounded-xl bg-white px-8 py-4 text-center font-black text-blue-800"
+>
+  جست‌وجوی مصالح
+</a>
 
            <a
   href="/service"
@@ -561,10 +570,16 @@ export default function Home() {
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
-                <p>مصالح و تجهیزات</p>
-                <p>خدمات ساختمانی</p>
+                <a href="/materials" className="block hover:text-white">
+  مصالح و تجهیزات
+</a>
+                <a href="/service" className="block hover:text-white">
+  خدمات ساختمانی
+</a>
                 <p>ثبت فروشگاه</p>
-                <p>ثبت خدمات</p>
+                <a href="/service/register" className="block hover:text-white">
+  ثبت خدمات
+</a>
               </div>
             </div>
 
