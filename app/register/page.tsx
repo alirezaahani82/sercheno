@@ -24,13 +24,13 @@ export default function RegisterPage() {
           <Link href="/" className="flex items-center gap-3">
             <img
               src="/logo.png"
-              alt="لوگوی سرچینو"
+              alt="لوگوی سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
             <div>
               <div className="text-2xl font-black text-blue-700">
-                سرچینو
+                سرچنو
               </div>
 
               <div className="text-xs text-slate-500">
@@ -70,7 +70,7 @@ export default function RegisterPage() {
                 <h1 className="mt-8 text-3xl font-black leading-relaxed">
                   به خانواده
                   <span className="block text-blue-400">
-                    سرچینو
+                    سرچنو
                   </span>
                   خوش آمدید
                 </h1>
@@ -264,7 +264,7 @@ placeholder="نام پدر"
               {/* LOGIN */}
               <div className="mt-7 border-t border-slate-100 pt-6 text-center text-sm text-slate-500">
 
-                قبلاً در سرچینو ثبت‌نام کرده‌اید؟
+                قبلاً در سرچنو ثبت‌نام کرده‌اید؟
 
                 <Link
                   href="/login"
