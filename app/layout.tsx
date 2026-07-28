@@ -41,7 +41,9 @@ export const metadata: Metadata = {
 
   creator: "سرچنو",
   publisher: "سرچنو",
-
+  icons: {
+  icon: "/logo.png",
+},
   openGraph: {
     title: "سرچنو | بازار هوشمند ساخت‌وساز",
     description:
