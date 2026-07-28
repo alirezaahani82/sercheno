@@ -178,56 +178,69 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Quick Actions */}
-      <section className="relative z-10 mx-auto -mt-8 max-w-6xl px-5">
-        <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl sm:grid-cols-2">
-          
-          <div className="border-b border-slate-100 p-7 sm:border-b-0 sm:border-l">
-            <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
-                🧱
-              </div>
+     {/* Quick Actions */}
+<section className="relative z-10 mx-auto -mt-8 max-w-6xl px-5">
+  <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl sm:grid-cols-2">
 
-              <div className="flex-1">
-                <h3 className="font-black">مصالح و تجهیزات می‌خواهید؟</h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  فروشندگان و تأمین‌کنندگان را پیدا کنید.
-                </p>
-              </div>
+    {/* Materials Quick Action */}
+    <div className="border-b border-slate-100 p-7 sm:border-b-0 sm:border-l">
+      <div className="flex items-center gap-5">
 
-              <a
-  href="//materials"
-  className="text-sm font-bold text-emerald-700"
->
-  شروع ←
- <a
-                
-              
-            </div>
-          </div>
-
-          <div className="p-7">
-            <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">
-                🛠️
-              </div>
-
-              <div className="flex-1">
-                <h3 className="font-black">نیروی متخصص می‌خواهید؟</h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  استادکار و متخصص مناسب پروژه را پیدا کنید.
-                </p>
-              </div>
-               <a
-  href="//service"
-<button className="text-sm font-bold text-emerald-700">
-                شروع ←
-   <a
-              </button>
-            </div>
-          </div>
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
+          🧱
         </div>
-      </section>
+
+        <div className="flex-1">
+          <h3 className="font-black">
+            مصالح و تجهیزات می‌خواهید؟
+          </h3>
+
+          <p className="mt-1 text-sm text-slate-500">
+            فروشندگان و تأمین‌کنندگان را پیدا کنید.
+          </p>
+        </div>
+
+        <a
+          href="/materials"
+          className="text-sm font-bold text-blue-700 hover:text-blue-800"
+        >
+          شروع ←
+        </a>
+
+      </div>
+    </div>
+
+    {/* Services Quick Action */}
+    <div className="p-7">
+      <div className="flex items-center gap-5">
+
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">
+          🛠️
+        </div>
+
+        <div className="flex-1">
+          <h3 className="font-black">
+            نیروی متخصص می‌خواهید؟
+          </h3>
+
+          <p className="mt-1 text-sm text-slate-500">
+            استادکار و متخصص مناسب پروژه را پیدا کنید.
+          </p>
+        </div>
+
+        <a
+          href="/service"
+          className="text-sm font-bold text-emerald-700 hover:text-emerald-800"
+        >
+          شروع ←
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+      
 {/* Materials */}
       <section id="materials" className="mx-auto max-w-7xl px-5 py-20">
         <div className="mb-10 flex items-end justify-between">
@@ -254,24 +267,25 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
-          {materialCategories.map((item) => (
-            <div
-              key={item.title}
-              className="group cursor-pointer rounded-3xl border border-slate-200 bg-white p-5 text-center transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
-            >
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-3xl transition group-hover:bg-blue-50">
-                {item.icon}
-              </div>
+         {materialCategories.map((item) => (
+  <a
+    key={item.title}
+    href="/materials"
+    className="group cursor-pointer rounded-3xl border border-slate-200 bg-white p-5 text-center transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+  >
+    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-3xl transition group-hover:bg-blue-50">
+      {item.icon}
+    </div>
 
-              <h3 className="mt-4 text-sm font-bold">
-                {item.title}
-              </h3>
+    <h3 className="mt-4 text-sm font-bold">
+      {item.title}
+    </h3>
 
-              <p className="mt-2 text-xs text-slate-400">
-                {item.count}
-              </p>
-            </div>
-          ))}
+    <p className="mt-2 text-xs text-slate-400">
+      {item.count}
+    </p>
+  </a>
+))}
         </div>
       </section>
 
