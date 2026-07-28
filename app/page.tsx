@@ -46,7 +46,7 @@ export default function Home() {
           <a href="#" className="flex items-center gap-3">
             <img
               src="/logo.png"
-              alt="لوگوی سرچینو"
+              alt="لوگوی سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
@@ -113,7 +113,7 @@ export default function Home() {
 <h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
               هر چیزی برای ساختن،
 <br />
-              <span className="text-cyan-300">در سرچینو پیدا کن</span>
+              <span className="text-cyan-300">در سرچنو پیدا کن</span>
             </h1>
 
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-blue-100 sm:text-lg">
@@ -416,16 +416,16 @@ export default function Home() {
           
           <div className="mx-auto max-w-3xl text-center">
             <span className="text-sm font-bold text-blue-700">
-              به سرچینو بپیوندید
+              به سرچنو بپیوندید
             </span>
 
             <h2 className="mt-3 text-3xl font-black">
-              کسب‌وکار یا مهارت خود را در سرچینو معرفی کنید
+              کسب‌وکار یا مهارت خود را در سرچنو معرفی کنید
             </h2>
 
             <p className="mt-4 leading-8 text-slate-600">
               چه فروشنده مصالح باشید و چه استادکار و متخصص ساختمانی،
-              می‌توانید در سرچینو خدمات و محصولات خود را به مشتریان
+              می‌توانید در سرچنو خدمات و محصولات خود را به مشتریان
               معرفی کنید.
             </p>
           </div>
@@ -489,7 +489,7 @@ export default function Home() {
           </span>
 
           <h2 className="mt-3 text-3xl font-black">
-            سرچینو چطور کار می‌کند؟
+            سرچنو چطور کار می‌کند؟
           </h2>
         </div>
 
@@ -529,7 +529,7 @@ export default function Home() {
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            در سرچینو، مصالح و تجهیزات مورد نیازتان را پیدا کنید و
+            در سرچنو، مصالح و تجهیزات مورد نیازتان را پیدا کنید و
             متخصصان مناسب پروژه را به‌راحتی پیدا کنید.
           </p>
 
@@ -563,13 +563,13 @@ export default function Home() {
               <div className="flex items-center gap-3">
                 <img
                   src="/logo.png"
-                  alt="سرچینو"
+                  alt="سرچنو"
                   className="h-12 w-12 rounded-xl object-contain"
                 />
 
                 <div>
                   <div className="text-xl font-black text-white">
-                    سرچینو
+                    سرچنو
                   </div>
 
                   <div className="text-xs text-slate-500">
@@ -586,7 +586,7 @@ export default function Home() {
 
             <div>
               <h3 className="font-bold text-white">
-                خدمات سرچینو
+                خدمات سرچنو
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
@@ -614,7 +614,7 @@ export default function Home() {
               </h3>
 <div className="mt-5 space-y-3 text-sm">
   <Link href="/about" className="block">
-    درباره سرچینو
+    درباره سرچنو
   </Link>
 
   <Link href="/contact" className="block">
@@ -631,7 +631,7 @@ export default function Home() {
           </div>
 
           <div className="mt-12 border-t border-white/10 pt-7 text-center text-xs text-slate-500">
-            © ۱۴۰۵ سرچینو — تمامی حقوق محفوظ است.
+            © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
           </div>
         </div>
       </footer>
