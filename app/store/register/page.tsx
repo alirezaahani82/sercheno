@@ -110,13 +110,13 @@ export default function StoreRegisterPage() {
           >
             <img
               src="/logo.png"
-              alt="لوگوی سرچینو"
+              alt="لوگوی سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
             <div>
               <div className="text-2xl font-black text-blue-700">
-                سرچینو
+                سرچنو
               </div>
 
               <div className="text-xs text-slate-500">
@@ -143,11 +143,11 @@ export default function StoreRegisterPage() {
           </div>
 
           <h1 className="mt-6 text-3xl font-black sm:text-4xl">
-            ثبت فروشگاه در سرچینو
+            ثبت فروشگاه در سرچنو
           </h1>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه و محصولات خود را در سرچینو معرفی کنید و
+            فروشگاه و محصولات خود را در سرچنو معرفی کنید و
             مشتریان بیشتری برای کسب‌وکار خود پیدا کنید.
           </p>
         </div>
@@ -493,7 +493,7 @@ export default function StoreRegisterPage() {
                     {/* Cooperation Price */}
                     <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
                       <label className="mb-2 block text-sm font-bold text-blue-800">
-                        قیمت همکاری با سرچینو
+                        قیمت همکاری با سرچنو
                       </label>
                       <div className="relative">
                         <input
@@ -511,19 +511,19 @@ export default function StoreRegisterPage() {
                         />
 
                         <span className="absolute left-4 top-3 text-xs text-slate-400">
-                          تومان
+                          ریال
                         </span>
                       </div>
 
                       <p className="mt-2 text-xs text-blue-600">
-                        قیمت ویژه همکاری و تأمین از طریق سرچینو
+                        قیمت ویژه همکاری و تأمین از طریق سرچنو
                       </p>
                     </div>
 
                     {/* Customer Price */}
                     <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                       <label className="mb-2 block text-sm font-bold text-emerald-800">
-                        قیمت مشتریان سرچینو
+                        قیمت مشتریان سرچنو
                       </label>
 
                       <div className="relative">
@@ -542,12 +542,12 @@ export default function StoreRegisterPage() {
                         />
 
                         <span className="absolute left-4 top-3 text-xs text-slate-400">
-                          تومان
+                          ریال
                         </span>
                       </div>
 
                       <p className="mt-2 text-xs text-emerald-600">
-                        قیمتی که مشتریان سرچینو مشاهده می‌کنند
+                        قیمتی که مشتریان سرچنو مشاهده می‌کنند
                       </p>
                     </div>
 
@@ -683,6 +683,7 @@ export default function StoreRegisterPage() {
               <CheckBox label="فروش جزئی" />
               <CheckBox label="فروش نقدی" />
               <CheckBox label="فروش اعتباری" />
+              <CheckBox label="فروش اقساطی" />
               <CheckBox label="ارسال به شهرهای دیگر" />
               <CheckBox label="امکان ارسال فوری" />
             </div>
@@ -708,7 +709,7 @@ export default function StoreRegisterPage() {
                 </h3>
 
                 <p className="mt-2 text-sm leading-7 text-blue-800">
-                  اطلاعات ثبت‌شده توسط تیم سرچینو بررسی خواهد شد و
+                  اطلاعات ثبت‌شده توسط تیم سرچنو بررسی خواهد شد و
                   پس از تأیید، فروشگاه و محصولات شما در پلتفرم نمایش داده
                   می‌شود.
                 </p>
@@ -723,7 +724,7 @@ export default function StoreRegisterPage() {
 
               <span className="text-sm leading-7 text-slate-700">
                 صحت اطلاعات واردشده را تأیید می‌کنم و با قوانین و مقررات
-                استفاده از خدمات سرچینو موافقم.
+                استفاده از خدمات سرچنو موافقم.
               </span>
             </label>
           </section>
