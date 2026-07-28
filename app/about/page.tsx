@@ -38,13 +38,13 @@ export default function AboutPage() {
               <h1 className="text-5xl font-black leading-tight sm:text-6xl">
                 به دنیای
                 <span className="block text-blue-400">
-                  سرچینو
+                  سرچنو
                 </span>
                 خوش آمدید
               </h1>
 
               <p className="mt-7 text-lg leading-9 text-slate-300">
-                سرچینو یک پلتفرم هوشمند برای جست‌وجو، معرفی، مقایسه و ارتباط
+                سرچنو یک پلتفرم هوشمند برای جست‌وجو، معرفی، مقایسه و ارتباط
                 میان خریداران، فروشندگان، تأمین‌کنندگان و ارائه‌دهندگان خدمات
                 است؛ جایی که پیدا کردن آنچه نیاز دارید، ساده‌تر و سریع‌تر
                 از همیشه می‌شود.
@@ -134,15 +134,15 @@ export default function AboutPage() {
         <div className="mx-auto max-w-5xl px-6 text-center">
 
           <span className="font-bold text-blue-600">
-            درباره سرچینو
+            درباره سرچنو
           </span>
 
           <h2 className="mt-4 text-3xl font-black sm:text-5xl">
-            سرچینو؛ پلی میان نیاز و انتخاب
+            سرچنو؛ پلی میان نیاز و انتخاب
           </h2>
 
           <p className="mt-7 text-lg leading-9 text-slate-600">
-            ما در سرچینو تلاش می‌کنیم مسیر پیدا کردن کالا و خدمات را برای
+            ما در سرچنو تلاش می‌کنیم مسیر پیدا کردن کالا و خدمات را برای
             مشتریان کوتاه‌تر و مسیر دیده‌شدن و فروش را برای کسب‌وکارها
             هموارتر کنیم. هدف ما ایجاد بستری مدرن و قابل اعتماد است که در
             آن خریدار بتواند راحت‌تر به گزینه‌های مناسب دسترسی پیدا کند
@@ -159,7 +159,7 @@ export default function AboutPage() {
 
           <div className="text-center">
             <span className="font-bold text-blue-600">
-              چرا سرچینو؟
+              چرا سرچنو؟
             </span>
 
             <h2 className="mt-4 text-3xl font-black sm:text-5xl">
@@ -246,7 +246,7 @@ export default function AboutPage() {
               </h2>
 
               <p className="mt-7 text-lg leading-9 text-slate-600">
-                سرچینو با هدف ساده‌سازی فرآیند جست‌وجو و ارتباط میان مشتری
+                سرچنو با هدف ساده‌سازی فرآیند جست‌وجو و ارتباط میان مشتری
                 و ارائه‌دهنده کالا یا خدمات طراحی شده است.
               </p>
 
@@ -263,7 +263,7 @@ export default function AboutPage() {
                     </h3>
 
                     <p className="mt-2 leading-7 text-slate-600">
-                      محصول، کالا یا خدمات مورد نیازتان را در سرچینو پیدا کنید.
+                      محصول، کالا یا خدمات مورد نیازتان را در سرچنو پیدا کنید.
                     </p>
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export default function AboutPage() {
 
             <div>
               <span className="font-bold text-cyan-400">
-                تمرکز اولیه سرچینو
+                تمرکز اولیه سرچنو
               </span>
 <h2 className="mt-4 text-3xl font-black sm:text-5xl">
                 از بازار ساختمان،
@@ -359,7 +359,7 @@ export default function AboutPage() {
             <div>
 
               <p className="text-lg leading-9 text-slate-300">
-                سرچینو فعالیت خود را با تمرکز بر حوزه ساختمان و کالاها و
+                سرچنو فعالیت خود را با تمرکز بر حوزه ساختمان و کالاها و
                 خدمات مرتبط با آن آغاز کرده است؛ حوزه‌ای گسترده که در آن
                 پیدا کردن تأمین‌کننده مناسب، مقایسه گزینه‌ها و برقراری
                 ارتباط با فروشندگان می‌تواند زمان‌بر باشد.
@@ -367,7 +367,7 @@ export default function AboutPage() {
 
               <p className="mt-6 text-lg leading-9 text-slate-300">
                 چشم‌انداز ما این است که با توسعه این زیرساخت، دامنه فعالیت
-                سرچینو گسترده‌تر شود و این پلتفرم به بستری برای جست‌وجو و
+                سرچنو گسترده‌تر شود و این پلتفرم به بستری برای جست‌وجو و
                 معرفی طیف وسیعی از کالاها و خدمات تبدیل شود.
               </p>
 
@@ -410,7 +410,7 @@ export default function AboutPage() {
               <Building2 className="h-12 w-12 text-cyan-300" />
 
               <h2 className="mt-7 text-3xl font-black sm:text-4xl">
-                سرچینو توسط چه مجموعه‌ای ساخته شده است؟
+                سرچنو توسط چه مجموعه‌ای ساخته شده است؟
               </h2>
 
             </div>
@@ -420,7 +420,7 @@ export default function AboutPage() {
               <p className="text-lg leading-10 text-slate-700">
                 پلتفرم
                 <strong className="mx-1 text-slate-950">
-                  سرچینو
+                  سرچنو
                 </strong>
                 توسط شرکت
                 <strong className="mx-1 text-blue-700">
@@ -432,7 +432,7 @@ export default function AboutPage() {
               <p className="mt-6 text-lg leading-10 text-slate-700">
                 ایده‌پردازی، طراحی مدل کسب‌وکار و مدل فروش، طراحی تجربه
                 کاربری، مدیریت و هدایت پروژه و همچنین طراحی و برنامه‌نویسی
-                صفر تا صد پلتفرم سرچینو، بر عهده مدیرعامل شرکت امیرتوان
+                صفر تا صد پلتفرم سرچنو، بر عهده مدیرعامل شرکت امیرتوان
                 پویای گستر،
                 <strong className="mx-1 text-slate-950">
                   علیرضا آهنی
@@ -467,13 +467,13 @@ export default function AboutPage() {
             چشم‌انداز ما
           </h2>
 <p className="mt-7 text-xl leading-10 text-slate-600">
-            ما می‌خواهیم سرچینو به جایی تبدیل شود که هر زمان فردی به دنبال
+            ما می‌خواهیم سرچنو به جایی تبدیل شود که هر زمان فردی به دنبال
             یک کالا، محصول، فروشنده، تأمین‌کننده یا ارائه‌دهنده خدمات است،
             بتواند با چند کلیک به گزینه‌های مناسب دسترسی پیدا کند.
           </p>
 
           <p className="mt-6 text-2xl font-black leading-relaxed">
-            سرچینو؛ جایی برای پیدا کردن، انتخاب کردن و ارتباط گرفتن.
+            سرچنو؛ جایی برای پیدا کردن، انتخاب کردن و ارتباط گرفتن.
           </p>
 
         </div>
@@ -565,14 +565,14 @@ export default function AboutPage() {
           </h2>
 
           <p className="mt-4 text-lg text-slate-600">
-            به سرچینو برگرد و دنیای جدیدی از انتخاب‌ها را کشف کن.
+            به سرچنو برگرد و دنیای جدیدی از انتخاب‌ها را کشف کن.
           </p>
 
           <Link
             href="/"
             className="mt-8 inline-flex items-center gap-3 rounded-2xl bg-slate-950 px-8 py-4 font-bold text-white transition hover:-translate-y-1 hover:shadow-xl"
           >
-            ورود به سرچینو
+            ورود به سرچنو
             <ArrowLeft className="h-5 w-5" />
           </Link>
 
