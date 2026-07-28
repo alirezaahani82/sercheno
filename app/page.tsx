@@ -78,13 +78,19 @@ export default function Home() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <button className="hidden rounded-xl px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 sm:block">
-              ورود
-            </button>
+            <Link
+  href="/login"
+  className="hidden rounded-xl px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 sm:block"
+>
+  ورود
+</Link>
 
-            <button className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 hover:bg-blue-800">
-              ثبت‌نام
-            </button>
+            <Link
+  href="/register"
+  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
+>
+  ثبت‌نام
+</Link>
           </div>
         </div>
       </header>
