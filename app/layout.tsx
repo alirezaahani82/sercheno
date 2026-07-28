@@ -16,9 +16,6 @@ export const metadata: Metadata = {
   title: "سرچنو",
   description:
     "سرچنو، پلتفرم جست‌وجو و مقایسه مصالح ساختمانی، تجهیزات، فروشندگان، تأمین‌کنندگان و متخصصان صنعت ساختمان.",
-  icons: {
-    icon: "/logo.png",
-  },
 
   keywords: [
     "سرچنو",
