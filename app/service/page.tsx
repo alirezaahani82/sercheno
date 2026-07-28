@@ -23,7 +23,7 @@ const cities = [
 
 const professionals = [
   {
-    name: "استادکار احمدی",
+    name: "استادکار آهنی",
     category: "بنا و استادکار",
     city: "تبریز",
     rating: "۴.۹",
@@ -32,7 +32,7 @@ const professionals = [
     description: "اجرای انواع عملیات ساختمانی و بازسازی",
   },
   {
-    name: "تیم نصب پنجره آریا",
+    name: "تیم نصب پنجره وینتراتور",
     category: "نصاب درب و پنجره",
     city: "تبریز",
     rating: "۴.۸",
@@ -68,7 +68,7 @@ const professionals = [
     description: "لوله‌کشی آب، فاضلاب و تأسیسات ساختمان",
   },
   {
-    name: "جوشکاری صنعتی آذربایجان",
+    name: "جوشکاری صنعتی پاکباز",
     category: "جوشکار",
     city: "تبریز",
     rating: "۴.۸",
@@ -119,13 +119,13 @@ export default function ServicePage() {
           >
             <img
               src="/logo.png"
-              alt="لوگوی سرچینو"
+              alt="لوگوی سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
             <div>
               <div className="text-2xl font-black text-blue-700">
-                سرچینو
+                سرچنو
               </div>
 
               <div className="text-xs text-slate-500">
@@ -173,7 +173,7 @@ export default function ServicePage() {
         <div className="mx-auto max-w-7xl px-5 py-20">
           <div className="mx-auto max-w-4xl text-center text-white">
             <div className="mb-5 inline-flex rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm">
-              🛠️ خدمات ساختمانی سرچینو
+              🛠️ خدمات ساختمانی سرچنو
             </div>
 
             <h1 className="text-4xl font-black leading-tight sm:text-5xl">
@@ -272,7 +272,7 @@ export default function ServicePage() {
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                تخصص و خدمات خود را در سرچینو ثبت کنید
+                تخصص و خدمات خود را در سرچنو ثبت کنید
                 و مشتریان جدید پیدا کنید.
               </p>
 <a
@@ -437,7 +437,7 @@ export default function ServicePage() {
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-600">
             تخصص، سابقه کاری، شهر محل فعالیت و خدمات خود را
-            در سرچینو ثبت کنید تا مشتریان بیشتری شما را پیدا کنند.
+            در سرچنو ثبت کنید تا مشتریان بیشتری شما را پیدا کنند.
           </p>
 
           <a
@@ -460,13 +460,13 @@ export default function ServicePage() {
               >
                 <img
                   src="/logo.png"
-                  alt="سرچینو"
+                  alt="سرچنو"
                   className="h-12 w-12 rounded-xl object-contain"
                 />
 
                 <div>
                   <div className="text-xl font-black text-white">
-                    سرچینو
+                    سرچنو
                   </div>
 
                   <div className="text-xs text-slate-500">
@@ -483,7 +483,7 @@ export default function ServicePage() {
 
             <div>
               <h3 className="font-bold text-white">
-                خدمات سرچینو
+                خدمات سرچنو
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
@@ -516,7 +516,7 @@ export default function ServicePage() {
 
               <div className="mt-5 space-y-3 text-sm">
                 <p>
-                  درباره سرچینو
+                  درباره سرچنو
                 </p>
 
                 <p>
@@ -535,7 +535,7 @@ export default function ServicePage() {
           </div>
 
           <div className="mt-12 border-t border-white/10 pt-7 text-center text-xs text-slate-500">
-            © ۱۴۰۵ سرچینو — تمامی حقوق محفوظ است.
+            © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
           </div>
         </div>
       </footer>
