@@ -127,7 +127,8 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-2 border-b border-slate-100 p-2 sm:flex">
                <a
   href="/meterials"
-                 className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white">
+                 className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white"
+                 >
                   🧱 خرید مصالح
                 </a>
 
