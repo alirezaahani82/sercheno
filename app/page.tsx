@@ -433,16 +433,13 @@ export default function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             
             {/* Seller */}
-            <div className="rounded-3xl bg-white p-8 shadow-sm">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
-                🏪
-              </div>
-
-             <a
+<a
   href="/store/register"
   className="block rounded-3xl bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
 >
   <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
+    🏪
+  </div>
 
   <h3 className="mt-6 text-2xl font-black">
     فروشنده یا تأمین‌کننده هستید؟
@@ -456,7 +453,6 @@ export default function Home() {
     ثبت فروشگاه
   </div>
 </a>
-            </div>
 
             {/* Service Provider */}
             <div className="rounded-3xl bg-white p-8 shadow-sm">
