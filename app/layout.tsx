@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "سرچنو | بازار هوشمند ساخت‌وساز",
+  title: "سرچنو",
   description:
     "سرچنو، پلتفرم جست‌وجو و مقایسه مصالح ساختمانی، تجهیزات، فروشندگان، تأمین‌کنندگان و متخصصان صنعت ساختمان.",
 
