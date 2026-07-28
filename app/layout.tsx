@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "سرچنو",
   description:
     "سرچنو، پلتفرم جست‌وجو و مقایسه مصالح ساختمانی، تجهیزات، فروشندگان، تأمین‌کنندگان و متخصصان صنعت ساختمان.",
+  alternates: {
+  canonical: "https://sercheno-ywf1.vercel.app/",
+},
 
   keywords: [
     "سرچنو",
