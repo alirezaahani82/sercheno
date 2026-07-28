@@ -21,13 +21,13 @@ export default function LoginPage() {
           <Link href="/" className="flex items-center gap-3">
             <img
               src="/logo.png"
-              alt="لوگوی سرچینو"
+              alt="لوگوی سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
             <div>
               <div className="text-2xl font-black text-blue-700">
-                سرچینو
+                سرچنو
               </div>
 
               <div className="text-xs text-slate-500">
@@ -62,12 +62,12 @@ export default function LoginPage() {
             <h1 className="mt-7 text-4xl font-black leading-tight sm:text-5xl">
               خوش آمدید به
               <span className="block text-blue-700">
-                سرچینو
+                سرچنو
               </span>
             </h1>
 
             <p className="mx-auto mt-6 max-w-xl text-lg leading-9 text-slate-600 lg:mx-0">
-              اگر قبلاً در سرچینو حساب کاربری ایجاد کرده‌اید،
+              اگر قبلاً در سرچنو حساب کاربری ایجاد کرده‌اید،
               مشخصات خود را وارد کنید تا وارد حساب کاربری خود شوید.
             </p>
 
@@ -163,7 +163,7 @@ export default function LoginPage() {
             {/* Register */}
             <div className="mt-8 border-t border-slate-100 pt-6 text-center">
               <p className="text-sm text-slate-500">
-                هنوز در سرچینو حساب کاربری ندارید؟
+                هنوز در سرچنو حساب کاربری ندارید؟
               </p>
 
               <Link
@@ -179,7 +179,7 @@ export default function LoginPage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
-        © ۱۴۰۵ سرچینو — تمامی حقوق محفوظ است.
+        © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
       </footer>
     </main>
   );
