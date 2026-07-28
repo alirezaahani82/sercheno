@@ -125,9 +125,11 @@ export default function Home() {
             <div className="mx-auto mt-10 max-w-4xl rounded-3xl bg-white p-3 shadow-2xl">
               
               <div className="grid grid-cols-2 gap-2 border-b border-slate-100 p-2 sm:flex">
-                <button className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white">
+               <a
+  href="/meterials"
+                 className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white">
                   🧱 خرید مصالح
-                </button>
+                </a>
 
                 <a
   href="/service"
