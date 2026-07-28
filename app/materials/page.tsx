@@ -106,13 +106,13 @@ export default function MaterialsPage() {
           <Link href="/" className="flex items-center gap-3">
             <img
               src="/logo.png"
-              alt="لوگوی سرچینو"
+              alt="لوگوی سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
             <div>
               <div className="text-2xl font-black tracking-tight text-blue-700">
-                سرچینو
+                سرچنو
               </div>
               <div className="text-xs text-slate-500">
                 بازار هوشمند ساخت‌وساز
@@ -137,7 +137,7 @@ export default function MaterialsPage() {
             </Link>
 
             <Link href="/about" className="hover:text-blue-700">
-              درباره سرچینو
+              درباره سرچنو
             </Link>
           </nav>
 
@@ -174,7 +174,7 @@ export default function MaterialsPage() {
             <h1 className="text-3xl font-black leading-tight sm:text-5xl">
               مصالح مورد نیاز پروژه‌تان را
               <span className="mt-2 block text-cyan-300">
-                در سرچینو پیدا کنید
+                در سرچنو پیدا کنید
               </span>
             </h1>
 
@@ -431,7 +431,7 @@ export default function MaterialsPage() {
                 </h2>
 
                 <p className="mt-2 text-sm text-slate-500">
-                  بهترین فروشندگان و تأمین‌کنندگان مصالح در سرچینو
+                  بهترین فروشندگان و تأمین‌کنندگان مصالح در سرچنو
                 </p>
               </div>
 
@@ -515,7 +515,7 @@ export default function MaterialsPage() {
             </h2>
 
             <p className="mt-4 leading-8 text-blue-100">
-              فروشگاه خود را در سرچینو ثبت کنید و محصولات و خدمات خود را
+              فروشگاه خود را در سرچنو ثبت کنید و محصولات و خدمات خود را
               به مشتریان جدید معرفی کنید.
             </p>
 
@@ -532,7 +532,7 @@ export default function MaterialsPage() {
                 href="/about"
                 className="rounded-xl border border-white/20 bg-white/10 px-8 py-4 font-bold text-white"
               >
-                درباره سرچینو
+                درباره سرچنو
               </Link>
 
             </div>
@@ -553,13 +553,13 @@ export default function MaterialsPage() {
               <Link href="/" className="flex items-center gap-3">
                 <img
                   src="/logo.png"
-                  alt="سرچینو"
+                  alt="سرچنو"
                   className="h-12 w-12 rounded-xl object-contain"
                 />
 
                 <div>
                   <div className="text-xl font-black text-white">
-                    سرچینو
+                    سرچنو
                   </div>
 
                   <div className="text-xs text-slate-500">
@@ -577,7 +577,7 @@ export default function MaterialsPage() {
 
             <div>
               <h3 className="font-bold text-white">
-                خدمات سرچینو
+                خدمات سرچنو
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
@@ -605,7 +605,7 @@ export default function MaterialsPage() {
                   href="/about"
                   className="block hover:text-white"
                 >
-                  درباره سرچینو
+                  درباره سرچنو
                 </Link>
 
                 <p>تماس با ما</p>
@@ -618,7 +618,7 @@ export default function MaterialsPage() {
           </div>
 
           <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
-            © ۱۴۰۵ سرچینو — تمامی حقوق محفوظ است.
+            © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
           </div>
 
         </div>
