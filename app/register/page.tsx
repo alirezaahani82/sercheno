@@ -285,4 +285,3 @@ placeholder="نام پدر"
     </main>
   );
 }
-
