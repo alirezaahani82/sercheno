@@ -63,13 +63,13 @@ const [description, setDescription] = useState("");
           <a href="/" className="flex items-center gap-3">
             <img
               src="/logo.png"
-              alt="سرچینو"
+              alt="سرچنو"
               className="h-12 w-12 rounded-xl object-contain"
             />
 
             <div>
               <div className="text-xl font-black text-blue-700">
-                سرچینو
+                سرچنو
               </div>
 
               <div className="text-xs text-slate-500">
@@ -397,7 +397,7 @@ const [description, setDescription] = useState("");
                 </h2>
 
                 <p className="mx-auto mt-4 max-w-xl leading-8 text-slate-500">
-                  پس از ثبت نهایی، پروفایل خدمات شما در سرچینو ایجاد می‌شود
+                  پس از ثبت نهایی، پروفایل خدمات شما در سرچنو ایجاد می‌شود
                   و مشتریان می‌توانند تخصص شما را مشاهده کنند.
                 </p>
 <div className="mx-auto mt-8 max-w-md rounded-2xl bg-slate-50 p-5 text-right">
@@ -452,7 +452,7 @@ const [description, setDescription] = useState("");
 }}
   className="mt-8 rounded-xl bg-emerald-600 px-10 py-4 font-black text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
 >
-  ثبت پروفایل من در سرچینو
+  ثبت پروفایل من در سرچنو
 </button>
               </div>
             )}
@@ -519,7 +519,7 @@ const [description, setDescription] = useState("");
 
       {/* Footer */}
       <footer className="bg-slate-950 py-8 text-center text-sm text-slate-400">
-        © ۱۴۰۵ سرچینو — بازار هوشمند ساخت‌وساز
+        © ۱۴۰۵ سرچنو — بازار هوشمند ساخت‌وساز
       </footer>
     </main>
   );
