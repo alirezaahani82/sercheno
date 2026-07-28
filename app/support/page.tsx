@@ -19,7 +19,7 @@ export default function SupportPage() {
 
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm text-cyan-300">
             <Headphones className="h-4 w-4" />
-            مرکز پشتیبانی سرچینو
+            مرکز پشتیبانی سرچنو
           </div>
 
           <h1 className="text-4xl font-black sm:text-6xl">
@@ -30,7 +30,7 @@ export default function SupportPage() {
           </h1>
 
           <p className="mx-auto mt-7 max-w-3xl text-lg leading-9 text-slate-300">
-            اگر درباره استفاده از سرچینو، ثبت کسب‌وکار، ثبت خدمات یا نحوه
+            اگر درباره استفاده از سرچنو، ثبت کسب‌وکار، ثبت خدمات یا نحوه
             فعالیت در پلتفرم سوالی دارید، می‌توانید از راه‌های زیر با ما
             در ارتباط باشید.
           </p>
@@ -83,7 +83,7 @@ export default function SupportPage() {
               </h3>
 
               <p className="mt-3 leading-8 text-slate-500">
-                سوال یا درخواست خود را برای تیم سرچینو ارسال کنید.
+                سوال یا درخواست خود را برای تیم سرچنو ارسال کنید.
               </p>
 
               <Link
@@ -109,7 +109,7 @@ export default function SupportPage() {
               </h3>
 
               <p className="mt-3 leading-8 text-slate-500">
-                پاسخ سوالات رایج درباره نحوه استفاده از سرچینو را مشاهده کنید.
+                پاسخ سوالات رایج درباره نحوه استفاده از سرچنو را مشاهده کنید.
               </p>
 
               <p className="mt-5 font-bold text-indigo-700">
@@ -139,11 +139,11 @@ export default function SupportPage() {
 
               <div className="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 className="font-black">
-                  چگونه در سرچینو ثبت‌نام کنم؟
+                  چگونه در سرچنو ثبت‌نام کنم؟
                 </h3>
 
                 <p className="mt-3 leading-8 text-slate-500">
-                  برای استفاده از امکانات سرچینو می‌توانید از گزینه ثبت‌نام
+                  برای استفاده از امکانات سرچنو می‌توانید از گزینه ثبت‌نام
                   در صفحه اصلی استفاده کنید.
                 </p>
               </div>
@@ -151,7 +151,7 @@ export default function SupportPage() {
 
               <div className="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 className="font-black">
-                  چگونه خدمات خود را در سرچینو ثبت کنم؟
+                  چگونه خدمات خود را در سرچنو ثبت کنم؟
                 </h3>
 
                 <p className="mt-3 leading-8 text-slate-500">
@@ -167,7 +167,7 @@ export default function SupportPage() {
                 </h3>
 
                 <p className="mt-3 leading-8 text-slate-500">
-                  سرچینو بستری برای جست‌وجو، معرفی و ارتباط میان کاربران،
+                  سرچنو بستری برای جست‌وجو، معرفی و ارتباط میان کاربران،
                   فروشندگان، تأمین‌کنندگان و ارائه‌دهندگان خدمات است.
                 </p>
               </div>
