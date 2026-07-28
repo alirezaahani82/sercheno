@@ -36,7 +36,7 @@ export default function ContactPage() {
             </h1>
 
             <p className="mx-auto mt-7 max-w-3xl text-lg leading-9 text-slate-300">
-              برای ارتباط با تیم سرچینو، دریافت اطلاعات بیشتر، پیشنهاد همکاری
+              برای ارتباط با تیم سرچنو، دریافت اطلاعات بیشتر، پیشنهاد همکاری
               یا مطرح کردن سوالات خود، می‌توانید از راه‌های ارتباطی زیر با ما
               در تماس باشید.
             </p>
@@ -61,7 +61,7 @@ export default function ContactPage() {
             </h3>
 
             <p className="mt-3 text-sm leading-7 text-slate-500">
-              برای ارتباط مستقیم با مجموعه سرچینو می‌توانید با شماره زیر تماس
+              برای ارتباط مستقیم با مجموعه سرچنو می‌توانید با شماره زیر تماس
               بگیرید.
             </p>
 
@@ -125,7 +125,7 @@ export default function ContactPage() {
             {/* INFO */}
             <div>
 <span className="font-bold text-blue-600">
-                ارتباط با سرچینو
+                ارتباط با سرچنو
               </span>
 
               <h2 className="mt-4 text-3xl font-black sm:text-5xl">
@@ -133,7 +133,7 @@ export default function ContactPage() {
               </h2>
 
               <p className="mt-7 text-lg leading-9 text-slate-600">
-                سرچینو با هدف ایجاد ارتباطی ساده‌تر میان مشتریان، فروشندگان،
+                سرچنو با هدف ایجاد ارتباطی ساده‌تر میان مشتریان، فروشندگان،
                 تأمین‌کنندگان و متخصصان فعالیت می‌کند. نظرات، پیشنهادها و
                 بازخوردهای شما به ما کمک می‌کند تا خدمات بهتری ارائه دهیم.
               </p>
@@ -164,7 +164,7 @@ export default function ContactPage() {
                     </p>
 
                     <p className="mt-1 text-sm text-slate-500">
-                      توسعه‌دهنده پلتفرم سرچینو
+                      توسعه‌دهنده پلتفرم سرچنو
                     </p>
                   </div>
                 </div>
@@ -262,18 +262,18 @@ placeholder="پیام خود را بنویسید..."
         <div className="mx-auto max-w-4xl px-6 text-center">
 
           <h2 className="text-3xl font-black sm:text-4xl">
-            می‌خواهید بیشتر درباره سرچینو بدانید؟
+            می‌خواهید بیشتر درباره سرچنو بدانید؟
           </h2>
 
           <p className="mt-5 text-lg leading-8 text-slate-400">
-            درباره اهداف، چشم‌انداز و مسیر توسعه پلتفرم سرچینو بیشتر بدانید.
+            درباره اهداف، چشم‌انداز و مسیر توسعه پلتفرم سرچنو بیشتر بدانید.
           </p>
 
           <Link
             href="/about"
             className="mt-8 inline-flex items-center gap-3 rounded-2xl bg-white px-8 py-4 font-black text-slate-950 transition hover:-translate-y-1"
           >
-            درباره سرچینو
+            درباره سرچنو
             <ArrowLeft className="h-5 w-5" />
           </Link>
 
