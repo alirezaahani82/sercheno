@@ -438,17 +438,33 @@ export default function Home() {
                 🏪
               </div>
 
-              <h3 className="mt-6 text-2xl font-black">
-                فروشنده یا تأمین‌کننده هستید؟
-              </h3>
+              <a
+  href="/store/register"
+  className="block rounded-3xl bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+>
+  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
+    🏪
+  </div>
 
-              <p className="mt-3 leading-7 text-slate-500">
-                فروشگاه و محصولات خود را ثبت کنید و مشتریان جدید پیدا کنید.
-              </p>
+  <h3 className="mt-6 text-2xl font-black">
+    فروشنده یا تأمین‌کننده هستید؟
+  </h3>
 
-              <button className="mt-7 rounded-xl bg-blue-700 px-6 py-4 font-bold text-white">
-                ثبت فروشگاه
-              </button>
+  <p className="mt-3 leading-7 text-slate-500">
+    فروشگاه و محصولات خود را ثبت کنید و مشتریان جدید پیدا کنید.
+  </p>
+
+  <div className="mt-7 inline-block rounded-xl bg-blue-700 px-6 py-4 font-bold text-white transition hover:bg-blue-800">
+    ثبت فروشگاه
+  </div>
+</a>
+
+              <a
+  href="/store/register"
+  className="mt-7 inline-block rounded-xl bg-blue-700 px-6 py-4 font-bold text-white transition hover:bg-blue-800"
+>
+  ثبت فروشگاه
+</a>
             </div>
 
             {/* Service Provider */}
@@ -593,7 +609,12 @@ export default function Home() {
                 <a href="/service" className="block hover:text-white">
   خدمات ساختمانی
 </a>
-                <p>ثبت فروشگاه</p>
+                <a
+  href="/store/register"
+  className="..."
+>
+  ثبت فروشگاه
+</a>
                 <a href="/service/register" className="block hover:text-white">
   ثبت خدمات
 </a>
