@@ -446,14 +446,6 @@ export default function Home() {
     🏪
   </div>
 
-  <h3 className="mt-6 text-2xl font-black">
-    فروشنده یا تأمین‌کننده هستید؟
-  </h3>
-
-  <p className="mt-3 leading-7 text-slate-500">
-    فروشگاه و محصولات خود را ثبت کنید و مشتریان جدید پیدا کنید.
-  </p>
-
   <div className="mt-7 inline-block rounded-xl bg-blue-700 px-6 py-4 font-bold text-white transition hover:bg-blue-800">
     ثبت فروشگاه
   </div>
