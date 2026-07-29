@@ -57,25 +57,6 @@ export default function AdminLoginPage() {
   router.push("/admin/service");
 };
 
-    if (!data.is_active) {
-      alert("این حساب غیرفعال است.");
-      setLoading(false);
-      return;
-    }
-
-    const { error: loginError } =
-      await supabase.auth.signInWithPassword({
-        email: data.email,
-        password,
-      });
-
-    setLoading(false);
-
-    if (loginError) {
-      alert("رمز عبور اشتباه است.");
-      return;
-    }
-
     router.push("/admin/service");
   };
 
