@@ -28,7 +28,7 @@ export default function ServiceAdminPage() {
     const { data, error } = await supabase
       .from("professionals")
       .select("*")
-      .eq("status", "pending")
+      
       .order("created_at", { ascending: false });
 
     if (error) {
