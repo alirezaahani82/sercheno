@@ -630,9 +630,15 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-12 border-t border-white/10 pt-7 text-center text-xs text-slate-500">
-            © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
-          </div>
+<div className="mt-12 border-t border-white/10 pt-7 text-center text-xs text-slate-500">
+  <p>© ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.</p>
+  <p className="mt-2">
+    شرکت امیر توان پویای گستر
+  </p>
+  <p className="mt-1">
+    مؤسس: علیرضا آهنی
+  </p>
+</div>
         </div>
       </footer>
     </main>
