@@ -288,26 +288,34 @@ const [description, setDescription] = useState("");
                       استان
                     </label>
 
-                    <select className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none">
-                      <option>آذربایجان شرقی</option>
-                      <option>تهران</option>
-                      <option>آذربایجان غربی</option>
-                      <option>اردبیل</option>
-                      <option>زنجان</option>
-                    </select>
+                   <select
+  value={province}
+  onChange={(e) => setProvince(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none"
+>
+  <option value="آذربایجان شرقی">آذربایجان شرقی</option>
+  <option value="تهران">تهران</option>
+  <option value="آذربایجان غربی">آذربایجان غربی</option>
+  <option value="اردبیل">اردبیل</option>
+  <option value="زنجان">زنجان</option>
+</select>
                   </div>
 
                   <div>
                     <label className="mb-2 block text-sm font-bold">
                       شهر
                     </label>
-<select className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none">
-                      <option>تبریز</option>
-                      <option>تهران</option>
-                      <option>ارومیه</option>
-                      <option>اردبیل</option>
-                      <option>زنجان</option>
-                    </select>
+<select
+  value={city}
+  onChange={(e) => setCity(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none"
+>
+  <option value="تبریز">تبریز</option>
+  <option value="تهران">تهران</option>
+  <option value="ارومیه">ارومیه</option>
+  <option value="اردبیل">اردبیل</option>
+  <option value="زنجان">زنجان</option>
+</select>
                   </div>
 
                   <div className="sm:col-span-2">
@@ -315,11 +323,13 @@ const [description, setDescription] = useState("");
                       محدوده فعالیت
                     </label>
 
-                    <input
-                      type="text"
-                      placeholder="مثلاً تبریز و حومه"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600"
-                    />
+                   <input
+  type="text"
+  placeholder="مثلاً تبریز و حومه"
+  value={serviceArea}
+  onChange={(e) => setServiceArea(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600"
+/>
                   </div>
                 </div>
               </div>
@@ -342,7 +352,11 @@ const [description, setDescription] = useState("");
                       چند سال سابقه کار دارید؟
                     </label>
 
-                    <select className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none">
+                    <select
+  value={experience}
+  onChange={(e) => setExperience(e.target.value)}
+  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none"
+>
                       <option>کمتر از ۱ سال</option>
                       <option>۱ تا ۳ سال</option>
                       <option>۳ تا ۵ سال</option>
@@ -356,11 +370,13 @@ const [description, setDescription] = useState("");
                       درباره تخصص و تجربه خود بنویسید
                     </label>
 
-                    <textarea
-                      rows={6}
-                      placeholder="مثلاً ۸ سال سابقه اجرای پروژه‌های ساختمانی..."
-                      className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600"
-                    />
+                   <textarea
+  rows={6}
+  placeholder="مثلاً ۸ سال سابقه اجرای پروژه‌های ساختمانی..."
+  value={description}
+  onChange={(e) => setDescription(e.target.value)}
+  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 outline-none focus:border-blue-600"
+/>
                   </div>
 
                   <div className="rounded-2xl border-2 border-dashed border-slate-200 p-8 text-center">
