@@ -65,11 +65,12 @@ useEffect(() => {
     selectedCity === "همه شهرها" ||
     person.city === selectedCity;
 
- const searchMatch =
+const searchMatch =
   search.trim() === "" ||
-  ${person.first_name} ${person.last_name}.includes(search) ||
-  (person.service || "").includes(search) ||
+  ${person.first_name  ""} ${person.last_name  ""}.includes(search) ||
+  (person.service  "").includes(search) 
   (person.city || "").includes(search);
+
   return categoryMatch && cityMatch && searchMatch;
 });
 
