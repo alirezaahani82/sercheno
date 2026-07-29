@@ -21,89 +21,57 @@ const cities = [
   "زنجان",
 ];
 
-const professionals = [
-  {
-    name: "استادکار آهنی",
-    category: "بنا و استادکار",
-    city: "تبریز",
-    rating: "۴.۹",
-    jobs: "۱۲۸ پروژه",
-    icon: "👷",
-    description: "اجرای انواع عملیات ساختمانی و بازسازی",
-  },
-  {
-    name: "تیم نصب پنجره وینتراتور",
-    category: "نصاب درب و پنجره",
-    city: "تبریز",
-    rating: "۴.۸",
-    jobs: "۹۴ پروژه",
-    icon: "🪟",
-    description: "نصب تخصصی درب و پنجره UPVC و آلومینیوم",
-  },
-  {
-    name: "کاشی‌کار حرفه‌ای",
-    category: "نصاب کاشی و سرامیک",
-    city: "تبریز",
-    rating: "۵.۰",
-    jobs: "۷۶ پروژه",
-    icon: "⬛",
-    description: "اجرای حرفه‌ای کاشی، سرامیک و سنگ",
-  },
-  {
-    name: "برق ساختمان تبریز",
-    category: "برق‌کار",
-    city: "تبریز",
-    rating: "۴.۷",
-    jobs: "۶۲ پروژه",
-    icon: "⚡",
-    description: "اجرای تأسیسات برق ساختمان و رفع عیب",
-  },
-  {
-    name: "تأسیسات نوین",
-    category: "لوله‌کش",
-    city: "تهران",
-    rating: "۴.۹",
-    jobs: "۱۱۰ پروژه",
-    icon: "🔧",
-    description: "لوله‌کشی آب، فاضلاب و تأسیسات ساختمان",
-  },
-  {
-    name: "جوشکاری صنعتی پاکباز",
-    category: "جوشکار",
-    city: "تبریز",
-    rating: "۴.۸",
-    jobs: "۸۳ پروژه",
-    icon: "🔥",
-    description: "انواع جوشکاری ساختمانی و صنعتی",
-  },
-];
-
 export default function ServicePage() {
   const [selectedCategory, setSelectedCategory] =
     useState("همه خدمات");
-
   const [selectedCity, setSelectedCity] =
     useState("همه شهرها");
 
   const [search, setSearch] = useState("");
+    const [professionals, setProfessionals] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
 
-  const filteredProfessionals = professionals.filter((person) => {
-    const categoryMatch =
-      selectedCategory === "همه خدمات" ||
-      person.category === selectedCategory;
+useEffect(() => {
+  const fetchProfessionals = async () => {
+    const { data, error } = await supabase
+      .from("professionals")
+      .select("*")
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
 
-    const cityMatch =
-      selectedCity === "همه شهرها" ||
-      person.city === selectedCity;
+    console.log("APPROVED PROFESSIONALS:", data);
+    console.log("SERVICE ERROR:", error);
 
-    const searchMatch =
-      search.trim() === "" ||
-      person.name.includes(search) ||
-      person.category.includes(search) ||
-      person.city.includes(search);
+    if (error) {
+      console.error("خطا در دریافت متخصصان:", error);
+      setLoading(false);
+      return;
+    }
 
-    return categoryMatch && cityMatch && searchMatch;
-  });
+    setProfessionals(data || []);
+    setLoading(false);
+  };
+
+  fetchProfessionals();
+}, []);
+
+
+ const filteredProfessionals = professionals.filter((person) => {
+  const categoryMatch =
+    selectedCategory === "همه خدمات" ||
+    person.service === selectedCategory;
+
+  const cityMatch =
+    selectedCity === "همه شهرها" ||
+    person.city === selectedCity;
+
+ const searchMatch =
+  search.trim() === "" ||
+  ${person.first_name} ${person.last_name}.includes(search) ||
+  (person.service || "").includes(search) ||
+  (person.city || "").includes(search);
+  return categoryMatch && cityMatch && searchMatch;
+});
 
   return (
     <main
