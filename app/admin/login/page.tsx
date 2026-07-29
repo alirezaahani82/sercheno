@@ -43,6 +43,7 @@ export default function AdminLoginPage() {
       email: data.email,
       password,
     });
+   console.log("LOGIN RESULT:", loginError);
 
   setLoading(false);
 
