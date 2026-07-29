@@ -455,6 +455,7 @@ const [description, setDescription] = useState("");
       activity_area: serviceArea,
       experience: experience,
       description: description,
+      status: "pending",
     });
 
   if (error) {
