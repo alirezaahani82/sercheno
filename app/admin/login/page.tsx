@@ -20,9 +20,6 @@ export default function AdminLoginPage() {
     .eq("username", username)
     .single();
 
-  alert("DATA: " + JSON.stringify(data));
-  alert("ERROR: " + JSON.stringify(error));
-
   if (error) {
     alert(error.message);
     setLoading(false);
