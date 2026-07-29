@@ -221,11 +221,11 @@ return categoryMatch && cityMatch && searchMatch;
             key={category}
             type="button"
             onClick={() => setSelectedCategory(category)}
-            className={w-full rounded-xl px-4 py-3 text-right text-sm font-bold transition ${
+            className={`w-full rounded-xl px-4 py-3 text-right text-sm font-bold transition ${
               selectedCategory === category
                 ? "bg-blue-700 text-white shadow-lg shadow-blue-700/20"
                 : "text-slate-600 hover:bg-slate-100"
-            }}
+            }`}
           >
             {category}
           </button>
