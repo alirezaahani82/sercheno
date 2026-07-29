@@ -22,22 +22,25 @@ export default function ServiceAdminPage() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfessionals = async () => {
-    setLoading(true);
+const fetchProfessionals = async () => {
+  setLoading(true);
 
-    const { data, error } = await supabase
-      .from("professionals")
-      .select("*")
-      
-      .order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("professionals")
+    .select("*");
 
-    if (error) {
-      console.error("SUPABASE ERROR:", error);
-      alert("خطا در دریافت درخواست‌ها: " + error.message);
-      setLoading(false);
-      return;
-    }
+  console.log("ADMIN DATA:", data);
+  console.log("ADMIN ERROR:", error);
 
+  if (error) {
+    alert("خطا در دریافت اطلاعات: " + error.message);
+    setLoading(false);
+    return;
+  }
+
+  setProfessionals(data || []);
+  setLoading(false);
+};
     setProfessionals(data || []);
     setLoading(false);
   };
