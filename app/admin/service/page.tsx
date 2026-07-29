@@ -21,6 +21,9 @@ type Professional = {
 export default function ServiceAdminPage() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<
+  "all" | "pending" | "approved" | "rejected"
+>("all");
 
 const fetchProfessionals = async () => {
   setLoading(true);
@@ -35,6 +38,13 @@ const fetchProfessionals = async () => {
   if (error) {
     alert("خطا در دریافت اطلاعات: " + error.message);
     setLoading(false);
+    const filteredProfessionals = professionals.filter((professional) => {
+  if (statusFilter === "all") {
+    return true;
+  }
+
+  return professional.status === statusFilter;
+});
     return;
   }
 
@@ -98,6 +108,72 @@ const fetchProfessionals = async () => {
             </button>
           </div>
         </div>
+        {/* Status Filters */}
+<div className="mb-8 grid gap-3 sm:grid-cols-4">
+
+  <button
+    onClick={() => setStatusFilter("all")}
+    className={rounded-2xl p-4 text-center font-bold transition ${
+      statusFilter === "all"
+        ? "bg-blue-700 text-white"
+        : "bg-white text-slate-700 hover:bg-slate-50"
+    }}
+  >
+    همه
+    <div className="mt-1 text-sm">
+      {professionals.length}
+    </div>
+  </button>
+
+  <button
+    onClick={() => setStatusFilter("pending")}
+    className={rounded-2xl p-4 text-center font-bold transition ${
+      statusFilter === "pending"
+        ? "bg-amber-500 text-white"
+        : "bg-white text-slate-700 hover:bg-slate-50"
+    }}
+  >
+    در انتظار بررسی
+    <div className="mt-1 text-sm">
+      {professionals.filter(
+        (p) => p.status === "pending"
+      ).length}
+    </div>
+  </button>
+
+  <button
+    onClick={() => setStatusFilter("approved")}
+    className={rounded-2xl p-4 text-center font-bold transition ${
+      statusFilter === "approved"
+        ? "bg-emerald-600 text-white"
+        : "bg-white text-slate-700 hover:bg-slate-50"
+    }}
+  >
+    تأیید شده
+    <div className="mt-1 text-sm">
+      {professionals.filter(
+        (p) => p.status === "approved"
+      ).length}
+    </div>
+  </button>
+
+  <button
+    onClick={() => setStatusFilter("rejected")}
+    className={rounded-2xl p-4 text-center font-bold transition ${
+      statusFilter === "rejected"
+        ? "bg-red-600 text-white"
+        : "bg-white text-slate-700 hover:bg-slate-50"
+    }}
+  >
+    رد شده
+    <div className="mt-1 text-sm">
+      {professionals.filter(
+        (p) => p.status === "rejected"
+      ).length}
+    </div>
+  </button>
+
+</div>
 
         {/* Loading */}
         {loading && (
@@ -111,7 +187,7 @@ const fetchProfessionals = async () => {
         )}
 
         {/* Empty */}
-        {!loading && professionals.length === 0 && (
+        {!loading && filteredProfessionals.length > 0 && (
           <div className="rounded-3xl bg-white p-12 text-center shadow-sm">
             <div className="text-5xl">📭</div>
 
@@ -129,7 +205,7 @@ const fetchProfessionals = async () => {
         {!loading && professionals.length > 0 && (
           <div className="space-y-6">
 
-            {professionals.map((professional) => (
+           {filteredProfessionals.map((professional) => (
               <div
                 key={professional.id}
                 className="overflow-hidden rounded-3xl bg-white shadow-sm"
@@ -149,9 +225,23 @@ const fetchProfessionals = async () => {
                       </p>
                     </div>
 
-                    <span className="w-fit rounded-full bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700">
-                      در انتظار بررسی
-                    </span>
+                   {professional.status === "pending" && (
+  <span className="w-fit rounded-full bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700">
+    🟠 در انتظار بررسی
+  </span>
+)}
+
+{professional.status === "approved" && (
+  <span className="w-fit rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700">
+    🟢 تأیید شده
+  </span>
+)}
+
+{professional.status === "rejected" && (
+  <span className="w-fit rounded-full bg-red-100 px-4 py-2 text-sm font-bold text-red-700">
+    🔴 رد شده
+  </span>
+)}
 
                   </div>
                 </div>
@@ -222,34 +312,66 @@ const fetchProfessionals = async () => {
                   </p>
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-col gap-3 p-6 sm:flex-row">
+               {/* Actions */}
+<div className="flex flex-col gap-3 p-6 sm:flex-row">
 
-                  <button
-                    onClick={() =>
-                      updateStatus(
-                        professional.id,
-                        "approved"
-                      )
-                    }
-                    className="rounded-xl bg-emerald-600 px-8 py-4 font-black text-white hover:bg-emerald-700"
-                  >
-                    ✓ تأیید و انتشار متخصص
-                  </button>
+  {professional.status === "pending" && (
+    <>
+      <button
+        onClick={() =>
+          updateStatus(
+            professional.id,
+            "approved"
+          )
+        }
+        className="rounded-xl bg-emerald-600 px-8 py-4 font-black text-white hover:bg-emerald-700"
+      >
+        ✓ تأیید و انتشار متخصص
+      </button>
 
-                  <button
-                    onClick={() =>
-                      updateStatus(
-                        professional.id,
-                        "rejected"
-                      )
-                    }
-                    className="rounded-xl bg-red-600 px-8 py-4 font-black text-white hover:bg-red-700"
-                  >
-                    ✕ رد درخواست
-                  </button>
+      <button
+        onClick={() =>
+          updateStatus(
+            professional.id,
+            "rejected"
+          )
+        }
+        className="rounded-xl bg-red-600 px-8 py-4 font-black text-white hover:bg-red-700"
+      >
+        ✕ رد درخواست
+      </button>
+    </>
+  )}
 
-                </div>
+  {professional.status === "approved" && (
+    <button
+      onClick={() =>
+        updateStatus(
+          professional.id,
+          "rejected"
+        )
+      }
+      className="rounded-xl bg-red-600 px-8 py-4 font-black text-white hover:bg-red-700"
+    >
+      ✕ لغو تأیید و رد متخصص
+    </button>
+  )}
+
+  {professional.status === "rejected" && (
+    <button
+      onClick={() =>
+        updateStatus(
+          professional.id,
+          "approved"
+        )
+      }
+      className="rounded-xl bg-emerald-600 px-8 py-4 font-black text-white hover:bg-emerald-700"
+    >
+      ✓ تأیید و انتشار متخصص
+    </button>
+  )}
+
+</div>
 
               </div>
             ))}
