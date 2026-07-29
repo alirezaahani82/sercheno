@@ -15,3 +15,6 @@ const fetchProfessionals = async () => {
   setProfessionals(data || []);
   setLoading(false);
 };
+useEffect(() => {
+  fetchProfessionals();
+}, []);
