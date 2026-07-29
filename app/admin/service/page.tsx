@@ -79,6 +79,13 @@ const fetchProfessionals = async () => {
 
     fetchProfessionals();
   };
+  const filteredProfessionals = professionals.filter((professional) => {
+  if (statusFilter === "all") {
+    return true;
+  }
+
+  return professional.status === statusFilter;
+});
 
   return (
     <main
