@@ -38,9 +38,6 @@ const fetchProfessionals = async () => {
     return;
   }
 
-  setProfessionals(data || []);
-  setLoading(false);
-};
     setProfessionals(data || []);
     setLoading(false);
   };
