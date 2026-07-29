@@ -27,6 +27,16 @@ export default function ServiceAdminPage() {
 
 const fetchProfessionals = async () => {
   setLoading(true);
+  const logout = async () => {
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    alert("خطا در خروج از پنل: " + error.message);
+    return;
+  }
+
+  window.location.href = "/admin/login";
+};
 
   const { data, error } = await supabase
     .from("professionals")
@@ -113,6 +123,12 @@ const fetchProfessionals = async () => {
             >
               بروزرسانی
             </button>
+            <button
+  onClick={logout}
+  className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-700"
+>
+  خروج از پنل
+</button>
           </div>
         </div>
         {/* Status Filters */}
