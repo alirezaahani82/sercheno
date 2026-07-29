@@ -57,9 +57,6 @@ export default function AdminLoginPage() {
   router.push("/admin/service");
 };
 
-    router.push("/admin/service");
-  };
-
   return (
     <main
       dir="rtl"
