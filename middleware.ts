@@ -14,8 +14,9 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
+
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
+          cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
 
@@ -35,9 +36,12 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
+  console.log("MIDDLEWARE USER:", user?.email);
 
-  if (pathname.startsWith("/admin/service") && !user) {
+  if (
+    request.nextUrl.pathname.startsWith("/admin/service") &&
+    !user
+  ) {
     return NextResponse.redirect(
       new URL("/admin/login", request.url)
     );
@@ -49,4 +53,3 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/admin/service/:path*"],
 };
-
