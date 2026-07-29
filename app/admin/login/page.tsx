@@ -11,20 +11,51 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const login = async () => {
-    setLoading(true);
+ const login = async () => {
+  setLoading(true);
 
-    const { data, error } = await supabase
-      .from("admin_users")
-      .select("email,is_active")
-      .eq("username", username)
-      .single();
+  const { data, error } = await supabase
+    .from("admin_users")
+    .select("email,is_active")
+    .eq("username", username)
+    .single();
 
-    if (error || !data) {
-      alert("نام کاربری یافت نشد.");
-      setLoading(false);
-      return;
-    }
+  alert("DATA: " + JSON.stringify(data));
+  alert("ERROR: " + JSON.stringify(error));
+
+  if (error) {
+    alert(error.message);
+    setLoading(false);
+    return;
+  }
+
+  if (!data) {
+    alert("کاربری پیدا نشد");
+    setLoading(false);
+    return;
+  }
+
+  if (!data.is_active) {
+    alert("این حساب غیرفعال است.");
+    setLoading(false);
+    return;
+  }
+
+  const { error: loginError } =
+    await supabase.auth.signInWithPassword({
+      email: data.email,
+      password,
+    });
+
+  setLoading(false);
+
+  if (loginError) {
+    alert("رمز عبور اشتباه است.");
+    return;
+  }
+
+  router.push("/admin/service");
+};
 
     if (!data.is_active) {
       alert("این حساب غیرفعال است.");
