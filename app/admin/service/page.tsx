@@ -127,11 +127,11 @@ const fetchProfessionals = async () => {
 
   <button
     onClick={() => setStatusFilter("pending")}
-    className={rounded-2xl p-4 text-center font-bold transition ${
+    className={`rounded-2xl p-4 text-center font-bold transition ${
       statusFilter === "pending"
         ? "bg-amber-500 text-white"
         : "bg-white text-slate-700 hover:bg-slate-50"
-    }}
+    }`}
   >
     در انتظار بررسی
     <div className="mt-1 text-sm">
@@ -143,11 +143,11 @@ const fetchProfessionals = async () => {
 
   <button
     onClick={() => setStatusFilter("approved")}
-    className={rounded-2xl p-4 text-center font-bold transition ${
+    className={`rounded-2xl p-4 text-center font-bold transition ${
       statusFilter === "approved"
         ? "bg-emerald-600 text-white"
         : "bg-white text-slate-700 hover:bg-slate-50"
-    }}
+    }`}
   >
     تأیید شده
     <div className="mt-1 text-sm">
@@ -159,11 +159,11 @@ const fetchProfessionals = async () => {
 
   <button
     onClick={() => setStatusFilter("rejected")}
-    className={rounded-2xl p-4 text-center font-bold transition ${
+    className={`rounded-2xl p-4 text-center font-bold transition ${
       statusFilter === "rejected"
         ? "bg-red-600 text-white"
         : "bg-white text-slate-700 hover:bg-slate-50"
-    }}
+    }`}
   >
     رد شده
     <div className="mt-1 text-sm">
