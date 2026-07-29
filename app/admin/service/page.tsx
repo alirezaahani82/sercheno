@@ -113,7 +113,7 @@ const fetchProfessionals = async () => {
 
   <button
     onClick={() => setStatusFilter("all")}
-    className={rounded-2xl p-4 text-center font-bold transition ${
+    className={`rounded-2xl p-4 text-center font-bold transition ${
       statusFilter === "all"
         ? "bg-blue-700 text-white"
         : "bg-white text-slate-700 hover:bg-slate-50"
