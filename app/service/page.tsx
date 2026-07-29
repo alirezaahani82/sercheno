@@ -273,68 +273,66 @@ return categoryMatch && cityMatch && searchMatch;
               </div>
             </div>
 
-            {filteredProfessionals.length === 0 ? (
-              <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center">
-                <div className="text-5xl">
-                  🔍
-                </div>
+           {filteredProfessionals.map((person) => (
+  <div
+    key={person.id}
+    className="rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-xl"
+  >
+    <div className="flex items-start gap-4">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
+        👷
+      </div>
 
-                <h3 className="mt-5 text-xl font-black">
-                  متخصصی پیدا نشد
-                </h3>
+      <div className="min-w-0 flex-1">
+        <h3 className="font-black">
+          {person.first_name} {person.last_name}
+        </h3>
 
-                <p className="mt-3 text-sm text-slate-500">
-                  فیلترها یا عبارت جست‌وجو را تغییر دهید.
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-5 md:grid-cols-2">
-                {filteredProfessionals.map(
-                  (person) => (
-                    <div
-                      key={person.name}
-                      className="rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-xl"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
-                          {person.icon}
-                        </div>
+        <p className="mt-1 text-sm font-bold text-blue-700">
+          {person.service}
+        </p>
 
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-black">
-                            {person.name}
-                          </h3>
+        <p className="mt-1 text-xs text-slate-400">
+          📍 {person.city}
+        </p>
+      </div>
 
-                          <p className="mt-1 text-sm font-bold text-blue-700">
-                            {person.category}
-                          </p>
+      <div className="rounded-lg bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-600">
+        ✓ تأیید شده
+      </div>
+    </div>
 
-                          <p className="mt-1 text-xs text-slate-400">
-                            📍 {person.city}
-                          </p>
-                        </div>
+    <div className="mt-5 space-y-2 text-sm text-slate-500">
+      <p>
+        <span className="font-bold text-slate-700">
+          محدوده فعالیت:
+        </span>{" "}
+        {person.activity_area || "ثبت نشده"}
+      </p>
 
-                        <div className="rounded-lg bg-amber-50 px-2 py-1 text-xs font-bold text-amber-600">
-                          ⭐ {person.rating}
-                        </div>
-                      </div>
+      <p>
+        <span className="font-bold text-slate-700">
+          سابقه فعالیت:
+        </span>{" "}
+        {person.experience || "ثبت نشده"}
+      </p>
+    </div>
 
-                      <p className="mt-5 text-sm leading-7 text-slate-500">
-                        {person.description}
-                      </p>
+    <p className="mt-5 text-sm leading-7 text-slate-500">
+      {person.description || "توضیحی برای این متخصص ثبت نشده است."}
+    </p>
 
-                      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-5">
-                        <span className="text-xs text-slate-400">
-                          {person.jobs}
-                        </span>
+    <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-5">
+      <span className="text-xs text-slate-400">
+        متخصص تأییدشده سرچنو
+      </span>
 
-                        <button className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800">
-                          مشاهده پروفایل
-                        </button>
-                      </div>
-                    </div>
-                  )
-                )}
+      <button className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800">
+        مشاهده پروفایل
+      </button>
+    </div>
+  </div>
+))}
               </div>
             )}
           </div>
