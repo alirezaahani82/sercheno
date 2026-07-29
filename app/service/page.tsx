@@ -67,11 +67,13 @@ useEffect(() => {
 
 const searchMatch =
   search.trim() === "" ||
-  ((person.first_name  "") + " " + (person.last_name  "")).includes(search) ||
-  (person.service  "").includes(search) 
-  (person.city || "").includes(search);
+  String(person.first_name) .includes(search) ||
+  String(person.last_name) .includes(search) ||
+  String(person.service) .includes(search) ||
+  String(person.city) .includes(search);
 
-  return categoryMatch && cityMatch && searchMatch;
+return categoryMatch && cityMatch && searchMatch;
+
 });
 
   return (
