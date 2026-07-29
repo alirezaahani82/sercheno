@@ -138,11 +138,11 @@ export default function ServiceAdminPage() {
 
           <button
             onClick={() => setStatusFilter("all")}
-            className={rounded-2xl p-4 text-center font-bold transition ${
+            className={`rounded-2xl p-4 text-center font-bold transition ${
               statusFilter === "all"
                 ? "bg-blue-700 text-white"
                 : "bg-white text-slate-700 hover:bg-slate-50"
-            }}
+            }`}
           >
             همه
 
@@ -153,11 +153,11 @@ export default function ServiceAdminPage() {
 
           <button
             onClick={() => setStatusFilter("pending")}
-            className={rounded-2xl p-4 text-center font-bold transition ${
+            className={`rounded-2xl p-4 text-center font-bold transition ${
               statusFilter === "pending"
                 ? "bg-amber-500 text-white"
                 : "bg-white text-slate-700 hover:bg-slate-50"
-            }}
+            }`}
           >
           درانتظار بررسی
         <div className="mt-1 text-sm">
@@ -169,11 +169,11 @@ export default function ServiceAdminPage() {
 
           <button
             onClick={() => setStatusFilter("approved")}
-            className={rounded-2xl p-4 text-center font-bold transition ${
+            className={`rounded-2xl p-4 text-center font-bold transition ${
               statusFilter === "approved"
                 ? "bg-emerald-600 text-white"
                 : "bg-white text-slate-700 hover:bg-slate-50"
-            }}
+            }`}
           >
             تأیید شده
 
@@ -186,11 +186,11 @@ export default function ServiceAdminPage() {
 
           <button
             onClick={() => setStatusFilter("rejected")}
-            className={rounded-2xl p-4 text-center font-bold transition ${
+            className={`rounded-2xl p-4 text-center font-bold transition ${
               statusFilter === "rejected"
                 ? "bg-red-600 text-white"
                 : "bg-white text-slate-700 hover:bg-slate-50"
-            }}
+            }`}
           >
             رد شده
 
