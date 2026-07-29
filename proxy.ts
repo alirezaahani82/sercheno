@@ -35,6 +35,7 @@ export async function proxy(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  console.log("PROXY USER:", user?.email);
 
   if (
     request.nextUrl.pathname.startsWith("/admin/service") &&
