@@ -70,6 +70,15 @@ export default function StoreRegisterPage() {
   description: "",
   name: "",
 });
+  const updateStoreForm = (
+  field: keyof StoreForm,
+  value: string
+) => {
+  setStoreForm((prev) => ({
+    ...prev,
+    [field]: value,
+  }));
+};
   const [submitting, setSubmitting] = useState(false);
   const handleSubmit = async () => {
   setSubmitting(true);
@@ -264,11 +273,14 @@ export default function StoreRegisterPage() {
             </div>
 
             <div className="grid gap-5 p-6 md:grid-cols-2">
-              <Input
-                label="نام فروشگاه یا مجموعه"
-                placeholder="نام فروشگاه"
-              />
-
+             <Input
+  label="نام فروشگاه یا مجموعه"
+  placeholder="نام فروشگاه"
+  value={storeForm.name}
+  onChange={(e) =>
+    updateStoreForm("name", e.target.value)
+  }
+/>
               <Select
                 label="دسته‌بندی اصلی فعالیت"
                 options={[
