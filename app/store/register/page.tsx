@@ -58,12 +58,12 @@ export default function StoreRegisterPage() {
 
   try {
     const { error } = await supabase
-      .from("stores")
-      .insert({
-        name: "فروشگاه تست سرچنو",
-        `slug: `store-${Date.now()},
-        status: "pending",
-      });
+  .from("stores")
+  .insert({
+    name: "فروشگاه تست سرچنو",
+    slug: "store-test",
+    status: "pending",
+  });
 
     if (error) {
       console.error("STORE INSERT ERROR:", error);
