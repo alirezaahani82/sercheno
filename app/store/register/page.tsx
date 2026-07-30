@@ -53,6 +53,29 @@ export default function StoreRegisterPage() {
     { ...emptyProduct },
   ]);
   const [submitting, setSubmitting] = useState(false);
+  const handleSubmit = async () => {
+  setSubmitting(true);
+
+  try {
+    const { error } = await supabase
+      .from("stores")
+      .insert({
+        name: "فروشگاه تست سرچنو",
+        slug: store-${Date.now()},
+        status: "pending",
+      });
+
+    if (error) {
+      console.error("STORE INSERT ERROR:", error);
+      alert("خطا در ثبت فروشگاه: " + error.message);
+      return;
+    }
+
+    alert("فروشگاه با موفقیت ثبت شد ✅");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const [productImages, setProductImages] = useState<File[]>([]);
   const [sampleImages, setSampleImages] = useState<File[]>([]);
@@ -732,13 +755,18 @@ export default function StoreRegisterPage() {
           </section>
 
           {/* Submit */}
-          <button
-            type="button"
-            className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-700 py-5 text-lg font-black text-white shadow-xl shadow-blue-700/20 transition hover:bg-blue-800"
-          >
-            <CheckCircle2 size={24} />
-            ثبت فروشگاه برای بررسی
-          </button>
+         <button
+  type="button"
+  onClick={handleSubmit}
+  disabled={submitting}
+  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-700 py-5 text-lg font-black text-white shadow-xl shadow-blue-700/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+>
+  <CheckCircle2 size={24} />
+
+  {submitting
+    ? "در حال ثبت فروشگاه..."
+    : "ثبت فروشگاه برای بررسی"}
+</button>
 
           <p className="text-center text-xs text-slate-400">
             در این مرحله اطلاعات فقط در فرم وارد می‌شود و هنوز در پایگاه
