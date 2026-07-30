@@ -317,9 +317,13 @@ export default function StoreRegisterPage() {
 
               <div className="md:col-span-2">
                 <Textarea
-                  label="معرفی فروشگاه"
-                  placeholder="درباره فروشگاه، سابقه فعالیت و حوزه تخصصی خود توضیح دهید..."
-                />
+  label="معرفی فروشگاه"
+  placeholder="درباره فروشگاه، سابقه فعالیت و حوزه تخصصی خود توضیح دهید..."
+  value={storeForm.description}
+  onChange={(e) =>
+    updateStoreForm("description", e.target.value)
+  }
+/>
               </div>
             </div>
           </section>
