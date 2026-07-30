@@ -52,6 +52,7 @@ export default function StoreRegisterPage() {
   const [products, setProducts] = useState<Product[]>([
     { ...emptyProduct },
   ]);
+  const [submitting, setSubmitting] = useState(false);
 
   const [productImages, setProductImages] = useState<File[]>([]);
   const [sampleImages, setSampleImages] = useState<File[]>([]);
