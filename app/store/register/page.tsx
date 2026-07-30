@@ -61,7 +61,7 @@ export default function StoreRegisterPage() {
       .from("stores")
       .insert({
         name: "فروشگاه تست سرچنو",
-        slug: store-${Date.now()},
+        `slug: `store-${Date.now()},
         status: "pending",
       });
 
