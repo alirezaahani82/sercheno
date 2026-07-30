@@ -255,73 +255,96 @@ export default function CartPage() {
                     <div className="p-5 sm:p-6">
 
                       <div className="flex gap-4">
-<span className="text-2xl font-black text-blue-700">
-                          {total.toLocaleString("fa-IR")}
-                        </span>
+{/* Icon */}
+                        <div
+                          className={flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-3xl ${
+                            item.type === "product"
+                              ? "bg-amber-50"
+                              : "bg-emerald-50"
+                          }}
+                        >
+                          {item.type === "product"
+                            ? "🧱"
+                            : "🔧"}
+                        </div>
 
-                        <span className="mb-1 font-bold text-slate-500">
-                          تومان
-                        </span>
+                        {/* Information */}
+                        <div className="min-w-0 flex-1">
 
-                      </div>
+                          <div className="flex items-start justify-between gap-3">
 
-                      {cart.some(
-                        (item) => item.price === null
-                      ) && (
-                        <p className="mt-3 text-xs leading-6 text-amber-600">
-                          قیمت برخی خدمات پس از بررسی درخواست
-                          و هماهنگی با متخصص مشخص می‌شود.
-                        </p>
-                      )}
+                            <div>
+                              <span
+                                className={inline-flex rounded-full px-3 py-1 text-xs font-bold ${
+                                  item.type === "product"
+                                    ? "bg-amber-50 text-amber-700"
+                                    : "bg-emerald-50 text-emerald-700"
+                                }}
+                              >
+                                {item.type === "product"
+                                  ? "مصالح ساختمانی"
+                                  : "خدمات ساختمانی"}
+                              </span>
 
-                    </div>
+                              <h4 className="mt-2 text-lg font-black text-slate-900">
+                                {item.title}
+                              </h4>
+                            </div>
 
-                    <button
-                      className="mt-6 w-full rounded-2xl bg-blue-700 py-4 font-black text-white shadow-lg shadow-blue-700/20 transition hover:-translate-y-0.5 hover:bg-blue-800"
-                    >
-                      ادامه ثبت سفارش
-                    </button>
+                            <button
+                              onClick={() =>
+                                removeItem(item.id)
+                              }
+                              className="rounded-xl p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                              title="حذف"
+                            >
+                              🗑️
+                            </button>
 
-                    <Link
-                      href="/"
-                      className="mt-3 block w-full rounded-2xl border border-slate-200 py-4 text-center font-bold text-slate-700 transition hover:bg-slate-50"
-                    >
-                      ادامه خرید
-                    </Link>
+                          </div>
 
-                    <div className="mt-6 flex items-center gap-3 rounded-2xl bg-emerald-50 p-4">
+                          {/* Bottom */}
+                          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                      <span className="text-xl">
-                        🔒
-                      </span>
+                            {/* Quantity */}
+                            <div className="flex items-center gap-3">
 
-                      <p className="text-xs font-bold leading-5 text-emerald-700">
-                        اطلاعات سفارش شما در سرچنو
-                        با امنیت نگهداری می‌شود.
-                      </p>
+                              <span className="text-sm font-bold text-slate-500">
+                                تعداد:
+                              </span>
 
-                    </div>
+                              <div className="flex items-center overflow-hidden rounded-xl border border-slate-200">
 
-                  </div>
-                </div>
+                                <button
+                                  onClick={() =>
+                                    increaseQuantity(item.id)
+                                  }
+                                  className="flex h-10 w-10 items-center justify-center bg-slate-50 text-lg font-black transition hover:bg-blue-50 hover:text-blue-700"
+                                >
+                                  +
+                                </button>
 
-              </aside>
+                                <span className="flex h-10 min-w-12 items-center justify-center border-x border-slate-200 bg-white font-black">
+                                  {item.quantity.toLocaleString(
+                                    "fa-IR"
+                                  )}
+                                </span>
 
-            </div>
-          </>
-        )}
-      </div>
+                                <button
+                                  onClick={() =>
+                                    decreaseQuantity(item.id)
+                                  }
+                                  className="flex h-10 w-10 items-center justify-center bg-slate-50 text-lg font-black transition hover:bg-blue-50 hover:text-blue-700"
+                                >
+                                  −
+                                </button>
 
-      {/* Footer */}
-      <footer className="mt-10 border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-6 text-center text-sm text-slate-400">
-          © سرچنو — بازار آنلاین مصالح و خدمات ساختمانی
-        </div>
-      </footer>
-    </main>
-  );
-}
-{item.price === null ? (
+                              </div>
+                            </div>
+
+                            {/* Price */}
+                            <div className="text-right">
+                              {item.price === null ? (
                                 <div>
                                   <p className="text-xs text-slate-400">
                                     مبلغ خدمت
@@ -428,92 +451,69 @@ export default function CartPage() {
                       </p>
 
                       <div className="mt-2 flex items-end justify-between gap-2">
-{/* Icon */}
-                        <div
-                          className={flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-3xl ${
-                            item.type === "product"
-                              ? "bg-amber-50"
-                              : "bg-emerald-50"
-                          }}
-                        >
-                          {item.type === "product"
-                            ? "🧱"
-                            : "🔧"}
-                        </div>
+                        <span className="text-2xl font-black text-blue-700">
+                          {total.toLocaleString("fa-IR")}
+                        </span>
 
-                        {/* Information */}
-                        <div className="min-w-0 flex-1">
+                        <span className="mb-1 font-bold text-slate-500">
+                          تومان
+                        </span>
 
-                          <div className="flex items-start justify-between gap-3">
+                      </div>
 
-                            <div>
-                              <span
-                                className={inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                                  item.type === "product"
-                                    ? "bg-amber-50 text-amber-700"
-                                    : "bg-emerald-50 text-emerald-700"
-                                }}
-                              >
-                                {item.type === "product"
-                                  ? "مصالح ساختمانی"
-                                  : "خدمات ساختمانی"}
-                              </span>
+                      {cart.some(
+                        (item) => item.price === null
+                      ) && (
+                        <p className="mt-3 text-xs leading-6 text-amber-600">
+                          قیمت برخی خدمات پس از بررسی درخواست
+                          و هماهنگی با متخصص مشخص می‌شود.
+                        </p>
+                      )}
 
-                              <h4 className="mt-2 text-lg font-black text-slate-900">
-                                {item.title}
-                              </h4>
-                            </div>
+                    </div>
 
-                            <button
-                              onClick={() =>
-                                removeItem(item.id)
-                              }
-                              className="rounded-xl p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
-                              title="حذف"
-                            >
-                              🗑️
-                            </button>
+                    <button
+                      className="mt-6 w-full rounded-2xl bg-blue-700 py-4 font-black text-white shadow-lg shadow-blue-700/20 transition hover:-translate-y-0.5 hover:bg-blue-800"
+                    >
+                      ادامه ثبت سفارش
+                    </button>
 
-                          </div>
+                    <Link
+                      href="/"
+                      className="mt-3 block w-full rounded-2xl border border-slate-200 py-4 text-center font-bold text-slate-700 transition hover:bg-slate-50"
+                    >
+                      ادامه خرید
+                    </Link>
 
-                          {/* Bottom */}
-                          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="mt-6 flex items-center gap-3 rounded-2xl bg-emerald-50 p-4">
 
-                            {/* Quantity */}
-                            <div className="flex items-center gap-3">
+                      <span className="text-xl">
+                        🔒
+                      </span>
 
-                              <span className="text-sm font-bold text-slate-500">
-                                تعداد:
-                              </span>
+                      <p className="text-xs font-bold leading-5 text-emerald-700">
+                        اطلاعات سفارش شما در سرچنو
+                        با امنیت نگهداری می‌شود.
+                      </p>
 
-                              <div className="flex items-center overflow-hidden rounded-xl border border-slate-200">
+                    </div>
 
-                                <button
-                                  onClick={() =>
-                                    increaseQuantity(item.id)
-                                  }
-                                  className="flex h-10 w-10 items-center justify-center bg-slate-50 text-lg font-black transition hover:bg-blue-50 hover:text-blue-700"
-                                >
-                                  +
-                                </button>
+                  </div>
+                </div>
 
-                                <span className="flex h-10 min-w-12 items-center justify-center border-x border-slate-200 bg-white font-black">
-                                  {item.quantity.toLocaleString(
-                                    "fa-IR"
-                                  )}
-                                </span>
+              </aside>
 
-                                <button
-                                  onClick={() =>
-                                    decreaseQuantity(item.id)
-                                  }
-                                  className="flex h-10 w-10 items-center justify-center bg-slate-50 text-lg font-black transition hover:bg-blue-50 hover:text-blue-700"
-                                >
-                                  −
-                                </button>
+            </div>
+          </>
+        )}
+      </div>
 
-                              </div>
-                            </div>
-
-                            {/* Price */}
-                            <div className="text-right">
+      {/* Footer */}
+      <footer className="mt-10 border-t border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-5 py-6 text-center text-sm text-slate-400">
+          © سرچنو — بازار آنلاین مصالح و خدمات ساختمانی
+        </div>
+      </footer>
+    </main>
+  );
+}
