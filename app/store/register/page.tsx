@@ -230,9 +230,13 @@ export default function StoreRegisterPage() {
 
             <div className="grid gap-5 p-6 md:grid-cols-2">
               <Input
-                label="نام"
-                placeholder="مثلاً علیرضا"
-              />
+  label="نام"
+  placeholder="مثلاً علیرضا"
+  value={storeForm.ownerName}
+  onChange={(e) =>
+    updateStoreForm("ownerName", e.target.value)
+  }
+/>
 
               <Input
                 label="نام خانوادگی"
@@ -240,10 +244,14 @@ export default function StoreRegisterPage() {
               />
 
               <Input
-                label="شماره تماس"
-                placeholder="09xxxxxxxxx"
-                type="tel"
-              />
+  label="شماره تماس"
+  placeholder="09xxxxxxxxx"
+  type="tel"
+  value={storeForm.phone}
+  onChange={(e) =>
+    updateStoreForm("phone", e.target.value)
+  }
+/>
 
               <Input
                 label="کد ملی"
