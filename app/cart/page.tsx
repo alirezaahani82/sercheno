@@ -257,11 +257,11 @@ export default function CartPage() {
                       <div className="flex gap-4">
 {/* Icon */}
                         <div
-                          className={flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-3xl ${
+                          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-3xl ${
                             item.type === "product"
                               ? "bg-amber-50"
                               : "bg-emerald-50"
-                          }}
+                          }`}
                         >
                           {item.type === "product"
                             ? "🧱"
@@ -275,11 +275,11 @@ export default function CartPage() {
 
                             <div>
                               <span
-                                className={inline-flex rounded-full px-3 py-1 text-xs font-bold ${
+                                className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
                                   item.type === "product"
                                     ? "bg-amber-50 text-amber-700"
                                     : "bg-emerald-50 text-emerald-700"
-                                }}
+                                }`}
                               >
                                 {item.type === "product"
                                   ? "مصالح ساختمانی"
