@@ -76,22 +76,38 @@ export default function Home() {
             </a>
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Link
-  href="/login"
-  className="hidden rounded-xl px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 sm:block"
->
-  ورود
-</Link>
+         {/* Actions */}
+<div className="flex items-center gap-2">
 
-            <Link
-  href="/register"
-  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
->
-  ثبت‌نام
-</Link>
-          </div>
+  {/* Cart */}
+  <Link
+    href="/cart"
+    className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
+    title="سبد خرید"
+  >
+    🛒
+
+    {/* تعداد فعلاً صفر */}
+    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-[10px] font-black text-white">
+      0
+    </span>
+  </Link>
+
+  <Link
+    href="/login"
+    className="hidden rounded-xl px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 sm:block"
+  >
+    ورود
+  </Link>
+
+  <Link
+    href="/register"
+    className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
+  >
+    ثبت‌نام
+  </Link>
+
+</div>
         </div>
       </header>
 
