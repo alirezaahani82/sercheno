@@ -47,11 +47,29 @@ const emptyProduct: Product = {
   customerPrice: "",
   description: "",
 };
+type StoreForm = {
+  ownerName: string;
+  phone: string;
+  province: string;
+  city: string;
+  address: string;
+  description: string;
+  name: string;
+};
 
 export default function StoreRegisterPage() {
   const [products, setProducts] = useState<Product[]>([
     { ...emptyProduct },
   ]);
+  const [storeForm, setStoreForm] = useState<StoreForm>({
+  ownerName: "",
+  phone: "",
+  province: "",
+  city: "",
+  address: "",
+  description: "",
+  name: "",
+});
   const [submitting, setSubmitting] = useState(false);
   const handleSubmit = async () => {
   setSubmitting(true);
