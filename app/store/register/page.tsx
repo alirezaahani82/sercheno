@@ -345,23 +345,30 @@ export default function StoreRegisterPage() {
 
             <div className="grid gap-5 p-6 md:grid-cols-3">
               <Select
-                label="استان"
-                options={[
-                  "آذربایجان شرقی",
-                  "آذربایجان غربی",
-                  "اردبیل",
-                  "تهران",
-                  "زنجان",
-                  "البرز",
-                  "سایر",
-                ]}
-              />
+  label="استان"
+  options={[
+    "آذربایجان شرقی",
+    "آذربایجان غربی",
+    "اردبیل",
+    "تهران",
+    "زنجان",
+    "البرز",
+    "سایر",
+  ]}
+  value={storeForm.province}
+  onChange={(e) =>
+    updateStoreForm("province", e.target.value)
+  }
+/>
 
-              <Input
-                label="شهر"
-                placeholder="مثلاً تبریز"
-              />
-
+             <Input
+  label="شهر"
+  placeholder="مثلاً تبریز"
+  value={storeForm.city}
+  onChange={(e) =>
+    updateStoreForm("city", e.target.value)
+  }
+/>
               <Input
                 label="منطقه یا محله"
                 placeholder="نام محله"
@@ -369,9 +376,13 @@ export default function StoreRegisterPage() {
 
               <div className="md:col-span-3">
                 <Textarea
-                  label="آدرس کامل فروشگاه"
-                  placeholder="آدرس دقیق فروشگاه را وارد کنید..."
-                />
+  label="آدرس کامل فروشگاه"
+  placeholder="آدرس دقیق فروشگاه را وارد کنید..."
+  value={storeForm.address}
+  onChange={(e) =>
+    updateStoreForm("address", e.target.value)
+  }
+/>
               </div>
             </div>
           </section>
