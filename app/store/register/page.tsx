@@ -172,7 +172,6 @@ const handleSubmit = async () => {
           .toString(36)
           .substring(2, 8)}`,
         category: product.category,
-        subcategories: product.model,
         description: product.description,
         price: Number(
           product.customerPrice.replace(/,/g, "") || 0
