@@ -49,26 +49,45 @@ const emptyProduct: Product = {
 };
 type StoreForm = {
   ownerName: string;
+  ownerLastName: string;
+  nationalCode: string;
   phone: string;
+
+  name: string;
+  category: string;
+  landline: string;
+  storeMobile: string;
+
   province: string;
   city: string;
+  district: string;
   address: string;
+
   description: string;
-  name: string;
+};
 };
 
 export default function StoreRegisterPage() {
   const [products, setProducts] = useState<Product[]>([
     { ...emptyProduct },
   ]);
-  const [storeForm, setStoreForm] = useState<StoreForm>({
+const [storeForm, setStoreForm] = useState<StoreForm>({
   ownerName: "",
+  ownerLastName: "",
+  nationalCode: "",
   phone: "",
+
+  name: "",
+  category: "",
+  landline: "",
+  storeMobile: "",
+
   province: "",
   city: "",
+  district: "",
   address: "",
+
   description: "",
-  name: "",
 });
   const updateStoreForm = (
   field: keyof StoreForm,
