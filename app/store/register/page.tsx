@@ -103,20 +103,40 @@ const [storeForm, setStoreForm] = useState<StoreForm>({
 
   try {
     console.log("STORE FORM:", storeForm);
-    const { error } = await supabase
+    const { data: store, error: storeError } = await supabase
   .from("stores")
   .insert({
-  name: storeForm.name,
-  slug: `store-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
-  owner_name: storeForm.ownerName,
-  phone: storeForm.phone,
-  province: storeForm.province,
-  city: storeForm.city,
-  address: storeForm.address,
-  description: storeForm.description,
-  status: "pending",
-});
+    name: storeForm.name,
+    slug: `store-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 8)}`,
+    owner_name: storeForm.ownerName,
+    phone: storeForm.phone,
+    province: storeForm.province,
+    city: storeForm.city,
+    address: storeForm.address,
+    description: storeForm.description,
+    status: "pending",
+  })
+  .select("id")
+  .single();
 
+if (storeError) {
+  throw storeError;
+}
+
+const { error: privateError } = await supabase
+  .from("store_private_info")
+  .insert({
+    store_id: store.id,
+    owner_first_name: storeForm.ownerName,
+    owner_last_name: storeForm.ownerLastName,
+    national_code: storeForm.nationalCode,
+  });
+
+if (privateError) {
+  throw privateError;
+}
     if (error) {
       console.error("STORE INSERT ERROR:", error);
       alert("خطا در ثبت فروشگاه: " + error.message);
