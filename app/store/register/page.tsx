@@ -198,6 +198,18 @@ const handleSubmit = async () => {
 
     // 4. ثبت تمام محصولات
     if (productsToInsert.length > 0) {
+     console.log("PRODUCTS TO INSERT:", productsToInsert);
+
+productsToInsert.forEach((product, index) => {
+  console.log(`PRODUCT ${index + 1}:`, {
+    name: product.name,
+    stock: product.stock,
+    price: product.price,
+    customer_price: product.customer_price,
+    cooperation_price: product.cooperation_price,
+    seller_id: product.seller_id,
+  });
+});
       const { error: productsError } = await supabase
         .from("products")
         .insert(productsToInsert);
