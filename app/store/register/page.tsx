@@ -103,6 +103,15 @@ const [storeForm, setStoreForm] = useState<StoreForm>({
 
   try {
     console.log("STORE FORM:", storeForm);
+    const { data: testData, error: testError } = await supabase
+  .from("stores")
+  .select("id")
+  .limit(1);
+
+console.log("SUPABASE TEST:", {
+  testData,
+  testError,
+});
 
     const { data: store, error: storeError } = await supabase
       .from("stores")
