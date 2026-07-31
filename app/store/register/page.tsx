@@ -98,21 +98,14 @@ const [storeForm, setStoreForm] = useState<StoreForm>({
   }));
 };
   const [submitting, setSubmitting] = useState(false);
- const handleSubmit = async () => {
+const handleSubmit = async () => {
   setSubmitting(true);
 
   try {
     console.log("STORE FORM:", storeForm);
-    const { data: testData, error: testError } = await supabase
-  .from("stores")
-  .select("id")
-  .limit(1);
+    console.log("PRODUCTS:", products);
 
-console.log("SUPABASE TEST:", {
-  testData,
-  testError,
-});
-
+    // 1. ثبت فروشگاه
     const { data: store, error: storeError } = await supabase
       .from("stores")
       .insert({
@@ -131,25 +124,25 @@ console.log("SUPABASE TEST:", {
       .select("id")
       .single();
 
-   if (storeError) {
-  console.error("STORE ERROR:", storeError);
+    if (storeError) {
+      console.error("STORE ERROR:", storeError);
 
-  alert(
-    "خطای stores:\n" +
-    "message: " + storeError.message + "\n" +
-    "code: " + storeError.code + "\n" +
-    "details: " + storeError.details + "\n" +
-    "hint: " + storeError.hint
-  );
+      alert(
+        "خطای ثبت فروشگاه:\n" +
+          storeError.message
+      );
 
-  return;
-}
+      return;
+    }
 
     if (!store) {
       alert("فروشگاه ایجاد نشد.");
       return;
     }
 
+    console.log("STORE CREATED:", store);
+
+    // 2. ثبت اطلاعات خصوصی مالک
     const { error: privateError } = await supabase
       .from("store_private_info")
       .insert({
@@ -159,29 +152,88 @@ console.log("SUPABASE TEST:", {
         national_code: storeForm.nationalCode,
       });
 
-   if (privateError) {
-  console.error("PRIVATE INFO ERROR:", privateError);
+    if (privateError) {
+      console.error("PRIVATE INFO ERROR:", privateError);
 
-  alert(
-    "خطای store_private_info:\n" +
-    "message: " + privateError.message + "\n" +
-    "code: " + privateError.code + "\n" +
-    "details: " + privateError.details + "\n" +
-    "hint: " + privateError.hint
-  );
+      alert(
+        "خطای اطلاعات مالک:\n" +
+          privateError.message
+      );
 
-  return;
-}
+      return;
+    }
 
-    alert("فروشگاه با موفقیت ثبت شد.");
+    // 3. آماده‌سازی تمام محصولات
+    const productsToInsert = products
+      .filter((product) => product.name.trim() !== "")
+      .map((product) => ({
+        name: product.name,
+        slug: `product-${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2, 8)}`,
+        category: product.category,
+        subcategories: product.model,
+        description: product.description,
+        price: Number(
+          product.customerPrice.replace(/,/g, "") || 0
+        ),
+        unit: product.unit,
+        stock: Number(
+          product.stock.replace(/,/g, "") || 0
+        ),
+        seller_id: store.id,
+        status: "pending",
+
+        // ستون‌های جدید
+        brand: product.brand,
+        model: product.model,
+        min_order: product.minOrder,
+        cooperation_price: Number(
+          product.cooperationPrice.replace(/,/g, "") || 0
+        ),
+        customer_price: Number(
+          product.customerPrice.replace(/,/g, "") || 0
+        ),
+      }));
+
+    // 4. ثبت تمام محصولات
+    if (productsToInsert.length > 0) {
+      const { error: productsError } = await supabase
+        .from("products")
+        .insert(productsToInsert);
+
+      if (productsError) {
+        console.error(
+          "PRODUCTS ERROR:",
+          productsError
+        );
+
+        alert(
+          "خطا در ثبت محصولات:\n" +
+            productsError.message
+        );
+
+        return;
+      }
+    }
+
+    // 5. موفقیت
+    alert(
+      "فروشگاه و محصولات با موفقیت برای بررسی ثبت شدند."
+    );
 
   } catch (err) {
     console.error("REGISTER ERROR:", err);
 
     if (err instanceof Error) {
-      alert("خطا در ثبت فروشگاه: " + err.message);
+      alert(
+        "خطا در ثبت فروشگاه: " +
+          err.message
+      );
     } else {
-      alert("خطای نامشخص هنگام ثبت فروشگاه");
+      alert(
+        "خطای نامشخص هنگام ثبت فروشگاه"
+      );
     }
 
   } finally {
