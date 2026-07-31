@@ -263,10 +263,14 @@ const [storeForm, setStoreForm] = useState<StoreForm>({
   }
 />
 
-              <Input
-                label="نام خانوادگی"
-                placeholder="مثلاً آهنی"
-              />
+             <Input
+  label="نام خانوادگی"
+  placeholder="مثلاً آهنی"
+  value={storeForm.ownerLastName}
+  onChange={(e) =>
+    updateStoreForm("ownerLastName", e.target.value)
+  }
+/>
 
               <Input
   label="شماره تماس"
@@ -278,10 +282,14 @@ const [storeForm, setStoreForm] = useState<StoreForm>({
   }
 />
 
-              <Input
-                label="کد ملی"
-                placeholder="کد ملی ۱۰ رقمی"
-              />
+<Input
+  label="کد ملی"
+  placeholder="کد ملی ۱۰ رقمی"
+  value={storeForm.nationalCode}
+  onChange={(e) =>
+    updateStoreForm("nationalCode", e.target.value)
+  }
+/>
             </div>
           </section>
 
