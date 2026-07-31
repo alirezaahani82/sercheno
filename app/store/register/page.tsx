@@ -131,11 +131,19 @@ console.log("SUPABASE TEST:", {
       .select("id")
       .single();
 
-    if (storeError) {
-      console.error("STORE ERROR:", storeError);
-      alert("خطا در ثبت فروشگاه: " + storeError.message);
-      return;
-    }
+   if (storeError) {
+  console.error("STORE ERROR:", storeError);
+
+  alert(
+    "خطای stores:\n" +
+    "message: " + storeError.message + "\n" +
+    "code: " + storeError.code + "\n" +
+    "details: " + storeError.details + "\n" +
+    "hint: " + storeError.hint
+  );
+
+  return;
+}
 
     if (!store) {
       alert("فروشگاه ایجاد نشد.");
@@ -151,14 +159,19 @@ console.log("SUPABASE TEST:", {
         national_code: storeForm.nationalCode,
       });
 
-    if (privateError) {
-      console.error("PRIVATE INFO ERROR:", privateError);
-      alert(
-        "فروشگاه ثبت شد، اما اطلاعات مالک ذخیره نشد: " +
-          privateError.message
-      );
-      return;
-    }
+   if (privateError) {
+  console.error("PRIVATE INFO ERROR:", privateError);
+
+  alert(
+    "خطای store_private_info:\n" +
+    "message: " + privateError.message + "\n" +
+    "code: " + privateError.code + "\n" +
+    "details: " + privateError.details + "\n" +
+    "hint: " + privateError.hint
+  );
+
+  return;
+}
 
     alert("فروشگاه با موفقیت ثبت شد.");
 
