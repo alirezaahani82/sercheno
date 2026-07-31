@@ -137,11 +137,6 @@ const { error: privateError } = await supabase
 if (privateError) {
   throw privateError;
 }
-    if (error) {
-      console.error("STORE INSERT ERROR:", error);
-      alert("خطا در ثبت فروشگاه: " + error.message);
-      return;
-    }
 
     alert("فروشگاه با موفقیت ثبت شد ✅");
   } finally {
