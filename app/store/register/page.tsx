@@ -84,6 +84,7 @@ export default function StoreRegisterPage() {
   setSubmitting(true);
 
   try {
+    console.log("STORE FORM:", storeForm);
     const { error } = await supabase
   .from("stores")
   .insert({
