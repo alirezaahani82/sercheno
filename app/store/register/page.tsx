@@ -98,47 +98,70 @@ const [storeForm, setStoreForm] = useState<StoreForm>({
   }));
 };
   const [submitting, setSubmitting] = useState(false);
-  const handleSubmit = async () => {
+ const handleSubmit = async () => {
   setSubmitting(true);
 
   try {
     console.log("STORE FORM:", storeForm);
+
     const { data: store, error: storeError } = await supabase
-  .from("stores")
-  .insert({
-    name: storeForm.name,
-    slug: `store-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 8)}`,
-    owner_name: storeForm.ownerName,
-    phone: storeForm.phone,
-    province: storeForm.province,
-    city: storeForm.city,
-    address: storeForm.address,
-    description: storeForm.description,
-    status: "pending",
-  })
-  .select("id")
-  .single();
+      .from("stores")
+      .insert({
+        name: storeForm.name,
+        slug: `store-${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2, 8)}`,
+        owner_name: storeForm.ownerName,
+        phone: storeForm.phone,
+        province: storeForm.province,
+        city: storeForm.city,
+        address: storeForm.address,
+        description: storeForm.description,
+        status: "pending",
+      })
+      .select("id")
+      .single();
 
-if (storeError) {
-  throw storeError;
-}
+    if (storeError) {
+      console.error("STORE ERROR:", storeError);
+      alert("خطا در ثبت فروشگاه: " + storeError.message);
+      return;
+    }
 
-const { error: privateError } = await supabase
-  .from("store_private_info")
-  .insert({
-    store_id: store.id,
-    owner_first_name: storeForm.ownerName,
-    owner_last_name: storeForm.ownerLastName,
-    national_code: storeForm.nationalCode,
-  });
+    if (!store) {
+      alert("فروشگاه ایجاد نشد.");
+      return;
+    }
 
-if (privateError) {
-  throw privateError;
-}
+    const { error: privateError } = await supabase
+      .from("store_private_info")
+      .insert({
+        store_id: store.id,
+        owner_first_name: storeForm.ownerName,
+        owner_last_name: storeForm.ownerLastName,
+        national_code: storeForm.nationalCode,
+      });
 
-    alert("فروشگاه با موفقیت ثبت شد ✅");
+    if (privateError) {
+      console.error("PRIVATE INFO ERROR:", privateError);
+      alert(
+        "فروشگاه ثبت شد، اما اطلاعات مالک ذخیره نشد: " +
+          privateError.message
+      );
+      return;
+    }
+
+    alert("فروشگاه با موفقیت ثبت شد.");
+
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+
+    if (err instanceof Error) {
+      alert("خطا در ثبت فروشگاه: " + err.message);
+    } else {
+      alert("خطای نامشخص هنگام ثبت فروشگاه");
+    }
+
   } finally {
     setSubmitting(false);
   }
