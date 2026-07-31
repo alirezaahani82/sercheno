@@ -173,9 +173,10 @@ const handleSubmit = async () => {
           .substring(2, 8)}`,
         category: product.category,
         description: product.description,
-        price: Number(
-          product.customerPrice.replace(/,/g, "") || 0
-        ),
+       price:
+  Number.parseFloat(
+    String(product.customerPrice || "0").replace(/,/g, "")
+  ) || 0,
         unit: product.unit,
         stock: Number(
           product.stock.replace(/,/g, "") || 0
