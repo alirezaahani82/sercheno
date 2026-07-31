@@ -65,7 +65,6 @@ type StoreForm = {
 
   description: string;
 };
-};
 
 export default function StoreRegisterPage() {
   const [products, setProducts] = useState<Product[]>([
