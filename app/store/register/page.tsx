@@ -182,7 +182,7 @@ const handleSubmit = async () => {
           product.stock.replace(/,/g, "") || 0
         ),
         seller_id: store.id,
-        status: "pending",
+        status: "active",
 
         // ستون‌های جدید
         brand: product.brand,
