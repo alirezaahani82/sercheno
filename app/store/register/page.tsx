@@ -873,9 +873,7 @@ productsToInsert.forEach((product, index) => {
       accept="image/*"
       multiple
       className="hidden"
-      onChange={handleProductImages}
-    />
-  </label>
+onChange={(e) => handleProductImages(index, e)}  </label>
 
   {productImages.length > 0 && (
     <p className="mt-4 text-sm font-bold text-emerald-600">
@@ -919,8 +917,7 @@ productsToInsert.forEach((product, index) => {
       accept="image/*"
       multiple
       className="hidden"
-      onChange={handleSampleImages}
-    />
+      onChange={(e) => handleSampleImages(index, e)}
   </label>
 
   {sampleImages.length > 0 && (
