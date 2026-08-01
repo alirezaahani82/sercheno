@@ -332,10 +332,12 @@ export default function StoreRegisterPage() {
         productsToInsert.length > 0
       ) {
         const {
-          error: productsError,
-        } = await supabase
-          .from("products")
-          .insert(productsToInsert);
+  data: insertedProducts,
+  error: productsError,
+} = await supabase
+  .from("products")
+  .insert(productsToInsert)
+  .select("id");
 
         if (productsError) {
           console.error(
@@ -350,6 +352,10 @@ export default function StoreRegisterPage() {
 
           return;
         }
+        if (!insertedProducts) {
+  alert("محصولات ثبت شدند اما شناسه محصولات دریافت نشد.");
+  return;
+}
       }
 
       // 5. موفقیت
