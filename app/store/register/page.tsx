@@ -356,6 +356,74 @@ export default function StoreRegisterPage() {
   alert("محصولات ثبت شدند اما شناسه محصولات دریافت نشد.");
   return;
 }
+       // 5. آپلود تصاویر محصولات
+for (let i = 0; i < insertedProducts.length; i++) {
+  const insertedProduct = insertedProducts[i];
+  const originalProduct = products.filter(
+    (product) => product.name.trim() !== ""
+  )[i];
+
+  if (!originalProduct) continue;
+
+  // تصاویر اصلی محصول
+  for (const file of originalProduct.images) {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 8)}.${fileExt}`;
+
+    const filePath = `${insertedProduct.id}/${fileName}`;
+
+    const { error: uploadError } =
+      await supabase.storage
+        .from("product-images")
+        .upload(filePath, file);
+
+    if (uploadError) {
+      console.error(
+        "IMAGE UPLOAD ERROR:",
+        uploadError
+      );
+
+      alert(
+        "خطا در آپلود تصویر محصول:\n" +
+          uploadError.message
+      );
+
+      return;
+    }
+
+    const { data: publicUrlData } =
+      supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+
+    const imageUrl =
+      publicUrlData.publicUrl;
+
+    const { error: imageDbError } =
+      await supabase
+        .from("product_images")
+        .insert({
+          product_id: insertedProduct.id,
+          image_url: imageUrl,
+        });
+
+    if (imageDbError) {
+      console.error(
+        "IMAGE DATABASE ERROR:",
+        imageDbError
+      );
+
+      alert(
+        "تصویر آپلود شد اما لینک آن ذخیره نشد:\n" +
+          imageDbError.message
+      );
+
+      return;
+    }
+  }
+} 
       }
 
       // 5. موفقیت
