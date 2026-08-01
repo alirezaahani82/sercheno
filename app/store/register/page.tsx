@@ -6,7 +6,6 @@ import { supabase } from "@/lib/supabase";
 import {
   Store,
   User,
-  Phone,
   MapPin,
   Package,
   ImagePlus,
@@ -17,8 +16,6 @@ import {
   Upload,
   Clock,
   Truck,
-  CreditCard,
-  FileText,
   ShieldCheck,
 } from "lucide-react";
 
@@ -59,6 +56,7 @@ const emptyProduct: Product = {
   saleConditions: [],
   saleDescription: "",
 };
+
 type StoreForm = {
   ownerName: string;
   ownerLastName: string;
@@ -82,238 +80,91 @@ export default function StoreRegisterPage() {
   const [products, setProducts] = useState<Product[]>([
     { ...emptyProduct },
   ]);
-const [storeForm, setStoreForm] = useState<StoreForm>({
-  ownerName: "",
-  ownerLastName: "",
-  nationalCode: "",
-  phone: "",
 
-  name: "",
-  category: "",
-  landline: "",
-  storeMobile: "",
+  const [storeForm, setStoreForm] = useState<StoreForm>({
+    ownerName: "",
+    ownerLastName: "",
+    nationalCode: "",
+    phone: "",
 
-  province: "",
-  city: "",
-  district: "",
-  address: "",
+    name: "",
+    category: "",
+    landline: "",
+    storeMobile: "",
 
-  description: "",
-});
-  const updateStoreForm = (
-  field: keyof StoreForm,
-  value: string
-) => {
-  setStoreForm((prev) => ({
-    ...prev,
-    [field]: value,
-  }));
-};
-  const [submitting, setSubmitting] = useState(false);
-  const [productImages, setProductImages] = useState<File[]>([]);
-const [sampleImages, setSampleImages] = useState<File[]>([]);
-const handleProductImages = (
-  index: number,
-  event: React.ChangeEvent<HTMLInputElement>
-) => {
-  if (!event.target.files) return;
+    province: "",
+    city: "",
+    district: "",
+    address: "",
 
-  const files = Array.from(event.target.files);
-
-  setProducts((prev) =>
-    prev.map((product, i) =>
-      i === index
-        ? {
-            ...product,
-            images: files,
-          }
-        : product
-    )
-  );
-};
-
-const handleSampleImages = (
-  index: number,
-  event: React.ChangeEvent<HTMLInputElement>
-) => {
-  if (!event.target.files) return;
-
-  const files = Array.from(event.target.files);
-
-  setProducts((prev) =>
-    prev.map((product, i) =>
-      i === index
-        ? {
-            ...product,
-            samples: files,
-          }
-        : product
-    )
-  );
-};
-const handleSubmit = async () => {
-  setSubmitting(true);
-
-  try {
-    console.log("STORE FORM:", storeForm);
-    console.log("PRODUCTS:", products);
-
-    // 1. ثبت فروشگاه
-    const { data: store, error: storeError } = await supabase
-      .from("stores")
-      .insert({
-        name: storeForm.name,
-        slug: `store-${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2, 8)}`,
-        owner_name: storeForm.ownerName,
-        phone: storeForm.phone,
-        province: storeForm.province,
-        city: storeForm.city,
-        address: storeForm.address,
-        description: storeForm.description,
-        status: "pending",
-      })
-      .select("id")
-      .single();
-
-    if (storeError) {
-      console.error("STORE ERROR:", storeError);
-
-      alert(
-        "خطای ثبت فروشگاه:\n" +
-          storeError.message
-      );
-
-      return;
-    }
-
-    if (!store) {
-      alert("فروشگاه ایجاد نشد.");
-      return;
-    }
-
-    console.log("STORE CREATED:", store);
-
-    // 2. ثبت اطلاعات خصوصی مالک
-    const { error: privateError } = await supabase
-      .from("store_private_info")
-      .insert({
-        store_id: store.id,
-        owner_first_name: storeForm.ownerName,
-        owner_last_name: storeForm.ownerLastName,
-        national_code: storeForm.nationalCode,
-      });
-
-    if (privateError) {
-      console.error("PRIVATE INFO ERROR:", privateError);
-
-      alert(
-        "خطای اطلاعات مالک:\n" +
-          privateError.message
-      );
-
-      return;
-    }
-
-    // 3. آماده‌سازی تمام محصولات
-    const productsToInsert = products
-      .filter((product) => product.name.trim() !== "")
-      .map((product) => ({
-        name: product.name,
-        slug: `product-${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2, 8)}`,
-        category: product.category,
-        description: product.description,
-       price:
-  Number.parseFloat(
-    String(product.customerPrice || "0").replace(/,/g, "")
-  ) || 0,
-        unit: product.unit,
-        stock: Number(
-          product.stock.replace(/,/g, "") || 0
-        ),
-        seller_id: store.id,
-        status: "active",
-
-        // ستون‌های جدید
-        brand: product.brand,
-        model: product.model,
-        min_order: product.minOrder,
-        cooperation_price: Number(
-          product.cooperationPrice.replace(/,/g, "") || 0
-        ),
-        customer_price: Number(
-          product.customerPrice.replace(/,/g, "") || 0
-        ),
-      }));
-
-    // 4. ثبت تمام محصولات
-    if (productsToInsert.length > 0) {
-     console.log("PRODUCTS TO INSERT:", productsToInsert);
-
-productsToInsert.forEach((product, index) => {
-  console.log(`PRODUCT ${index + 1}:`, {
-    name: product.name,
-    stock: product.stock,
-    price: product.price,
-    customer_price: product.customer_price,
-    cooperation_price: product.cooperation_price,
-    seller_id: product.seller_id,
+    description: "",
   });
-});
-      const { error: productsError } = await supabase
-        .from("products")
-        .insert(productsToInsert);
 
-      if (productsError) {
-        console.error(
-          "PRODUCTS ERROR:",
-          productsError
-        );
+  const [submitting, setSubmitting] = useState(false);
 
-        alert(
-          "خطا در ثبت محصولات:\n" +
-            productsError.message
-        );
+  const updateStoreForm = (
+    field: keyof StoreForm,
+    value: string
+  ) => {
+    setStoreForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
-        return;
-      }
-    }
+  const handleProductImages = (
+    index: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!event.target.files) return;
 
-    // 5. موفقیت
-    alert(
-      "فروشگاه و محصولات با موفقیت برای بررسی ثبت شدند."
+    const files = Array.from(event.target.files);
+
+    setProducts((prev) =>
+      prev.map((product, i) =>
+        i === index
+          ? {
+              ...product,
+              images: files,
+            }
+          : product
+      )
     );
+  };
 
-  } catch (err) {
-    console.error("REGISTER ERROR:", err);
+  const handleSampleImages = (
+    index: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!event.target.files) return;
 
-    if (err instanceof Error) {
-      alert(
-        "خطا در ثبت فروشگاه: " +
-          err.message
-      );
-    } else {
-      alert(
-        "خطای نامشخص هنگام ثبت فروشگاه"
-      );
-    }
+    const files = Array.from(event.target.files);
 
-  } finally {
-    setSubmitting(false);
-  }
-};
+    setProducts((prev) =>
+      prev.map((product, i) =>
+        i === index
+          ? {
+              ...product,
+              samples: files,
+            }
+          : product
+      )
+    );
+  };
 
   const addProduct = () => {
-    setProducts([...products, { ...emptyProduct }]);
+    setProducts((prev) => [
+      ...prev,
+      { ...emptyProduct },
+    ]);
   };
 
   const removeProduct = (index: number) => {
     if (products.length === 1) return;
 
-    setProducts(products.filter((_, i) => i !== index));
+    setProducts((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
   };
 
   const updateProduct = (
@@ -321,14 +172,209 @@ productsToInsert.forEach((product, index) => {
     field: keyof Product,
     value: string
   ) => {
-    const updatedProducts = [...products];
+    setProducts((prev) =>
+      prev.map((product, i) =>
+        i === index
+          ? {
+              ...product,
+              [field]: value,
+            }
+          : product
+      )
+    );
+  };
+    const handleSubmit = async () => {
+    setSubmitting(true);
 
-    updatedProducts[index] = {
-      ...updatedProducts[index],
-      [field]: value,
-    };
+    try {
+      console.log("STORE FORM:", storeForm);
+      console.log("PRODUCTS:", products);
 
-    setProducts(updatedProducts);
+      // 1. ثبت فروشگاه
+      const { data: store, error: storeError } =
+        await supabase
+          .from("stores")
+          .insert({
+            name: storeForm.name,
+            slug: `store-${Date.now()}-${Math.random()
+              .toString(36)
+              .substring(2, 8)}`,
+            owner_name: storeForm.ownerName,
+            phone: storeForm.phone,
+            province: storeForm.province,
+            city: storeForm.city,
+            address: storeForm.address,
+            description: storeForm.description,
+            status: "pending",
+          })
+          .select("id")
+          .single();
+
+      if (storeError) {
+        console.error(
+          "STORE ERROR:",
+          storeError
+        );
+
+        alert(
+          "خطای ثبت فروشگاه:\n" +
+            storeError.message
+        );
+
+        return;
+      }
+
+      if (!store) {
+        alert("فروشگاه ایجاد نشد.");
+        return;
+      }
+
+      console.log(
+        "STORE CREATED:",
+        store
+      );
+
+      // 2. ثبت اطلاعات خصوصی مالک
+      const { error: privateError } =
+        await supabase
+          .from("store_private_info")
+          .insert({
+            store_id: store.id,
+            owner_first_name:
+              storeForm.ownerName,
+            owner_last_name:
+              storeForm.ownerLastName,
+            national_code:
+              storeForm.nationalCode,
+          });
+
+      if (privateError) {
+        console.error(
+          "PRIVATE INFO ERROR:",
+          privateError
+        );
+
+        alert(
+          "خطای اطلاعات مالک:\n" +
+            privateError.message
+        );
+
+        return;
+      }
+
+      // 3. آماده‌سازی محصولات
+      const productsToInsert = products
+        .filter(
+          (product) =>
+            product.name.trim() !== ""
+        )
+        .map((product) => ({
+          name: product.name,
+
+          slug: `product-${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2, 8)}`,
+
+          category: product.category,
+
+          description:
+            product.description,
+
+          price:
+            Number.parseFloat(
+              String(
+                product.customerPrice || "0"
+              ).replace(/,/g, "")
+            ) || 0,
+
+          unit: product.unit,
+
+          stock:
+            Number.parseFloat(
+              String(
+                product.stock || "0"
+              ).replace(/,/g, "")
+            ) || 0,
+
+          seller_id: store.id,
+
+          status: "active",
+
+          brand: product.brand,
+
+          model: product.model,
+
+          min_order:
+            product.minOrder,
+
+          cooperation_price:
+            Number.parseFloat(
+              String(
+                product.cooperationPrice || "0"
+              ).replace(/,/g, "")
+            ) || 0,
+
+          customer_price:
+            Number.parseFloat(
+              String(
+                product.customerPrice || "0"
+              ).replace(/,/g, "")
+            ) || 0,
+        }));
+
+      console.log(
+        "PRODUCTS TO INSERT:",
+        productsToInsert
+      );
+
+      // 4. ثبت محصولات
+      if (
+        productsToInsert.length > 0
+      ) {
+        const {
+          error: productsError,
+        } = await supabase
+          .from("products")
+          .insert(productsToInsert);
+
+        if (productsError) {
+          console.error(
+            "PRODUCTS ERROR:",
+            productsError
+          );
+
+          alert(
+            "خطا در ثبت محصولات:\n" +
+              productsError.message
+          );
+
+          return;
+        }
+      }
+
+      // 5. موفقیت
+      alert(
+        "فروشگاه و محصولات با موفقیت برای بررسی ثبت شدند."
+      );
+    } catch (err) {
+      console.error(
+        "REGISTER ERROR:",
+        err
+      );
+
+      if (err instanceof Error) {
+        alert(
+          "خطا در ثبت فروشگاه: " +
+            err.message
+        );
+      } else {
+        alert(
+          "خطای نامشخص هنگام ثبت فروشگاه"
+        );
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -336,7 +382,7 @@ productsToInsert.forEach((product, index) => {
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* Header */}
+            {/* Header */}
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <Link
@@ -391,6 +437,7 @@ productsToInsert.forEach((product, index) => {
       {/* Main Form */}
       <div className="mx-auto max-w-5xl px-5 py-12">
         <form className="space-y-8">
+
           {/* Owner Information */}
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 bg-slate-50 p-6">
@@ -413,41 +460,57 @@ productsToInsert.forEach((product, index) => {
 
             <div className="grid gap-5 p-6 md:grid-cols-2">
               <Input
-  label="نام"
-  placeholder="مثلاً علیرضا"
-  value={storeForm.ownerName}
-  onChange={(e) =>
-    updateStoreForm("ownerName", e.target.value)
-  }
-/>
-
-             <Input
-  label="نام خانوادگی"
-  placeholder="مثلاً آهنی"
-  value={storeForm.ownerLastName}
-  onChange={(e) =>
-    updateStoreForm("ownerLastName", e.target.value)
-  }
-/>
+                label="نام"
+                placeholder="مثلاً علیرضا"
+                value={storeForm.ownerName}
+                onChange={(e) =>
+                  updateStoreForm(
+                    "ownerName",
+                    e.target.value
+                  )
+                }
+              />
 
               <Input
-  label="شماره تماس"
-  placeholder="09xxxxxxxxx"
-  type="tel"
-  value={storeForm.phone}
-  onChange={(e) =>
-    updateStoreForm("phone", e.target.value)
-  }
-/>
+                label="نام خانوادگی"
+                placeholder="مثلاً آهنی"
+                value={
+                  storeForm.ownerLastName
+                }
+                onChange={(e) =>
+                  updateStoreForm(
+                    "ownerLastName",
+                    e.target.value
+                  )
+                }
+              />
 
-<Input
-  label="کد ملی"
-  placeholder="کد ملی ۱۰ رقمی"
-  value={storeForm.nationalCode}
-  onChange={(e) =>
-    updateStoreForm("nationalCode", e.target.value)
-  }
-/>
+              <Input
+                label="شماره تماس"
+                placeholder="09xxxxxxxxx"
+                type="tel"
+                value={storeForm.phone}
+                onChange={(e) =>
+                  updateStoreForm(
+                    "phone",
+                    e.target.value
+                  )
+                }
+              />
+
+              <Input
+                label="کد ملی"
+                placeholder="کد ملی ۱۰ رقمی"
+                value={
+                  storeForm.nationalCode
+                }
+                onChange={(e) =>
+                  updateStoreForm(
+                    "nationalCode",
+                    e.target.value
+                  )
+                }
+              />
             </div>
           </section>
 
@@ -472,14 +535,18 @@ productsToInsert.forEach((product, index) => {
             </div>
 
             <div className="grid gap-5 p-6 md:grid-cols-2">
-             <Input
-  label="نام فروشگاه یا مجموعه"
-  placeholder="نام فروشگاه"
-  value={storeForm.name}
-  onChange={(e) =>
-    updateStoreForm("name", e.target.value)
-  }
-/>
+              <Input
+                label="نام فروشگاه یا مجموعه"
+                placeholder="نام فروشگاه"
+                value={storeForm.name}
+                onChange={(e) =>
+                  updateStoreForm(
+                    "name",
+                    e.target.value
+                  )
+                }
+              />
+
               <Select
                 label="دسته‌بندی اصلی فعالیت"
                 options={[
@@ -493,33 +560,62 @@ productsToInsert.forEach((product, index) => {
                   "تأسیسات و تجهیزات",
                   "سایر",
                 ]}
+                value={storeForm.category}
+                onChange={(e) =>
+                  updateStoreForm(
+                    "category",
+                    e.target.value
+                  )
+                }
               />
 
               <Input
                 label="شماره تلفن ثابت"
                 placeholder="041xxxxxxxx"
+                value={
+                  storeForm.landline
+                }
+                onChange={(e) =>
+                  updateStoreForm(
+                    "landline",
+                    e.target.value
+                  )
+                }
               />
 
               <Input
                 label="شماره موبایل فروشگاه"
                 placeholder="09xxxxxxxxx"
                 type="tel"
+                value={
+                  storeForm.storeMobile
+                }
+                onChange={(e) =>
+                  updateStoreForm(
+                    "storeMobile",
+                    e.target.value
+                  )
+                }
               />
 
               <div className="md:col-span-2">
                 <Textarea
-  label="معرفی فروشگاه"
-  placeholder="درباره فروشگاه، سابقه فعالیت و حوزه تخصصی خود توضیح دهید..."
-  value={storeForm.description}
-  onChange={(e) =>
-    updateStoreForm("description", e.target.value)
-  }
-/>
+                  label="معرفی فروشگاه"
+                  placeholder="درباره فروشگاه، سابقه فعالیت و حوزه تخصصی خود توضیح دهید..."
+                  value={
+                    storeForm.description
+                  }
+                  onChange={(e) =>
+                    updateStoreForm(
+                      "description",
+                      e.target.value
+                    )
+                  }
+                />
               </div>
             </div>
           </section>
-
-          {/* Address */}
+                    {/* Address */}
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 bg-slate-50 p-6">
               <div className="flex items-center gap-3">
@@ -531,6 +627,7 @@ productsToInsert.forEach((product, index) => {
                   <h2 className="text-xl font-black">
                     آدرس و محدوده فعالیت
                   </h2>
+
                   <p className="mt-1 text-sm text-slate-500">
                     محل فعالیت فروشگاه و محدوده ارسال را مشخص کنید.
                   </p>
@@ -540,44 +637,61 @@ productsToInsert.forEach((product, index) => {
 
             <div className="grid gap-5 p-6 md:grid-cols-3">
               <Select
-  label="استان"
-  options={[
-    "آذربایجان شرقی",
-    "آذربایجان غربی",
-    "اردبیل",
-    "تهران",
-    "زنجان",
-    "البرز",
-    "سایر",
-  ]}
-  value={storeForm.province}
-  onChange={(e) =>
-    updateStoreForm("province", e.target.value)
-  }
-/>
+                label="استان"
+                options={[
+                  "آذربایجان شرقی",
+                  "آذربایجان غربی",
+                  "اردبیل",
+                  "تهران",
+                  "زنجان",
+                  "البرز",
+                  "سایر",
+                ]}
+                value={storeForm.province}
+                onChange={(e) =>
+                  updateStoreForm(
+                    "province",
+                    e.target.value
+                  )
+                }
+              />
 
-             <Input
-  label="شهر"
-  placeholder="مثلاً تبریز"
-  value={storeForm.city}
-  onChange={(e) =>
-    updateStoreForm("city", e.target.value)
-  }
-/>
+              <Input
+                label="شهر"
+                placeholder="مثلاً تبریز"
+                value={storeForm.city}
+                onChange={(e) =>
+                  updateStoreForm(
+                    "city",
+                    e.target.value
+                  )
+                }
+              />
+
               <Input
                 label="منطقه یا محله"
                 placeholder="نام محله"
+                value={storeForm.district}
+                onChange={(e) =>
+                  updateStoreForm(
+                    "district",
+                    e.target.value
+                  )
+                }
               />
 
               <div className="md:col-span-3">
                 <Textarea
-  label="آدرس کامل فروشگاه"
-  placeholder="آدرس دقیق فروشگاه را وارد کنید..."
-  value={storeForm.address}
-  onChange={(e) =>
-    updateStoreForm("address", e.target.value)
-  }
-/>
+                  label="آدرس کامل فروشگاه"
+                  placeholder="آدرس دقیق فروشگاه را وارد کنید..."
+                  value={storeForm.address}
+                  onChange={(e) =>
+                    updateStoreForm(
+                      "address",
+                      e.target.value
+                    )
+                  }
+                />
               </div>
             </div>
           </section>
@@ -645,288 +759,377 @@ productsToInsert.forEach((product, index) => {
             </div>
 
             <div className="space-y-6 p-6">
-              {products.map((product, index) => (
-                <div
-                  key={index}
-                  className="relative rounded-3xl border border-slate-200 bg-slate-50 p-5"
-                >
-                  <div className="mb-5 flex items-center justify-between">
-                    <h3 className="font-black text-slate-800">
-                      محصول شماره {index + 1}
-                    </h3>
-                    {products.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeProduct(index)}
-                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 size={17} />
-                        حذف محصول
-                      </button>
-                    )}
-                  </div>
+              {products.map(
+                (product, index) => (
+                  <div
+                    key={index}
+                    className="relative rounded-3xl border border-slate-200 bg-slate-50 p-5"
+                  >
+                    <div className="mb-5 flex items-center justify-between">
+                      <h3 className="font-black text-slate-800">
+                        محصول شماره{" "}
+                        {index + 1}
+                      </h3>
 
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <Input
-                      label="نام محصول"
-                      placeholder="مثلاً کاشی ۶۰×۱۲۰"
-                      value={product.name}
-                      onChange={(e) =>
-                        updateProduct(index, "name", e.target.value)
-                      }
-                    />
-
-                    <Select
-                      label="دسته‌بندی محصول"
-                      options={[
-                        "آجر و بلوک",
-                        "سیمان و بتن",
-                        "کاشی و سرامیک",
-                        "سنگ ساختمانی",
-                        "آهن و مصالح فلزی",
-                        "درب و پنجره",
-                        "رنگ و پوشش",
-                        "تأسیسات و تجهیزات",
-                      ]}
-                      value={product.category}
-                      onChange={(e) =>
-                        updateProduct(
-                          index,
-                          "category",
-                          e.target.value
-                        )
-                      }
-                    />
-
-                    <Input
-                      label="برند"
-                      placeholder="نام برند"
-                      value={product.brand}
-                      onChange={(e) =>
-                        updateProduct(index, "brand", e.target.value)
-                      }
-                    />
-
-                    <Input
-                      label="مدل یا مشخصات"
-                      placeholder="مدل، کد یا مشخصات محصول"
-                      value={product.model}
-                      onChange={(e) =>
-                        updateProduct(index, "model", e.target.value)
-                      }
-                    />
-
-                    <Select
-                      label="واحد فروش"
-                      options={[
-                        "عدد",
-                        "متر",
-                        "مترمربع",
-                        "مترمکعب",
-                        "کیلوگرم",
-                        "تن",
-                        "کیسه",
-                        "شاخه",
-                        "دستگاه",
-                      ]}
-                      value={product.unit}
-                      onChange={(e) =>
-                        updateProduct(index, "unit", e.target.value)
-                      }
-                    />
-
-                    <Input
-                      label="حداقل مقدار سفارش"
-                      placeholder="مثلاً ۱۰ متر"
-                      value={product.minOrder}
-                      onChange={(e) =>
-                        updateProduct(
-                          index,
-                          "minOrder",
-                          e.target.value
-                        )
-                      }
-                    />
-
-                    <Input
-                      label="موجودی تقریبی"
-                      placeholder="مثلاً ۵۰۰ عدد"
-                      value={product.stock}
-                      onChange={(e) =>
-                        updateProduct(index, "stock", e.target.value)
-                      }
-                    />
-
-                    <div />
-
-                    {/* Cooperation Price */}
-                    <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-                      <label className="mb-2 block text-sm font-bold text-blue-800">
-                        قیمت همکاری با سرچنو
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="مثلاً ۱,۵۰۰,۰۰۰"
-                          value={product.cooperationPrice}
-                          onChange={(e) =>
-                            updateProduct(
-                              index,
-                              "cooperationPrice",
-                              e.target.value
+                      {products.length >
+                        1 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeProduct(
+                              index
                             )
                           }
-                          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-
-                        <span className="absolute left-4 top-3 text-xs text-slate-400">
-                          ریال
-                        </span>
-                      </div>
-
-                      <p className="mt-2 text-xs text-blue-600">
-                        قیمت ویژه همکاری و تأمین از طریق سرچنو
-                      </p>
+                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2
+                            size={17}
+                          />
+                          حذف محصول
+                        </button>
+                      )}
                     </div>
 
-                    {/* Customer Price */}
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                      <label className="mb-2 block text-sm font-bold text-emerald-800">
-                        قیمت مشتریان سرچنو
-                      </label>
-
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="مثلاً ۱,۷۰۰,۰۰۰"
-                          value={product.customerPrice}
-                          onChange={(e) =>
-                            updateProduct(
-                              index,
-                              "customerPrice",
-                              e.target.value
-                            )
-                          }
-                          className="w-full rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-                        />
-
-                        <span className="absolute left-4 top-3 text-xs text-slate-400">
-                          ریال
-                        </span>
-                      </div>
-
-                      <p className="mt-2 text-xs text-emerald-600">
-                        قیمتی که مشتریان سرچنو مشاهده می‌کنند
-                      </p>
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <Textarea
-                        label="توضیحات محصول"
-                        placeholder="توضیحات تکمیلی درباره محصول، کیفیت، مشخصات و شرایط فروش..."
-                        value={product.description}
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <Input
+                        label="نام محصول"
+                        placeholder="مثلاً کاشی ۶۰×۱۲۰"
+                        value={
+                          product.name
+                        }
                         onChange={(e) =>
                           updateProduct(
                             index,
-                            "description",
+                            "name",
                             e.target.value
                           )
                         }
                       />
+
+                      <Select
+                        label="دسته‌بندی محصول"
+                        options={[
+                          "آجر و بلوک",
+                          "سیمان و بتن",
+                          "کاشی و سرامیک",
+                          "سنگ ساختمانی",
+                          "آهن و مصالح فلزی",
+                          "درب و پنجره",
+                          "رنگ و پوشش",
+                          "تأسیسات و تجهیزات",
+                        ]}
+                        value={
+                          product.category
+                        }
+                        onChange={(e) =>
+                          updateProduct(
+                            index,
+                            "category",
+                            e.target.value
+                          )
+                        }
+                      />
+
+                      <Input
+                        label="برند"
+                        placeholder="نام برند"
+                        value={
+                          product.brand
+                        }
+                        onChange={(e) =>
+                          updateProduct(
+                            index,
+                            "brand",
+                            e.target.value
+                          )
+                        }
+                      />
+
+                      <Input
+                        label="مدل یا مشخصات"
+                        placeholder="مدل، کد یا مشخصات محصول"
+                        value={
+                          product.model
+                        }
+                        onChange={(e) =>
+                          updateProduct(
+                            index,
+                            "model",
+                            e.target.value
+                          )
+                        }
+                      />
+
+                      <Select
+                        label="واحد فروش"
+                        options={[
+                          "عدد",
+                          "متر",
+                          "مترمربع",
+                          "مترمکعب",
+                          "کیلوگرم",
+                          "تن",
+                          "کیسه",
+                          "شاخه",
+                          "دستگاه",
+                        ]}
+                        value={
+                          product.unit
+                        }
+                        onChange={(e) =>
+                          updateProduct(
+                            index,
+                            "unit",
+                            e.target.value
+                          )
+                        }
+                      />
+
+                      <Input
+                        label="حداقل مقدار سفارش"
+                        placeholder="مثلاً ۱۰ متر"
+                        value={
+                          product.minOrder
+                        }
+                        onChange={(e) =>
+                          updateProduct(
+                            index,
+                            "minOrder",
+                            e.target.value
+                          )
+                        }
+                      />
+
+                      <Input
+                        label="موجودی تقریبی"
+                        placeholder="مثلاً ۵۰۰ عدد"
+                        value={
+                          product.stock
+                        }
+                        onChange={(e) =>
+                          updateProduct(
+                            index,
+                            "stock",
+                            e.target.value
+                          )
+                        }
+                      />
+                                            {/* Cooperation Price */}
+                      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+                        <label className="mb-2 block text-sm font-bold text-blue-800">
+                          قیمت همکاری با سرچنو
+                        </label>
+
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="مثلاً ۱,۵۰۰,۰۰۰"
+                            value={
+                              product.cooperationPrice
+                            }
+                            onChange={(e) =>
+                              updateProduct(
+                                index,
+                                "cooperationPrice",
+                                e.target.value
+                              )
+                            }
+                            className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+
+                          <span className="absolute left-4 top-3 text-xs text-slate-400">
+                            ریال
+                          </span>
+                        </div>
+
+                        <p className="mt-2 text-xs text-blue-600">
+                          قیمت ویژه همکاری و تأمین از طریق سرچنو
+                        </p>
+                      </div>
+
+                      {/* Customer Price */}
+                      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                        <label className="mb-2 block text-sm font-bold text-emerald-800">
+                          قیمت مشتریان سرچنو
+                        </label>
+
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="مثلاً ۱,۷۰۰,۰۰۰"
+                            value={
+                              product.customerPrice
+                            }
+                            onChange={(e) =>
+                              updateProduct(
+                                index,
+                                "customerPrice",
+                                e.target.value
+                              )
+                            }
+                            className="w-full rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                          />
+
+                          <span className="absolute left-4 top-3 text-xs text-slate-400">
+                            ریال
+                          </span>
+                        </div>
+
+                        <p className="mt-2 text-xs text-emerald-600">
+                          قیمتی که مشتریان سرچنو مشاهده می‌کنند
+                        </p>
+                      </div>
+
+                      {/* Product Description */}
+                      <div className="md:col-span-2">
+                        <Textarea
+                          label="توضیحات محصول"
+                          placeholder="توضیحات تکمیلی درباره محصول، کیفیت، مشخصات و شرایط فروش..."
+                          value={
+                            product.description
+                          }
+                          onChange={(e) =>
+                            updateProduct(
+                              index,
+                              "description",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </div>
+
+                      {/* Product Images */}
+                      <div className="md:col-span-2">
+                        <div className="rounded-3xl border border-pink-200 bg-pink-50 p-5">
+                          <div className="mb-4 flex items-center gap-3">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
+                              <ImagePlus
+                                size={22}
+                              />
+                            </div>
+
+                            <div>
+                              <h4 className="font-black text-slate-800">
+                                تصاویر محصول
+                              </h4>
+
+                              <p className="mt-1 text-xs text-slate-500">
+                                تصاویر مربوط به همین محصول را انتخاب کنید.
+                              </p>
+                            </div>
+                          </div>
+
+                          <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-pink-300 bg-white p-8 text-center transition hover:border-pink-500 hover:bg-pink-50">
+                            <Upload
+                              className="text-pink-600"
+                              size={32}
+                            />
+
+                            <span className="mt-3 font-bold">
+                              انتخاب تصاویر محصول
+                            </span>
+
+                            <span className="mt-2 text-xs text-slate-500">
+                              امکان انتخاب چند تصویر وجود دارد
+                            </span>
+
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) =>
+                                handleProductImages(
+                                  index,
+                                  e
+                                )
+                              }
+                            />
+                          </label>
+
+                          {product.images
+                            .length > 0 && (
+                            <p className="mt-3 text-sm font-bold text-emerald-600">
+                              {
+                                product
+                                  .images
+                                  .length
+                              }{" "}
+                              تصویر انتخاب شده است.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Product Samples */}
+                      <div className="md:col-span-2">
+                        <div className="rounded-3xl border border-purple-200 bg-purple-50 p-5">
+                          <div className="mb-4 flex items-center gap-3">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
+                              <ImagePlus
+                                size={22}
+                              />
+                            </div>
+
+                            <div>
+                              <h4 className="font-black text-slate-800">
+                                نمونه‌کارهای محصول
+                              </h4>
+
+                              <p className="mt-1 text-xs text-slate-500">
+                                تصاویر نمونه‌کارها و پروژه‌های مرتبط با این محصول را اضافه کنید.
+                              </p>
+                            </div>
+                          </div>
+
+                          <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-purple-300 bg-white p-8 text-center transition hover:border-purple-500 hover:bg-purple-50">
+                            <ImagePlus
+                              className="text-purple-600"
+                              size={32}
+                            />
+
+                            <span className="mt-3 font-bold">
+                              انتخاب تصاویر نمونه‌کار
+                            </span>
+
+                            <span className="mt-2 text-xs text-slate-500">
+                              امکان انتخاب چند تصویر وجود دارد
+                            </span>
+
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) =>
+                                handleSampleImages(
+                                  index,
+                                  e
+                                )
+                              }
+                            />
+                          </label>
+
+                          {product.samples
+                            .length > 0 && (
+                            <p className="mt-3 text-sm font-bold text-emerald-600">
+                              {
+                                product
+                                  .samples
+                                  .length
+                              }{" "}
+                              تصویر نمونه‌کار انتخاب شده است.
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           </section>
-{/* Product Images */}
-<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-  <div className="mb-6 flex items-center gap-3">
-    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
-      <ImagePlus size={24} />
-    </div>
 
-    <div>
-      <h2 className="text-xl font-black">
-        تصاویر محصولات
-      </h2>
-
-      <p className="mt-1 text-sm text-slate-500">
-        تصاویر محصولات قابل ارائه در فروشگاه را بارگذاری کنید.
-      </p>
-    </div>
-  </div>
-
- <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-blue-400 hover:bg-blue-50">
-  <Upload className="text-blue-600" size={36} />
-
-  <span className="mt-4 font-bold">
-    برای انتخاب تصاویر کلیک کنید
-  </span>
-
-  <span className="mt-2 text-xs text-slate-500">
-    امکان انتخاب چند تصویر وجود دارد
-  </span>
-
-  <input
-    type="file"
-    accept="image/*"
-    multiple
-    className="hidden"
-onChange={handleProductImages}  />
-</label>
-
-  {productImages.length > 0 && (
-    <p className="mt-4 text-sm font-bold text-emerald-600">
-      {productImages.length} تصویر انتخاب شده است.
-    </p>
-  )}
-</section>
-
-
-{/* Samples */}
-<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-  <div className="mb-6 flex items-center gap-3">
-    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
-      <ImagePlus size={24} />
-    </div>
-
-    <div>
-      <h2 className="text-xl font-black">
-        نمونه‌کارها
-      </h2>
-
-      <p className="mt-1 text-sm text-slate-500">
-        تصاویر نمونه‌کارها و پروژه‌های انجام‌شده را بارگذاری کنید.
-      </p>
-    </div>
-  </div>
-
-  <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-purple-400 hover:bg-purple-50">
-    <ImagePlus className="text-purple-600" size={36} />
-
-    <span className="mt-4 font-bold">
-      بارگذاری تصاویر نمونه‌کار
-    </span>
-
-    <span className="mt-2 text-xs text-slate-500">
-      تصاویر پروژه‌ها و نمونه‌کارهای واقعی خود را اضافه کنید.
-    </span>
-
-    <input
-      type="file"
-      accept="image/*"
-      multiple
-      className="hidden"
-onChange={handleSampleImages}  />
-</label>
-
-  {sampleImages.length > 0 && (
-    <p className="mt-4 text-sm font-bold text-emerald-600">
-      {sampleImages.length} تصویر نمونه‌کار انتخاب شده است.
-    </p>
-  )}
-</section>
           {/* Business Conditions */}
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center gap-3">
@@ -962,14 +1165,14 @@ onChange={handleSampleImages}  />
               />
             </div>
           </section>
-
-          {/* Final Confirmation */}
+                    {/* Final Confirmation */}
           <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6">
             <div className="flex items-start gap-4">
               <ShieldCheck
                 className="mt-1 shrink-0 text-blue-700"
                 size={28}
               />
+
               <div>
                 <h3 className="font-black text-blue-900">
                   بررسی و تأیید اطلاعات
@@ -997,22 +1200,21 @@ onChange={handleSampleImages}  />
           </section>
 
           {/* Submit */}
-         <button
-  type="button"
-  onClick={handleSubmit}
-  disabled={submitting}
-  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-700 py-5 text-lg font-black text-white shadow-xl shadow-blue-700/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
->
-  <CheckCircle2 size={24} />
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-700 py-5 text-lg font-black text-white shadow-xl shadow-blue-700/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <CheckCircle2 size={24} />
 
-  {submitting
-    ? "در حال ثبت فروشگاه..."
-    : "ثبت فروشگاه برای بررسی"}
-</button>
+            {submitting
+              ? "در حال ثبت فروشگاه..."
+              : "ثبت فروشگاه برای بررسی"}
+          </button>
 
           <p className="text-center text-xs text-slate-400">
-            در این مرحله اطلاعات فقط در فرم وارد می‌شود و هنوز در پایگاه
-            داده ذخیره نخواهد شد.
+            اطلاعات فروشگاه و محصولات پس از ثبت برای بررسی ذخیره می‌شوند.
           </p>
         </form>
       </div>
@@ -1083,7 +1285,10 @@ function Select({
         </option>
 
         {options.map((option) => (
-          <option key={option} value={option}>
+          <option
+            key={option}
+            value={option}
+          >
             {option}
           </option>
         ))}
