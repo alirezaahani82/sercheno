@@ -112,20 +112,44 @@ const [storeForm, setStoreForm] = useState<StoreForm>({
   const [submitting, setSubmitting] = useState(false);
   const [productImages, setProductImages] = useState<File[]>([]);
 const [sampleImages, setSampleImages] = useState<File[]>([]);
-  const handleProductImages = (
+const handleProductImages = (
+  index: number,
   event: React.ChangeEvent<HTMLInputElement>
 ) => {
-  if (event.target.files) {
-    setProductImages(Array.from(event.target.files));
-  }
+  if (!event.target.files) return;
+
+  const files = Array.from(event.target.files);
+
+  setProducts((prev) =>
+    prev.map((product, i) =>
+      i === index
+        ? {
+            ...product,
+            images: files,
+          }
+        : product
+    )
+  );
 };
 
 const handleSampleImages = (
+  index: number,
   event: React.ChangeEvent<HTMLInputElement>
 ) => {
-  if (event.target.files) {
-    setSampleImages(Array.from(event.target.files));
-  }
+  if (!event.target.files) return;
+
+  const files = Array.from(event.target.files);
+
+  setProducts((prev) =>
+    prev.map((product, i) =>
+      i === index
+        ? {
+            ...product,
+            samples: files,
+          }
+        : product
+    )
+  );
 };
 const handleSubmit = async () => {
   setSubmitting(true);
