@@ -827,21 +827,6 @@ productsToInsert.forEach((product, index) => {
                 امکان انتخاب چند تصویر وجود دارد
               </span>
 
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleProductImages}
-              />
-            </label>
-
-            {productImages.length > 0 && (
-              <p className="mt-4 text-sm font-bold text-emerald-600">
-                {productImages.length} تصویر انتخاب شده است.
-              </p>
-            )}
-          </section>
 
           {/* Samples */}
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
