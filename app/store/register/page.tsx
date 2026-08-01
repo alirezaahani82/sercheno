@@ -33,6 +33,12 @@ type Product = {
   cooperationPrice: string;
   customerPrice: string;
   description: string;
+
+  images: File[];
+  samples: File[];
+
+  saleConditions: string[];
+  saleDescription: string;
 };
 
 const emptyProduct: Product = {
@@ -46,6 +52,12 @@ const emptyProduct: Product = {
   cooperationPrice: "",
   customerPrice: "",
   description: "",
+
+  images: [],
+  samples: [],
+
+  saleConditions: [],
+  saleDescription: "",
 };
 type StoreForm = {
   ownerName: string;
