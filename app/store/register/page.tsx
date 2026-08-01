@@ -376,7 +376,7 @@ for (let i = 0; i < insertedProducts.length; i++) {
 
     const { error: uploadError } =
       await supabase.storage
-        .from("product-images")
+        .from("product-image")
         .upload(filePath, file);
 
     if (uploadError) {
