@@ -110,6 +110,23 @@ const [storeForm, setStoreForm] = useState<StoreForm>({
   }));
 };
   const [submitting, setSubmitting] = useState(false);
+  const [productImages, setProductImages] = useState<File[]>([]);
+const [sampleImages, setSampleImages] = useState<File[]>([]);
+  const handleProductImages = (
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  if (event.target.files) {
+    setProductImages(Array.from(event.target.files));
+  }
+};
+
+const handleSampleImages = (
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  if (event.target.files) {
+    setSampleImages(Array.from(event.target.files));
+  }
+};
 const handleSubmit = async () => {
   setSubmitting(true);
 
