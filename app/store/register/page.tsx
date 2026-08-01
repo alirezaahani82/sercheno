@@ -857,23 +857,25 @@ productsToInsert.forEach((product, index) => {
     </div>
   </div>
 
-  <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-blue-400 hover:bg-blue-50">
-    <Upload className="text-blue-600" size={36} />
+ <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-blue-400 hover:bg-blue-50">
+  <Upload className="text-blue-600" size={36} />
 
-    <span className="mt-4 font-bold">
-      برای انتخاب تصاویر کلیک کنید
-    </span>
+  <span className="mt-4 font-bold">
+    برای انتخاب تصاویر کلیک کنید
+  </span>
 
-    <span className="mt-2 text-xs text-slate-500">
-      امکان انتخاب چند تصویر وجود دارد
-    </span>
+  <span className="mt-2 text-xs text-slate-500">
+    امکان انتخاب چند تصویر وجود دارد
+  </span>
 
-    <input
-      type="file"
-      accept="image/*"
-      multiple
-      className="hidden"
-onChange={(e) => handleProductImages(index, e)}  </label>
+  <input
+    type="file"
+    accept="image/*"
+    multiple
+    className="hidden"
+    onChange={(e) => handleProductImages(index, e)}
+  />
+</label>
 
   {productImages.length > 0 && (
     <p className="mt-4 text-sm font-bold text-emerald-600">
@@ -918,7 +920,8 @@ onChange={(e) => handleProductImages(index, e)}  </label>
       multiple
       className="hidden"
       onChange={(e) => handleSampleImages(index, e)}
-  </label>
+  />
+</label>
 
   {sampleImages.length > 0 && (
     <p className="mt-4 text-sm font-bold text-emerald-600">
