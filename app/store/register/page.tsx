@@ -265,9 +265,6 @@ productsToInsert.forEach((product, index) => {
   }
 };
 
-  const [productImages, setProductImages] = useState<File[]>([]);
-  const [sampleImages, setSampleImages] = useState<File[]>([]);
-
   const addProduct = () => {
     setProducts([...products, { ...emptyProduct }]);
   };
@@ -291,22 +288,6 @@ productsToInsert.forEach((product, index) => {
     };
 
     setProducts(updatedProducts);
-  };
-
-  const handleProductImages = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files) {
-      setProductImages(Array.from(event.target.files));
-    }
-  };
-
-  const handleSampleImages = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files) {
-      setSampleImages(Array.from(event.target.files));
-    }
   };
 
   return (
