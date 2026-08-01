@@ -873,8 +873,7 @@ productsToInsert.forEach((product, index) => {
     accept="image/*"
     multiple
     className="hidden"
-    onChange={(e) => handleProductImages(index, e)}
-  />
+onChange={handleProductImages}  />
 </label>
 
   {productImages.length > 0 && (
@@ -919,8 +918,7 @@ productsToInsert.forEach((product, index) => {
       accept="image/*"
       multiple
       className="hidden"
-      onChange={(e) => handleSampleImages(index, e)}
-  />
+onChange={handleSampleImages}  />
 </label>
 
   {sampleImages.length > 0 && (
