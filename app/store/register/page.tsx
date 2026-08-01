@@ -798,81 +798,96 @@ productsToInsert.forEach((product, index) => {
               ))}
             </div>
           </section>
+{/* Product Images */}
+<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div className="mb-6 flex items-center gap-3">
+    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
+      <ImagePlus size={24} />
+    </div>
 
-          {/* Product Images */}
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
-                <ImagePlus size={24} />
-              </div>
+    <div>
+      <h2 className="text-xl font-black">
+        تصاویر محصولات
+      </h2>
 
-              <div>
-                <h2 className="text-xl font-black">
-                  تصاویر محصولات
-                </h2>
+      <p className="mt-1 text-sm text-slate-500">
+        تصاویر محصولات قابل ارائه در فروشگاه را بارگذاری کنید.
+      </p>
+    </div>
+  </div>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  تصاویر محصولات قابل ارائه در فروشگاه را بارگذاری کنید.
-                </p>
-              </div>
-            </div>
+  <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-blue-400 hover:bg-blue-50">
+    <Upload className="text-blue-600" size={36} />
 
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-blue-400 hover:bg-blue-50">
-              <Upload className="text-blue-600" size={36} />
-              <span className="mt-4 font-bold">
-                برای انتخاب تصاویر کلیک کنید
-              </span>
+    <span className="mt-4 font-bold">
+      برای انتخاب تصاویر کلیک کنید
+    </span>
 
-              <span className="mt-2 text-xs text-slate-500">
-                امکان انتخاب چند تصویر وجود دارد
-              </span>
+    <span className="mt-2 text-xs text-slate-500">
+      امکان انتخاب چند تصویر وجود دارد
+    </span>
+
+    <input
+      type="file"
+      accept="image/*"
+      multiple
+      className="hidden"
+      onChange={handleProductImages}
+    />
+  </label>
+
+  {productImages.length > 0 && (
+    <p className="mt-4 text-sm font-bold text-emerald-600">
+      {productImages.length} تصویر انتخاب شده است.
+    </p>
+  )}
+</section>
 
 
-          {/* Samples */}
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
-                <ImagePlus size={24} />
-              </div>
+{/* Samples */}
+<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div className="mb-6 flex items-center gap-3">
+    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
+      <ImagePlus size={24} />
+    </div>
 
-              <div>
-                <h2 className="text-xl font-black">
-                  نمونه‌کارها
-                </h2>
+    <div>
+      <h2 className="text-xl font-black">
+        نمونه‌کارها
+      </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  تصاویر نمونه‌کارها و پروژه‌های انجام‌شده را بارگذاری کنید.
-                </p>
-              </div>
-            </div>
+      <p className="mt-1 text-sm text-slate-500">
+        تصاویر نمونه‌کارها و پروژه‌های انجام‌شده را بارگذاری کنید.
+      </p>
+    </div>
+  </div>
 
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-purple-400 hover:bg-purple-50">
-              <ImagePlus className="text-purple-600" size={36} />
+  <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-purple-400 hover:bg-purple-50">
+    <ImagePlus className="text-purple-600" size={36} />
 
-              <span className="mt-4 font-bold">
-                بارگذاری تصاویر نمونه‌کار
-              </span>
+    <span className="mt-4 font-bold">
+      بارگذاری تصاویر نمونه‌کار
+    </span>
 
-              <span className="mt-2 text-xs text-slate-500">
-                تصاویر پروژه‌ها و نمونه‌کارهای واقعی خود را اضافه کنید.
-              </span>
+    <span className="mt-2 text-xs text-slate-500">
+      تصاویر پروژه‌ها و نمونه‌کارهای واقعی خود را اضافه کنید.
+    </span>
 
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleSampleImages}
-              />
-            </label>
+    <input
+      type="file"
+      accept="image/*"
+      multiple
+      className="hidden"
+      onChange={handleSampleImages}
+    />
+  </label>
 
-            {sampleImages.length > 0 && (
-              <p className="mt-4 text-sm font-bold text-emerald-600">
-                {sampleImages.length} تصویر نمونه‌کار انتخاب شده است.
-              </p>
-            )}
-          </section>
-
+  {sampleImages.length > 0 && (
+    <p className="mt-4 text-sm font-bold text-emerald-600">
+      {sampleImages.length} تصویر نمونه‌کار انتخاب شده است.
+    </p>
+  )}
+</section>
           {/* Business Conditions */}
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center gap-3">
