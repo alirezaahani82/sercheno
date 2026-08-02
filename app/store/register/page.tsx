@@ -342,70 +342,128 @@ const handleSubmit = async () => {
           `products/${createdProduct.id}/${fileName}`;
 
         const { error: uploadError } =
-          await supabase.storage
-            .from("product-image")
-            .upload(filePath, file, {
-              cacheControl: "3600",
-              upsert: false,
-              contentType: file.type,
-            });
+         // -----------------------------
+// 5. آپلود تصاویر محصولات
+// -----------------------------
 
-        if (uploadError) {
-          console.error(
-            "IMAGE UPLOAD ERROR:",
-            uploadError
-          );
+for (let productIndex = 0; productIndex < products.length; productIndex++) {
+  const product = products[productIndex];
 
-          throw new Error(
-            "خطا در آپلود تصویر «" +
-              file.name +
-              "»: " +
-              uploadError.message
-          );
-        }
+  if (!product.images || product.images.length === 0) {
+    continue;
+  }
 
-        // -----------------------------
-        // 6. گرفتن URL عمومی تصویر
-        // -----------------------------
-        const { data: publicUrlData } =
-          supabase.storage
-            .from("product-image")
-            .getPublicUrl(filePath);
+  // پیدا کردن محصول ثبت‌شده
+  const createdProduct = createdProducts[productIndex]
+  if (!createdProduct) {
+    console.error("PRODUCT NOT FOUND:", productIndex);
+    continue;
+  }
 
-        const imageUrl =
-          publicUrlData.publicUrl;
+  // فعلاً برای تست، تصاویر را با نام یکتا آپلود می‌کنیم
+  for (const file of product.images) {
+    try {
+      const fileExtension =
+        file.name.split(".").pop()?.toLowerCase() || "jpg";
 
-        if (!imageUrl) {
-          throw new Error(
-            "آدرس تصویر ایجاد نشد."
-          );
-        }
+      const fileName =
+        `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2, 10)}.${fileExtension}`;
 
-        // -----------------------------
-        // 7. ثبت تصویر در product_images
-        // -----------------------------
-        const { error: imageRowError } =
-          await supabase
-            .from("product_images")
-            .insert({
-              product_id: createdProduct.id,
-              image_url: imageUrl,
-            });
+      const filePath =
+        `${createdProduct.slug}/${fileName}`;
 
-        if (imageRowError) {
-          console.error(
-            "PRODUCT IMAGE ROW ERROR:",
-            imageRowError
-          );
+      console.log("START IMAGE UPLOAD:", {
+        fileName: file.name,
+        filePath,
+        type: file.type,
+        size: file.size,
+      });
 
-          throw new Error(
-            "تصویر آپلود شد اما ثبت اطلاعات تصویر در دیتابیس انجام نشد: " +
-              imageRowError.message
-          );
-        }
+      const {
+        data: uploadData,
+        error: uploadError,
+      } = await supabase.storage
+        .from("product-image")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type || "image/jpeg",
+        });
+
+      console.log("UPLOAD RESULT:", {
+        uploadData,
+        uploadError,
+      });
+
+      if (uploadError) {
+        throw new Error(
+          `آپلود تصویر ${file.name} ناموفق بود: ${uploadError.message}`
+        );
       }
-    }
 
+      // -----------------------------
+      // گرفتن URL عمومی
+      // -----------------------------
+
+      const {
+        data: publicUrlData,
+      } = supabase.storage
+        .from("product-image")
+        .getPublicUrl(filePath);
+
+      const imageUrl =
+        publicUrlData?.publicUrl;
+
+      console.log("IMAGE URL:", imageUrl);
+
+      if (!imageUrl) {
+        throw new Error(
+          "آدرس عمومی تصویر ایجاد نشد."
+        );
+      }
+
+      // -----------------------------
+      // ثبت تصویر در product_images
+      // -----------------------------
+
+      const {
+        error: imageRowError,
+      } = await supabase
+        .from("product_images")
+        .insert({
+          product_id: createdProduct.id,
+          image_url: imageUrl,
+        });
+
+      if (imageRowError) {
+        console.error(
+          "PRODUCT IMAGE ROW ERROR:",
+          imageRowError
+        );
+
+        throw new Error(
+          "تصویر آپلود شد اما ثبت آن در دیتابیس انجام نشد: " +
+          imageRowError.message
+        );
+      }
+
+      console.log(
+        "IMAGE COMPLETED:",
+        file.name
+      );
+
+    } catch (imageError) {
+      console.error(
+        "IMAGE UPLOAD FAILED:",
+        imageError
+      );
+
+      throw imageError;
+    }
+  }
+}
     // -----------------------------
     // 8. موفقیت
     // -----------------------------
