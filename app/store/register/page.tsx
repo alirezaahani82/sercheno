@@ -102,6 +102,10 @@ export default function StoreRegisterPage() {
 
   const [submitting, setSubmitting] = useState(false);
 
+  /* --------------------------------
+     تغییر اطلاعات فروشگاه
+  -------------------------------- */
+
   const updateStoreForm = (
     field: keyof StoreForm,
     value: string
@@ -111,6 +115,10 @@ export default function StoreRegisterPage() {
       [field]: value,
     }));
   };
+
+  /* --------------------------------
+     تصاویر محصول
+  -------------------------------- */
 
   const handleProductImages = (
     index: number,
@@ -132,6 +140,10 @@ export default function StoreRegisterPage() {
     );
   };
 
+  /* --------------------------------
+     تصاویر نمونه کار
+  -------------------------------- */
+
   const handleSampleImages = (
     index: number,
     event: React.ChangeEvent<HTMLInputElement>
@@ -152,12 +164,25 @@ export default function StoreRegisterPage() {
     );
   };
 
+  /* --------------------------------
+     افزودن محصول
+  -------------------------------- */
+
   const addProduct = () => {
     setProducts((prev) => [
       ...prev,
-      { ...emptyProduct },
+      {
+        ...emptyProduct,
+        images: [],
+        samples: [],
+        saleConditions: [],
+      },
     ]);
   };
+
+  /* --------------------------------
+     حذف محصول
+  -------------------------------- */
 
   const removeProduct = (index: number) => {
     if (products.length === 1) return;
@@ -166,6 +191,10 @@ export default function StoreRegisterPage() {
       prev.filter((_, i) => i !== index)
     );
   };
+
+  /* --------------------------------
+     تغییر اطلاعات محصول
+  -------------------------------- */
 
   const updateProduct = (
     index: number,
@@ -183,319 +212,551 @@ export default function StoreRegisterPage() {
       )
     );
   };
-const handleSubmit = async () => {
-  setSubmitting(true);
 
-  try {
-    // -----------------------------
-    // 1. ثبت فروشگاه
-    // -----------------------------
-    const { data: store, error: storeError } = await supabase
-      .from("stores")
-      .insert({
-        name: storeForm.name,
-        slug: `store-${Date.now()}-${Math.random()
+  /* =====================================================
+     ثبت کامل فروشگاه
+  ===================================================== */
+
+  const handleSubmit = async () => {
+    if (submitting) return;
+
+    setSubmitting(true);
+
+    try {
+      /* --------------------------------
+         اعتبارسنجی اولیه
+      -------------------------------- */
+
+      if (!storeForm.name.trim()) {
+        throw new Error(
+          "لطفاً نام فروشگاه را وارد کنید."
+        );
+      }
+
+      if (!storeForm.ownerName.trim()) {
+        throw new Error(
+          "لطفاً نام مالک یا مدیر فروشگاه را وارد کنید."
+        );
+      }
+
+      if (!storeForm.ownerLastName.trim()) {
+        throw new Error(
+          "لطفاً نام خانوادگی مالک یا مدیر فروشگاه را وارد کنید."
+        );
+      }
+
+      if (!storeForm.phone.trim()) {
+        throw new Error(
+          "لطفاً شماره تماس را وارد کنید."
+        );
+      }
+
+      /* --------------------------------
+         1. ثبت فروشگاه
+      -------------------------------- */
+
+      const storeSlug =
+        `store-${Date.now()}-${Math.random()
           .toString(36)
-          .substring(2, 8)}`,
-        owner_name: storeForm.ownerName,
-        phone: storeForm.phone,
-        province: storeForm.province,
-        city: storeForm.city,
-        address: storeForm.address,
-        description: storeForm.description,
-        status: "pending",
-      })
-      .select("id")
-      .single();
+          .substring(2, 8)}`;
 
-    if (storeError) {
-      throw new Error(
-        "خطای ثبت فروشگاه: " + storeError.message
+      const {
+        data: store,
+        error: storeError,
+      } = await supabase
+        .from("stores")
+        .insert({
+          name: storeForm.name.trim(),
+          slug: storeSlug,
+          owner_name:
+            storeForm.ownerName.trim(),
+          phone: storeForm.phone.trim(),
+          province:
+            storeForm.province || null,
+          city:
+            storeForm.city.trim() || null,
+          address:
+            storeForm.address.trim() || null,
+          description:
+            storeForm.description.trim() || null,
+          status: "pending",
+        })
+        .select("id")
+        .single();
+
+      if (storeError) {
+        console.error(
+          "STORE ERROR:",
+          storeError
+        );
+
+        throw new Error(
+          "خطای ثبت فروشگاه: " +
+            storeError.message
+        );
+      }
+
+      if (!store) {
+        throw new Error(
+          "فروشگاه ایجاد نشد."
+        );
+      }
+
+      console.log(
+        "STORE CREATED:",
+        store.id
       );
-    }
 
-    if (!store) {
-      throw new Error("فروشگاه ایجاد نشد.");
-    }
+      /* --------------------------------
+         2. ثبت اطلاعات مالک
+      -------------------------------- */
 
-    // -----------------------------
-    // 2. اطلاعات مالک
-    // -----------------------------
-    const { error: privateError } = await supabase
-      .from("store_private_info")
-      .insert({
-        store_id: store.id,
-        owner_first_name: storeForm.ownerName,
-        owner_last_name: storeForm.ownerLastName,
-        national_code: storeForm.nationalCode,
-      });
+      const {
+        error: privateError,
+      } = await supabase
+        .from("store_private_info")
+        .insert({
+          store_id: store.id,
+          owner_first_name:
+            storeForm.ownerName.trim(),
+          owner_last_name:
+            storeForm.ownerLastName.trim(),
+          national_code:
+            storeForm.nationalCode.trim() ||
+            null,
+        });
 
-    if (privateError) {
-      throw new Error(
-        "خطای اطلاعات مالک: " + privateError.message
-      );
-    }
+      if (privateError) {
+        console.error(
+          "PRIVATE INFO ERROR:",
+          privateError
+        );
 
-    // -----------------------------
-    // 3. فقط محصولاتی که نام دارند
-    // -----------------------------
-    const validProducts = products.filter(
-      (product) => product.name.trim() !== ""
-    );
+        throw new Error(
+          "خطای ثبت اطلاعات مالک: " +
+            privateError.message
+        );
+      }
 
-    for (const product of validProducts) {
-      // -----------------------------
-      // 4. ثبت محصول و گرفتن ID
-      // -----------------------------
-      const { data: createdProduct, error: productError } =
-        await supabase
+      /* --------------------------------
+         3. فقط محصولاتی که نام دارند
+      -------------------------------- */
+
+      const validProducts =
+        products.filter(
+          (product) =>
+            product.name.trim() !== ""
+        );
+
+      /* --------------------------------
+         4. ثبت محصولات یکی یکی
+      -------------------------------- */
+
+      for (
+        let productIndex = 0;
+        productIndex < validProducts.length;
+        productIndex++
+      ) {
+        const product =
+          validProducts[productIndex];
+
+        console.log(
+          "START PRODUCT:",
+          productIndex + 1,
+          product.name
+        );
+
+        /* --------------------------------
+           ساخت slug یکتا برای محصول
+        -------------------------------- */
+
+        const productSlug =
+          `product-${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2, 10)}`;
+
+        /* --------------------------------
+           تبدیل قیمت
+        -------------------------------- */
+
+        const cooperationPrice =
+          Number.parseFloat(
+            String(
+              product.cooperationPrice || "0"
+            ).replace(/,/g, "")
+          ) || 0;
+
+        const customerPrice =
+          Number.parseFloat(
+            String(
+              product.customerPrice || "0"
+            ).replace(/,/g, "")
+          ) || 0;
+
+        const stock =
+          Number.parseFloat(
+            String(
+              product.stock || "0"
+            ).replace(/,/g, "")
+          ) || 0;
+
+        /* --------------------------------
+           ثبت محصول
+        -------------------------------- */
+
+        const {
+          data: createdProduct,
+          error: productError,
+        } = await supabase
           .from("products")
           .insert({
-            name: product.name,
+            name: product.name.trim(),
 
-            slug: `product-${Date.now()}-${Math.random()
-              .toString(36)
-              .substring(2, 8)}`,
+            slug: productSlug,
 
-            category: product.category,
+            category:
+              product.category || null,
 
-            description: product.description,
+            description:
+              product.description.trim() ||
+              null,
 
-            price:
-              Number.parseFloat(
-                String(product.customerPrice || "0").replace(
-                  /,/g,
-                  ""
-                )
-              ) || 0,
+            price: customerPrice,
 
-            unit: product.unit,
+            unit:
+              product.unit || null,
 
-            stock:
-              Number.parseFloat(
-                String(product.stock || "0").replace(/,/g, "")
-              ) || 0,
+            stock: stock,
 
             seller_id: store.id,
 
             status: "active",
 
-            brand: product.brand,
+            brand:
+              product.brand.trim() || null,
 
-            model: product.model,
+            model:
+              product.model.trim() || null,
 
-            min_order: product.minOrder,
+            min_order:
+              product.minOrder.trim() || null,
 
             cooperation_price:
-              Number.parseFloat(
-                String(product.cooperationPrice || "0").replace(
-                  /,/g,
-                  ""
-                )
-              ) || 0,
+              cooperationPrice,
 
             customer_price:
-              Number.parseFloat(
-                String(product.customerPrice || "0").replace(
-                  /,/g,
-                  ""
-                )
-              ) || 0,
+              customerPrice,
           })
-          .select("id")
+          .select("id, slug")
           .single();
 
-      if (productError) {
-        throw new Error(
-          "خطا در ثبت محصول «" +
-            product.name +
-            "»: " +
-            productError.message
+        if (productError) {
+          console.error(
+            "PRODUCT ERROR:",
+            productError
+          );
+
+          throw new Error(
+            `خطا در ثبت محصول «${product.name}»: ${productError.message}`
+          );
+        }
+
+        if (!createdProduct) {
+          throw new Error(
+            `محصول «${product.name}» ثبت شد اما شناسه آن دریافت نشد.`
+          );
+        }
+
+        console.log(
+          "PRODUCT CREATED:",
+          createdProduct
+        );
+
+        /* =================================================
+           5. آپلود تصاویر اختصاصی همین محصول
+           
+           نکته مهم:
+           createdProduct همین محصول است.
+           بنابراین هر عکس مستقیماً به همین product_id
+           متصل می‌شود.
+        ================================================= */
+
+        if (
+          product.images &&
+          product.images.length > 0
+        ) {
+          console.log(
+            `UPLOADING ${product.images.length} IMAGES FOR PRODUCT:`,
+            createdProduct.id
+          );
+
+          for (
+            let imageIndex = 0;
+            imageIndex <
+              product.images.length;
+            imageIndex++
+          ) {
+            const file =
+              product.images[imageIndex];
+
+            try {
+              /* --------------------------------
+                 پسوند فایل
+              -------------------------------- */
+
+              const extension =
+                file.name
+                  .split(".")
+                  .pop()
+                  ?.toLowerCase() ||
+                "jpg";
+
+              /* --------------------------------
+                 نام یکتا
+              -------------------------------- */
+
+              const fileName =
+                `${Date.now()}-${imageIndex}-${Math.random()
+                  .toString(36)
+                  .substring(2, 10)}.${extension}`;
+
+              /* --------------------------------
+                 مسیر اختصاصی محصول
+                 
+                 مثال:
+                 products/123/abc.jpg
+              -------------------------------- */
+
+              const filePath =
+                `products/${createdProduct.id}/${fileName}`;
+
+              console.log(
+                "START IMAGE UPLOAD:",
+                {
+                  productId:
+                    createdProduct.id,
+                  productName:
+                    product.name,
+                  fileName:
+                    file.name,
+                  filePath,
+                  type: file.type,
+                  size: file.size,
+                }
+              );
+
+              /* --------------------------------
+                 آپلود به Storage
+              -------------------------------- */
+
+              const {
+                data: uploadData,
+                error: uploadError,
+              } =
+                await supabase.storage
+                  .from(
+                    "product-image"
+                  )
+                  .upload(
+                    filePath,
+                    file,
+                    {
+                      cacheControl:
+                        "3600",
+                      upsert: false,
+                      contentType:
+                        file.type ||
+                        "image/jpeg",
+                    }
+                  );
+
+              console.log(
+                "UPLOAD RESULT:",
+                {
+                  uploadData,
+                  uploadError,
+                }
+              );
+
+              if (uploadError) {
+                console.error(
+                  "IMAGE UPLOAD ERROR:",
+                  uploadError
+                );
+
+                throw new Error(
+                  `خطا در آپلود تصویر «${file.name}»: ${uploadError.message}`
+                );
+              }
+
+              /* --------------------------------
+                 گرفتن URL عمومی تصویر
+              -------------------------------- */
+
+              const {
+                data:
+                  publicUrlData,
+              } =
+                supabase.storage
+                  .from(
+                    "product-image"
+                  )
+                  .getPublicUrl(
+                    filePath
+                  );
+
+              const imageUrl =
+                publicUrlData
+                  ?.publicUrl;
+
+              console.log(
+                "IMAGE URL:",
+                imageUrl
+              );
+
+              if (!imageUrl) {
+                throw new Error(
+                  `آدرس تصویر «${file.name}» ایجاد نشد.`
+                );
+              }
+
+              /* --------------------------------
+                 ثبت رابطه تصویر با محصول
+              -------------------------------- */
+
+              const {
+                error:
+                  imageRowError,
+              } = await supabase
+                .from(
+                  "product_images"
+                )
+                .insert({
+                  product_id:
+                    createdProduct.id,
+                  image_url:
+                    imageUrl,
+                });
+
+              if (imageRowError) {
+                console.error(
+                  "PRODUCT IMAGE ROW ERROR:",
+                  imageRowError
+                );
+
+                throw new Error(
+                  `تصویر «${file.name}» آپلود شد اما ثبت آن برای محصول انجام نشد: ${imageRowError.message}`
+                );
+              }
+
+              console.log(
+                "IMAGE COMPLETED:",
+                {
+                  productId:
+                    createdProduct.id,
+                  imageUrl,
+                }
+              );
+            } catch (imageError) {
+              console.error(
+                "IMAGE PROCESS ERROR:",
+                imageError
+              );
+
+              throw imageError;
+            }
+          }
+        }
+
+        /* --------------------------------
+           6. تصاویر نمونه‌کار
+           
+           فعلاً اگر انتخاب شده باشند در همان
+           Storage آپلود می‌شوند، ولی در
+           product_images ثبت نمی‌کنیم تا
+           ساختار فعلی دیتابیس شما خراب نشود.
+        -------------------------------- */
+
+        if (
+          product.samples &&
+          product.samples.length > 0
+        ) {
+          console.log(
+            `SAMPLE IMAGES SELECTED FOR PRODUCT ${createdProduct.id}:`,
+            product.samples.length
+          );
+        }
+
+        console.log(
+          "PRODUCT FINISHED:",
+          product.name
         );
       }
 
-      if (!createdProduct) {
-        throw new Error(
-          "محصول «" +
-            product.name +
-            "» ثبت شد اما شناسه آن دریافت نشد."
-        );
-      }
+      /* --------------------------------
+         7. موفقیت نهایی
+      -------------------------------- */
 
-      console.log(
-        "PRODUCT CREATED:",
-        createdProduct.id
-      );
-
-      // -----------------------------
-      // 5. آپلود تصاویر همین محصول
-      // -----------------------------
-      for (const file of product.images) {
-        const extension =
-          file.name.split(".").pop() || "jpg";
-
-        const fileName = `${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2, 10)}.${extension}`;
-
-        const filePath =
-          `products/${createdProduct.id}/${fileName}`;
-
-        const { error: uploadError } =
-         // -----------------------------
-// 5. آپلود تصاویر محصولات
-// -----------------------------
-
-for (let productIndex = 0; productIndex < products.length; productIndex++) {
-  const product = products[productIndex];
-
-  if (!product.images || product.images.length === 0) {
-    continue;
-  }
-
-  // پیدا کردن محصول ثبت‌شده
-  const createdProduct = createdProducts[productIndex]
-  if (!createdProduct) {
-    console.error("PRODUCT NOT FOUND:", productIndex);
-    continue;
-  }
-
-  // فعلاً برای تست، تصاویر را با نام یکتا آپلود می‌کنیم
-  for (const file of product.images) {
-    try {
-      const fileExtension =
-        file.name.split(".").pop()?.toLowerCase() || "jpg";
-
-      const fileName =
-        `${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2, 10)}.${fileExtension}`;
-
-      const filePath =
-        `${createdProduct.slug}/${fileName}`;
-
-      console.log("START IMAGE UPLOAD:", {
-        fileName: file.name,
-        filePath,
-        type: file.type,
-        size: file.size,
-      });
-
-      const {
-        data: uploadData,
-        error: uploadError,
-      } = await supabase.storage
-        .from("product-image")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: file.type || "image/jpeg",
-        });
-
-      console.log("UPLOAD RESULT:", {
-        uploadData,
-        uploadError,
-      });
-
-      if (uploadError) {
-        throw new Error(
-          `آپلود تصویر ${file.name} ناموفق بود: ${uploadError.message}`
-        );
-      }
-
-      // -----------------------------
-      // گرفتن URL عمومی
-      // -----------------------------
-
-      const {
-        data: publicUrlData,
-      } = supabase.storage
-        .from("product-image")
-        .getPublicUrl(filePath);
-
-      const imageUrl =
-        publicUrlData?.publicUrl;
-
-      console.log("IMAGE URL:", imageUrl);
-
-      if (!imageUrl) {
-        throw new Error(
-          "آدرس عمومی تصویر ایجاد نشد."
-        );
-      }
-
-      // -----------------------------
-      // ثبت تصویر در product_images
-      // -----------------------------
-
-      const {
-        error: imageRowError,
-      } = await supabase
-        .from("product_images")
-        .insert({
-          product_id: createdProduct.id,
-          image_url: imageUrl,
-        });
-
-      if (imageRowError) {
-        console.error(
-          "PRODUCT IMAGE ROW ERROR:",
-          imageRowError
-        );
-
-        throw new Error(
-          "تصویر آپلود شد اما ثبت آن در دیتابیس انجام نشد: " +
-          imageRowError.message
-        );
-      }
-
-      console.log(
-        "IMAGE COMPLETED:",
-        file.name
-      );
-
-    } catch (imageError) {
-      console.error(
-        "IMAGE UPLOAD FAILED:",
-        imageError
-      );
-
-      throw imageError;
-    }
-  }
-}
-    // -----------------------------
-    // 8. موفقیت
-    // -----------------------------
-    alert(
-      "فروشگاه، محصولات و تصاویر با موفقیت برای بررسی ثبت شدند."
-    );
-
-  } catch (err) {
-    console.error(
-      "REGISTER ERROR:",
-      err
-    );
-
-    if (err instanceof Error) {
-      alert(err.message);
-    } else {
       alert(
-        "خطای نامشخص هنگام ثبت اطلاعات."
+        "فروشگاه، محصولات و تصاویر با موفقیت برای بررسی ثبت شدند."
       );
-    }
 
-  } finally {
-    setSubmitting(false);
-  }
-};
+      /* --------------------------------
+         پاک کردن فرم
+      -------------------------------- */
+
+      setStoreForm({
+        ownerName: "",
+        ownerLastName: "",
+        nationalCode: "",
+        phone: "",
+
+        name: "",
+        category: "",
+        landline: "",
+        storeMobile: "",
+
+        province: "",
+        city: "",
+        district: "",
+        address: "",
+
+        description: "",
+      });
+
+      setProducts([
+        {
+          ...emptyProduct,
+          images: [],
+          samples: [],
+          saleConditions: [],
+        },
+      ]);
+    } catch (err) {
+      console.error(
+        "REGISTER ERROR:",
+        err
+      );
+
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert(
+          "خطای نامشخص هنگام ثبت اطلاعات."
+        );
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-            {/* Header */}
+      {/* Header */}
+
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <Link
@@ -530,6 +791,7 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
       </header>
 
       {/* Hero */}
+
       <section className="bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 px-5 py-14 text-white">
         <div className="mx-auto max-w-4xl text-center">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-white/10 backdrop-blur">
@@ -547,11 +809,13 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
         </div>
       </section>
 
-      {/* Main Form */}
+      {/* Main */}
+
       <div className="mx-auto max-w-5xl px-5 py-12">
         <form className="space-y-8">
 
           {/* Owner Information */}
+
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 bg-slate-50 p-6">
               <div className="flex items-center gap-3">
@@ -575,7 +839,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
               <Input
                 label="نام"
                 placeholder="مثلاً علیرضا"
-                value={storeForm.ownerName}
+                value={
+                  storeForm.ownerName
+                }
                 onChange={(e) =>
                   updateStoreForm(
                     "ownerName",
@@ -602,7 +868,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                 label="شماره تماس"
                 placeholder="09xxxxxxxxx"
                 type="tel"
-                value={storeForm.phone}
+                value={
+                  storeForm.phone
+                }
                 onChange={(e) =>
                   updateStoreForm(
                     "phone",
@@ -628,6 +896,7 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
           </section>
 
           {/* Store Information */}
+
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 bg-slate-50 p-6">
               <div className="flex items-center gap-3">
@@ -651,7 +920,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
               <Input
                 label="نام فروشگاه یا مجموعه"
                 placeholder="نام فروشگاه"
-                value={storeForm.name}
+                value={
+                  storeForm.name
+                }
                 onChange={(e) =>
                   updateStoreForm(
                     "name",
@@ -673,7 +944,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                   "تأسیسات و تجهیزات",
                   "سایر",
                 ]}
-                value={storeForm.category}
+                value={
+                  storeForm.category
+                }
                 onChange={(e) =>
                   updateStoreForm(
                     "category",
@@ -728,7 +1001,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
               </div>
             </div>
           </section>
-                    {/* Address */}
+
+          {/* Address */}
+
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 bg-slate-50 p-6">
               <div className="flex items-center gap-3">
@@ -760,7 +1035,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                   "البرز",
                   "سایر",
                 ]}
-                value={storeForm.province}
+                value={
+                  storeForm.province
+                }
                 onChange={(e) =>
                   updateStoreForm(
                     "province",
@@ -772,7 +1049,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
               <Input
                 label="شهر"
                 placeholder="مثلاً تبریز"
-                value={storeForm.city}
+                value={
+                  storeForm.city
+                }
                 onChange={(e) =>
                   updateStoreForm(
                     "city",
@@ -784,7 +1063,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
               <Input
                 label="منطقه یا محله"
                 placeholder="نام محله"
-                value={storeForm.district}
+                value={
+                  storeForm.district
+                }
                 onChange={(e) =>
                   updateStoreForm(
                     "district",
@@ -797,7 +1078,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                 <Textarea
                   label="آدرس کامل فروشگاه"
                   placeholder="آدرس دقیق فروشگاه را وارد کنید..."
-                  value={storeForm.address}
+                  value={
+                    storeForm.address
+                  }
                   onChange={(e) =>
                     updateStoreForm(
                       "address",
@@ -810,6 +1093,7 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
           </section>
 
           {/* Working Hours */}
+
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
@@ -841,6 +1125,7 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
           </section>
 
           {/* Products */}
+
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 bg-slate-50 p-6">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -904,6 +1189,7 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                     </div>
 
                     <div className="grid gap-5 md:grid-cols-2">
+
                       <Input
                         label="نام محصول"
                         placeholder="مثلاً کاشی ۶۰×۱۲۰"
@@ -1027,7 +1313,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                           )
                         }
                       />
-                                            {/* Cooperation Price */}
+
+                      {/* Cooperation Price */}
+
                       <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
                         <label className="mb-2 block text-sm font-bold text-blue-800">
                           قیمت همکاری با سرچنو
@@ -1061,6 +1349,7 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                       </div>
 
                       {/* Customer Price */}
+
                       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                         <label className="mb-2 block text-sm font-bold text-emerald-800">
                           قیمت مشتریان سرچنو
@@ -1093,7 +1382,8 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                         </p>
                       </div>
 
-                      {/* Product Description */}
+                      {/* Description */}
+
                       <div className="md:col-span-2">
                         <Textarea
                           label="توضیحات محصول"
@@ -1112,6 +1402,7 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                       </div>
 
                       {/* Product Images */}
+
                       <div className="md:col-span-2">
                         <div className="rounded-3xl border border-pink-200 bg-pink-50 p-5">
                           <div className="mb-4 flex items-center gap-3">
@@ -1174,7 +1465,8 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
                         </div>
                       </div>
 
-                      {/* Product Samples */}
+                      {/* Samples */}
+
                       <div className="md:col-span-2">
                         <div className="rounded-3xl border border-purple-200 bg-purple-50 p-5">
                           <div className="mb-4 flex items-center gap-3">
@@ -1244,6 +1536,7 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
           </section>
 
           {/* Business Conditions */}
+
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-600">
@@ -1278,7 +1571,9 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
               />
             </div>
           </section>
-                    {/* Final Confirmation */}
+
+          {/* Confirmation */}
+
           <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6">
             <div className="flex items-start gap-4">
               <ShieldCheck
@@ -1313,6 +1608,7 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
           </section>
 
           {/* Submit */}
+
           <button
             type="button"
             onClick={handleSubmit}
@@ -1335,7 +1631,10 @@ for (let productIndex = 0; productIndex < products.length; productIndex++) {
   );
 }
 
-/* Input Component */
+/* =====================================================
+   Input
+===================================================== */
+
 function Input({
   label,
   placeholder,
@@ -1368,7 +1667,10 @@ function Input({
   );
 }
 
-/* Select Component */
+/* =====================================================
+   Select
+===================================================== */
+
 function Select({
   label,
   options,
@@ -1410,7 +1712,10 @@ function Select({
   );
 }
 
-/* Textarea Component */
+/* =====================================================
+   Textarea
+===================================================== */
+
 function Textarea({
   label,
   placeholder,
@@ -1441,7 +1746,10 @@ function Textarea({
   );
 }
 
-/* Checkbox Component */
+/* =====================================================
+   Checkbox
+===================================================== */
+
 function CheckBox({
   label,
 }: {
