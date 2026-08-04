@@ -155,90 +155,86 @@ export default function CementPage() {
           </div>
         </div>
       </header>
+{/* Hero */}
+<section className="relative min-h-[420px] overflow-hidden">
 
-      {/* Hero */}
-      <section className="relative min-h-[420px] overflow-hidden">
-  
-  {/* عکس واقعی سیمان */}
+  {/* تصویر واقعی سیمان */}
   <img
     src="/materials/cement-concrete.jpg"
     alt="سیمان و مصالح ساختمانی"
     className="absolute inset-0 h-full w-full object-cover"
   />
 
-  {/* لایه تیره روی عکس برای خوانایی متن */}
+  {/* لایه تیره روی تصویر */}
   <div className="absolute inset-0 bg-blue-950/75" />
 
-  {/* افکت رنگی */}
+  {/* افکت‌های نوری */}
   <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
 
   <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
 
+  {/* محتوای Hero */}
   <div className="relative mx-auto max-w-7xl px-5 py-14 lg:py-20">
-        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
 
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+    <div className="mx-auto max-w-4xl text-center text-white">
 
-        <div className="relative mx-auto max-w-7xl px-5 py-14 lg:py-20">
-          <div className="mx-auto max-w-4xl text-center text-white">
+      <Link
+        href="/materials"
+        className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        بازگشت به مصالح و تجهیزات
+      </Link>
 
-            <Link
-              href="/materials"
-              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              بازگشت به مصالح و تجهیزات
-            </Link>
+      <h1 className="text-3xl font-black leading-tight sm:text-5xl">
+        سیمان، گچ و مصالح
+        <span className="mt-2 block text-cyan-300">
+          ساختمانی
+        </span>
+      </h1>
 
-            <h1 className="text-3xl font-black leading-tight sm:text-5xl">
-              سیمان، گچ و مصالح
-              <span className="mt-2 block text-cyan-300">
-                ساختمانی
-              </span>
-            </h1>
+      <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
+        انواع سیمان، سیمان فله‌ای، گچ، پودر سنگ،
+        سنگ‌پی، ماسه و سایر مصالح مورد نیاز پروژه‌های
+        ساختمانی را از تأمین‌کنندگان پیدا کنید.
+      </p>
 
-            <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-              انواع سیمان، سیمان فله‌ای، گچ، پودر سنگ،
-              سنگ‌پی، ماسه و سایر مصالح مورد نیاز پروژه‌های
-              ساختمانی را از تأمین‌کنندگان پیدا کنید.
-            </p>
+      {/* Search */}
+      <div className="mx-auto mt-8 rounded-3xl bg-white p-3 shadow-2xl">
+        <div className="flex flex-col gap-3 lg:flex-row">
 
-            {/* Search */}
-            <div className="mx-auto mt-8 rounded-3xl bg-white p-3 shadow-2xl">
-              <div className="flex flex-col gap-3 lg:flex-row">
+          <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
+            <Search className="h-5 w-5 text-slate-400" />
 
-                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
-                  <Search className="h-5 w-5 text-slate-400" />
-
-                  <input
-                    type="text"
-                    placeholder="مثلاً سیمان تیپ ۲، گچ، ماسه شسته..."
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
-                  <MapPin className="h-5 w-5 text-slate-400" />
-
-                  <select className="w-full bg-transparent text-sm text-slate-700 outline-none">
-                    <option>تبریز</option>
-                    <option>تهران</option>
-                    <option>ارومیه</option>
-                    <option>زنجان</option>
-                    <option>همه شهرها</option>
-                  </select>
-                </div>
-
-                <button className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white">
-                  جست‌وجو
-                </button>
-
-              </div>
-            </div>
+            <input
+              type="text"
+              placeholder="مثلاً سیمان تیپ ۲، گچ، ماسه شسته..."
+              className="w-full bg-transparent text-sm text-slate-800 outline-none"
+            />
           </div>
-        </div>
-      </section>
 
+          <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
+            <MapPin className="h-5 w-5 text-slate-400" />
+
+            <select className="w-full bg-transparent text-sm text-slate-700 outline-none">
+              <option>تبریز</option>
+              <option>تهران</option>
+              <option>ارومیه</option>
+              <option>زنجان</option>
+              <option>همه شهرها</option>
+            </select>
+          </div>
+
+          <button className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white hover:bg-blue-800">
+            جست‌وجو
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
       {/* Category buttons */}
       <section className="mx-auto max-w-7xl px-5 py-10">
 
