@@ -75,6 +75,12 @@ const materialCategories = [
     count: "۲۱۸ فروشنده",
     image: "/materials/stone-tile.jpg",
   },
+  {
+    slug: "elevator",
+    title: "آسانسور و تجهیزات ",
+    count: "32 فروشنده",
+    image: "/materials/elevator-hero.jpg",
+  },
 ];
 
 const serviceCategories = [
