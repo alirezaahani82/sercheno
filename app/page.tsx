@@ -76,7 +76,7 @@ const materialCategories = [
     image: "/materials/stone-tile.jpg",
   },
   {
-    slug: "elevator",
+    slug: "elevators",
     title: "آسانسور و تجهیزات ",
     count: "32 فروشنده",
     image: "/materials/elevator-hero.jpg",
