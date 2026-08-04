@@ -18,7 +18,7 @@ const products = [
     seller: "مصالح ساختمانی سهند",
     city: "تبریز",
     rating: "۴.۸",
-    image: "/materials/cement/cement-type2.jpg",
+    image: "/materials/cement-type2.jpg",
   },
   {
     title: "سیمان فله‌ای",
@@ -26,7 +26,7 @@ const products = [
     seller: "تأمین مصالح آذربایجان",
     city: "تبریز",
     rating: "۴.۹",
-    image: "/materials/cement/cement-bulk.jpg",
+    image: "/materials/cement-bulk.jpg",
   },
   {
     title: "سیمان سفید",
@@ -34,7 +34,7 @@ const products = [
     seller: "مصالح ساختمانی تبریز",
     city: "تبریز",
     rating: "۴.۷",
-    image: "/materials/cement/white-cement.jpg",
+    image: "/materials/white-cement.jpg",
   },
   {
     title: "گچ ساختمانی",
@@ -42,7 +42,7 @@ const products = [
     seller: "گچ و مصالح سهند",
     city: "تبریز",
     rating: "۴.۸",
-    image: "/materials/cement/plaster.jpg",
+    image: "/materials/plaster.jpg",
   },
   {
     title: "گچ پلیمری",
@@ -50,7 +50,7 @@ const products = [
     seller: "تأمین مصالح نوین",
     city: "تبریز",
     rating: "۴.۸",
-    image: "/materials/cement/polymer-plaster.jpg",
+    image: "/materials/polymer-plaster.jpg",
   },
   {
     title: "پودر سنگ",
@@ -58,7 +58,7 @@ const products = [
     seller: "سنگبری آذربایجان",
     city: "تبریز",
     rating: "۴.۷",
-    image: "/materials/cement/stone-powder.jpg",
+    image: "/materials/stone-powder.jpg",
   },
   {
     title: "سنگ‌پی",
@@ -66,7 +66,7 @@ const products = [
     seller: "مصالح ساختمانی سهند",
     city: "تبریز",
     rating: "۴.۶",
-    image: "/materials/cement/stone-pi.jpg",
+    image: "/materials/stone-pi.jpg",
   },
   {
     title: "ماسه شسته",
@@ -74,7 +74,7 @@ const products = [
     seller: "شن و ماسه آذربایجان",
     city: "تبریز",
     rating: "۴.۸",
-    image: "/materials/cement/washed-sand.jpg",
+    image: "/materials/washed-sand.jpg",
   },
 ];
 
