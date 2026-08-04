@@ -191,7 +191,7 @@ export default function ElevatorsPage() {
       <section className="relative overflow-hidden bg-slate-950">
         <div className="absolute inset-0">
           <img
-            src="/materials/elevators/elevators-hero.jpg"
+            src="/materials/elevators-hero.jpg"
             alt="آسانسور و تجهیزات آسانسور"
             className="h-full w-full object-cover opacity-35"
           />
