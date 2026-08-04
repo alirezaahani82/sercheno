@@ -127,7 +127,7 @@ const serviceCategories = [
   {
     image: "/materials/gachkar.jpg",
     title: "گچ‌کار",
-    text: "اجرای گچ‌کاری و سفیدکاری ساختمان",
+    text: "اجرای گچ‌کاری ساختمان",
   },
   {
     image: "/materials/asansorkar.jpg",
@@ -142,32 +142,32 @@ const serviceCategories = [
   {
     image: "/materials/kanafkar.jpg",
     title: "کناف‌کار",
-    text: "اجرای کناف و سقف‌های دکوراتیو",
+    text: "اجرای کناف و سقف کاذب",
   },
   {
     image: "/materials/kooler.jpg",
     title: "نصب و تعمیر کولر و پکیج",
-    text: "نصب، سرویس و تعمیر تجهیزات گرمایشی و سرمایشی",
+    text: "نصب، سرویس و تعمیر",
   },
   {
     image: "/materials/nazafat.jpg",
     title: "نظافت‌کار",
-    text: "نظافت ساختمان و پروژه‌های ساختمانی",
+    text: "خدمات نظافت ساختمان",
   },
   {
     image: "/materials/almator.jpg",
     title: "آرماتوربند",
-    text: "اجرای آرماتوربندی و سازه‌های بتنی",
+    text: "اجرای آرماتوربندی ساختمان",
   },
   {
     image: "/materials/simankar.jpg",
     title: "سیمان‌کار",
-    text: "اجرای سیمان‌کاری ساختمان",
+    text: "اجرای انواع عملیات سیمانی",
   },
   {
     image: "/materials/mohandes.jpg",
     title: "مهندس و پیمانکار",
-    text: "مهندسی، اجرا و مدیریت پروژه",
+    text: "مهندسی، اجرا و پیمانکاری",
   },
 ];
 
@@ -201,7 +201,6 @@ export default function Home() {
               <div className="text-2xl font-black tracking-tight text-blue-700">
                 سرچنو
               </div>
-
               <div className="text-xs text-slate-500">
                 بازار هوشمند ساخت‌وساز
               </div>
@@ -213,24 +212,15 @@ export default function Home() {
               خانه
             </Link>
 
-            <Link
-              href="/materials"
-              className="hover:text-blue-700"
-            >
+            <Link href="/materials" className="hover:text-blue-700">
               مصالح و تجهیزات
             </Link>
 
-            <Link
-              href="/service"
-              className="hover:text-blue-700"
-            >
+            <Link href="/service" className="hover:text-blue-700">
               خدمات ساختمانی
             </Link>
 
-            <Link
-              href="/about"
-              className="hover:text-blue-700"
-            >
+            <Link href="/about" className="hover:text-blue-700">
               درباره سرچنو
             </Link>
           </nav>
@@ -242,7 +232,6 @@ export default function Home() {
               title="سبد خرید"
             >
               🛒
-
               <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-[10px] font-black text-white">
                 0
               </span>
@@ -304,7 +293,6 @@ export default function Home() {
               جست‌وجو کنید، مقایسه کنید و با بهترین گزینه ارتباط بگیرید.
             </p>
 
-            {/* Search Engine */}
             <div className="mx-auto mt-10 max-w-5xl rounded-[2rem] border border-white/20 bg-white/95 p-3 text-right shadow-2xl backdrop-blur-md">
               <div className="grid grid-cols-2 gap-2 border-b border-slate-200 p-2 sm:flex">
                 <Link
@@ -324,9 +312,7 @@ export default function Home() {
 
               <div className="mt-3 flex flex-col gap-3 sm:flex-row">
                 <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4">
-                  <span className="text-xl">
-                    🔍
-                  </span>
+                  <span className="text-xl">🔍</span>
 
                   <input
                     type="text"
@@ -339,25 +325,11 @@ export default function Home() {
                   className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none sm:w-44"
                   defaultValue="تبریز"
                 >
-                  <option value="تبریز">
-                    📍 تبریز
-                  </option>
-
-                  <option value="تهران">
-                    تهران
-                  </option>
-
-                  <option value="ارومیه">
-                    ارومیه
-                  </option>
-
-                  <option value="زنجان">
-                    زنجان
-                  </option>
-
-                  <option value="همه">
-                    همه شهرها
-                  </option>
+                  <option value="تبریز">📍 تبریز</option>
+                  <option value="تهران">تهران</option>
+                  <option value="ارومیه">ارومیه</option>
+                  <option value="زنجان">زنجان</option>
+                  <option value="همه">همه شهرها</option>
                 </select>
 
                 <button
@@ -369,11 +341,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Popular Searches */}
             <div className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-blue-100">
-              <span className="px-2 py-2">
-                جست‌وجوهای محبوب:
-              </span>
+              <span className="px-2 py-2">جست‌وجوهای محبوب:</span>
 
               <Link
                 href="/materials/stone-tile"
@@ -410,8 +379,6 @@ export default function Home() {
       {/* Quick Actions */}
       <section className="relative z-10 mx-auto -mt-8 max-w-6xl px-5">
         <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl sm:grid-cols-2">
-
-          {/* Store */}
           <Link
             href="/store/register"
             className="group relative min-h-[260px] overflow-hidden border-b border-slate-100 sm:border-b-0 sm:border-l"
@@ -422,51 +389,49 @@ export default function Home() {
               className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/55 to-slate-950/20" />
+            <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/60 to-slate-950/20" />
 
-            <div className="relative z-10 flex h-full min-h-[260px] flex-col justify-center p-8 text-white">
+            <div className="relative z-10 flex h-full min-h-[260px] flex-col justify-center p-7 text-white">
               <h3 className="text-2xl font-black">
                 فروشنده یا تأمین‌کننده هستید؟
               </h3>
 
-              <p className="mt-3 max-w-md leading-7 text-slate-200">
+              <p className="mt-3 max-w-sm text-sm leading-7 text-slate-200">
                 فروشگاه و محصولات خود را در سرچنو ثبت کنید و مشتریان جدید پیدا کنید.
               </p>
 
-              <div className="mt-7 inline-flex w-fit rounded-xl bg-blue-700 px-6 py-4 font-bold text-white transition group-hover:bg-blue-800">
+              <span className="mt-6 inline-block w-fit rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold transition group-hover:bg-blue-800">
                 ثبت فروشگاه ←
-              </div>
+              </span>
             </div>
           </Link>
 
-          {/* Service */}
           <Link
             href="/service/register"
             className="group relative min-h-[260px] overflow-hidden"
           >
             <img
               src="/ostadkar.jpg"
-              alt="ثبت خدمات و تخصص"
+              alt="ثبت خدمات"
               className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/55 to-slate-950/20" />
+            <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/60 to-slate-950/20" />
 
-            <div className="relative z-10 flex h-full min-h-[260px] flex-col justify-center p-8 text-white">
+            <div className="relative z-10 flex h-full min-h-[260px] flex-col justify-center p-7 text-white">
               <h3 className="text-2xl font-black">
                 استادکار یا ارائه‌دهنده خدمات هستید؟
               </h3>
 
-              <p className="mt-3 max-w-md leading-7 text-slate-200">
-                تخصص، سابقه کار و نمونه‌کار خود را ثبت کنید و مشتریان جدید بگیرید.
+              <p className="mt-3 max-w-sm text-sm leading-7 text-slate-200">
+                تخصص، سابقه کار و محدوده فعالیت خود را ثبت کنید و مشتریان جدید بگیرید.
               </p>
 
-              <div className="mt-7 inline-flex w-fit rounded-xl bg-emerald-600 px-6 py-4 font-bold text-white transition group-hover:bg-emerald-700">
-                ثبت خدمات و تخصص ←
-              </div>
+              <span className="mt-6 inline-block w-fit rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold transition group-hover:bg-emerald-700">
+                ثبت خدمات ←
+              </span>
             </div>
           </Link>
-
         </div>
       </section>
 
@@ -498,7 +463,6 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* 13 Categories */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {materialCategories.map((item) => (
             <Link
@@ -563,19 +527,16 @@ export default function Home() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {serviceCategories.map((service) => (
               <Link
-                key={service.title}
                 href="/service"
+                key={service.title}
                 className="group cursor-pointer overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl"
               >
-                {/* Full image */}
-                <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                <div className="h-48 w-full overflow-hidden bg-slate-100">
                   <img
                     src={service.image}
                     alt={service.title}
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent" />
                 </div>
 
                 <div className="p-6">
@@ -685,45 +646,57 @@ export default function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             <Link
               href="/store/register"
-              className="block rounded-3xl bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+              className="group relative min-h-[360px] overflow-hidden rounded-3xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
-                🏪
-              </div>
+              <img
+                src="/gah.jpg"
+                alt="ثبت فروشگاه در سرچنو"
+                className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
 
-              <h3 className="mt-6 text-2xl font-black">
-                فروشنده یا تأمین‌کننده هستید؟
-              </h3>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent" />
 
-              <p className="mt-3 leading-7 text-slate-500">
-                فروشگاه و محصولات خود را ثبت کنید و مشتریان جدید پیدا کنید.
-              </p>
+              <div className="relative z-10 flex h-full min-h-[360px] flex-col justify-end p-8 text-white">
+                <h3 className="text-2xl font-black">
+                  فروشنده یا تأمین‌کننده هستید؟
+                </h3>
 
-              <div className="mt-7 inline-block rounded-xl bg-blue-700 px-6 py-4 font-bold text-white transition hover:bg-blue-800">
-                ثبت فروشگاه
+                <p className="mt-3 max-w-lg leading-7 text-slate-200">
+                  فروشگاه و محصولات خود را ثبت کنید و مشتریان جدید پیدا کنید.
+                </p>
+
+                <div className="mt-7 inline-block w-fit rounded-xl bg-blue-700 px-6 py-4 font-bold text-white transition hover:bg-blue-800">
+                  ثبت فروشگاه
+                </div>
               </div>
             </Link>
 
-            <div className="rounded-3xl bg-white p-8 shadow-sm">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">
-                👷
+            <div className="group relative min-h-[360px] overflow-hidden rounded-3xl bg-white shadow-sm">
+              <img
+                src="/ostadkar.jpg"
+                alt="ثبت خدمات و تخصص در سرچنو"
+                className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent" />
+
+              <div className="relative z-10 flex h-full min-h-[360px] flex-col justify-end p-8 text-white">
+                <h3 className="text-2xl font-black">
+                  استادکار یا ارائه‌دهنده خدمات هستید؟
+                </h3>
+
+                <p className="mt-3 max-w-lg leading-7 text-slate-200">
+                  تخصص، سابقه کار، نمونه‌کار و محدوده فعالیت خود را ثبت کنید
+                  و مشتریان جدید بگیرید.
+                </p>
+
+                <Link
+                  href="/service/register"
+                  className="mt-7 inline-block w-fit rounded-xl bg-emerald-600 px-6 py-4 font-bold text-white transition hover:bg-emerald-700"
+                >
+                  ثبت خدمات و تخصص
+                </Link>
               </div>
-
-              <h3 className="mt-6 text-2xl font-black">
-                استادکار یا ارائه‌دهنده خدمات هستید؟
-              </h3>
-
-              <p className="mt-3 leading-7 text-slate-500">
-                تخصص، سابقه کار، نمونه‌کار و محدوده فعالیت خود را ثبت کنید
-                و مشتریان جدید بگیرید.
-              </p>
-
-              <Link
-                href="/service/register"
-                className="mt-7 inline-block rounded-xl bg-emerald-600 px-6 py-4 font-bold text-white transition hover:bg-emerald-700"
-              >
-                ثبت خدمات و تخصص
-              </Link>
             </div>
           </div>
         </div>
