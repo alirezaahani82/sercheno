@@ -218,95 +218,171 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
-        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+     {/* Hero */}
+<section
+  id="home"
+  className="relative min-h-[650px] overflow-hidden"
+>
+  {/* Hero Background Image */}
+  <div className="absolute inset-0">
+    <img
+      src="/hero-searchino.jpg"
+      alt="سرچنو - بازار هوشمند ساخت‌وساز"
+      className="h-full w-full object-cover"
+    />
 
-        <div className="relative mx-auto max-w-7xl px-5 py-20 lg:py-28">
-          <div className="mx-auto max-w-5xl text-center text-white">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur">
-              <span>🚀</span>
-              <span>همه چیز برای ساخت‌وساز، در یکجا</span>
-            </div>
+    {/* Dark blue overlay */}
+    <div className="absolute inset-0 bg-blue-950/65" />
 
-            <h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
-              هر چیزی برای ساختن،
-              <br />
-              <span className="text-cyan-300">
-                در سرچنو پیدا کن
-              </span>
-            </h1>
+    {/* Gradient for better readability */}
+    <div className="absolute inset-0 bg-gradient-to-l from-blue-950/90 via-blue-900/55 to-blue-950/30" />
+  </div>
 
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-blue-100 sm:text-lg">
-              مصالح ساختمانی، تجهیزات و متخصصان مورد نیاز پروژه‌تان را
-              جست‌وجو کنید، مقایسه کنید و با بهترین گزینه ارتباط بگیرید.
-            </p>
+  {/* Decorative effects */}
+  <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-cyan-400/10 blur-3xl" />
+  <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
 
-            {/* Search Box */}
-            <div className="mx-auto mt-10 max-w-4xl rounded-3xl bg-white p-3 shadow-2xl">
-              <div className="grid grid-cols-2 gap-2 border-b border-slate-100 p-2 sm:flex">
-                <Link
-                  href="/materials"
-                  className="rounded-xl bg-blue-700 px-5 py-3 text-center text-sm font-bold text-white"
-                >
-                  🧱 خرید مصالح
-                </Link>
+  {/* Hero Content */}
+  <div className="relative z-10 mx-auto max-w-7xl px-5 py-24 lg:py-32">
+    <div className="mx-auto max-w-5xl text-center text-white">
 
-                <Link
-                  href="/service"
-                  className="rounded-xl px-5 py-3 text-center text-sm font-bold text-slate-600 hover:bg-slate-100"
-                >
-                  🛠️ دریافت خدمات
-                </Link>
-              </div>
+      {/* Badge */}
+      <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur-md">
+        <span>🚀</span>
+        <span>همه چیز برای ساخت‌وساز، در یکجا</span>
+      </div>
 
-              <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
-                  <span className="text-xl">🔍</span>
+      {/* Title */}
+      <h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
+        هر چیزی برای ساختن،
+        <span className="mt-3 block text-cyan-300">
+          در سرچنو پیدا کن
+        </span>
+      </h1>
 
-                  <input
-                    type="text"
-                    placeholder="مثلاً کاشی، سیمان، پنجره یا نصاب..."
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
-                  />
-                </div>
+      {/* Description */}
+      <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-blue-100 sm:text-lg">
+        مصالح ساختمانی، تجهیزات و متخصصان مورد نیاز پروژه‌تان را
+        جست‌وجو کنید، مقایسه کنید و با بهترین گزینه ارتباط بگیرید.
+      </p>
 
-                <select className="rounded-2xl bg-slate-50 px-5 py-4 text-sm text-slate-700 outline-none">
-                  <option>📍 تبریز</option>
-                  <option>تهران</option>
-                  <option>ارومیه</option>
-                  <option>زنجان</option>
-                  <option>همه شهرها</option>
-                </select>
+      {/* Search Engine */}
+      <div className="mx-auto mt-10 max-w-5xl rounded-[2rem] border border-white/20 bg-white/95 p-3 text-right shadow-2xl backdrop-blur-md">
 
-                <button
-                  type="button"
-                  className="rounded-2xl bg-blue-700 px-8 py-4 font-bold text-white transition hover:bg-blue-800"
-                >
-                  جست‌وجو
-                </button>
-              </div>
-            </div>
+        {/* Search Type */}
+        <div className="grid grid-cols-2 gap-2 border-b border-slate-200 p-2 sm:flex">
 
-            <div className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-blue-100">
-              <span>جست‌وجوهای محبوب:</span>
+          <Link
+            href="/materials"
+            className="rounded-xl bg-blue-700 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-blue-800"
+          >
+            🧱 خرید مصالح
+          </Link>
 
-              <span className="rounded-full bg-white/10 px-3 py-1">
-                کاشی ۶۰×۱۲۰
-              </span>
+          <Link
+            href="/service"
+            className="rounded-xl px-5 py-3 text-center text-sm font-bold text-slate-600 transition hover:bg-slate-100"
+          >
+            🛠️ دریافت خدمات
+          </Link>
 
-              <span className="rounded-full bg-white/10 px-3 py-1">
-                پنجره UPVC
-              </span>
-
-              <span className="rounded-full bg-white/10 px-3 py-1">
-                نصاب سرامیک
-              </span>
-            </div>
-          </div>
         </div>
-      </section>
+
+        {/* Search Fields */}
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+
+          {/* Search Input */}
+          <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4">
+
+            <span className="text-xl">
+              🔍
+            </span>
+
+            <input
+              type="text"
+              placeholder="مثلاً سیمان، میلگرد، آسانسور، کاشی یا نصاب..."
+              className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+            />
+
+          </div>
+
+          {/* City */}
+          <select
+            className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none sm:w-44"
+            defaultValue="تبریز"
+          >
+            <option value="تبریز">
+              📍 تبریز
+            </option>
+
+            <option value="تهران">
+              تهران
+            </option>
+
+            <option value="ارومیه">
+              ارومیه
+            </option>
+
+            <option value="زنجان">
+              زنجان
+            </option>
+
+            <option value="همه">
+              همه شهرها
+            </option>
+          </select>
+
+          {/* Search Button */}
+          <button
+            type="button"
+            className="rounded-2xl bg-blue-700 px-10 py-4 font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
+          >
+            جست‌وجو
+          </button>
+
+        </div>
+      </div>
+
+      {/* Popular Searches */}
+      <div className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-blue-100">
+
+        <span className="px-2 py-2">
+          جست‌وجوهای محبوب:
+        </span>
+
+        <Link
+          href="/materials/stone-tile"
+          className="rounded-full border border-white/10 bg-white/10 px-4 py-2 backdrop-blur transition hover:bg-white/20"
+        >
+          کاشی ۶۰×۱۲۰
+        </Link>
+
+        <Link
+          href="/materials/doors-windows"
+          className="rounded-full border border-white/10 bg-white/10 px-4 py-2 backdrop-blur transition hover:bg-white/20"
+        >
+          پنجره UPVC
+        </Link>
+
+        <Link
+          href="/materials/iron-steel"
+          className="rounded-full border border-white/10 bg-white/10 px-4 py-2 backdrop-blur transition hover:bg-white/20"
+        >
+          میلگرد
+        </Link>
+
+        <Link
+          href="/materials/elevator"
+          className="rounded-full border border-white/10 bg-white/10 px-4 py-2 backdrop-blur transition hover:bg-white/20"
+        >
+          آسانسور
+        </Link>
+
+      </div>
+
+    </div>
+  </div>
+</section>
 
       {/* Quick Actions */}
       <section className="relative z-10 mx-auto -mt-8 max-w-6xl px-5">
