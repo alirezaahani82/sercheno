@@ -85,9 +85,10 @@ const materialCategories = [
 
 const serviceCategories = [
   {
-    icon: "👷",
-    title: "بنا و استادکار",
-    text: "اجرای انواع عملیات ساختمانی",
+    slug: "service",
+    title: "بنا و استاد کار",
+    count: "اجرا انوع عملیات ساختمانی",
+    image: "/materials/bana.jpg",
   },
   {
     icon: "🪟",
