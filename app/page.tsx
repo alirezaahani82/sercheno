@@ -85,11 +85,10 @@ const materialCategories = [
 
 const serviceCategories = [
   {
-    slug: "service",
-    title: "بنا و استاد کار",
-    count: "اجرا انوع عملیات ساختمانی",
-    image: "/materials/bana.jpg",
-  },
+  image: "/materials/bana.jpg",
+  title: "بنا و استادکار",
+  text: "اجرای انواع عملیات ساختمانی",
+},
   {
     icon: "🪟",
     title: "نصاب درب و پنجره",
@@ -390,9 +389,17 @@ export default function Home() {
         <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl sm:grid-cols-2">
           <div className="border-b border-slate-100 p-7 sm:border-b-0 sm:border-l">
             <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
-                🧱
-              </div>
+              <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm">
+  {service.image ? (
+    <img
+      src={service.image}
+      alt={service.title}
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <span className="text-3xl">{service.icon}</span>
+  )}
+</div>
 
               <div className="flex-1">
                 <h3 className="font-black">
