@@ -539,31 +539,35 @@ export default function Home() {
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {serviceCategories.map((service) => (
-              <Link
-                href="/service"
-                key={service.title}
-                className="group rounded-3xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm">
-                  {service.icon}
-                </div>
+  <div
+    key={service.title}
+    className="group cursor-pointer rounded-3xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl"
+  >
+    <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm">
+      {service.image ? (
+        <img
+          src={service.image}
+          alt={service.title}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <span className="text-3xl">{service.icon}</span>
+      )}
+    </div>
 
-                <h3 className="mt-5 font-black">
-                  {service.title}
-                </h3>
+    <h3 className="mt-5 font-black">
+      {service.title}
+    </h3>
 
-                <p className="mt-2 text-sm text-slate-500">
-                  {service.text}
-                </p>
+    <p className="mt-2 text-sm text-slate-500">
+      {service.text}
+    </p>
 
-                <div className="mt-5 text-sm font-bold text-emerald-600">
-                  مشاهده متخصصان ←
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+    <div className="mt-5 text-sm font-bold text-emerald-600">
+      مشاهده متخصصان ←
+    </div>
+  </div>
+))}
 
       {/* Popular Services */}
       <section className="mx-auto max-w-7xl px-5 py-20">
