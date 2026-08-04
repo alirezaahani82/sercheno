@@ -511,7 +511,75 @@ export default function Home() {
         </div>
       </section>
 
-{/* Services */} <section id="services" className="bg-white py-20"> <div className="mx-auto max-w-7xl px-5"> <div className="mb-10 flex items-end justify-between"> <div> <span className="text-sm font-bold text-emerald-600"> خدمات ساختمانی </span> <h2 className="mt-2 text-3xl font-black"> متخصص مورد نیاز پروژه‌تان را پیدا کنید </h2> <p className="mt-3 text-slate-500"> از استادکار و بنا تا نصاب، جوشکار و متخصصان فنی. </p> </div> <Link href="/service" className="hidden font-bold text-emerald-600 sm:block" > همه خدمات ← </Link> </div> <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"> {serviceCategories.map((service) => ( <div key={service.title} className="group cursor-pointer rounded-3xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl" > <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm"> {service.image ? ( <img src={service.image} alt={service.title} className="h-full w-full object-cover" /> ) : ( <span className="text-3xl"> {service.icon} </span> )} </div> <h3 className="mt-5 font-black"> {service.title} </h3> <p className="mt-2 text-sm text-slate-500"> {service.text} </p> <div className="mt-5 text-sm font-bold text-emerald-600"> مشاهده متخصصان ← </div> </div> ))} </div> </div> </section>
+{/* Services */}
+<section id="services" className="bg-white py-20">
+  <div className="mx-auto max-w-7xl px-5">
+
+    <div className="mb-10 flex items-end justify-between">
+      <div>
+        <span className="text-sm font-bold text-emerald-600">
+          خدمات ساختمانی
+        </span>
+
+        <h2 className="mt-2 text-3xl font-black">
+          متخصص مورد نیاز پروژه‌تان را پیدا کنید
+        </h2>
+
+        <p className="mt-3 text-slate-500">
+          از استادکار و بنا تا نصاب، جوشکار و متخصصان فنی.
+        </p>
+      </div>
+
+      <Link
+        href="/service"
+        className="hidden font-bold text-emerald-600 sm:block"
+      >
+        همه خدمات ←
+      </Link>
+    </div>
+
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+      {serviceCategories.map((service) => (
+        <div
+          key={service.title}
+          className="group cursor-pointer rounded-3xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl"
+        >
+
+          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm">
+
+            {"image" in service && service.image ? (
+              <img
+                src={service.image}
+                alt={service.title}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-3xl">
+                {"icon" in service ? service.icon : "👷"}
+              </span>
+            )}
+
+          </div>
+
+          <h3 className="mt-5 font-black">
+            {service.title}
+          </h3>
+
+          <p className="mt-2 text-sm text-slate-500">
+            {service.text}
+          </p>
+
+          <div className="mt-5 text-sm font-bold text-emerald-600">
+            مشاهده متخصصان ←
+          </div>
+
+        </div>
+      ))}
+
+    </div>
+  </div>
+</section>
 
       {/* Popular Services */}
       <section className="mx-auto max-w-7xl px-5 py-20">
