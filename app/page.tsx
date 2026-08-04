@@ -77,8 +77,8 @@ const materialCategories = [
   },
   {
     slug: "elevators",
-    title: "آسانسور و تجهیزات ",
-    count: "32 فروشنده",
+    title: "آسانسور و تجهیزات",
+    count: "۳۲ فروشنده",
     image: "/materials/elevator-hero.jpg",
   },
 ];
@@ -142,7 +142,7 @@ const serviceCategories = [
   {
     image: "/materials/kanafkar.jpg",
     title: "کناف‌کار",
-    text: "اجرای کناف و سقف کاذب",
+    text: "اجرای کناف و سقف‌های دکوراتیو",
   },
   {
     image: "/materials/kooler.jpg",
@@ -152,7 +152,7 @@ const serviceCategories = [
   {
     image: "/materials/nazafat.jpg",
     title: "نظافت‌کار",
-    text: "نظافت ساختمان و محیط‌های کاری",
+    text: "نظافت ساختمان و پروژه‌های ساختمانی",
   },
   {
     image: "/materials/almator.jpg",
@@ -162,12 +162,12 @@ const serviceCategories = [
   {
     image: "/materials/simankar.jpg",
     title: "سیمانکار",
-    text: "اجرای سیمان‌کاری و عملیات مرتبط",
+    text: "اجرای سیمان‌کاری و زیرسازی",
   },
   {
     image: "/materials/mohandes.jpg",
     title: "مهندس و پیمانکار",
-    text: "مهندسی، اجرا و مدیریت پروژه‌های ساختمانی",
+    text: "خدمات مهندسی، اجرا و پیمانکاری",
   },
 ];
 
@@ -212,24 +212,15 @@ export default function Home() {
               خانه
             </Link>
 
-            <Link
-              href="/materials"
-              className="hover:text-blue-700"
-            >
+            <Link href="/materials" className="hover:text-blue-700">
               مصالح و تجهیزات
             </Link>
 
-            <Link
-              href="/service"
-              className="hover:text-blue-700"
-            >
+            <Link href="/service" className="hover:text-blue-700">
               خدمات ساختمانی
             </Link>
 
-            <Link
-              href="/about"
-              className="hover:text-blue-700"
-            >
+            <Link href="/about" className="hover:text-blue-700">
               درباره سرچنو
             </Link>
           </nav>
@@ -268,7 +259,6 @@ export default function Home() {
         id="home"
         className="relative min-h-[650px] overflow-hidden"
       >
-        {/* Hero Background Image */}
         <div className="absolute inset-0">
           <img
             src="/hero-searchino.jpg"
@@ -276,28 +266,21 @@ export default function Home() {
             className="h-full w-full object-cover"
           />
 
-          {/* Dark blue overlay */}
           <div className="absolute inset-0 bg-blue-950/65" />
 
-          {/* Gradient for better readability */}
           <div className="absolute inset-0 bg-gradient-to-l from-blue-950/90 via-blue-900/55 to-blue-950/30" />
         </div>
 
-        {/* Decorative effects */}
         <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-cyan-400/10 blur-3xl" />
         <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
 
-        {/* Hero Content */}
         <div className="relative z-10 mx-auto max-w-7xl px-5 py-24 lg:py-32">
           <div className="mx-auto max-w-5xl text-center text-white">
-
-            {/* Badge */}
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur-md">
               <span>🚀</span>
               <span>همه چیز برای ساخت‌وساز، در یکجا</span>
             </div>
 
-            {/* Title */}
             <h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
               هر چیزی برای ساختن،
               <span className="mt-3 block text-cyan-300">
@@ -305,18 +288,13 @@ export default function Home() {
               </span>
             </h1>
 
-            {/* Description */}
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-blue-100 sm:text-lg">
               مصالح ساختمانی، تجهیزات و متخصصان مورد نیاز پروژه‌تان را
               جست‌وجو کنید، مقایسه کنید و با بهترین گزینه ارتباط بگیرید.
             </p>
 
-            {/* Search Engine */}
             <div className="mx-auto mt-10 max-w-5xl rounded-[2rem] border border-white/20 bg-white/95 p-3 text-right shadow-2xl backdrop-blur-md">
-
-              {/* Search Type */}
               <div className="grid grid-cols-2 gap-2 border-b border-slate-200 p-2 sm:flex">
-
                 <Link
                   href="/materials"
                   className="rounded-xl bg-blue-700 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-blue-800"
@@ -330,67 +308,40 @@ export default function Home() {
                 >
                   🛠️ دریافت خدمات
                 </Link>
-
               </div>
 
-              {/* Search Fields */}
               <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-
-                {/* Search Input */}
                 <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4">
-
-                  <span className="text-xl">
-                    🔍
-                  </span>
+                  <span className="text-xl">🔍</span>
 
                   <input
                     type="text"
                     placeholder="مثلاً سیمان، میلگرد، آسانسور، کاشی یا نصاب..."
                     className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
                   />
-
                 </div>
 
-                {/* City */}
                 <select
                   className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none sm:w-44"
                   defaultValue="تبریز"
                 >
-                  <option value="تبریز">
-                    📍 تبریز
-                  </option>
-
-                  <option value="تهران">
-                    تهران
-                  </option>
-
-                  <option value="ارومیه">
-                    ارومیه
-                  </option>
-
-                  <option value="زنجان">
-                    زنجان
-                  </option>
-
-                  <option value="همه">
-                    همه شهرها
-                  </option>
+                  <option value="تبریز">📍 تبریز</option>
+                  <option value="تهران">تهران</option>
+                  <option value="ارومیه">ارومیه</option>
+                  <option value="زنجان">زنجان</option>
+                  <option value="همه">همه شهرها</option>
                 </select>
 
-                {/* Search Button */}
                 <button
                   type="button"
                   className="rounded-2xl bg-blue-700 px-10 py-4 font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
                 >
                   جست‌وجو
                 </button>
-
               </div>
             </div>
 
-            {/* Popular Searches */}
             <div className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-blue-100">
-
               <span className="px-2 py-2">
                 جست‌وجوهای محبوب:
               </span>
@@ -422,9 +373,7 @@ export default function Home() {
               >
                 آسانسور
               </Link>
-
             </div>
-
           </div>
         </div>
       </section>
@@ -434,7 +383,7 @@ export default function Home() {
         <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl sm:grid-cols-2">
           <div className="border-b border-slate-100 p-7 sm:border-b-0 sm:border-l">
             <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-3xl">
+              <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-blue-100 text-3xl">
                 🧱
               </div>
 
@@ -512,7 +461,6 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* 13 Categories */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {materialCategories.map((item) => (
             <Link
@@ -551,7 +499,6 @@ export default function Home() {
       {/* Services */}
       <section id="services" className="bg-white py-20">
         <div className="mx-auto max-w-7xl px-5">
-
           <div className="mb-10 flex items-end justify-between">
             <div>
               <span className="text-sm font-bold text-emerald-600">
@@ -576,39 +523,38 @@ export default function Home() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
             {serviceCategories.map((service) => (
               <Link
                 key={service.title}
                 href="/service"
-                className="group cursor-pointer rounded-3xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl"
+                className="group overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl"
               >
-
-                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm">
-
+                {/* عکس تمام مربع */}
+                <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
                   <img
                     src={service.image}
                     alt={service.title}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
 
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
                 </div>
 
-                <h3 className="mt-5 font-black">
-                  {service.title}
-                </h3>
+                <div className="p-6">
+                  <h3 className="font-black">
+                    {service.title}
+                  </h3>
 
-                <p className="mt-2 text-sm text-slate-500">
-                  {service.text}
-                </p>
+                  <p className="mt-2 text-sm text-slate-500">
+                    {service.text}
+                  </p>
 
-                <div className="mt-5 text-sm font-bold text-emerald-600">
-                  مشاهده متخصصان ←
+                  <div className="mt-5 text-sm font-bold text-emerald-600">
+                    مشاهده متخصصان ←
+                  </div>
                 </div>
-
               </Link>
             ))}
-
           </div>
         </div>
       </section>
@@ -835,10 +781,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 py-14">
           <div className="grid gap-10 md:grid-cols-4">
             <div className="md:col-span-2">
-              <Link
-                href="/"
-                className="flex items-center gap-3"
-              >
+              <Link href="/" className="flex items-center gap-3">
                 <img
                   src="/logo.png"
                   alt="سرچنو"
