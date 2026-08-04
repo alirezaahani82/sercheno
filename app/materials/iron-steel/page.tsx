@@ -37,7 +37,7 @@ const products = [
     seller: "آهن‌آلات آذربایجان",
     city: "تبریز",
     rating: "۴.۹",
-    image: "/materials/iron/میلگرد.jpg",
+    image: "/materials/iron-steel.jpg",
   },
   {
     title: "تیرآهن IPE",
@@ -227,7 +227,7 @@ export default function IronSteelPage() {
 
               <p className="mt-1 text-xs text-slate-400">
                 بعداً تصویر واقعی در مسیر
-                /public/materials/steel-iron.jpg
+                /public/materials/iron-steel.jpg
                 قرار می‌گیرد.
               </p>
             </div>
