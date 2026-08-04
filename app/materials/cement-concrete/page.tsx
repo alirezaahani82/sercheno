@@ -157,7 +157,24 @@ export default function CementPage() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
+      <section className="relative min-h-[420px] overflow-hidden">
+  
+  {/* عکس واقعی سیمان */}
+  <img
+    src="/materials/cement-concrete.jpg"
+    alt="سیمان و مصالح ساختمانی"
+    className="absolute inset-0 h-full w-full object-cover"
+  />
+
+  {/* لایه تیره روی عکس برای خوانایی متن */}
+  <div className="absolute inset-0 bg-blue-950/75" />
+
+  {/* افکت رنگی */}
+  <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
+
+  <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+
+  <div className="relative mx-auto max-w-7xl px-5 py-14 lg:py-20">
         <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
 
         <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
