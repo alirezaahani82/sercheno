@@ -22,7 +22,7 @@ export default function RegisterProjectPage() {
             />
 
             <div>
-              <div className="text-2xl font-black text-blue-700">
+              <div className="text-2xl font-black tracking-tight text-blue-700">
                 سرچنو
               </div>
               <div className="text-xs text-slate-500">
@@ -32,326 +32,341 @@ export default function RegisterProjectPage() {
           </Link>
 
           <Link
-            href="/"
+            href="/tenders"
             className="rounded-xl bg-slate-100 px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
           >
-            بازگشت به صفحه اصلی
+            بازگشت به مناقصات
           </Link>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-l from-blue-950 via-blue-900 to-blue-800 py-20 text-white">
-        <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-cyan-400/10 blur-3xl" />
-        <div className="absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src="/monagese.jpg"
+            alt="مناقصات کشوری سرچنو"
+            className="h-full w-full object-cover"
+          />
 
-        <div className="relative mx-auto max-w-5xl px-5 text-center">
-          <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-bold backdrop-blur">
-            🏗️ مناقصات کشوری سرچنو
-          </span>
+          <div className="absolute inset-0 bg-blue-950/80" />
+          <div className="absolute inset-0 bg-gradient-to-l from-blue-950 via-blue-900/70 to-blue-950/40" />
+        </div>
 
-          <h1 className="mt-6 text-4xl font-black leading-tight sm:text-5xl">
-            پروژه ساختمانی خود را
-            <span className="mt-3 block text-cyan-300">
-              برای اجرای تخصصی ثبت کنید
+        <div className="relative z-10 mx-auto max-w-7xl px-5 py-20 sm:py-24">
+          <div className="max-w-3xl text-white">
+            <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-bold backdrop-blur">
+              مناقصات کشوری سرچنو
             </span>
-          </h1>
 
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-blue-100 sm:text-lg">
-            پروژه خود را در سرچنو ثبت کنید تا فروشندگان، پیمانکاران و
-            متخصصان واجد شرایط بتوانند پیشنهاد خود را برای اجرای آن ارائه
-            کنند.
-          </p>
+            <h1 className="mt-6 text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
+              پروژه ساختمانی خود را
+              <span className="mt-3 block text-cyan-300">
+                به بهترین پیشنهاد بسپارید
+              </span>
+            </h1>
+
+            <p className="mt-6 max-w-2xl text-base leading-8 text-blue-100 sm:text-lg">
+              پروژه خود را در سرچنو ثبت کنید تا فروشندگان، تأمین‌کنندگان،
+              متخصصان و شرکت‌های فعال صنعت ساختمان بتوانند پیشنهاد خود را
+              برای اجرای آن ارائه کنند.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* Form */}
-      <section className="mx-auto max-w-5xl px-5 py-14">
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl sm:p-10">
+      <section className="mx-auto max-w-5xl px-5 py-12 sm:py-16">
+        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl">
 
-          {/* Section 1 */}
-          <div>
-            <div className="mb-7">
-              <span className="text-sm font-bold text-blue-700">
-                مرحله اول
-              </span>
+          {/* Form Header */}
+          <div className="border-b border-slate-100 bg-slate-50 p-7 sm:p-9">
+            <h2 className="text-2xl font-black">
+              ثبت پروژه جدید
+            </h2>
 
-              <h2 className="mt-2 text-2xl font-black">
-                اطلاعات ثبت‌کننده پروژه
-              </h2>
-
-              <p className="mt-2 text-sm leading-7 text-slate-500">
-                نوع شخصیت ثبت‌کننده پروژه را مشخص کنید.
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => setPersonType("real")}
-                className={`rounded-2xl border p-5 text-right transition ${
-                  personType === "real"
-                    ? "border-blue-600 bg-blue-50 ring-2 ring-blue-100"
-                    : "border-slate-200 bg-slate-50 hover:bg-white"
-                }`}
-              >
-                <div className="text-lg font-black">
-                  👤 شخص حقیقی
-                </div>
-
-                <div className="mt-2 text-sm text-slate-500">
-                  ثبت پروژه توسط شخص حقیقی
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPersonType("legal")}
-                className={`rounded-2xl border p-5 text-right transition ${
-                  personType === "legal"
-                    ? "border-blue-600 bg-blue-50 ring-2 ring-blue-100"
-                    : "border-slate-200 bg-slate-50 hover:bg-white"
-                }`}
-              >
-                <div className="text-lg font-black">
-                  🏢 شخص حقوقی
-                </div>
-
-                <div className="mt-2 text-sm text-slate-500">
-                  ثبت پروژه توسط شرکت، سازمان یا مجموعه حقوقی
-                </div>
-              </button>
-            </div>
-
-            <div className="mt-7 grid gap-5 md:grid-cols-2">
-              <Field
-                label={personType === "real" ? "نام و نام خانوادگی" : "نام شرکت / سازمان"}
-                placeholder={
-                  personType === "real"
-                    ? "نام و نام خانوادگی"
-                    : "نام کامل شرکت یا سازمان"
-                }
-              />
-
-              {personType === "real" ? (
-                <Field
-                  label="کد ملی"
-                  placeholder="کد ملی"
-                />
-              ) : (
-                <Field
-                  label="شماره ثبت"
-                  placeholder="شماره ثبت شرکت / سازمان"
-                />
-              )}
-
-              {personType === "legal" && (
-                <>
-                  <Field
-                    label="نام مدیر عامل"
-                    placeholder="نام و نام خانوادگی مدیر عامل"
-                  />
-
-                  <Field
-                    label="سمت یا موقعیت در پروژه"
-                    placeholder="مثلاً مدیر پروژه، نماینده شرکت، مالک یا کارفرما"
-                  />
-                </>
-              )}
-
-              <Field
-                label="شماره تماس"
-                placeholder="شماره تماس"
-                type="tel"
-              />
-
-              <Field
-                label="ایمیل"
-                placeholder="example@email.com"
-                type="email"
-              />
-            </div>
+            <p className="mt-2 text-sm leading-7 text-slate-500">
+              اطلاعات پروژه را با دقت وارد کنید تا پیشنهادهای مناسب‌تری
+              دریافت کنید.
+            </p>
           </div>
 
-          <div className="my-12 h-px bg-slate-200" />
+          <form className="space-y-10 p-6 sm:p-9">
 
-          {/* Section 2 */}
-          <div>
-            <div className="mb-7">
-              <span className="text-sm font-bold text-blue-700">
-                مرحله دوم
-              </span>
+            {/* Applicant Type */}
+            <section>
+              <h3 className="mb-5 text-lg font-black">
+                ۱. اطلاعات ثبت‌کننده پروژه
+              </h3>
 
-              <h2 className="mt-2 text-2xl font-black">
-                اطلاعات پروژه
-              </h2>
-            </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setPersonType("real")}
+                  className={`rounded-2xl border p-5 text-right transition ${
+                    personType === "real"
+                      ? "border-blue-600 bg-blue-50 ring-2 ring-blue-100"
+                      : "border-slate-200 bg-white hover:border-blue-300"
+                  }`}
+                >
+                  <div className="text-lg font-black">
+                    شخص حقیقی
+                  </div>
 
-            <div className="grid gap-5">
-              <Field
-                label="عنوان پروژه"
-                placeholder="مثلاً ساخت مجتمع مسکونی ۸ واحدی"
-              />
+                  <p className="mt-2 text-sm text-slate-500">
+                    برای مالک، کارفرما یا فردی که پروژه را شخصاً ثبت می‌کند.
+                  </p>
+                </button>
 
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-700">
-                  شرح پروژه و خدمات یا تخصص مورد نیاز
-                </label>
+                <button
+                  type="button"
+                  onClick={() => setPersonType("legal")}
+                  className={`rounded-2xl border p-5 text-right transition ${
+                    personType === "legal"
+                      ? "border-blue-600 bg-blue-50 ring-2 ring-blue-100"
+                      : "border-slate-200 bg-white hover:border-blue-300"
+                  }`}
+                >
+                  <div className="text-lg font-black">
+                    شخص حقوقی
+                  </div>
 
-                <textarea
-                  rows={7}
-                  placeholder="شرح کامل پروژه، عملیات مورد نیاز، تخصص مورد انتظار، حجم تقریبی کار و هر توضیحی که برای ارائه پیشنهاد دقیق لازم است..."
-                  className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
-                />
+                  <p className="mt-2 text-sm text-slate-500">
+                    برای شرکت، سازمان، مجموعه یا مؤسسه ثبت‌کننده پروژه.
+                  </p>
+                </button>
               </div>
 
-              <div className="grid gap-5 md:grid-cols-3">
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+
+                {personType === "real" ? (
+                  <>
+                    <Field
+                      label="نام و نام خانوادگی"
+                      placeholder="مثلاً علیرضا آهنی"
+                    />
+
+                    <Field
+                      label="کد ملی"
+                      placeholder="کد ملی"
+                      inputMode="numeric"
+                    />
+
+                    <Field
+                      label="شماره تماس"
+                      placeholder="۰۹۱۲..."
+                      inputMode="tel"
+                    />
+
+                    <Field
+                      label="سمت / نقش در پروژه"
+                      placeholder="مثلاً مالک، کارفرما، مدیر پروژه"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Field
+                      label="نام شرکت / سازمان"
+                      placeholder="نام کامل شرکت یا سازمان"
+                    />
+
+                    <Field
+                      label="شناسه ملی"
+                      placeholder="شناسه ملی"
+                      inputMode="numeric"
+                    />
+
+                    <Field
+                      label="شماره ثبت"
+                      placeholder="شماره ثبت شرکت"
+                      inputMode="numeric"
+                    />
+
+                    <Field
+                      label="نام مدیرعامل"
+                      placeholder="نام و نام خانوادگی مدیرعامل"
+                    />
+
+                    <Field
+                      label="شماره تماس"
+                      placeholder="شماره تماس شرکت یا نماینده"
+                      inputMode="tel"
+                    />
+                  </>
+                )}
+
+              </div>
+            </section>
+
+            {/* Project Information */}
+            <section>
+              <h3 className="mb-5 text-lg font-black">
+                ۲. اطلاعات پروژه
+              </h3>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+
                 <Field
-                  label="استان"
-                  placeholder="استان پروژه"
+                  label="عنوان پروژه"
+                  placeholder="مثلاً احداث ساختمان مسکونی ۸ طبقه"
                 />
+
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-slate-700">
+                    نوع پروژه
+                  </label>
+
+                  <select className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                    <option>ساختمان مسکونی</option>
+                    <option>ساختمان تجاری</option>
+                    <option>ساختمان اداری</option>
+                    <option>مجتمع مسکونی</option>
+                    <option>مجتمع تجاری</option>
+                    <option>صنعتی</option>
+                    <option>راه و ابنیه</option>
+                    <option>تأسیسات</option>
+                    <option>بازسازی</option>
+                    <option>سایر</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-slate-700">
+                    استان
+                  </label>
+
+                  <select className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                    <option>آذربایجان شرقی</option>
+                    <option>تهران</option>
+                    <option>آذربایجان غربی</option>
+                    <option>اردبیل</option>
+                    <option>زنجان</option>
+                    <option>البرز</option>
+                    <option>اصفهان</option>
+                    <option>فارس</option>
+                    <option>خراسان رضوی</option>
+                    <option>سایر استان‌ها</option>
+                  </select>
+                </div>
 
                 <Field
                   label="شهر"
-                  placeholder="شهر پروژه"
+                  placeholder="مثلاً تبریز"
                 />
 
                 <Field
-                  label="محدوده / آدرس پروژه"
-                  placeholder="آدرس یا محدوده تقریبی"
+                  label="محدوده / آدرس تقریبی پروژه"
+                  placeholder="آدرس یا محدوده اجرای پروژه"
                 />
-              </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-700">
-                  نوع پروژه
-                </label>
-
-                <select className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
-                  <option>انتخاب نوع پروژه</option>
-                  <option>ساختمان مسکونی</option>
-                  <option>مجتمع تجاری</option>
-                  <option>مجتمع اداری</option>
-                  <option>پروژه صنعتی</option>
-                  <option>پروژه عمرانی</option>
-                  <option>بازسازی و نوسازی</option>
-                  <option>تأسیسات ساختمانی</option>
-                  <option>سایر</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="my-12 h-px bg-slate-200" />
-
-          {/* Section 3 */}
-          <div>
-            <div className="mb-7">
-              <span className="text-sm font-bold text-blue-700">
-                مرحله سوم
-              </span>
-
-              <h2 className="mt-2 text-2xl font-black">
-                زمان‌بندی پروژه
-              </h2>
-            </div>
-
-            <div className="grid gap-5 md:grid-cols-3">
-              <Field
-                label="تاریخ شروع پروژه"
-                placeholder="۱۴۰۵/۰۱/۱۵"
-              />
-
-              <Field
-                label="تاریخ پایان پروژه"
-                placeholder="۱۴۰۵/۰۶/۳۰"
-              />
-
-              <Field
-                label="مهلت ارسال پیشنهاد"
-                placeholder="۱۴۰۵/۰۱/۳۰"
-              />
-            </div>
-          </div>
-
-          <div className="my-12 h-px bg-slate-200" />
-
-          {/* Section 4 */}
-          <div>
-            <div className="mb-7">
-              <span className="text-sm font-bold text-blue-700">
-                مرحله چهارم
-              </span>
-
-              <h2 className="mt-2 text-2xl font-black">
-                مدارک و توضیحات تکمیلی
-              </h2>
-            </div>
-
-            <div className="grid gap-5">
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-700">
-                  توضیحات تکمیلی
-                </label>
-
-                <textarea
-                  rows={5}
-                  placeholder="اطلاعات تکمیلی مورد نیاز برای شرکت‌کنندگان در مناقصه..."
-                  className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-7 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                <Field
+                  label="متراژ / حجم تقریبی پروژه"
+                  placeholder="مثلاً ۵۰۰۰ مترمربع"
                 />
+
+              </div>
+            </section>
+
+            {/* Project Description */}
+            <section>
+              <h3 className="mb-5 text-lg font-black">
+                ۳. شرح پروژه و خدمات یا تخصص مورد نیاز
+              </h3>
+
+              <textarea
+                rows={7}
+                placeholder="شرح کامل پروژه، عملیات مورد نیاز، مصالح یا تجهیزات مورد نیاز، تخصص مورد انتظار، حجم کار و سایر توضیحات مهم را وارد کنید..."
+                className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm leading-8 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </section>
+
+            {/* Timeline */}
+            <section>
+              <h3 className="mb-5 text-lg font-black">
+                ۴. زمان‌بندی پروژه
+              </h3>
+
+              <div className="grid gap-5 sm:grid-cols-3">
+
+                <Field
+                  label="تاریخ شروع پروژه"
+                  placeholder="۱۴۰۵/۰۶/۰۱"
+                />
+
+                <Field
+                  label="تاریخ پایان پروژه"
+                  placeholder="۱۴۰۶/۰۶/۰۱"
+                />
+
+                <Field
+                  label="مهلت ارسال پیشنهاد"
+                  placeholder="۱۴۰۵/۰۵/۲۵"
+                />
+
               </div>
 
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
-                <label className="block text-sm font-bold text-slate-700">
-                  بارگذاری مدارک پروژه
-                </label>
+              <p className="mt-3 text-xs leading-6 text-slate-400">
+                تاریخ‌ها را به صورت شمسی و با فرمت ۱۴۰۵/۰۶/۰۱ وارد کنید.
+              </p>
+            </section>
 
-                <p className="mt-2 text-xs leading-6 text-slate-500">
-                  در صورت نیاز می‌توانید نقشه، تصاویر، مشخصات فنی یا
-                  مدارک مرتبط با پروژه را بارگذاری کنید.
-                </p>
+            {/* Tender Requirements */}
+            <section>
+              <h3 className="mb-5 text-lg font-black">
+                ۵. شرایط و توضیحات شرکت در پروژه
+              </h3>
 
+              <textarea
+                rows={5}
+                placeholder="در صورت وجود شرایط خاص برای شرکت‌کنندگان، مدارک مورد نیاز، سابقه کاری، مجوزها یا الزامات فنی را وارد کنید..."
+                className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm leading-8 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </section>
+
+            {/* Confirmation */}
+            <section className="rounded-3xl border border-blue-100 bg-blue-50 p-6">
+              <div className="flex gap-4">
                 <input
-                  type="file"
-                  multiple
-                  className="mt-5 block w-full rounded-xl border border-slate-200 bg-white p-3 text-sm"
+                  id="confirm"
+                  type="checkbox"
+                  className="mt-1 h-5 w-5 accent-blue-700"
                 />
+
+                <label
+                  htmlFor="confirm"
+                  className="cursor-pointer text-sm leading-7 text-slate-700"
+                >
+                  تأیید می‌کنم اطلاعات واردشده صحیح است و اختیار ثبت این
+                  پروژه و دریافت پیشنهاد از فروشندگان، تأمین‌کنندگان و
+                  متخصصان را دارم.
+                </label>
               </div>
+            </section>
+
+            {/* Submit */}
+            <div className="border-t border-slate-100 pt-7">
+              <button
+                type="submit"
+                className="w-full rounded-2xl bg-blue-700 py-5 text-base font-black text-white shadow-xl shadow-blue-700/20 transition hover:bg-blue-800"
+              >
+                ثبت پروژه و انتشار مناقصه
+              </button>
+
+              <p className="mt-4 text-center text-xs leading-6 text-slate-400">
+                پس از ثبت، اطلاعات پروژه بررسی شده و در صورت تأیید در بخش
+                مناقصات سرچنو منتشر خواهد شد.
+              </p>
             </div>
-          </div>
 
-          <div className="my-10 rounded-2xl border border-blue-100 bg-blue-50 p-5">
-            <div className="flex gap-3">
-              <div className="text-xl">ℹ️</div>
-
-              <div>
-                <h3 className="font-black text-blue-900">
-                  توجه
-                </h3>
-
-                <p className="mt-2 text-sm leading-7 text-blue-800">
-                  اطلاعات پروژه باید دقیق و واقعی باشد. پس از بررسی
-                  اطلاعات، پروژه برای انتشار در بخش مناقصات سرچنو آماده
-                  خواهد شد و شرکت‌ها و متخصصان می‌توانند پیشنهاد خود را
-                  ارائه کنند.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Submit */}
-          <button
-            type="button"
-            className="w-full rounded-2xl bg-blue-700 px-6 py-5 text-lg font-black text-white shadow-xl shadow-blue-700/20 transition hover:bg-blue-800"
-          >
-            ثبت پروژه و ارسال برای بررسی
-          </button>
-
-          <p className="mt-4 text-center text-xs leading-6 text-slate-400">
-            با ثبت پروژه، صحت اطلاعات واردشده را تأیید می‌کنید.
-          </p>
+          </form>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-950 py-8 text-center text-xs text-slate-500">
+        <p>© ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.</p>
+        <p className="mt-2">شرکت امیر توان پویای گستر</p>
+      </footer>
     </main>
   );
 }
@@ -359,11 +374,11 @@ export default function RegisterProjectPage() {
 function Field({
   label,
   placeholder,
-  type = "text",
+  inputMode,
 }: {
   label: string;
   placeholder: string;
-  type?: string;
+  inputMode?: "numeric" | "tel" | "text";
 }) {
   return (
     <div>
@@ -372,9 +387,10 @@ function Field({
       </label>
 
       <input
-        type={type}
+        type="text"
+        inputMode={inputMode}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       />
     </div>
   );
