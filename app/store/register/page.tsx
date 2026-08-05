@@ -766,36 +766,60 @@ export default function StoreRegisterPage() {
       {/* Header */}
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-          <Link
-            href="/"
-            className="flex items-center gap-3"
-          >
-            <img
-              src="/logo.png"
-              alt="لوگوی سرچنو"
-              className="h-12 w-12 rounded-2xl object-contain"
-            />
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
 
-            <div>
-              <div className="text-2xl font-black text-blue-700">
-                سرچنو
-              </div>
+  {/* لوگو */}
+  <Link
+    href="/"
+    className="flex shrink-0 items-center gap-3"
+  >
+    <img
+      src="/logo.png"
+      alt="لوگوی سرچنو"
+      className="h-12 w-12 rounded-2xl object-contain"
+    />
 
-              <div className="text-xs text-slate-500">
-                بازار هوشمند ساخت‌وساز
-              </div>
-            </div>
-          </Link>
+    <div>
+      <div className="text-2xl font-black text-blue-700">
+        سرچنو
+      </div>
 
-          <Link
-            href="/"
-            className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-100"
-          >
-            بازگشت به صفحه اصلی
-            <ArrowRight size={18} />
-          </Link>
-        </div>
+      <div className="text-xs text-slate-500">
+        بازار هوشمند ساخت‌وساز
+      </div>
+    </div>
+  </Link>
+
+  {/* دکمه‌های سمت راست */}
+  <div className="flex items-center gap-2">
+
+    {/* ثبت محصول */}
+    <Link
+      href="/store/product/register"
+      className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-emerald-700"
+    >
+      <Package size={18} />
+      <span className="hidden sm:inline">
+        ثبت محصول
+      </span>
+    </Link>
+
+    {/* بازگشت */}
+    <Link
+      href="/"
+      className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-100"
+    >
+      <span className="hidden sm:inline">
+        بازگشت به صفحه اصلی
+      </span>
+      <ArrowRight size={18} />
+    </Link>
+
+  </div>
+
+</div>
+
+
       </header>
 
       {/* Hero */}
