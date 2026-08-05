@@ -62,7 +62,9 @@ type StoreForm = {
   ownerLastName: string;
   nationalCode: string;
   phone: string;
-
+  username: string;
+  password: string;
+  
   name: string;
   category: string;
   landline: string;
@@ -86,6 +88,9 @@ export default function StoreRegisterPage() {
     ownerLastName: "",
     nationalCode: "",
     phone: "",
+    
+    username: "",
+    password: "",
 
     name: "",
     category: "",
@@ -894,6 +899,65 @@ export default function StoreRegisterPage() {
               />
             </div>
           </section>
+
+          {/* Account Information */}
+
+<section className="overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-sm">
+  <div className="border-b border-blue-100 bg-blue-50 p-6">
+    <div className="flex items-center gap-3">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+        <User size={24} />
+      </div>
+
+      <div>
+        <h2 className="text-xl font-black text-slate-900">
+          اطلاعات ورود به پنل فروشگاه
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-500">
+          با این اطلاعات، بعداً می‌توانید بدون ثبت مجدد فروشگاه، محصولات خود را اضافه کنید.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div className="grid gap-5 p-6 md:grid-cols-2">
+
+    <Input
+      label="نام کاربری"
+      placeholder="مثلاً alireza_store"
+      value={storeForm.username}
+      onChange={(e) =>
+        updateStoreForm(
+          "username",
+          e.target.value
+        )
+      }
+    />
+
+    <Input
+      label="رمز عبور"
+      placeholder="حداقل ۶ کاراکتر"
+      type="password"
+      value={storeForm.password}
+      onChange={(e) =>
+        updateStoreForm(
+          "password",
+          e.target.value
+        )
+      }
+    />
+
+  </div>
+
+  <div className="mx-6 mb-6 rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-600">
+    <strong className="text-slate-800">
+      نکته:
+    </strong>{" "}
+    این اطلاعات برای شناسایی فروشگاه شما هنگام ثبت محصولات استفاده خواهد شد.
+  </div>
+</section>
+
 
           {/* Store Information */}
 
