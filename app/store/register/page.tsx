@@ -711,6 +711,9 @@ export default function StoreRegisterPage() {
       -------------------------------- */
 
       setStoreForm({
+        username: "",
+        password: "",
+        
         ownerName: "",
         ownerLastName: "",
         nationalCode: "",
