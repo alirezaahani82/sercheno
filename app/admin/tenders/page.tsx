@@ -115,21 +115,27 @@ export default function TendersAdminPage() {
               className="rounded-2xl bg-slate-100 px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"
             />
 
-            <select className="rounded-2xl bg-slate-100 px-5 py-4 text-sm outline-none">
-              <option>همه وضعیت‌ها</option>
-              <option>در انتظار بررسی</option>
-              <option>فعال</option>
-              <option>پایان‌یافته</option>
-              <option>لغو شده</option>
+            <select
+              defaultValue="all"
+              className="rounded-2xl bg-slate-100 px-5 py-4 text-sm outline-none"
+            >
+              <option value="all">همه وضعیت‌ها</option>
+              <option value="pending">در انتظار بررسی</option>
+              <option value="active">فعال</option>
+              <option value="finished">پایان‌یافته</option>
+              <option value="cancelled">لغو شده</option>
             </select>
 
-            <select className="rounded-2xl bg-slate-100 px-5 py-4 text-sm outline-none">
-              <option>همه نوع پروژه‌ها</option>
-              <option>ساختمانی</option>
-              <option>تأسیسات</option>
-              <option>مصالح و تجهیزات</option>
-              <option>خدمات فنی</option>
-              <option>پیمانکاری</option>
+            <select
+              defaultValue="all"
+              className="rounded-2xl bg-slate-100 px-5 py-4 text-sm outline-none"
+            >
+              <option value="all">همه نوع پروژه‌ها</option>
+              <option value="building">ساختمانی</option>
+              <option value="mechanical">تأسیسات</option>
+              <option value="materials">مصالح و تجهیزات</option>
+              <option value="technical">خدمات فنی</option>
+              <option value="contracting">پیمانکاری</option>
             </select>
 
             <button
@@ -172,9 +178,11 @@ export default function TendersAdminPage() {
 
             <div className="rounded-2xl bg-white/10 p-5">
               <div className="text-2xl">🔍</div>
+
               <h3 className="mt-3 font-black">
                 بررسی پروژه
               </h3>
+
               <p className="mt-2 text-sm leading-6 text-slate-300">
                 بررسی اطلاعات و مدارک قبل از انتشار مناقصه
               </p>
@@ -182,9 +190,11 @@ export default function TendersAdminPage() {
 
             <div className="rounded-2xl bg-white/10 p-5">
               <div className="text-2xl">📢</div>
+
               <h3 className="mt-3 font-black">
                 انتشار
               </h3>
+
               <p className="mt-2 text-sm leading-6 text-slate-300">
                 انتشار پروژه برای فروشندگان و متخصصان واجد شرایط
               </p>
@@ -192,9 +202,11 @@ export default function TendersAdminPage() {
 
             <div className="rounded-2xl bg-white/10 p-5">
               <div className="text-2xl">📨</div>
+
               <h3 className="mt-3 font-black">
                 پیشنهادها
               </h3>
+
               <p className="mt-2 text-sm leading-6 text-slate-300">
                 مشاهده و مدیریت پیشنهادهای ارسال‌شده
               </p>
@@ -202,9 +214,11 @@ export default function TendersAdminPage() {
 
             <div className="rounded-2xl bg-white/10 p-5">
               <div className="text-2xl">🏆</div>
+
               <h3 className="mt-3 font-black">
                 نتیجه مناقصه
               </h3>
+
               <p className="mt-2 text-sm leading-6 text-slate-300">
                 ثبت نتیجه و تعیین برنده مناقصه
               </p>
