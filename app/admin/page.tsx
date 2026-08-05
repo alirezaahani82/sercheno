@@ -125,7 +125,7 @@ export default function AdminDashboard() {
 
             <div>
               <h1 className="text-2xl font-black text-blue-700">
-                داشبورد مدیریت سرچنو
+                داشبورد مدیریت سرچنو فقط علیرضا آهنی دسترسی دارد
               </h1>
 
               <p className="mt-1 text-sm text-slate-500">
