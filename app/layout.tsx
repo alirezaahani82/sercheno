@@ -14,9 +14,6 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "سرچنو",
-  other: {
-  enamad: "69928544",
-},
   description:
     "سرچنو، پلتفرم جست‌وجو و مقایسه مصالح ساختمانی، تجهیزات، فروشندگان، تأمین‌کنندگان و متخصصان صنعت ساختمان.",
   alternates: {
@@ -67,15 +64,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
+ return (
+  <>
     <html
       lang="fa"
       dir="rtl"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <meta name="enamad" content="69928544" />
+      </head>
+
       <body className="min-h-full flex flex-col">
         {children}
       </body>
     </html>
-  );
+  </>
+);
 }
