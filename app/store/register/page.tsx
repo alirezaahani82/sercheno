@@ -794,15 +794,30 @@ export default function StoreRegisterPage() {
   <div className="flex items-center gap-2">
 
     {/* ثبت محصول */}
+    <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+
+  <Link
+    href="/store/product-register"
+    className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+  >
+    <Package size={19} />
+    ثبت محصول
+  </Link>
+
+  <div className="text-sm text-slate-500">
+    قبلاً حساب فروشگاه دارید؟
+    <span className="mx-1 font-bold text-slate-700">
+      از اینجا
+    </span>
     <Link
-      href="/store/product/register"
-      className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-emerald-700"
+      href="/store/product-register"
+      className="font-black text-blue-700 transition hover:text-blue-900"
     >
-      <Package size={18} />
-      <span className="hidden sm:inline">
-        ثبت محصول
-      </span>
+      ثبت محصول کنید
     </Link>
+  </div>
+
+</div>
 
     {/* بازگشت */}
     <Link
