@@ -54,6 +54,73 @@ const emptyProduct: ProductForm = {
 
 export default function AddProductPage() {
   const router = useRouter();
+  const [storeId, setStoreId] = useState<string | null>(null);
+const [storeName, setStoreName] = useState("");
+const [products, setProducts] = useState<any[]>([]);
+const [loadingStore, setLoadingStore] = useState(true);
+
+useEffect(() => {
+  const id = sessionStorage.getItem("sercheno_store_id");
+  const name = sessionStorage.getItem("sercheno_store_name");
+
+  if (!id) {
+    router.replace("/store/product-register");
+    return;
+  }
+
+  setStoreId(id);
+  setStoreName(name || "");
+
+  const loadStoreProducts = async () => {
+    setLoadingStore(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          `
+          id,
+          name,
+          slug,
+          category,
+          description,
+          price,
+          unit,
+          stock,
+          brand,
+          model,
+          min_order,
+          cooperation_price,
+          customer_price,
+          status
+        `
+        )
+        .eq("seller_id", id)
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (error) {
+        console.error(
+          "LOAD STORE PRODUCTS ERROR:",
+          error
+        );
+        return;
+      }
+
+      setProducts(data || []);
+    } catch (error) {
+      console.error(
+        "LOAD PRODUCTS ERROR:",
+        error
+      );
+    } finally {
+      setLoadingStore(false);
+    }
+  };
+
+  loadStoreProducts();
+}, [router]);
 
   const [store, setStore] = useState<StoreInfo | null>(null);
   const [product, setProduct] =
