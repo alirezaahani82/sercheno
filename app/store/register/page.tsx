@@ -285,6 +285,8 @@ export default function StoreRegisterPage() {
           description:
             storeForm.description.trim() || null,
           status: "pending",
+          username: storeForm.username.trim(),
+password_hash: storeForm.password,
         })
         .select("id")
         .single();
