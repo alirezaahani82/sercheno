@@ -128,7 +128,6 @@ useEffect(() => {
 
   const [images, setImages] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [loadingStore, setLoadingStore] = useState(true);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
