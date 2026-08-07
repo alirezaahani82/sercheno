@@ -79,9 +79,9 @@ export default function StorePanelPage() {
         error: storeError,
       } = await supabase
         .from("stores")
-        .select(
-  "id,name,category,subcategory,price,customer_price,cooperation_price,stock,unit,status,description"
-)
+       .select(
+    "id,name,owner_name,phone,province,city,address,description,status"
+  )
         .eq("id", storeId)
         .single();
 
@@ -109,8 +109,8 @@ export default function StorePanelPage() {
       } = await supabase
         .from("products")
         .select(
-          "id,name,price,customer_price,cooperation_price,stock,unit,status,description"
-        )
+  "id,name,category,subcategory,price,customer_price,cooperation_price,stock,unit,status,description"
+)
         .eq("seller_id", storeId)
         .order("created_at", {
           ascending: false,
