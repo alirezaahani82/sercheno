@@ -64,6 +64,9 @@ const [selectedProduct, setSelectedProduct] =
   .select(
     "id,name,category,subcategory,brand,model,price,customer_price,cooperation_price,min_order,stock,unit,image_URL,description,seller_id,status,created_at,updated_at"
   )
+     console.log("PRODUCTS DATA:", data);
+console.log("PRODUCTS ERROR:", error);
+      
   .order("created_at", {
     ascending: false,
   });
