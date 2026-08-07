@@ -34,6 +34,8 @@ type StoreInfo = {
 type Product = {
   id: string;
   name: string;
+  category: string | null;
+  subcategory: string | null;
   price: number | null;
   customer_price: number | null;
   cooperation_price: number | null;
@@ -42,7 +44,6 @@ type Product = {
   status: string | null;
   description: string | null;
 };
-
 export default function StorePanelPage() {
   const router = useRouter();
 
@@ -79,8 +80,8 @@ export default function StorePanelPage() {
       } = await supabase
         .from("stores")
         .select(
-          "id,name,owner_name,phone,province,city,address,description,status"
-        )
+  "id,name,category,subcategory,price,customer_price,cooperation_price,stock,unit,status,description"
+)
         .eq("id", storeId)
         .single();
 
@@ -489,6 +490,19 @@ export default function StorePanelPage() {
                       <h3 className="font-black text-slate-900">
                         {product.name}
                       </h3>
+                      {product.category && (
+  <div className="mt-2 flex flex-wrap gap-2">
+    <span className="rounded-lg bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700">
+      {product.category}
+    </span>
+
+    {product.subcategory && (
+      <span className="rounded-lg bg-slate-200 px-2.5 py-1 text-xs font-bold text-slate-600">
+        {product.subcategory}
+      </span>
+    )}
+  </div>
+)}
 
                       <p className="mt-1 text-xs text-slate-500">
                         {product.unit || "واحد مشخص نشده"}
