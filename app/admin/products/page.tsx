@@ -70,12 +70,15 @@ const [selectedProduct, setSelectedProduct] =
 
 console.log("PRODUCTS DATA:", data);
 console.log("PRODUCTS ERROR:", error);
-      if (Error) {
-        console.error(Error);
-        setError("خطا در دریافت محصولات.");
-        return;
-      }
+     if (error) {
+  console.error("PRODUCTS ERROR:", error);
 
+  setError(
+    `خطا در دریافت محصولات: ${error.message}`
+  );
+
+  return;
+}
       setProducts(data || []);
 
       const sellerIds = [
