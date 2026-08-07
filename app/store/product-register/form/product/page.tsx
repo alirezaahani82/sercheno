@@ -11,6 +11,7 @@ import {
   X,
   CheckCircle2,
   ShieldCheck,
+  Clock,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
