@@ -31,7 +31,6 @@ type Product = {
 model: string | null;
 subcategory: string | null;
 min_order: number | null;
-image_URL: string | null;
 };
 
 type StoreInfo = {
