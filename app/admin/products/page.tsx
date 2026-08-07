@@ -70,8 +70,8 @@ const [selectedProduct, setSelectedProduct] =
 
 console.log("PRODUCTS DATA:", data);
 console.log("PRODUCTS ERROR:", error);
-      if (productError) {
-        console.error(productError);
+      if (Error) {
+        console.error(Error);
         setError("خطا در دریافت محصولات.");
         return;
       }
