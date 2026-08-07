@@ -59,18 +59,17 @@ const [selectedProduct, setSelectedProduct] =
       setLoading(true);
       setError("");
 
-     const { data, error: productError } = await supabase
+    const { data, error } = await supabase
   .from("products")
   .select(
-    "id,name,category,subcategory,brand,model,price,customer_price,cooperation_price,min_order,stock,unit,image_URL,description,seller_id,status,created_at,updated_at"
+    "id,name,category,subcategory,brand,model,price,customer_price,cooperation_price,stock,unit,min_order,image_URL,description,seller_id,status,created_at"
   )
-     console.log("PRODUCTS DATA:", data);
-console.log("PRODUCTS ERROR:", error);
-      
   .order("created_at", {
     ascending: false,
   });
 
+console.log("PRODUCTS DATA:", data);
+console.log("PRODUCTS ERROR:", error);
       if (productError) {
         console.error(productError);
         setError("خطا در دریافت محصولات.");
