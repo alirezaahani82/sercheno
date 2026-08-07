@@ -60,14 +60,14 @@ export default function AdminProductsPage() {
       setLoading(true);
       setError("");
 
-      const { data, error: productError } = await supabase
-        .from("products")
-        .select(
-          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at"
-        )
-        .order("created_at", {
-          ascending: false,
-        });
+     const { data, error: productError } = await supabase
+  .from("products")
+  .select(
+    "id,name,category,subcategory,brand,model,price,customer_price,cooperation_price,min_order,stock,unit,image_URL,description,seller_id,status,created_at,updated_at"
+  )
+  .order("created_at", {
+    ascending: false,
+  });
 
       if (productError) {
         console.error(productError);
