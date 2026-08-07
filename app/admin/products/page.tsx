@@ -27,12 +27,21 @@ type Product = {
   seller_id: string | null;
   status: string | null;
   created_at: string | null;
+  brand: string | null;
+model: string | null;
+subcategory: string | null;
+min_order: number | null;
+image_URL: string | null;
 };
 
 type StoreInfo = {
   id: string;
   name: string | null;
 };
+
+const [selectedProduct, setSelectedProduct] =
+  useState<Product | null>(null);
+
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
