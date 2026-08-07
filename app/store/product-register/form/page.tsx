@@ -3,19 +3,21 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import {
-  ArrowRight,
   Store,
   Package,
-  Upload,
-  ImagePlus,
-  CheckCircle2,
-  ShieldCheck,
-  MapPin,
-  Trash2,
   Plus,
+  Edit3,
+  LogOut,
+  MapPin,
+  Phone,
+  User,
+  CheckCircle2,
+  Clock,
+  XCircle,
 } from "lucide-react";
+
+import { supabase } from "@/lib/supabase";
 
 type StoreInfo = {
   id: string;
@@ -24,493 +26,179 @@ type StoreInfo = {
   phone: string | null;
   province: string | null;
   city: string | null;
+  address: string | null;
+  description: string | null;
+  status: string | null;
 };
 
-type ProductForm = {
+type Product = {
+  id: string;
   name: string;
-  category: string;
-  brand: string;
-  model: string;
-  unit: string;
-  minOrder: string;
-  stock: string;
-  cooperationPrice: string;
-  customerPrice: string;
-  description: string;
+  price: number | null;
+  customer_price: number | null;
+  cooperation_price: number | null;
+  stock: number | null;
+  unit: string | null;
+  status: string | null;
+  description: string | null;
 };
 
-const emptyProduct: ProductForm = {
-  name: "",
-  category: "",
-  brand: "",
-  model: "",
-  unit: "",
-  minOrder: "",
-  stock: "",
-  cooperationPrice: "",
-  customerPrice: "",
-  description: "",
-};
-
-export default function AddProductPage() {
+export default function StorePanelPage() {
   const router = useRouter();
-  const [storeId, setStoreId] = useState<string | null>(null);
-const [storeName, setStoreName] = useState("");
-const [products, setProducts] = useState<any[]>([]);
-const [loadingStore, setLoadingStore] = useState(true);
 
-useEffect(() => {
-  const id = sessionStorage.getItem("sercheno_store_id");
-  const name = sessionStorage.getItem("sercheno_store_name");
+  const [store, setStore] = useState<StoreInfo | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
 
-  if (!id) {
-    router.replace("/store/product-register");
-    return;
-  }
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  setStoreId(id);
-  setStoreName(name || "");
+  useEffect(() => {
+    loadStore();
+  }, []);
 
-  const loadStoreProducts = async () => {
-    setLoadingStore(true);
-
+  const loadStore = async () => {
     try {
-      const { data, error } = await supabase
+      setLoading(true);
+      setError("");
+
+      const storeId =
+        sessionStorage.getItem("sercheno_store_id");
+
+      if (!storeId) {
+        router.replace("/store/product-register");
+        return;
+      }
+
+      /* -----------------------------
+         دریافت اطلاعات فروشگاه
+      ----------------------------- */
+
+      const {
+        data: storeData,
+        error: storeError,
+      } = await supabase
+        .from("stores")
+        .select(
+          "id,name,owner_name,phone,province,city,address,description,status"
+        )
+        .eq("id", storeId)
+        .single();
+
+      if (storeError || !storeData) {
+        console.error(storeError);
+
+        sessionStorage.removeItem(
+          "sercheno_store_id"
+        );
+
+        router.replace("/store/product-register");
+
+        return;
+      }
+
+      setStore(storeData);
+
+      /* -----------------------------
+         دریافت محصولات فروشگاه
+      ----------------------------- */
+
+      const {
+        data: productData,
+        error: productError,
+      } = await supabase
         .from("products")
         .select(
-          `
-          id,
-          name,
-          slug,
-          category,
-          description,
-          price,
-          unit,
-          stock,
-          brand,
-          model,
-          min_order,
-          cooperation_price,
-          customer_price,
-          status
-        `
+          "id,name,price,customer_price,cooperation_price,stock,unit,status,description"
         )
-        .eq("seller_id", id)
+        .eq("seller_id", storeId)
         .order("created_at", {
           ascending: false,
         });
 
-      if (error) {
-        console.error(
-          "LOAD STORE PRODUCTS ERROR:",
-          error
+      if (productError) {
+        console.error(productError);
+        setError(
+          "خطا در دریافت محصولات فروشگاه."
         );
         return;
       }
 
-      setProducts(data || []);
-    } catch (error) {
-      console.error(
-        "LOAD PRODUCTS ERROR:",
-        error
+      setProducts(productData || []);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        "خطایی هنگام دریافت اطلاعات فروشگاه رخ داد."
       );
     } finally {
-      setLoadingStore(false);
+      setLoading(false);
     }
   };
 
-  loadStoreProducts();
-}, [router]);
+  /* -----------------------------
+     خروج
+  ----------------------------- */
 
-  const [store, setStore] = useState<StoreInfo | null>(null);
-  const [product, setProduct] =
-    useState<ProductForm>(emptyProduct);
-
-  const [images, setImages] = useState<File[]>([]);
-  const [submitting, setSubmitting] = useState(false);
-
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  /* --------------------------------
-     دریافت فروشگاه واردشده
-  -------------------------------- */
-
-  useEffect(() => {
-    const storeId = sessionStorage.getItem(
+  const logout = () => {
+    sessionStorage.removeItem(
       "sercheno_store_id"
     );
 
-    if (!storeId) {
-      router.replace("/store/product-register");
-      return;
+    sessionStorage.removeItem(
+      "sercheno_store_name"
+    );
+
+    sessionStorage.removeItem(
+      "sercheno_store_owner"
+    );
+
+    router.replace(
+      "/store/product-register"
+    );
+  };
+
+  /* -----------------------------
+     وضعیت فروشگاه
+  ----------------------------- */
+
+  const statusBox = () => {
+    if (store?.status === "approved") {
+      return (
+        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700">
+          <CheckCircle2 size={18} />
+          فروشگاه تأیید شده
+        </div>
+      );
     }
 
-    const loadStore = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("stores")
-          .select(
-            "id,name,owner_name,phone,province,city"
-          )
-          .eq("id", storeId)
-          .maybeSingle();
+    if (store?.status === "rejected") {
+      return (
+        <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-sm font-bold text-red-700">
+          <XCircle size={18} />
+          فروشگاه رد شده
+        </div>
+      );
+    }
 
-        if (error) {
-          console.error("STORE LOAD ERROR:", error);
-          setError(
-            "اطلاعات فروشگاه دریافت نشد. دوباره وارد شوید."
-          );
-          return;
-        }
-
-        if (!data) {
-          sessionStorage.removeItem(
-            "sercheno_store_id"
-          );
-
-          router.replace("/store/product-register");
-          return;
-        }
-
-        setStore(data);
-      } catch (err) {
-        console.error(err);
-
-        setError(
-          "خطایی هنگام دریافت اطلاعات فروشگاه رخ داد."
-        );
-      } finally {
-        setLoadingStore(false);
-      }
-    };
-
-    loadStore();
-  }, [router]);
-
-  /* --------------------------------
-     تغییر فیلد محصول
-  -------------------------------- */
-
-  const updateProduct = (
-    field: keyof ProductForm,
-    value: string
-  ) => {
-    setProduct((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  /* --------------------------------
-     تصاویر
-  -------------------------------- */
-
-  const handleImages = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!event.target.files) return;
-
-    const selectedFiles = Array.from(
-      event.target.files
-    );
-
-    setImages((prev) => [
-      ...prev,
-      ...selectedFiles,
-    ]);
-
-    event.target.value = "";
-  };
-
-  const removeImage = (index: number) => {
-    setImages((prev) =>
-      prev.filter((_, i) => i !== index)
-    );
-  };
-
-  /* --------------------------------
-     تبدیل عدد
-  -------------------------------- */
-
-  const parseNumber = (value: string) => {
     return (
-      Number.parseFloat(
-        String(value || "").replace(/,/g, "")
-      ) || 0
+      <div className="flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700">
+        <Clock size={18} />
+        در انتظار بررسی
+      </div>
     );
   };
 
-  /* --------------------------------
-     ثبت محصول
-  -------------------------------- */
-
-  const handleSubmit = async () => {
-    if (submitting) return;
-
-    setError("");
-    setMessage("");
-
-    if (!store) {
-      setError(
-        "اطلاعات فروشگاه موجود نیست. دوباره وارد شوید."
-      );
-      return;
-    }
-
-    if (!product.name.trim()) {
-      setError("لطفاً نام محصول را وارد کنید.");
-      return;
-    }
-
-    if (!product.category) {
-      setError(
-        "لطفاً دسته‌بندی محصول را انتخاب کنید."
-      );
-      return;
-    }
-
-    if (!product.unit) {
-      setError("لطفاً واحد فروش را انتخاب کنید.");
-      return;
-    }
-
-    if (!product.customerPrice.trim()) {
-      setError(
-        "لطفاً قیمت مشتریان سرچنو را وارد کنید."
-      );
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      /* --------------------------------
-         slug محصول
-      -------------------------------- */
-
-      const productSlug =
-        `product-${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2, 10)}`;
-
-      const cooperationPrice = parseNumber(
-        product.cooperationPrice
-      );
-
-      const customerPrice = parseNumber(
-        product.customerPrice
-      );
-
-      const stock = parseNumber(
-        product.stock
-      );
-
-      /* --------------------------------
-         ثبت محصول
-      -------------------------------- */
-
-      const {
-        data: createdProduct,
-        error: productError,
-      } = await supabase
-        .from("products")
-        .insert({
-          name: product.name.trim(),
-
-          slug: productSlug,
-
-          category: product.category,
-
-          description:
-            product.description.trim() ||
-            null,
-
-          price: customerPrice,
-
-          unit: product.unit,
-
-          stock: stock,
-
-          seller_id: store.id,
-
-          status: "active",
-
-          brand:
-            product.brand.trim() || null,
-
-          model:
-            product.model.trim() || null,
-
-          min_order:
-            product.minOrder.trim() || null,
-
-          cooperation_price:
-            cooperationPrice,
-
-          customer_price:
-            customerPrice,
-        })
-        .select("id,slug")
-        .single();
-
-      if (productError) {
-        console.error(
-          "PRODUCT INSERT ERROR:",
-          productError
-        );
-
-        throw new Error(
-          `خطا در ثبت محصول: ${productError.message}`
-        );
-      }
-
-      if (!createdProduct) {
-        throw new Error(
-          "محصول ثبت شد اما شناسه آن دریافت نشد."
-        );
-      }
-
-      /* --------------------------------
-         آپلود تصاویر
-      -------------------------------- */
-
-      for (
-        let i = 0;
-        i < images.length;
-        i++
-      ) {
-        const file = images[i];
-
-        const extension =
-          file.name
-            .split(".")
-            .pop()
-            ?.toLowerCase() || "jpg";
-
-        const fileName =
-          `${Date.now()}-${i}-${Math.random()
-            .toString(36)
-            .substring(2, 10)}.${extension}`;
-
-        const filePath =
-          `products/${createdProduct.id}/${fileName}`;
-
-        const {
-          error: uploadError,
-        } = await supabase.storage
-          .from("product-image")
-          .upload(
-            filePath,
-            file,
-            {
-              cacheControl: "3600",
-              upsert: false,
-              contentType:
-                file.type ||
-                "image/jpeg",
-            }
-          );
-
-        if (uploadError) {
-          console.error(
-            "IMAGE UPLOAD ERROR:",
-            uploadError
-          );
-
-          throw new Error(
-            `محصول ثبت شد اما تصویر «${file.name}» آپلود نشد: ${uploadError.message}`
-          );
-        }
-
-        const {
-          data: publicUrlData,
-        } = supabase.storage
-          .from("product-image")
-          .getPublicUrl(filePath);
-
-        const imageUrl =
-          publicUrlData.publicUrl;
-
-        if (!imageUrl) {
-          throw new Error(
-            "آدرس تصویر دریافت نشد."
-          );
-        }
-
-        const {
-          error: imageRowError,
-        } = await supabase
-          .from("product_images")
-          .insert({
-            product_id:
-              createdProduct.id,
-            image_url: imageUrl,
-          });
-
-        if (imageRowError) {
-          console.error(
-            "IMAGE ROW ERROR:",
-            imageRowError
-          );
-
-          throw new Error(
-            `تصویر آپلود شد اما ثبت ارتباط تصویر با محصول انجام نشد: ${imageRowError.message}`
-          );
-        }
-      }
-
-      /* --------------------------------
-         موفقیت
-      -------------------------------- */
-
-      setMessage(
-        "محصول با موفقیت ثبت شد و برای نمایش در سرچنو آماده است."
-      );
-
-      setProduct({
-        ...emptyProduct,
-      });
-
-      setImages([]);
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-    } catch (err) {
-      console.error(
-        "ADD PRODUCT ERROR:",
-        err
-      );
-
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(
-          "خطای نامشخص هنگام ثبت محصول."
-        );
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  /* --------------------------------
-     Loading
-  -------------------------------- */
-
-  if (loadingStore) {
+  if (loading) {
     return (
       <main
         dir="rtl"
         className="flex min-h-screen items-center justify-center bg-slate-50"
       >
         <div className="rounded-3xl bg-white p-10 text-center shadow-sm">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-700" />
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
 
-          <p className="mt-5 font-bold text-slate-700">
-            در حال دریافت اطلاعات فروشگاه...
+          <p className="mt-5 font-bold text-slate-600">
+            در حال دریافت پنل فروشگاه...
           </p>
         </div>
       </main>
@@ -526,6 +214,7 @@ useEffect(() => {
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+
           <Link
             href="/"
             className="flex items-center gap-3"
@@ -533,631 +222,396 @@ useEffect(() => {
             <img
               src="/logo.png"
               alt="سرچنو"
-              className="h-12 w-12 rounded-2xl object-contain"
+              className="h-11 w-11 rounded-2xl object-contain"
             />
 
             <div>
-              <div className="text-2xl font-black text-blue-700">
+              <div className="text-xl font-black text-blue-700">
                 سرچنو
               </div>
 
               <div className="text-xs text-slate-500">
-                بازار هوشمند ساخت‌وساز
+                پنل فروشگاه
               </div>
             </div>
           </Link>
 
-          <Link
-            href="/store/product-register"
-            className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-100"
+          <button
+            type="button"
+            onClick={logout}
+            className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100"
           >
-            خروج از حساب فروشگاه
-            <ArrowRight size={18} />
-          </Link>
+            <LogOut size={18} />
+            خروج
+          </button>
+
         </div>
       </header>
 
-      {/* Hero */}
+      <div className="mx-auto max-w-7xl px-5 py-8">
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 px-5 py-14 text-white">
-        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        {/* Store Header */}
 
-        <div className="absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-cyan-300/10 blur-3xl" />
+        <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 p-7 text-white shadow-lg">
 
-        <div className="relative mx-auto max-w-6xl">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold backdrop-blur">
-                <CheckCircle2 size={17} />
-                حساب فروشگاه شناسایی شد
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+
+            <div className="flex items-center gap-5">
+
+              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white/10">
+                <Store size={40} />
               </div>
 
-              <h1 className="text-3xl font-black sm:text-4xl">
-                ثبت محصول جدید
-              </h1>
+              <div>
 
-              <p className="mt-4 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-                محصول جدید خود را ثبت کنید تا در بازار
-                هوشمند ساخت‌وساز سرچنو به خریداران نمایش داده شود.
-              </p>
+                <div className="text-sm text-blue-200">
+                  پنل اختصاصی فروشگاه
+                </div>
+
+                <h1 className="mt-1 text-3xl font-black">
+                  {store?.name}
+                </h1>
+
+                <p className="mt-2 text-sm text-blue-100">
+                  مدیر فروشگاه:{" "}
+                  {store?.owner_name || "ثبت نشده"}
+                </p>
+
+              </div>
+
             </div>
 
-            {store && (
-              <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
-                <div className="flex items-center gap-3">
-                  <Store size={25} />
+            {statusBox()}
 
-                  <div>
-                    <div className="text-xs text-blue-200">
-                      فروشگاه
-                    </div>
-
-                    <div className="mt-1 text-lg font-black">
-                      {store.name}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
-      </section>
 
-      {/* Main */}
+        </section>
 
-      <div className="mx-auto max-w-6xl px-5 py-10">
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Form */}
+        {error && (
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 font-bold text-red-700">
+            {error}
+          </div>
+        )}
 
-          <section className="lg:col-span-2">
-            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-              <div className="border-b border-slate-100 bg-slate-50 p-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
-                    <Package size={24} />
-                  </div>
+        {/* Statistics */}
 
-                  <div>
-                    <h2 className="text-xl font-black">
-                      اطلاعات محصول
-                    </h2>
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-                    <p className="mt-1 text-sm text-slate-500">
-                      مشخصات محصول را با دقت وارد کنید.
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <StatCard
+            icon={<Package size={22} />}
+            title="کل محصولات"
+            value={products.length.toString()}
+          />
 
-              <div className="grid gap-5 p-6 md:grid-cols-2">
-                <Input
-                  label="نام محصول *"
-                  placeholder="مثلاً کاشی ۶۰×۱۲۰"
-                  value={product.name}
-                  onChange={(e) =>
-                    updateProduct(
-                      "name",
-                      e.target.value
-                    )
-                  }
-                />
+          <StatCard
+            icon={<CheckCircle2 size={22} />}
+            title="محصولات فعال"
+            value={products
+              .filter(
+                (p) => p.status === "active"
+              )
+              .length.toString()}
+          />
 
-                <Select
-                  label="دسته‌بندی *"
-                  value={product.category}
-                  options={[
-                    "آجر و بلوک",
-                    "سیمان و بتن",
-                    "کاشی و سرامیک",
-                    "سنگ ساختمانی",
-                    "آهن و مصالح فلزی",
-                    "درب و پنجره",
-                    "رنگ و پوشش",
-                    "تأسیسات و تجهیزات",
-                    "ابزار و ماشین‌آلات",
-                    "سایر",
-                  ]}
-                  onChange={(e) =>
-                    updateProduct(
-                      "category",
-                      e.target.value
-                    )
-                  }
-                />
+          <StatCard
+            icon={<Clock size={22} />}
+            title="در انتظار بررسی"
+            value={products
+              .filter(
+                (p) => p.status === "pending"
+              )
+              .length.toString()}
+          />
 
-                <Input
-                  label="برند"
-                  placeholder="نام برند"
-                  value={product.brand}
-                  onChange={(e) =>
-                    updateProduct(
-                      "brand",
-                      e.target.value
-                    )
-                  }
-                />
+          <StatCard
+            icon={<Store size={22} />}
+            title="وضعیت فروشگاه"
+            value={
+              store?.status === "approved"
+                ? "تأیید شده"
+                : "در انتظار بررسی"
+            }
+          />
 
-                <Input
-                  label="مدل یا مشخصات"
-                  placeholder="مدل، کد یا مشخصات فنی"
-                  value={product.model}
-                  onChange={(e) =>
-                    updateProduct(
-                      "model",
-                      e.target.value
-                    )
-                  }
-                />
+        </section>
 
-                <Select
-                  label="واحد فروش *"
-                  value={product.unit}
-                  options={[
-                    "عدد",
-                    "متر",
-                    "مترمربع",
-                    "مترمکعب",
-                    "کیلوگرم",
-                    "تن",
-                    "کیسه",
-                    "شاخه",
-                    "دستگاه",
-                  ]}
-                  onChange={(e) =>
-                    updateProduct(
-                      "unit",
-                      e.target.value
-                    )
-                  }
-                />
+        {/* Store Information */}
 
-                <Input
-                  label="حداقل مقدار سفارش"
-                  placeholder="مثلاً ۱۰ عدد"
-                  value={product.minOrder}
-                  onChange={(e) =>
-                    updateProduct(
-                      "minOrder",
-                      e.target.value
-                    )
-                  }
-                />
+        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 
-                <Input
-                  label="موجودی تقریبی"
-                  placeholder="مثلاً ۵۰۰ عدد"
-                  value={product.stock}
-                  onChange={(e) =>
-                    updateProduct(
-                      "stock",
-                      e.target.value
-                    )
-                  }
-                />
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                {/* Cooperation */}
+            <div>
 
-                <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-                  <label className="mb-2 block text-sm font-black text-blue-900">
-                    قیمت همکاری سرچنو
-                  </label>
+              <h2 className="text-xl font-black">
+                اطلاعات فروشگاه
+              </h2>
 
-                  <input
-                    type="text"
-                    placeholder="مثلاً ۱۵۰۰۰۰۰"
-                    value={
-                      product.cooperationPrice
-                    }
-                    onChange={(e) =>
-                      updateProduct(
-                        "cooperationPrice",
-                        e.target.value
-                      )
-                    }
-                    className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+              <p className="mt-1 text-sm text-slate-500">
+                اطلاعات فروشگاه و مالک را مشاهده و مدیریت کنید.
+              </p>
 
-                  <p className="mt-2 text-xs text-blue-700">
-                    قیمت ویژه همکاری با سرچنو
-                  </p>
-                </div>
-
-                {/* Customer */}
-
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                  <label className="mb-2 block text-sm font-black text-emerald-900">
-                    قیمت مشتریان سرچنو *
-                  </label>
-
-                  <input
-                    type="text"
-                    placeholder="مثلاً ۱۷۰۰۰۰۰"
-                    value={
-                      product.customerPrice
-                    }
-                    onChange={(e) =>
-                      updateProduct(
-                        "customerPrice",
-                        e.target.value
-                      )
-                    }
-                    className="w-full rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-
-                  <p className="mt-2 text-xs text-emerald-700">
-                    قیمتی که مشتریان مشاهده خواهند کرد
-                  </p>
-                </div>
-
-                {/* Description */}
-
-                <div className="md:col-span-2">
-                  <Textarea
-                    label="توضیحات محصول"
-                    placeholder="کیفیت، مشخصات فنی، کاربرد، رنگ، ابعاد و سایر توضیحات..."
-                    value={product.description}
-                    onChange={(e) =>
-                      updateProduct(
-                        "description",
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-
-                {/* Images */}
-
-                <div className="md:col-span-2">
-                  <div className="rounded-3xl border border-pink-200 bg-pink-50 p-5">
-                    <div className="mb-5 flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
-                        <ImagePlus size={24} />
-                      </div>
-
-                      <div>
-                        <h3 className="font-black">
-                          تصاویر محصول
-                        </h3>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          تصاویر واقعی و باکیفیت محصول را اضافه کنید.
-                        </p>
-                      </div>
-                    </div>
-
-                    <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-pink-300 bg-white p-8 text-center transition hover:border-pink-500 hover:bg-pink-50">
-                      <Upload
-                        size={34}
-                        className="text-pink-600"
-                      />
-
-                      <span className="mt-3 font-black">
-                        انتخاب تصاویر
-                      </span>
-
-                      <span className="mt-2 text-xs text-slate-500">
-                        امکان انتخاب چند تصویر وجود دارد
-                      </span>
-
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        className="hidden"
-                        onChange={handleImages}
-                      />
-                    </label>
-
-                    {images.length > 0 && (
-                      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
-                        {images.map(
-                          (file, index) => (
-                            <div
-                              key={`${file.name}-${index}`}
-                              className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-2"
-                            >
-                              <img
-                                src={URL.createObjectURL(
-                                  file
-                                )}
-                                alt={file.name}
-                                className="h-32 w-full rounded-xl object-cover"
-                              />
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  removeImage(
-                                    index
-                                  )
-                                }
-                                className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white shadow-lg"
-                              >
-                                <Trash2 size={15} />
-                              </button>
-
-                              <p className="mt-2 truncate px-1 text-xs text-slate-500">
-                                {file.name}
-                              </p>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Messages */}
-
-              <div className="space-y-3 px-6 pb-2">
-                {error && (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold leading-7 text-red-700">
-                    {error}
-                  </div>
-                )}
-
-                {message && (
-                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold leading-7 text-emerald-700">
-                    {message}
-                  </div>
-                )}
-              </div>
-
-              {/* Submit */}
-
-              <div className="p-6">
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-700 py-5 text-lg font-black text-white shadow-xl shadow-blue-700/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {submitting ? (
-                    "در حال ثبت محصول..."
-                  ) : (
-                    <>
-                      <CheckCircle2 size={24} />
-                      ثبت محصول در سرچنو
-                    </>
-                  )}
-                </button>
-              </div>
             </div>
-          </section>
-
-          {/* Sidebar */}
-
-          <aside className="space-y-5">
-            {/* Store */}
-
-            {store && (
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-                    <Store size={24} />
-                  </div>
-
-                  <div>
-                    <div className="text-xs text-slate-500">
-                      فروشگاه فعال
-                    </div>
-
-                    <div className="mt-1 font-black">
-                      {store.name}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 space-y-3 text-sm">
-                  {store.owner_name && (
-                    <div className="rounded-xl bg-slate-50 p-3">
-                      <span className="text-slate-500">
-                        مدیر:
-                      </span>{" "}
-                      <span className="font-bold">
-                        {store.owner_name}
-                      </span>
-                    </div>
-                  )}
-
-                  {store.city && (
-                    <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3">
-                      <MapPin size={17} />
-                      {store.province} -{" "}
-                      {store.city}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Guide */}
-
-            <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6">
-              <div className="flex items-center gap-3">
-                <ShieldCheck
-                  size={24}
-                  className="text-blue-700"
-                />
-
-                <h3 className="font-black text-blue-900">
-                  نکات ثبت محصول
-                </h3>
-              </div>
-
-              <ul className="mt-5 space-y-3 text-sm leading-7 text-blue-800">
-                <li>
-                  ✓ نام محصول را واضح و دقیق وارد کنید.
-                </li>
-
-                <li>
-                  ✓ قیمت و موجودی واقعی ثبت کنید.
-                </li>
-
-                <li>
-                  ✓ تصاویر باکیفیت باعث دیده‌شدن بهتر محصول می‌شود.
-                </li>
-
-                <li>
-                  ✓ مشخصات فنی محصول را کامل بنویسید.
-                </li>
-              </ul>
-            </div>
-
-            {/* Add Another */}
-
-            {message && (
-              <button
-                type="button"
-                onClick={() => {
-                  setMessage("");
-                  setError("");
-                  window.scrollTo({
-                    top: 0,
-                    behavior: "smooth",
-                  });
-                }}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white py-4 text-sm font-black text-blue-700 transition hover:bg-blue-50"
-              >
-                <Plus size={19} />
-                ثبت محصول جدید
-              </button>
-            )}
-
-            {/* Back */}
 
             <Link
-              href="/store/product-register"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-sm font-black text-white transition hover:bg-slate-800"
+              href="/store/product-register/form/edit"
+              className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800"
             >
-              بازگشت به ورود فروشگاه
-              <ArrowRight size={18} />
+              <Edit3 size={18} />
+              ویرایش اطلاعات فروشگاه
             </Link>
-          </aside>
-        </div>
+
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+            <InfoItem
+              icon={<Store size={18} />}
+              title="نام فروشگاه"
+              value={store?.name}
+            />
+
+            <InfoItem
+              icon={<User size={18} />}
+              title="مالک / مدیر"
+              value={store?.owner_name}
+            />
+
+            <InfoItem
+              icon={<Phone size={18} />}
+              title="شماره تماس"
+              value={store?.phone}
+            />
+
+            <InfoItem
+              icon={<MapPin size={18} />}
+              title="استان"
+              value={store?.province}
+            />
+
+            <InfoItem
+              icon={<MapPin size={18} />}
+              title="شهر"
+              value={store?.city}
+            />
+
+            <InfoItem
+              icon={<MapPin size={18} />}
+              title="آدرس"
+              value={store?.address}
+            />
+
+          </div>
+
+        </section>
+
+        {/* Products */}
+
+        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+
+              <h2 className="text-xl font-black">
+                محصولات فروشگاه
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                محصولات ثبت‌شده خود را مشاهده و مدیریت کنید.
+              </p>
+
+            </div>
+
+            <Link
+              href="/store/product-register/form/product"
+              className="flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-3 text-sm font-black text-white transition hover:bg-blue-800"
+            >
+              <Plus size={18} />
+              ثبت محصول جدید
+            </Link>
+
+          </div>
+
+          {products.length === 0 ? (
+            <div className="mt-8 rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+
+              <Package
+                size={45}
+                className="mx-auto text-slate-300"
+              />
+
+              <h3 className="mt-5 text-xl font-black">
+                هنوز محصولی ثبت نکرده‌اید
+              </h3>
+
+              <p className="mt-2 text-sm text-slate-500">
+                اولین محصول فروشگاه خود را ثبت کنید.
+              </p>
+
+              <Link
+                href="/store/product-register/form/product"
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-700 px-6 py-3 text-sm font-black text-white"
+              >
+                <Plus size={18} />
+                ثبت اولین محصول
+              </Link>
+
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
+                >
+
+                  <div className="flex items-start justify-between gap-3">
+
+                    <div>
+
+                      <h3 className="font-black text-slate-900">
+                        {product.name}
+                      </h3>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        {product.unit || "واحد مشخص نشده"}
+                      </p>
+
+                    </div>
+
+                    <span className="rounded-lg bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">
+                      {product.status || "فعال"}
+                    </span>
+
+                  </div>
+
+                  <div className="mt-5 space-y-2 text-sm">
+
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">
+                        قیمت مشتری
+                      </span>
+
+                      <strong>
+                        {product.customer_price ??
+                          product.price ??
+                          0}
+                      </strong>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">
+                        قیمت همکاری
+                      </span>
+
+                      <strong>
+                        {product.cooperation_price ??
+                          0}
+                      </strong>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">
+                        موجودی
+                      </span>
+
+                      <strong>
+                        {product.stock ?? 0}
+                      </strong>
+                    </div>
+
+                  </div>
+
+                  <div className="mt-5 flex gap-2">
+
+                    <Link
+                      href={`/store/product-register/form/product/${product.id}`}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-bold text-blue-700 ring-1 ring-slate-200"
+                    >
+                      <Edit3 size={16} />
+                      ویرایش
+                    </Link>
+
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+          )}
+
+        </section>
+
       </div>
-
-      {/* Footer */}
-
-      <footer className="border-t border-slate-200 bg-white py-8">
-        <div className="mx-auto max-w-6xl px-5 text-center text-xs text-slate-400">
-          ثبت و مدیریت محصولات فروشگاه‌ها در سرچنو
-        </div>
-      </footer>
     </main>
   );
 }
 
-/* =====================================================
-   Input
-===================================================== */
+/* --------------------------------
+   Stat Card
+-------------------------------- */
 
-function Input({
-  label,
-  placeholder,
+function StatCard({
+  icon,
+  title,
   value,
-  onChange,
 }: {
-  label: string;
-  placeholder?: string;
-  value?: string;
-  onChange?: (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => void;
+  icon: React.ReactNode;
+  title: string;
+  value: string;
 }) {
   return (
-    <div>
-      <label className="mb-2 block text-sm font-bold text-slate-700">
-        {label}
-      </label>
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
 
-      <input
-        type="text"
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-      />
+      <div className="flex items-center gap-3">
+
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
+          {icon}
+        </div>
+
+        <div>
+          <div className="text-xs font-bold text-slate-500">
+            {title}
+          </div>
+
+          <div className="mt-1 text-xl font-black">
+            {value}
+          </div>
+        </div>
+
+      </div>
+
     </div>
   );
 }
 
-/* =====================================================
-   Select
-===================================================== */
+/* --------------------------------
+   Info Item
+-------------------------------- */
 
-function Select({
-  label,
-  options,
+function InfoItem({
+  icon,
+  title,
   value,
-  onChange,
 }: {
-  label: string;
-  options: string[];
-  value?: string;
-  onChange?: (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => void;
+  icon: React.ReactNode;
+  title: string;
+  value?: string | null;
 }) {
   return (
-    <div>
-      <label className="mb-2 block text-sm font-bold text-slate-700">
-        {label}
-      </label>
+    <div className="rounded-2xl bg-slate-50 p-4">
 
-      <select
-        value={value}
-        onChange={onChange}
-        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-      >
-        <option value="">
-          انتخاب کنید
-        </option>
+      <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+        {icon}
+        {title}
+      </div>
 
-        {options.map((option) => (
-          <option
-            key={option}
-            value={option}
-          >
-            {option}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
+      <div className="mt-2 text-sm font-black text-slate-800">
+        {value || "ثبت نشده"}
+      </div>
 
-/* =====================================================
-   Textarea
-===================================================== */
-
-function Textarea({
-  label,
-  placeholder,
-  value,
-  onChange,
-}: {
-  label: string;
-  placeholder?: string;
-  value?: string;
-  onChange?: (
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => void;
-}) {
-  return (
-    <div>
-      <label className="mb-2 block text-sm font-bold text-slate-700">
-        {label}
-      </label>
-
-      <textarea
-        rows={5}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-      />
     </div>
   );
 }
