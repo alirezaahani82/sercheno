@@ -161,32 +161,47 @@ export default function StorePanelPage() {
      وضعیت فروشگاه
   ----------------------------- */
 
-  const statusBox = () => {
-    if (store?.status === "approved") {
-      return (
-        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700">
-          <CheckCircle2 size={18} />
-          فروشگاه تأیید شده
-        </div>
-      );
-    }
-
-    if (store?.status === "rejected") {
-      return (
-        <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-sm font-bold text-red-700">
-          <XCircle size={18} />
-          فروشگاه رد شده
-        </div>
-      );
-    }
-
+   const statusBox = () => {
+  if (store?.status === "approved") {
     return (
-      <div className="flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700">
-        <Clock size={18} />
-        در انتظار بررسی
+      <div className="rounded-2xl border border-emerald-300 bg-emerald-100 px-5 py-3 text-center text-emerald-800">
+        <div className="font-black">
+          ✓ فروشگاه تأیید شد
+        </div>
+
+        <div className="mt-1 text-xs">
+          فروشگاه شما در سرچنو فعال است.
+        </div>
       </div>
     );
-  };
+  }
+
+  if (store?.status === "rejected") {
+    return (
+      <div className="rounded-2xl border border-red-300 bg-red-100 px-5 py-3 text-center text-red-800">
+        <div className="font-black">
+          ✕ فروشگاه رد شد
+        </div>
+
+        <div className="mt-1 text-xs">
+          لطفاً اطلاعات فروشگاه را بررسی و اصلاح کنید.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-amber-300 bg-amber-100 px-5 py-3 text-center text-amber-800">
+      <div className="font-black">
+        ⏳ در انتظار بررسی
+      </div>
+
+      <div className="mt-1 text-xs">
+        فروشگاه شما توسط تیم سرچنو بررسی می‌شود.
+      </div>
+    </div>
+  );
+};
 
   if (loading) {
     return (
