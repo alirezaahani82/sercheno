@@ -62,7 +62,7 @@ const [selectedProduct, setSelectedProduct] =
     const { data, error } = await supabase
   .from("products")
   .select(
-    "id,name,category,subcategory,brand,model,price,customer_price,cooperation_price,stock,unit,min_order,image_URL,description,seller_id,status,created_at"
+    "id,name,category,subcategory,brand,model,price,customer_price,cooperation_price,stock,unit,min_order,description,seller_id,status,created_at"
   )
   .order("created_at", {
     ascending: false,
