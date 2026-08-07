@@ -39,11 +39,10 @@ type StoreInfo = {
   name: string | null;
 };
 
+export default function AdminProductsPage() {
 const [selectedProduct, setSelectedProduct] =
   useState<Product | null>(null);
 
-
-export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
