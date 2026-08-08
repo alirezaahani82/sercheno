@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   MapPin,
@@ -12,16 +12,20 @@ import {
   Building2,
   Phone,
   SlidersHorizontal,
+  Loader2,
 } from "lucide-react";
 
 type Product = {
+  id: string;
   title: string;
-  type: string;
-  brand: string;
-  seller: string;
-  city: string;
-  rating: string;
-  image: string;
+  description?: string | null;
+  category?: string | null;
+  seller?: string | null;
+  city?: string | null;
+  rating?: string | number | null;
+  image?: string | null;
+  status?: string | null;
+  brand?: string | null;
 };
 
 const categories = [
@@ -49,152 +53,126 @@ const cities = [
   "زنجان",
 ];
 
-const products: Product[] = [
-  {
-    title: "میلگرد آجدار A3",
-    type: "میلگرد",
-    brand: "ذوب‌آهن اصفهان",
-    seller: "آهن‌آلات آذربایجان",
-    city: "تبریز",
-    rating: "۴.۹",
-    image: "/materials/iron-steel.jpg",
-  },
-  {
-    title: "تیرآهن IPE",
-    type: "تیرآهن",
-    brand: "ذوب‌آهن اصفهان",
-    seller: "بازرگانی فولاد تبریز",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/iron/تیرآهن.jpg",
-  },
-  {
-    title: "نبشی بال مساوی",
-    type: "نبشی",
-    brand: "فولاد ایرانی",
-    seller: "فروشگاه آهن شرق",
-    city: "تبریز",
-    rating: "۴.۷",
-    image: "/materials/iron/نبشی.jpg",
-  },
-  {
-    title: "ناودانی UPN",
-    type: "ناودانی",
-    brand: "فولاد مبارکه",
-    seller: "تأمین فولاد آذربایجان",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/iron/ناودانی.jpg",
-  },
-  {
-    title: "قوطی و پروفیل ساختمانی",
-    type: "قوطی و پروفیل",
-    brand: "پروفیل ایرانی",
-    seller: "پروفیل‌فروشی نوین",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/iron/قوطی-پروفیل.jpg",
-  },
-  {
-    title: "ورق سیاه فولادی",
-    type: "ورق فولادی",
-    brand: "فولاد مبارکه",
-    seller: "بازرگانی فولاد ایران",
-    city: "تبریز",
-    rating: "۴.۹",
-    image: "/materials/iron/ورق-سیاه.jpg",
-  },
-  {
-    title: "وال‌پست منقطع",
-    type: "وال‌پست",
-    brand: "تولیدکننده ایرانی",
-    seller: "مصالح نوین ساختمان",
-    city: "تبریز",
-    rating: "۴.۷",
-    image: "/materials/iron/وال-پست.jpg",
-  },
-  {
-    title: "لوله فولادی داربستی",
-    type: "لوله فولادی",
-    brand: "فولاد ایرانی",
-    seller: "لوله و پروفیل آذربایجان",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/iron/لوله.jpg",
-  },
-  {
-    title: "پلیت و صفحه ستون",
-    type: "پلیت و صفحه ستون",
-    brand: "تولید سفارشی",
-    seller: "خدمات برش و فولاد تبریز",
-    city: "تبریز",
-    rating: "۴.۷",
-    image: "/materials/iron/پلیت.jpg",
-  },
-  {
-    title: "مفتول آرماتوربندی",
-    type: "مفتول و سیم آرماتوربندی",
-    brand: "فولاد ایرانی",
-    seller: "تأمین‌کننده مصالح سهند",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/iron/مفتول.jpg",
-  },
-  {
-    title: "مش و شبکه فولادی",
-    type: "مش و شبکه",
-    brand: "تولیدکننده ایرانی",
-    seller: "مش فولادی آذربایجان",
-    city: "تبریز",
-    rating: "۴.۶",
-    image: "/materials/iron/مش.jpg",
-  },
-  {
-    title: "پیچ و مهره سازه‌ای",
-    type: "پیچ و مهره",
-    brand: "صنعتی",
-    seller: "اتصالات سازه تبریز",
-    city: "تبریز",
-    rating: "۴.۷",
-    image: "/materials/iron/پیچ-مهره.jpg",
-  },
-];
-
 export default function IronSteelPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [search, setSearch] = useState("");
   const [city, setCity] = useState("همه شهرها");
   const [category, setCategory] = useState("همه");
   const [sort, setSort] = useState("جدیدترین");
 
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadProducts() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          "/api/products?category=iron-steel&status=approved",
+          {
+            cache: "no-store",
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error || "خطا در دریافت محصولات"
+          );
+        }
+
+        if (mounted) {
+          setProducts(
+            Array.isArray(data.products)
+              ? data.products
+              : []
+          );
+        }
+      } catch (err) {
+        console.error(
+          "IRON STEEL PRODUCTS ERROR:",
+          err
+        );
+
+        if (mounted) {
+          setError(
+            "دریافت محصولات آهن و فولاد با خطا مواجه شد."
+          );
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProducts();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const filteredProducts = useMemo(() => {
-    let result = products.filter((product) => {
-      const matchesCategory =
-        category === "همه" || product.type === category;
+    let result = [...products];
 
-      const matchesCity =
-        city === "همه شهرها" || product.city === city;
+    if (category !== "همه") {
+      result = result.filter(
+        (product) =>
+          product.category?.trim() === category
+      );
+    }
 
-      const query = search.trim().toLowerCase();
+    if (city !== "همه شهرها") {
+      result = result.filter(
+        (product) =>
+          product.city?.trim() === city
+      );
+    }
 
-      const matchesSearch =
-        query === "" ||
-        `${product.title} ${product.type} ${product.brand} ${product.seller} ${product.city}`
-          .toLowerCase()
-          .includes(query);
+    if (search.trim()) {
+      const query = search
+        .trim()
+        .toLowerCase();
 
-      return matchesCategory && matchesCity && matchesSearch;
-    });
+      result = result.filter((product) => {
+        const text = [
+          product.title,
+          product.description,
+          product.category,
+          product.seller,
+          product.city,
+          product.brand,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return text.includes(query);
+      });
+    }
 
     if (sort === "بیشترین امتیاز") {
-      result = [...result].sort(
+      result.sort(
         (a, b) =>
-          Number(b.rating.replace("۴", "4").replace("٫", ".")) -
-          Number(a.rating.replace("۴", "4").replace("٫", "."))
+          Number(b.rating || 0) -
+          Number(a.rating || 0)
       );
     }
 
     return result;
-  }, [search, city, category, sort]);
+  }, [
+    products,
+    search,
+    city,
+    category,
+    sort,
+  ]);
 
   return (
     <main
@@ -204,7 +182,6 @@ export default function IronSteelPage() {
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-
           <Link
             href="/"
             className="flex items-center gap-3"
@@ -227,13 +204,7 @@ export default function IronSteelPage() {
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
-
-            <Link
-              href="/"
-              className="hover:text-blue-700"
-            >
-              خانه
-            </Link>
+            <Link href="/">خانه</Link>
 
             <Link
               href="/materials"
@@ -242,24 +213,16 @@ export default function IronSteelPage() {
               مصالح و تجهیزات
             </Link>
 
-            <Link
-              href="/service"
-              className="hover:text-blue-700"
-            >
+            <Link href="/service">
               خدمات ساختمانی
             </Link>
 
-            <Link
-              href="/about"
-              className="hover:text-blue-700"
-            >
+            <Link href="/about">
               درباره سرچنو
             </Link>
-
           </nav>
 
           <div className="flex items-center gap-2">
-
             <Link
               href="/login"
               className="hidden rounded-xl px-4 py-3 text-sm font-bold sm:block"
@@ -269,47 +232,36 @@ export default function IronSteelPage() {
 
             <Link
               href="/register"
-              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
+              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20"
             >
               ثبت‌نام
             </Link>
-
           </div>
         </div>
       </header>
 
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-800 to-blue-900">
-
         <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
 
         <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/10 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-5 py-12 lg:py-16">
-
           <div className="mx-auto mb-8 flex h-52 max-w-5xl items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-white/5">
-
-            <img
-              src="/materials/iron-steel.jpg"
-              alt="آهن و فولاد ساختمانی"
-              className="h-full w-full object-cover"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
-
-            <div className="absolute text-center text-white">
+            <div className="text-center text-white">
               <div className="text-6xl">🏗️</div>
 
               <p className="mt-4 text-sm text-slate-300">
                 آهن، فولاد و مقاطع ساختمانی
               </p>
-            </div>
 
+              <p className="mt-1 text-xs text-slate-400">
+                بازار هوشمند آهن‌آلات سرچنو
+              </p>
+            </div>
           </div>
 
           <div className="mx-auto max-w-4xl text-center text-white">
-
             <Link
               href="/materials"
               className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur"
@@ -329,33 +281,28 @@ export default function IronSteelPage() {
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
               انواع میلگرد، تیرآهن، نبشی، ناودانی،
               قوطی و پروفیل، ورق فولادی، وال‌پست،
-              لوله و سایر مقاطع آهن و فولاد را از
-              تأمین‌کنندگان پیدا کنید.
+              لوله و سایر محصولات آهن و فولاد را
+              از تأمین‌کنندگان تأییدشده سرچنو پیدا کنید.
             </p>
 
             {/* SEARCH */}
-            <div className="mx-auto mt-8 rounded-3xl bg-white p-3 shadow-2xl">
-
+            <div className="mx-auto mt-8 rounded-3xl bg-white p-3 text-right shadow-2xl">
               <div className="flex flex-col gap-3 lg:flex-row">
-
                 <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
-
                   <Search className="h-5 w-5 text-slate-400" />
 
                   <input
+                    type="text"
                     value={search}
                     onChange={(e) =>
                       setSearch(e.target.value)
                     }
-                    type="text"
                     placeholder="مثلاً میلگرد، تیرآهن، وال‌پست، پروفیل..."
                     className="w-full bg-transparent text-sm text-slate-800 outline-none"
                   />
-
                 </div>
 
                 <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
-
                   <MapPin className="h-5 w-5 text-slate-400" />
 
                   <select
@@ -371,7 +318,6 @@ export default function IronSteelPage() {
                       </option>
                     ))}
                   </select>
-
                 </div>
 
                 <button
@@ -380,40 +326,35 @@ export default function IronSteelPage() {
                 >
                   جست‌وجو
                 </button>
-
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
       {/* CATEGORIES */}
       <section className="mx-auto max-w-7xl px-5 py-10">
-
         <div className="mb-6">
-
           <span className="text-sm font-bold text-blue-700">
             دسته‌بندی آهن‌آلات
           </span>
 
           <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-            محصول مورد نیاز خود را انتخاب کنید
+            محصولات آهن و فولاد
           </h2>
 
           <p className="mt-3 text-sm text-slate-500">
-            از میلگرد و تیرآهن تا وال‌پست و اتصالات سازه‌ای
+            محصول مورد نیاز خود را انتخاب کنید.
           </p>
-
         </div>
 
         <div className="flex flex-wrap gap-3">
-
           {categories.map((item) => (
-
             <button
               key={item}
-              onClick={() => setCategory(item)}
+              onClick={() =>
+                setCategory(item)
+              }
               className={`rounded-full px-5 py-3 text-sm font-bold transition ${
                 category === item
                   ? "bg-blue-700 text-white"
@@ -422,34 +363,25 @@ export default function IronSteelPage() {
             >
               {item}
             </button>
-
           ))}
-
         </div>
       </section>
 
       {/* PRODUCTS */}
       <section className="mx-auto max-w-7xl px-5 pb-16">
-
         <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
-
           {/* FILTER */}
           <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
-
             <div className="flex items-center justify-between">
-
               <h3 className="font-black">
                 فیلتر محصولات
               </h3>
 
               <SlidersHorizontal className="h-5 w-5 text-blue-700" />
-
             </div>
 
             <div className="mt-7 space-y-6">
-
               <div>
-
                 <label className="text-sm font-bold">
                   نوع محصول
                 </label>
@@ -467,11 +399,9 @@ export default function IronSteelPage() {
                     </option>
                   ))}
                 </select>
-
               </div>
 
               <div>
-
                 <label className="text-sm font-bold">
                   شهر
                 </label>
@@ -489,57 +419,14 @@ export default function IronSteelPage() {
                     </option>
                   ))}
                 </select>
-
               </div>
 
               <div>
-
-                <label className="text-sm font-bold">
-                  استاندارد / گرید
-                </label>
-
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-
-                  <option>همه</option>
-                  <option>A1</option>
-                  <option>A2</option>
-                  <option>A3</option>
-                  <option>A4</option>
-                  <option>ST37</option>
-                  <option>ST52</option>
-
-                </select>
-
-              </div>
-
-              <div>
-
-                <label className="text-sm font-bold">
-                  کارخانه / برند
-                </label>
-
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-
-                  <option>همه برندها</option>
-                  <option>ذوب‌آهن اصفهان</option>
-                  <option>فولاد مبارکه</option>
-                  <option>فولاد میانه</option>
-                  <option>شاهین بناب</option>
-                  <option>ظفر بناب</option>
-                  <option>آذرفولاد امین</option>
-
-                </select>
-
-              </div>
-
-              <div>
-
                 <label className="text-sm font-bold">
                   نحوه فروش
                 </label>
 
                 <div className="mt-3 space-y-3 text-sm">
-
                   <label className="flex items-center gap-2">
                     <input type="checkbox" />
                     کیلویی
@@ -564,44 +451,34 @@ export default function IronSteelPage() {
                     <input type="checkbox" />
                     خرده
                   </label>
-
                 </div>
-
               </div>
 
               <div className="border-t border-slate-100 pt-5">
-
                 <label className="flex items-center gap-3 text-sm">
-
                   <input
                     type="checkbox"
                     className="h-4 w-4"
                   />
 
                   فقط تأمین‌کنندگان تأییدشده
-
                 </label>
-
               </div>
-
             </div>
           </aside>
 
-          {/* PRODUCT LIST */}
+          {/* LIST */}
           <div>
-
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
               <div>
-
                 <h2 className="text-2xl font-black">
                   محصولات آهن و فولاد
                 </h2>
 
                 <p className="mt-2 text-sm text-slate-500">
-                  محصولات نمونه برای نمایش ساختار صفحه
+                  فقط محصولات تأییدشده توسط مدیریت
+                  سرچنو نمایش داده می‌شوند.
                 </p>
-
               </div>
 
               <select
@@ -615,124 +492,166 @@ export default function IronSteelPage() {
                 <option>بیشترین امتیاز</option>
                 <option>ارزان‌ترین</option>
               </select>
-
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {/* LOADING */}
+            {loading && (
+              <div className="flex min-h-64 items-center justify-center rounded-3xl border border-slate-200 bg-white">
+                <div className="text-center">
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-700" />
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-16 text-center">
-
-                <Package className="mx-auto h-12 w-12 text-slate-300" />
-
-                <h3 className="mt-5 text-xl font-black">
-                  محصولی پیدا نشد
-                </h3>
-
-                <p className="mt-3 text-sm text-slate-500">
-                  عبارت جست‌وجو یا فیلتر انتخاب‌شده را تغییر دهید.
-                </p>
-
+                  <p className="mt-4 text-sm text-slate-500">
+                    در حال دریافت محصولات تأییدشده...
+                  </p>
+                </div>
               </div>
-
-            ) : (
-
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-
-                {filteredProducts.map((product) => (
-
-                  <div
-                    key={product.title}
-                    className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                  >
-
-                    <div className="relative h-56 overflow-hidden bg-slate-100">
-
-                      <img
-                        src={product.image}
-                        alt={product.title}
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                      />
-
-                      <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
-                        {product.type}
-                      </div>
-
-                    </div>
-
-                    <div className="p-5">
-
-                      <div className="flex items-center justify-between">
-
-                        <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
-
-                          <Star className="h-4 w-4 fill-current" />
-
-                          {product.rating}
-
-                        </div>
-
-                        <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
-
-                          <CheckCircle2 className="h-4 w-4" />
-
-                          موجود
-
-                        </span>
-
-                      </div>
-
-                      <h3 className="mt-4 font-black">
-                        {product.title}
-                      </h3>
-
-                      <p className="mt-2 text-sm font-bold text-blue-700">
-                        {product.brand}
-                      </p>
-
-                      <p className="mt-2 text-sm text-slate-500">
-                        {product.seller}
-                      </p>
-
-                      <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-
-                        <MapPin className="h-4 w-4" />
-
-                        {product.city}
-
-                      </div>
-
-                      <Link
-                        href={`/materials/iron-steel/${encodeURIComponent(product.title)}`}
-                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
-                      >
-                        مشاهده محصول
-
-                        <ArrowLeft className="h-4 w-4" />
-                      </Link>
-
-                    </div>
-
-                  </div>
-
-                ))}
-
-              </div>
-
             )}
 
+            {/* ERROR */}
+            {!loading && error && (
+              <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
+                <p className="font-bold text-red-700">
+                  {error}
+                </p>
+
+                <button
+                  onClick={() =>
+                    window.location.reload()
+                  }
+                  className="mt-5 rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white"
+                >
+                  تلاش مجدد
+                </button>
+              </div>
+            )}
+
+            {/* EMPTY */}
+            {!loading &&
+              !error &&
+              filteredProducts.length === 0 && (
+                <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center">
+                  <Package className="mx-auto h-12 w-12 text-slate-300" />
+
+                  <h3 className="mt-5 text-xl font-black">
+                    هنوز محصول تأییدشده‌ای ثبت نشده است
+                  </h3>
+
+                  <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500">
+                    محصولات پس از ثبت توسط فروشنده و
+                    تأیید توسط مدیریت سرچنو، در این صفحه
+                    نمایش داده می‌شوند.
+                  </p>
+
+                  <Link
+                    href="/register"
+                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white"
+                  >
+                    ثبت فروشگاه و محصول
+                    <ArrowLeft className="h-4 w-4" />
+                  </Link>
+                </div>
+              )}
+
+            {/* REAL PRODUCTS */}
+            {!loading &&
+              !error &&
+              filteredProducts.length > 0 && (
+                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  {filteredProducts.map(
+                    (product) => (
+                      <div
+                        key={product.id}
+                        className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                      >
+                        <div className="relative h-56 overflow-hidden bg-slate-100">
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.title}
+                              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center">
+                              <Package className="h-16 w-16 text-slate-300" />
+                            </div>
+                          )}
+
+                          <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
+                            {product.category ||
+                              "آهن و فولاد"}
+                          </div>
+                        </div>
+
+                        <div className="p-5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
+                              <Star className="h-4 w-4 fill-current" />
+
+                              {product.rating ||
+                                "۵.۰"}
+                            </div>
+
+                            <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+                              <CheckCircle2 className="h-4 w-4" />
+
+                              تأییدشده
+                            </span>
+                          </div>
+
+                          <h3 className="mt-4 font-black">
+                            {product.title}
+                          </h3>
+
+                          {product.brand && (
+                            <p className="mt-2 text-sm font-bold text-blue-700">
+                              {product.brand}
+                            </p>
+                          )}
+
+                          {product.description && (
+                            <p className="mt-2 line-clamp-2 text-sm leading-7 text-slate-500">
+                              {product.description}
+                            </p>
+                          )}
+
+                          {product.seller && (
+                            <div className="mt-3 flex items-center gap-2 text-sm font-bold text-slate-700">
+                              <Building2 className="h-4 w-4 text-blue-700" />
+
+                              {product.seller}
+                            </div>
+                          )}
+
+                          <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
+                            <MapPin className="h-4 w-4" />
+
+                            {product.city ||
+                              "تبریز"}
+                          </div>
+
+                          <Link
+                            href={`/materials/iron-steel/${product.id}`}
+                            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                          >
+                            مشاهده محصول
+
+                            <ArrowLeft className="h-4 w-4" />
+                          </Link>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
           </div>
         </div>
       </section>
 
       {/* BULK */}
       <section className="mx-auto max-w-7xl px-5 pb-16">
-
         <div className="overflow-hidden rounded-[2rem] bg-gradient-to-l from-slate-950 to-blue-950 p-8 text-white lg:p-12">
-
           <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-
             <div>
-
               <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold">
                 تأمین آهن پروژه
               </span>
@@ -742,13 +661,13 @@ export default function IronSteelPage() {
               </h2>
 
               <p className="mt-4 leading-8 text-slate-300">
-                برای پروژه‌های ساختمانی می‌توانید انواع
-                میلگرد، تیرآهن، پروفیل، ورق، وال‌پست و سایر
-                مقاطع فولادی را از تأمین‌کنندگان پیدا کنید.
+                برای پروژه‌های ساختمانی می‌توانید
+                انواع میلگرد، تیرآهن، پروفیل، ورق،
+                وال‌پست و سایر مقاطع فولادی را از
+                تأمین‌کنندگان پیدا کنید.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
-
                 <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
                   فروش کیلویی
                 </span>
@@ -764,33 +683,25 @@ export default function IronSteelPage() {
                 <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
                   فروش عمده
                 </span>
-
               </div>
-
             </div>
 
             <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
-
               <div className="flex items-center gap-4">
-
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
-
                   <Package className="h-7 w-7" />
-
                 </div>
 
                 <div>
-
                   <h3 className="font-black">
                     نیاز به آهن‌آلات پروژه دارید؟
                   </h3>
 
                   <p className="mt-1 text-sm text-slate-300">
-                    با فروشندگان و تأمین‌کنندگان ارتباط بگیرید.
+                    با فروشندگان و تأمین‌کنندگان
+                    ارتباط بگیرید.
                   </p>
-
                 </div>
-
               </div>
 
               <Link
@@ -798,20 +709,17 @@ export default function IronSteelPage() {
                 className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-black text-blue-900"
               >
                 ثبت فروشگاه و محصول
+
                 <ArrowLeft className="h-4 w-4" />
               </Link>
-
             </div>
-
           </div>
         </div>
       </section>
 
       {/* CTA */}
       <section className="px-5 pb-16">
-
         <div className="mx-auto max-w-7xl rounded-[2rem] bg-blue-700 px-6 py-14 text-center text-white">
-
           <Building2 className="mx-auto h-10 w-10" />
 
           <h2 className="mt-5 text-2xl font-black sm:text-3xl">
@@ -819,8 +727,9 @@ export default function IronSteelPage() {
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه خود را در سرچنو ثبت کنید و محصولات آهن و
-            فولاد خود را به خریداران و سازندگان معرفی کنید.
+            فروشگاه خود را در سرچنو ثبت کنید و
+            محصولات آهن و فولاد خود را به خریداران
+            و سازندگان معرفی کنید.
           </p>
 
           <Link
@@ -828,26 +737,21 @@ export default function IronSteelPage() {
             className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
           >
             ثبت فروشگاه
+
             <ArrowLeft className="h-4 w-4" />
           </Link>
-
         </div>
       </section>
 
       {/* FOOTER */}
       <footer className="bg-slate-950 text-slate-300">
-
         <div className="mx-auto max-w-7xl px-5 py-12">
-
           <div className="grid gap-10 md:grid-cols-4">
-
             <div className="md:col-span-2">
-
               <Link
                 href="/"
                 className="flex items-center gap-3"
               >
-
                 <img
                   src="/logo.png"
                   alt="سرچنو"
@@ -855,7 +759,6 @@ export default function IronSteelPage() {
                 />
 
                 <div>
-
                   <div className="text-xl font-black text-white">
                     سرچنو
                   </div>
@@ -863,26 +766,22 @@ export default function IronSteelPage() {
                   <div className="text-xs text-slate-500">
                     بازار هوشمند ساخت‌وساز
                   </div>
-
                 </div>
-
               </Link>
 
               <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
-                پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان،
-                تأمین‌کنندگان و متخصصان صنعت ساختمان.
+                پلتفرم جست‌وجو، مقایسه و ارتباط با
+                فروشندگان، تأمین‌کنندگان و متخصصان
+                صنعت ساختمان.
               </p>
-
             </div>
 
             <div>
-
               <h3 className="font-bold text-white">
                 خدمات سرچنو
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
-
                 <Link
                   href="/materials"
                   className="block hover:text-white"
@@ -903,19 +802,15 @@ export default function IronSteelPage() {
                 >
                   ثبت فروشگاه
                 </Link>
-
               </div>
-
             </div>
 
             <div>
-
               <h3 className="font-bold text-white">
                 ارتباط با ما
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
-
                 <Link
                   href="/about"
                   className="block hover:text-white"
@@ -924,35 +819,22 @@ export default function IronSteelPage() {
                 </Link>
 
                 <p className="flex items-center gap-2">
-
                   <Phone className="h-4 w-4" />
-
                   تماس با ما
-
                 </p>
 
-                <p>
-                  قوانین و مقررات
-                </p>
+                <p>قوانین و مقررات</p>
 
-                <p>
-                  پشتیبانی
-                </p>
-
+                <p>پشتیبانی</p>
               </div>
-
             </div>
-
           </div>
 
           <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
             © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
           </div>
-
         </div>
-
       </footer>
-
     </main>
   );
 }
