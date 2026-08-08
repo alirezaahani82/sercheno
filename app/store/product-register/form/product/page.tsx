@@ -282,7 +282,7 @@ export default function ProductRegisterPage() {
 
             seller_id: storeId,
 
-            status: "approved",
+            status: "inactive",
 
             sales_conditions:
               selectedConditions.length > 0
