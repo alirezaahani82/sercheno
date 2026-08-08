@@ -241,6 +241,14 @@ export default function ProductRegisterPage() {
           .from("products")
           .insert({
             name: product.name.trim(),
+            slug:
+  product.name
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\u0600-\u06FFa-zA-Z0-9-]/g, "")
+    + "-" +
+  Date.now(),
 
             category: product.category,
 
