@@ -282,7 +282,7 @@ export default function ProductRegisterPage() {
 
             seller_id: storeId,
 
-            status: "pending",
+            status: "approved",
 
             sales_conditions:
               selectedConditions.length > 0
