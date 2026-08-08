@@ -130,6 +130,7 @@ export default function ElevatorsPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+
           <Link href="/" className="flex items-center gap-3">
             <img
               src="/logo.png"
@@ -160,11 +161,17 @@ export default function ElevatorsPage() {
               مصالح و تجهیزات
             </Link>
 
-            <Link href="/service" className="hover:text-blue-700">
+            <Link
+              href="/service"
+              className="hover:text-blue-700"
+            >
               خدمات ساختمانی
             </Link>
 
-            <Link href="/about" className="hover:text-blue-700">
+            <Link
+              href="/about"
+              className="hover:text-blue-700"
+            >
               درباره سرچنو
             </Link>
           </nav>
@@ -189,6 +196,7 @@ export default function ElevatorsPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-slate-950">
+
         <div className="absolute inset-0">
           <img
             src="/materials/elevators-hero.jpg"
@@ -200,7 +208,9 @@ export default function ElevatorsPage() {
         </div>
 
         <div className="relative mx-auto max-w-7xl px-5 py-20 lg:py-24">
+
           <div className="max-w-4xl text-white">
+
             <Link
               href="/materials"
               className="mb-6 inline-flex items-center gap-2 text-sm text-blue-200 hover:text-white"
@@ -216,21 +226,26 @@ export default function ElevatorsPage() {
 
             <h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
               تمام تجهیزات آسانسور
+
               <span className="mt-3 block text-cyan-300">
                 در سرچنو
               </span>
             </h1>
 
             <p className="mt-6 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-              از کابین و درب آسانسور تا موتور، تابلو فرمان، ریل،
-              سیم بکسل، تجهیزات ایمنی و قطعات مورد نیاز پروژه‌های
-              آسانسور را از فروشندگان و تأمین‌کنندگان پیدا کنید.
+              از کابین و درب آسانسور تا موتور، تابلو فرمان،
+              ریل، سیم بکسل، تجهیزات ایمنی و قطعات مورد نیاز
+              پروژه‌های آسانسور را از فروشندگان و تأمین‌کنندگان
+              پیدا کنید.
             </p>
 
             {/* Search */}
             <div className="mt-9 rounded-3xl bg-white p-3 text-right shadow-2xl">
+
               <div className="flex flex-col gap-3 lg:flex-row">
+
                 <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
+
                   <Search className="h-5 w-5 text-slate-400" />
 
                   <input
@@ -238,9 +253,11 @@ export default function ElevatorsPage() {
                     placeholder="مثلاً کابین، موتور، ریل، درب یا تابلو فرمان..."
                     className="w-full bg-transparent text-sm text-slate-800 outline-none"
                   />
+
                 </div>
 
                 <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
+
                   <MapPin className="h-5 w-5 text-slate-400" />
 
                   <select className="w-full bg-transparent text-sm text-slate-700 outline-none">
@@ -250,16 +267,21 @@ export default function ElevatorsPage() {
                     <option>زنجان</option>
                     <option>همه شهرها</option>
                   </select>
+
                 </div>
 
                 <button className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800">
                   جست‌وجو
                 </button>
+
               </div>
             </div>
 
             <div className="mt-5 flex flex-wrap gap-2 text-xs text-blue-100">
-              <span>جست‌وجوهای محبوب:</span>
+
+              <span>
+                جست‌وجوهای محبوب:
+              </span>
 
               <span className="rounded-full bg-white/10 px-4 py-2">
                 کابین آسانسور
@@ -276,14 +298,18 @@ export default function ElevatorsPage() {
               <span className="rounded-full bg-white/10 px-4 py-2">
                 ریل آسانسور
               </span>
+
             </div>
+
           </div>
         </div>
       </section>
 
       {/* Categories */}
       <section className="mx-auto max-w-7xl px-5 py-16">
+
         <div className="mb-8">
+
           <span className="text-sm font-bold text-blue-700">
             دسته‌بندی تجهیزات
           </span>
@@ -295,24 +321,31 @@ export default function ElevatorsPage() {
           <p className="mt-3 text-sm text-slate-500">
             دسته مورد نظر خود را انتخاب کنید.
           </p>
+
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+
           {elevatorCategories.map((category) => (
+
             <Link
               key={category.title}
               href="/materials/elevators"
               className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
             >
+
               <div className="h-40 overflow-hidden bg-slate-100">
+
                 <img
                   src={category.image}
                   alt={category.title}
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 />
+
               </div>
 
               <div className="p-5 text-center">
+
                 <h3 className="text-sm font-black">
                   {category.title}
                 </h3>
@@ -320,16 +353,23 @@ export default function ElevatorsPage() {
                 <p className="mt-2 text-xs text-slate-400">
                   {category.count}
                 </p>
+
               </div>
+
             </Link>
+
           ))}
+
         </div>
       </section>
 
       {/* Products */}
       <section className="bg-white py-16">
+
         <div className="mx-auto max-w-7xl px-5">
+
           <div className="mb-8">
+
             <span className="text-sm font-bold text-emerald-600">
               تجهیزات پیشنهادی
             </span>
@@ -337,32 +377,48 @@ export default function ElevatorsPage() {
             <h2 className="mt-2 text-2xl font-black sm:text-3xl">
               محصولات پرطرفدار آسانسور
             </h2>
+
+            <p className="mt-3 text-sm text-slate-500">
+              محصولات و تجهیزات ثبت‌شده در بازار آسانسور سرچنو
+            </p>
+
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
             {products.map((product) => (
+
               <div
                 key={product.title}
                 className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
               >
+
                 <div className="h-48 overflow-hidden bg-slate-100">
+
                   <img
                     src={product.image}
                     alt={product.title}
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
+
                 </div>
 
                 <div className="p-5">
+
                   <div className="flex items-center justify-between gap-2">
+
                     <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
                       {product.category}
                     </span>
 
                     <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
+
                       <Star className="h-4 w-4 fill-current" />
+
                       {product.rating}
+
                     </div>
+
                   </div>
 
                   <h3 className="mt-4 font-black">
@@ -374,91 +430,169 @@ export default function ElevatorsPage() {
                   </p>
 
                   <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
+
                     <MapPin className="h-4 w-4" />
+
                     {product.city}
+
                   </div>
 
                   {product.verified && (
+
                     <div className="mt-3 flex items-center gap-2 text-xs font-bold text-emerald-600">
+
                       <CheckCircle2 className="h-4 w-4" />
+
                       تأمین‌کننده تأییدشده
+
                     </div>
+
                   )}
 
                   <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-700 transition hover:bg-blue-700 hover:text-white">
+
                     مشاهده جزئیات
+
                     <ArrowLeft className="h-4 w-4" />
+
                   </button>
+
                 </div>
+
               </div>
+
             ))}
+
           </div>
         </div>
       </section>
 
       {/* Marketplace */}
       <section className="mx-auto max-w-7xl px-5 py-16">
+
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+
           {/* Filters */}
           <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
+
             <div className="flex items-center justify-between">
+
               <h3 className="font-black">
                 فیلتر نتایج
               </h3>
 
               <SlidersHorizontal className="h-5 w-5 text-blue-700" />
+
             </div>
 
             <div className="mt-7 space-y-6">
+
               <div>
+
                 <label className="text-sm font-bold">
                   دسته‌بندی
                 </label>
 
                 <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-                  <option>همه تجهیزات</option>
-                  <option>کابین آسانسور</option>
-                  <option>درب آسانسور</option>
-                  <option>موتور آسانسور</option>
-                  <option>تابلو فرمان</option>
-                  <option>ریل آسانسور</option>
-                  <option>سیم بکسل</option>
-                  <option>تجهیزات ایمنی</option>
-                  <option>قطعات آسانسور</option>
+
+                  <option>
+                    همه تجهیزات
+                  </option>
+
+                  <option>
+                    کابین آسانسور
+                  </option>
+
+                  <option>
+                    درب آسانسور
+                  </option>
+
+                  <option>
+                    موتور آسانسور
+                  </option>
+
+                  <option>
+                    تابلو فرمان
+                  </option>
+
+                  <option>
+                    ریل آسانسور
+                  </option>
+
+                  <option>
+                    سیم بکسل
+                  </option>
+
+                  <option>
+                    تجهیزات ایمنی
+                  </option>
+
+                  <option>
+                    قطعات آسانسور
+                  </option>
+
                 </select>
+
               </div>
 
               <div>
+
                 <label className="text-sm font-bold">
                   شهر
                 </label>
 
                 <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-                  <option>همه شهرها</option>
-                  <option>تبریز</option>
-                  <option>تهران</option>
-                  <option>ارومیه</option>
-                  <option>زنجان</option>
+
+                  <option>
+                    همه شهرها
+                  </option>
+
+                  <option>
+                    تبریز
+                  </option>
+
+                  <option>
+                    تهران
+                  </option>
+
+                  <option>
+                    ارومیه
+                  </option>
+
+                  <option>
+                    زنجان
+                  </option>
+
                 </select>
+
               </div>
 
               <div className="border-t border-slate-100 pt-5">
+
                 <label className="flex cursor-pointer items-center gap-3 text-sm">
+
                   <input
                     type="checkbox"
                     className="h-4 w-4 rounded"
                   />
 
                   فقط تأمین‌کنندگان تأییدشده
+
                 </label>
+
               </div>
+
             </div>
+
           </aside>
 
           {/* Sellers */}
           <div>
+
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
               <div>
+
                 <h2 className="text-2xl font-black">
                   تأمین‌کنندگان تجهیزات آسانسور
                 </h2>
@@ -466,35 +600,52 @@ export default function ElevatorsPage() {
                 <p className="mt-2 text-sm text-slate-500">
                   فروشندگان و تأمین‌کنندگان تجهیزات آسانسور در سرچنو
                 </p>
+
               </div>
 
               <button className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold">
+
                 مرتب‌سازی
+
                 <ChevronDown className="h-4 w-4" />
+
               </button>
+
             </div>
 
             <div className="space-y-4">
+
               {sellers.map((seller) => (
+
                 <div
                   key={seller.name}
                   className="rounded-3xl border border-slate-200 bg-white p-6 transition hover:border-blue-200 hover:shadow-lg"
                 >
+
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+
                     <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50">
+
                       <Building2 className="h-8 w-8 text-blue-700" />
+
                     </div>
 
                     <div className="flex-1">
+
                       <div className="flex flex-wrap items-center gap-2">
+
                         <h3 className="font-black">
                           {seller.name}
                         </h3>
 
                         <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+
                           <ShieldCheck className="h-3 w-3" />
+
                           تأییدشده
+
                         </span>
+
                       </div>
 
                       <p className="mt-2 text-sm text-slate-500">
@@ -502,38 +653,58 @@ export default function ElevatorsPage() {
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-400">
+
                         <span className="flex items-center gap-1">
+
                           <MapPin className="h-4 w-4" />
+
                           {seller.city}
+
                         </span>
 
                         <span className="flex items-center gap-1 text-amber-500">
+
                           <Star className="h-4 w-4 fill-current" />
+
                           {seller.rating}
+
                         </span>
 
                         <span className="flex items-center gap-1">
+
                           <Package className="h-4 w-4" />
+
                           {seller.products}
+
                         </span>
+
                       </div>
+
                     </div>
 
                     <button className="rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-800">
                       مشاهده فروشگاه
                     </button>
+
                   </div>
+
                 </div>
+
               ))}
+
             </div>
+
           </div>
         </div>
       </section>
 
       {/* CTA */}
       <section className="px-5 pb-16">
+
         <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-gradient-to-l from-blue-700 to-blue-950 px-6 py-14 text-center text-white">
+
           <div className="mx-auto max-w-3xl">
+
             <h2 className="text-2xl font-black sm:text-3xl">
               فروشنده یا تأمین‌کننده تجهیزات آسانسور هستید؟
             </h2>
@@ -544,8 +715,9 @@ export default function ElevatorsPage() {
             </p>
 
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+
               <Link
-                href="/store/register"
+                href="/register"
                 className="rounded-xl bg-white px-8 py-4 font-black text-blue-800 transition hover:bg-blue-50"
               >
                 ثبت فروشگاه
@@ -557,17 +729,24 @@ export default function ElevatorsPage() {
               >
                 درباره سرچنو
               </Link>
+
             </div>
+
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="bg-slate-950 text-slate-300">
+
         <div className="mx-auto max-w-7xl px-5 py-12">
+
           <div className="grid gap-10 md:grid-cols-4">
+
             <div className="md:col-span-2">
+
               <Link href="/" className="flex items-center gap-3">
+
                 <img
                   src="/logo.png"
                   alt="سرچنو"
@@ -575,6 +754,7 @@ export default function ElevatorsPage() {
                 />
 
                 <div>
+
                   <div className="text-xl font-black text-white">
                     سرچنو
                   </div>
@@ -582,21 +762,26 @@ export default function ElevatorsPage() {
                   <div className="text-xs text-slate-500">
                     بازار هوشمند ساخت‌وساز
                   </div>
+
                 </div>
+
               </Link>
 
               <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
                 پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان مصالح،
                 تأمین‌کنندگان و متخصصان صنعت ساختمان.
               </p>
+
             </div>
 
             <div>
+
               <h3 className="font-bold text-white">
                 خدمات سرچنو
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
+
                 <Link
                   href="/materials"
                   className="block hover:text-white"
@@ -619,20 +804,24 @@ export default function ElevatorsPage() {
                 </Link>
 
                 <Link
-                  href="/store/register"
+                  href="/register"
                   className="block hover:text-white"
                 >
                   ثبت فروشگاه
                 </Link>
+
               </div>
+
             </div>
 
             <div>
+
               <h3 className="font-bold text-white">
                 ارتباط با ما
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
+
                 <Link
                   href="/about"
                   className="block hover:text-white"
@@ -660,13 +849,17 @@ export default function ElevatorsPage() {
                 >
                   پشتیبانی
                 </Link>
+
               </div>
+
             </div>
+
           </div>
 
           <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
             © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
           </div>
+
         </div>
       </footer>
     </main>
