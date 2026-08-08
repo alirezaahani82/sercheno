@@ -72,17 +72,7 @@ export default function IronSteelPage() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          "/api/products?category=iron-steel",
-          {
-            cache: "no-store",
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("خطا در دریافت محصولات");
-        }
-
+        
         const data = await response.json();
 
         setProducts(
