@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   MapPin,
@@ -8,90 +11,20 @@ import {
   Package,
   Building2,
   Phone,
+  Loader2,
 } from "lucide-react";
 
-const products = [
-  {
-    title: "کاغذ دیواری طرح مدرن",
-    type: "کاغذ دیواری",
-    seller: "دکوراسیون آذربایجان",
-    city: "تبریز",
-    rating: "۴.۹",
-    image: "/materials/interior-decoration/wallpaper.jpg",
-  },
-  {
-    title: "دیوارپوش PVC",
-    type: "دیوارپوش",
-    seller: "دکوراسیون نوین",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/interior-decoration/wall-panel.jpg",
-  },
-  {
-    title: "پارکت لمینت",
-    type: "پارکت و لمینت",
-    seller: "فروشگاه کف‌پوش تبریز",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/interior-decoration/laminate.jpg",
-  },
-  {
-    title: "کفپوش PVC",
-    type: "کفپوش",
-    seller: "کفپوش آذربایجان",
-    city: "تبریز",
-    rating: "۴.۷",
-    image: "/materials/interior-decoration/flooring.jpg",
-  },
-  {
-    title: "قرنیز MDF",
-    type: "قرنیز",
-    seller: "MDF و دکوراسیون سهند",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/interior-decoration/skirting.jpg",
-  },
-  {
-    title: "MDF دکوراتیو",
-    type: "MDF و صفحات دکوراتیو",
-    seller: "صفحات MDF آذربایجان",
-    city: "تبریز",
-    rating: "۴.۹",
-    image: "/materials/interior-decoration/mdf.jpg",
-  },
-  {
-    title: "پارتیشن اداری",
-    type: "پارتیشن و دیوار کاذب",
-    seller: "پارتیشن سازان تبریز",
-    city: "تبریز",
-    rating: "۴.۷",
-    image: "/materials/interior-decoration/partition.jpg",
-  },
-  {
-    title: "سقف کاذب دکوراتیو",
-    type: "سقف کاذب",
-    seller: "اجرای سقف مدرن",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/interior-decoration/false-ceiling.jpg",
-  },
-  {
-    title: "درب داخلی ساختمان",
-    type: "درب داخلی",
-    seller: "درب و دکوراسیون نوین",
-    city: "تبریز",
-    rating: "۴.۹",
-    image: "/materials/interior-decoration/interior-door.jpg",
-  },
-  {
-    title: "نورپردازی دکوراتیو",
-    type: "نورپردازی",
-    seller: "روشنایی و دکور آذربایجان",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/interior-decoration/decorative-lighting.jpg",
-  },
-];
+type Product = {
+  id: string;
+  title: string;
+  description?: string | null;
+  category?: string | null;
+  seller?: string | null;
+  city?: string | null;
+  rating?: string | number | null;
+  image?: string | null;
+  status?: string | null;
+};
 
 const categories = [
   "همه",
@@ -109,17 +42,130 @@ const categories = [
   "اکسسوری دکوراسیون",
 ];
 
+const cities = [
+  "همه شهرها",
+  "تبریز",
+  "تهران",
+  "ارومیه",
+  "زنجان",
+];
+
 export default function InteriorDecorationPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [search, setSearch] = useState("");
+  const [city, setCity] = useState("همه شهرها");
+  const [category, setCategory] = useState("همه");
+  const [sort, setSort] = useState("جدیدترین");
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  async function loadProducts() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch(
+        "/api/products?category=interior-decoration",
+        {
+          cache: "no-store",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("خطا در دریافت محصولات");
+      }
+
+      const data = await response.json();
+
+      setProducts(
+        Array.isArray(data.products)
+          ? data.products
+          : []
+      );
+    } catch (err) {
+      console.error("INTERIOR PRODUCTS ERROR:", err);
+      setError(
+        "دریافت محصولات دکوراسیون داخلی با خطا مواجه شد."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+
+    if (category !== "همه") {
+      result = result.filter(
+        (product) =>
+          product.category?.trim() === category
+      );
+    }
+
+    if (city !== "همه شهرها") {
+      result = result.filter(
+        (product) =>
+          product.city?.trim() === city
+      );
+    }
+
+    if (search.trim()) {
+      const query = search
+        .trim()
+        .toLowerCase();
+
+      result = result.filter((product) => {
+        const text = [
+          product.title,
+          product.description,
+          product.category,
+          product.seller,
+          product.city,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return text.includes(query);
+      });
+    }
+
+    if (sort === "بیشترین امتیاز") {
+      result.sort(
+        (a, b) =>
+          Number(b.rating || 0) -
+          Number(a.rating || 0)
+      );
+    }
+
+    return result;
+  }, [
+    products,
+    search,
+    city,
+    category,
+    sort,
+  ]);
+
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* Header */}
+      {/* HEADER */}
+
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
 
-          <Link href="/" className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex items-center gap-3"
+          >
             <img
               src="/logo.png"
               alt="لوگوی سرچنو"
@@ -138,7 +184,11 @@ export default function InteriorDecorationPage() {
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
-            <Link href="/">
+
+            <Link
+              href="/"
+              className="hover:text-blue-700"
+            >
               خانه
             </Link>
 
@@ -149,13 +199,20 @@ export default function InteriorDecorationPage() {
               مصالح و تجهیزات
             </Link>
 
-            <Link href="/service">
+            <Link
+              href="/service"
+              className="hover:text-blue-700"
+            >
               خدمات ساختمانی
             </Link>
 
-            <Link href="/about">
+            <Link
+              href="/about"
+              className="hover:text-blue-700"
+            >
               درباره سرچنو
             </Link>
+
           </nav>
 
           <div className="flex items-center gap-2">
@@ -169,7 +226,7 @@ export default function InteriorDecorationPage() {
 
             <Link
               href="/register"
-              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20"
+              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
             >
               ثبت‌نام
             </Link>
@@ -178,14 +235,25 @@ export default function InteriorDecorationPage() {
         </div>
       </header>
 
-      {/* Hero */}
+      {/* HERO */}
+
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
 
         <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
 
         <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
 
-        <div className="relative mx-auto max-w-7xl px-5 py-14 lg:py-20">
+        <div className="relative mx-auto max-w-7xl px-5 py-10 lg:py-14">
+
+          <div className="mx-auto mb-8 max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
+
+            <img
+              src="/materials/interior-decoration.jpg"
+              alt="دکوراسیون داخلی ساختمان"
+              className="h-64 w-full object-cover sm:h-80 lg:h-[420px]"
+            />
+
+          </div>
 
           <div className="mx-auto max-w-4xl text-center text-white">
 
@@ -198,20 +266,25 @@ export default function InteriorDecorationPage() {
             </Link>
 
             <h1 className="text-3xl font-black leading-tight sm:text-5xl">
+
               دکوراسیون داخلی
+
               <span className="mt-2 block text-cyan-300">
                 ساختمان
               </span>
+
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-              انواع کاغذ دیواری، دیوارپوش، کفپوش، پارکت،
-              لمینت، قرنیز، سقف کاذب، MDF، پارتیشن،
-              درب داخلی و تجهیزات دکوراسیون را از فروشندگان
-              و تأمین‌کنندگان پیدا کنید.
+              انواع کاغذ دیواری، دیوارپوش، کفپوش،
+              پارکت، لمینت، قرنیز، سقف کاذب، MDF،
+              پارتیشن، درب داخلی، نورپردازی و تجهیزات
+              دکوراسیون را از فروشندگان و تأمین‌کنندگان
+              پیدا کنید.
             </p>
 
-            {/* Search */}
+            {/* SEARCH */}
+
             <div className="mx-auto mt-8 rounded-3xl bg-white p-3 shadow-2xl">
 
               <div className="flex flex-col gap-3 lg:flex-row">
@@ -222,6 +295,10 @@ export default function InteriorDecorationPage() {
 
                   <input
                     type="text"
+                    value={search}
+                    onChange={(e) =>
+                      setSearch(e.target.value)
+                    }
                     placeholder="مثلاً پارکت، کاغذ دیواری، MDF..."
                     className="w-full bg-transparent text-sm text-slate-800 outline-none"
                   />
@@ -232,17 +309,26 @@ export default function InteriorDecorationPage() {
 
                   <MapPin className="h-5 w-5 text-slate-400" />
 
-                  <select className="w-full bg-transparent text-sm text-slate-700 outline-none">
-                    <option>تبریز</option>
-                    <option>تهران</option>
-                    <option>ارومیه</option>
-                    <option>زنجان</option>
-                    <option>همه شهرها</option>
+                  <select
+                    value={city}
+                    onChange={(e) =>
+                      setCity(e.target.value)
+                    }
+                    className="w-full bg-transparent text-sm text-slate-700 outline-none"
+                  >
+                    {cities.map((item) => (
+                      <option key={item}>
+                        {item}
+                      </option>
+                    ))}
                   </select>
 
                 </div>
 
-                <button className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800">
+                <button
+                  type="button"
+                  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
+                >
                   جست‌وجو
                 </button>
 
@@ -253,7 +339,8 @@ export default function InteriorDecorationPage() {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* CATEGORIES */}
+
       <section className="mx-auto max-w-7xl px-5 py-10">
 
         <div className="mb-6">
@@ -274,17 +361,21 @@ export default function InteriorDecorationPage() {
 
         <div className="flex flex-wrap gap-3">
 
-          {categories.map((category, index) => (
+          {categories.map((item) => (
 
             <button
-              key={category}
+              key={item}
+              type="button"
+              onClick={() =>
+                setCategory(item)
+              }
               className={`rounded-full px-5 py-3 text-sm font-bold transition ${
-                index === 0
+                category === item
                   ? "bg-blue-700 text-white"
                   : "border border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700"
               }`}
             >
-              {category}
+              {item}
             </button>
 
           ))}
@@ -292,7 +383,8 @@ export default function InteriorDecorationPage() {
         </div>
       </section>
 
-      {/* Products */}
+      {/* PRODUCTS */}
+
       <section className="mx-auto max-w-7xl px-5 pb-16">
 
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -304,12 +396,19 @@ export default function InteriorDecorationPage() {
             </h2>
 
             <p className="mt-2 text-sm text-slate-500">
-              مشاهده محصولات ثبت‌شده توسط فروشندگان سرچنو
+              فقط محصولات تأییدشده توسط مدیریت سرچنو
+              نمایش داده می‌شوند.
             </p>
 
           </div>
 
-          <select className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none">
+          <select
+            value={sort}
+            onChange={(e) =>
+              setSort(e.target.value)
+            }
+            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none"
+          >
             <option>جدیدترین</option>
             <option>بیشترین امتیاز</option>
             <option>ارزان‌ترین</option>
@@ -317,98 +416,309 @@ export default function InteriorDecorationPage() {
 
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {/* LOADING */}
 
-          {products.map((product) => (
+        {loading && (
 
-            <div
-              key={product.title}
-              className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+          <div className="flex min-h-64 items-center justify-center rounded-3xl border border-slate-200 bg-white">
+
+            <div className="text-center">
+
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-700" />
+
+              <p className="mt-4 text-sm text-slate-500">
+                در حال دریافت محصولات تأییدشده...
+              </p>
+
+            </div>
+
+          </div>
+
+        )}
+
+        {/* ERROR */}
+
+        {!loading && error && (
+
+          <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
+
+            <p className="font-bold text-red-700">
+              {error}
+            </p>
+
+            <button
+              type="button"
+              onClick={() =>
+                window.location.reload()
+              }
+              className="mt-5 rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white"
             >
+              تلاش مجدد
+            </button>
 
-              <div className="relative h-56 overflow-hidden bg-slate-100">
+          </div>
 
-                <img
-                  src={product.image}
-                  alt={product.title}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                />
+        )}
 
-                <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
-                  {product.type}
-                </div>
+        {/* EMPTY */}
 
-              </div>
+        {!loading &&
+          !error &&
+          filteredProducts.length === 0 && (
 
-              <div className="p-5">
+            <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white px-6 py-16 text-center">
 
-                <div className="flex items-center justify-between">
+              <Package className="mx-auto h-14 w-14 text-slate-300" />
 
-                  <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
+              <h3 className="mt-5 text-xl font-black">
+                هنوز تأمین‌کننده‌ای با محصول تأییدشده وجود ندارد
+              </h3>
 
-                    <Star className="h-4 w-4 fill-current" />
+              <p className="mx-auto mt-3 max-w-lg text-sm leading-8 text-slate-500">
+                محصولات دکوراسیون داخلی پس از ثبت
+                توسط فروشنده و تأیید توسط مدیریت سرچنو،
+                در این صفحه نمایش داده خواهند شد.
+              </p>
 
-                    {product.rating}
+              <Link
+                href="/register"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white"
+              >
+                ثبت فروشگاه
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+
+            </div>
+
+          )}
+
+        {/* PRODUCTS */}
+
+        {!loading &&
+          !error &&
+          filteredProducts.length > 0 && (
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+              {filteredProducts.map((product) => (
+
+                <div
+                  key={product.id}
+                  className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                >
+
+                  {/* IMAGE */}
+
+                  <div className="relative h-56 overflow-hidden bg-slate-100">
+
+                    {product.image ? (
+
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+
+                    ) : (
+
+                      <div className="flex h-full items-center justify-center">
+
+                        <Package className="h-16 w-16 text-slate-300" />
+
+                      </div>
+
+                    )}
+
+                    <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
+                      {product.category ||
+                        "دکوراسیون داخلی"}
+                    </div>
 
                   </div>
 
-                  <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+                  {/* INFO */}
 
-                    <CheckCircle2 className="h-4 w-4" />
+                  <div className="p-5">
 
-                    موجود
+                    <div className="flex items-center justify-between">
 
-                  </span>
+                      <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
+
+                        <Star className="h-4 w-4 fill-current" />
+
+                        {product.rating || "۵.۰"}
+
+                      </div>
+
+                      <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+
+                        <CheckCircle2 className="h-4 w-4" />
+
+                        تأییدشده
+
+                      </span>
+
+                    </div>
+
+                    <h3 className="mt-4 font-black">
+                      {product.title}
+                    </h3>
+
+                    {product.description && (
+
+                      <p className="mt-2 line-clamp-2 text-sm leading-7 text-slate-500">
+                        {product.description}
+                      </p>
+
+                    )}
+
+                    {product.seller && (
+
+                      <div className="mt-3 flex items-center gap-2 text-sm font-bold text-slate-700">
+
+                        <Building2 className="h-4 w-4 text-blue-700" />
+
+                        {product.seller}
+
+                      </div>
+
+                    )}
+
+                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
+
+                      <MapPin className="h-4 w-4" />
+
+                      {product.city || "تبریز"}
+
+                    </div>
+
+                    <Link
+                      href={`/materials/interior-decoration/${product.id}`}
+                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                    >
+                      مشاهده محصول
+
+                      <ArrowLeft className="h-4 w-4" />
+
+                    </Link>
+
+                  </div>
 
                 </div>
 
-                <h3 className="mt-4 font-black">
-                  {product.title}
-                </h3>
+              ))}
 
-                <p className="mt-2 text-sm text-slate-500">
-                  {product.seller}
-                </p>
+            </div>
 
-                <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
+          )}
 
-                  <MapPin className="h-4 w-4" />
+      </section>
 
-                  {product.city}
+      {/* BULK */}
 
-                </div>
+      <section className="mx-auto max-w-7xl px-5 pb-16">
 
-                <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800">
+        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-l from-slate-900 to-blue-950 p-8 text-white lg:p-12">
 
-                  مشاهده محصول
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
 
-                  <ArrowLeft className="h-4 w-4" />
+            <div>
 
-                </button>
+              <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold">
+                تأمین پروژه‌ای
+              </span>
+
+              <h2 className="mt-5 text-2xl font-black sm:text-3xl">
+                تأمین عمده دکوراسیون داخلی
+              </h2>
+
+              <p className="mt-4 leading-8 text-slate-300">
+                برای پروژه‌های ساختمانی، اداری،
+                تجاری و مسکونی می‌توانید تأمین‌کنندگان
+                محصولات دکوراسیون داخلی را پیدا کنید.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  فروش عمده
+                </span>
+
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  تأمین پروژه
+                </span>
+
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  فروش متری
+                </span>
+
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  فروش تعدادی
+                </span>
 
               </div>
 
             </div>
 
-          ))}
+            <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
+
+              <div className="flex items-center gap-4">
+
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
+
+                  <Package className="h-7 w-7" />
+
+                </div>
+
+                <div>
+
+                  <h3 className="font-black">
+                    نیاز به تأمین دکوراسیون دارید؟
+                  </h3>
+
+                  <p className="mt-1 text-sm text-slate-300">
+                    با فروشندگان و تأمین‌کنندگان
+                    ارتباط بگیرید.
+                  </p>
+
+                </div>
+
+              </div>
+
+              <Link
+                href="/register"
+                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-black text-blue-900"
+              >
+                ثبت فروشگاه و محصول
+
+                <ArrowLeft className="h-4 w-4" />
+
+              </Link>
+
+            </div>
+
+          </div>
 
         </div>
+
       </section>
 
       {/* CTA */}
+
       <section className="px-5 pb-16">
 
-        <div className="mx-auto max-w-7xl rounded-[2rem] bg-gradient-to-l from-blue-700 to-blue-950 px-6 py-14 text-center text-white">
+        <div className="mx-auto max-w-7xl rounded-[2rem] bg-blue-700 px-6 py-14 text-center text-white">
 
           <Building2 className="mx-auto h-10 w-10" />
 
           <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-            فروشنده یا فعال دکوراسیون داخلی هستید؟
+            فروشنده دکوراسیون داخلی هستید؟
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه خود را در سرچنو ثبت کنید و محصولات
-            دکوراسیون داخلی خود را به خریداران معرفی کنید.
+            فروشگاه خود را در سرچنو ثبت کنید و
+            محصولات دکوراسیون داخلی خود را در معرض
+            دید خریداران قرار دهید.
           </p>
 
           <Link
@@ -418,12 +728,15 @@ export default function InteriorDecorationPage() {
             ثبت فروشگاه
 
             <ArrowLeft className="h-4 w-4" />
+
           </Link>
 
         </div>
+
       </section>
 
-      {/* Footer */}
+      {/* FOOTER */}
+
       <footer className="bg-slate-950 text-slate-300">
 
         <div className="mx-auto max-w-7xl px-5 py-12">
@@ -513,8 +826,11 @@ export default function InteriorDecorationPage() {
                 </Link>
 
                 <p className="flex items-center gap-2">
+
                   <Phone className="h-4 w-4" />
+
                   تماس با ما
+
                 </p>
 
                 <p>
