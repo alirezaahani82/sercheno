@@ -63,16 +63,23 @@ export default function IronSteelPage() {
   const [category, setCategory] = useState("همه");
   const [sort, setSort] = useState("جدیدترین");
 
-  const [saleTypes, setSaleTypes] = useState<string[]>([]);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-
   useEffect(() => {
     async function loadProducts() {
       try {
         setLoading(true);
         setError("");
 
-        
+        const response = await fetch(
+          "/api/products?category=iron-steel",
+          {
+            cache: "no-store",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("خطا در دریافت محصولات آهن و فولاد");
+        }
+
         const data = await response.json();
 
         setProducts(
@@ -81,10 +88,8 @@ export default function IronSteelPage() {
             : []
         );
       } catch (err) {
-        console.error(err);
-        setError(
-          "دریافت محصولات آهن و فولاد با خطا مواجه شد."
-        );
+        console.error("IRON STEEL PRODUCTS ERROR:", err);
+        setError("دریافت محصولات آهن و فولاد با خطا مواجه شد.");
       } finally {
         setLoading(false);
       }
@@ -93,18 +98,9 @@ export default function IronSteelPage() {
     loadProducts();
   }, []);
 
-  const toggleSaleType = (type: string) => {
-    setSaleTypes((current) =>
-      current.includes(type)
-        ? current.filter((item) => item !== type)
-        : [...current, type]
-    );
-  };
-
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    // دسته‌بندی
     if (category !== "همه") {
       result = result.filter(
         (product) =>
@@ -112,7 +108,6 @@ export default function IronSteelPage() {
       );
     }
 
-    // شهر
     if (city !== "همه شهرها") {
       result = result.filter(
         (product) =>
@@ -120,11 +115,8 @@ export default function IronSteelPage() {
       );
     }
 
-    // جست‌وجو
     if (search.trim()) {
-      const query = search
-        .trim()
-        .toLowerCase();
+      const query = search.trim().toLowerCase();
 
       result = result.filter((product) => {
         const text = [
@@ -143,17 +135,6 @@ export default function IronSteelPage() {
       });
     }
 
-    // فقط تأمین‌کنندگان تأییدشده
-    if (verifiedOnly) {
-      result = result.filter(
-        (product) =>
-          product.status === "approved" ||
-          product.status === "تأییدشده" ||
-          product.status === "approved"
-      );
-    }
-
-    // مرتب‌سازی
     if (sort === "بیشترین امتیاز") {
       result.sort(
         (a, b) =>
@@ -169,7 +150,6 @@ export default function IronSteelPage() {
     city,
     category,
     sort,
-    verifiedOnly,
   ]);
 
   return (
@@ -251,7 +231,6 @@ export default function IronSteelPage() {
             </Link>
 
           </div>
-
         </div>
       </header>
 
@@ -266,22 +245,19 @@ export default function IronSteelPage() {
 
           <div className="mx-auto mb-8 flex h-52 max-w-5xl items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-white/5">
 
-            <div className="text-center text-white">
+            <img
+              src="/materials/iron-steel.jpg"
+              alt="آهن و فولاد ساختمانی"
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
 
+            <div className="absolute text-center text-white">
               <div className="text-6xl">
                 🏗️
               </div>
-
-              <p className="mt-4 text-sm text-slate-300">
-                آهن، فولاد و مقاطع ساختمانی
-              </p>
-
-              <p className="mt-1 text-xs text-slate-400">
-                تصویر اصلی را می‌توانید بعداً در مسیر
-                /public/materials/iron-steel.jpg
-                قرار دهید.
-              </p>
-
             </div>
 
           </div>
@@ -316,6 +292,7 @@ export default function IronSteelPage() {
             </p>
 
             {/* SEARCH */}
+
             <div className="mx-auto mt-8 rounded-3xl bg-white p-3 text-right shadow-2xl">
 
               <div className="flex flex-col gap-3 lg:flex-row">
@@ -370,11 +347,11 @@ export default function IronSteelPage() {
             </div>
 
           </div>
-
         </div>
       </section>
 
       {/* CATEGORIES */}
+
       <section className="mx-auto max-w-7xl px-5 py-10">
 
         <div className="mb-6">
@@ -399,9 +376,7 @@ export default function IronSteelPage() {
 
             <button
               key={item}
-              onClick={() =>
-                setCategory(item)
-              }
+              onClick={() => setCategory(item)}
               className={`rounded-full px-5 py-3 text-sm font-bold transition ${
                 category === item
                   ? "bg-blue-700 text-white"
@@ -418,11 +393,13 @@ export default function IronSteelPage() {
       </section>
 
       {/* PRODUCTS */}
+
       <section className="mx-auto max-w-7xl px-5 pb-16">
 
         <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
 
           {/* FILTER */}
+
           <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
 
             <div className="flex items-center justify-between">
@@ -436,8 +413,6 @@ export default function IronSteelPage() {
             </div>
 
             <div className="mt-7 space-y-6">
-
-              {/* CATEGORY */}
 
               <div>
 
@@ -463,8 +438,6 @@ export default function IronSteelPage() {
 
               </div>
 
-              {/* CITY */}
-
               <div>
 
                 <label className="text-sm font-bold">
@@ -489,55 +462,47 @@ export default function IronSteelPage() {
 
               </div>
 
-              {/* GRADE */}
-
               <div>
 
                 <label className="text-sm font-bold">
                   استاندارد / گرید
                 </label>
 
-                <select
-                  className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none"
-                >
+                <div className="mt-3 space-y-3 text-sm">
 
-                  <option>همه</option>
-                  <option>A1</option>
-                  <option>A2</option>
-                  <option>A3</option>
-                  <option>A4</option>
-                  <option>ST37</option>
-                  <option>ST52</option>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    A1
+                  </label>
 
-                </select>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    A2
+                  </label>
 
-              </div>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    A3
+                  </label>
 
-              {/* BRAND */}
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    A4
+                  </label>
 
-              <div>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    ST37
+                  </label>
 
-                <label className="text-sm font-bold">
-                  کارخانه / برند
-                </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    ST52
+                  </label>
 
-                <select
-                  className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none"
-                >
-
-                  <option>همه برندها</option>
-                  <option>ذوب‌آهن اصفهان</option>
-                  <option>فولاد مبارکه</option>
-                  <option>فولاد میانه</option>
-                  <option>شاهین بناب</option>
-                  <option>ظفر بناب</option>
-                  <option>آذرفولاد امین</option>
-
-                </select>
+                </div>
 
               </div>
-
-              {/* SALE TYPE */}
 
               <div>
 
@@ -547,51 +512,41 @@ export default function IronSteelPage() {
 
                 <div className="mt-3 space-y-3 text-sm">
 
-                  {[
-                    "کیلویی",
-                    "شاخه‌ای",
-                    "تنی",
-                    "عمده",
-                    "خرده",
-                  ].map((item) => (
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    کیلویی
+                  </label>
 
-                    <label
-                      key={item}
-                      className="flex cursor-pointer items-center gap-2"
-                    >
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    شاخه‌ای
+                  </label>
 
-                      <input
-                        type="checkbox"
-                        checked={saleTypes.includes(item)}
-                        onChange={() =>
-                          toggleSaleType(item)
-                        }
-                      />
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    تنی
+                  </label>
 
-                      {item}
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    عمده
+                  </label>
 
-                    </label>
-
-                  ))}
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    خرده
+                  </label>
 
                 </div>
 
               </div>
 
-              {/* VERIFIED */}
-
               <div className="border-t border-slate-100 pt-5">
 
-                <label className="flex cursor-pointer items-center gap-3 text-sm">
+                <label className="flex items-center gap-3 text-sm">
 
                   <input
                     type="checkbox"
-                    checked={verifiedOnly}
-                    onChange={(e) =>
-                      setVerifiedOnly(
-                        e.target.checked
-                      )
-                    }
                     className="h-4 w-4"
                   />
 
@@ -631,9 +586,17 @@ export default function IronSteelPage() {
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none"
               >
 
-                <option>جدیدترین</option>
-                <option>بیشترین امتیاز</option>
-                <option>ارزان‌ترین</option>
+                <option>
+                  جدیدترین
+                </option>
+
+                <option>
+                  بیشترین امتیاز
+                </option>
+
+                <option>
+                  ارزان‌ترین
+                </option>
 
               </select>
 
@@ -665,7 +628,9 @@ export default function IronSteelPage() {
 
               <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
 
-                <p className="font-bold text-red-700">
+                <Package className="mx-auto h-12 w-12 text-red-300" />
+
+                <p className="mt-4 font-bold text-red-700">
                   {error}
                 </p>
 
@@ -698,9 +663,9 @@ export default function IronSteelPage() {
 
                   <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500">
 
-                    پس از ثبت محصول توسط فروشنده و تأیید آن
-                    در پنل مدیریت سرچنو، محصول در این صفحه
-                    نمایش داده خواهد شد.
+                    پس از ثبت محصول توسط فروشنده و
+                    تأیید آن در پنل مدیریت سرچنو،
+                    محصول در این صفحه نمایش داده خواهد شد.
 
                   </p>
 
@@ -722,8 +687,6 @@ export default function IronSteelPage() {
                       key={product.id}
                       className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                     >
-
-                      {/* IMAGE */}
 
                       <div className="relative h-56 overflow-hidden bg-slate-100">
 
@@ -753,8 +716,6 @@ export default function IronSteelPage() {
                         </div>
 
                       </div>
-
-                      {/* CONTENT */}
 
                       <div className="p-5">
 
@@ -866,8 +827,8 @@ export default function IronSteelPage() {
               <p className="mt-4 leading-8 text-slate-300">
 
                 برای پروژه‌های ساختمانی می‌توانید انواع
-                میلگرد، تیرآهن، پروفیل، ورق، وال‌پست و سایر
-                مقاطع فولادی را از تأمین‌کنندگان پیدا کنید.
+                میلگرد، تیرآهن، پروفیل، ورق، وال‌پست و
+                سایر مقاطع فولادی را از تأمین‌کنندگان پیدا کنید.
 
               </p>
 
@@ -947,8 +908,8 @@ export default function IronSteelPage() {
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
 
-            فروشگاه خود را در سرچنو ثبت کنید و محصولات آهن و
-            فولاد خود را به خریداران و سازندگان معرفی کنید.
+            فروشگاه خود را در سرچنو ثبت کنید و محصولات آهن
+            و فولاد خود را به خریداران و سازندگان معرفی کنید.
 
           </p>
 
