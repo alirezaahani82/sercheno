@@ -25,7 +25,10 @@ const categories = [
   { value: "insulation", label: "عایق‌کاری" },
   { value: "interior-decoration", label: "دکوراسیون داخلی" },
   { value: "iron-steel", label: "آهن و فولاد" },
-  { value: "mechanical-installations", label: "تأسیسات مکانیکی" },
+  {
+    value: "mechanical-installations",
+    label: "تأسیسات مکانیکی",
+  },
   { value: "paint-coatings", label: "رنگ و پوشش" },
   { value: "plumbing-pipes", label: "لوله و اتصالات" },
   { value: "sanitary", label: "بهداشتی" },
@@ -167,12 +170,16 @@ export default function ProductRegisterPage() {
     }
 
     if (!product.category) {
-      setError("لطفاً دسته‌بندی محصول را انتخاب کنید.");
+      setError(
+        "لطفاً دسته‌بندی محصول را انتخاب کنید."
+      );
       return;
     }
 
     if (!product.unit) {
-      setError("لطفاً واحد فروش را انتخاب کنید.");
+      setError(
+        "لطفاً واحد فروش را انتخاب کنید."
+      );
       return;
     }
 
@@ -223,9 +230,13 @@ export default function ProductRegisterPage() {
 
       /*
        * ثبت محصول
+       *
+       * تغییر اصلی:
+       * select().single() حذف شده است.
+       * فقط INSERT انجام می‌شود.
        */
 
-      const { data, error: insertError } =
+      const { error: insertError } =
         await supabase
           .from("products")
           .insert({
@@ -265,14 +276,6 @@ export default function ProductRegisterPage() {
 
             status: "pending",
 
-            /*
-             * شرایط فروش
-             *
-             * فعلاً در description ذخیره نمی‌کنیم.
-             * اگر ستون مخصوص شرایط فروش داشته باشیم
-             * بعداً جداگانه به آن متصل می‌کنیم.
-             */
-
             sales_conditions:
               selectedConditions.length > 0
                 ? selectedConditions.join("، ")
@@ -281,14 +284,7 @@ export default function ProductRegisterPage() {
             sales_description:
               product.salesDescription.trim() ||
               null,
-          })
-          .select()
-          .single();
-
-      console.log(
-        "PRODUCT INSERT DATA:",
-        data
-      );
+          });
 
       console.log(
         "PRODUCT INSERT ERROR:",
@@ -319,7 +315,7 @@ export default function ProductRegisterPage() {
       console.error(err);
 
       setError(
-        "خطای غیرمنتظره‌ای هنگام ثبت محصول رخ داد."
+        "خطای غیرمنتظره‌ای هنگام ثبت اطلاعات رخ داد."
       );
     } finally {
       setSubmitting(false);
@@ -421,8 +417,6 @@ export default function ProductRegisterPage() {
 
             <div className="grid gap-5 md:grid-cols-2">
 
-              {/* Name */}
-
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-bold">
                   نام محصول*
@@ -440,8 +434,6 @@ export default function ProductRegisterPage() {
                   className="input"
                 />
               </div>
-
-              {/* Category */}
 
               <div>
                 <label className="mb-2 block text-sm font-bold">
@@ -475,8 +467,6 @@ export default function ProductRegisterPage() {
                 </select>
               </div>
 
-              {/* Brand */}
-
               <div>
                 <label className="mb-2 block text-sm font-bold">
                   برند
@@ -495,8 +485,6 @@ export default function ProductRegisterPage() {
                 />
               </div>
 
-              {/* Model */}
-
               <div>
                 <label className="mb-2 block text-sm font-bold">
                   مدل یا مشخصات
@@ -514,8 +502,6 @@ export default function ProductRegisterPage() {
                   className="input"
                 />
               </div>
-
-              {/* Unit */}
 
               <div>
                 <label className="mb-2 block text-sm font-bold">
@@ -590,8 +576,6 @@ export default function ProductRegisterPage() {
 
             <div className="grid gap-5 md:grid-cols-2">
 
-              {/* Customer */}
-
               <div>
                 <label className="mb-2 block text-sm font-bold">
                   قیمت مشتریان سرچنو*
@@ -611,8 +595,6 @@ export default function ProductRegisterPage() {
                   className="input"
                 />
               </div>
-
-              {/* Cooperation */}
 
               <div>
                 <label className="mb-2 block text-sm font-bold">
@@ -636,8 +618,6 @@ export default function ProductRegisterPage() {
                 />
               </div>
 
-              {/* Minimum Order */}
-
               <div>
                 <label className="mb-2 block text-sm font-bold">
                   حداقل مقدار سفارش
@@ -657,8 +637,6 @@ export default function ProductRegisterPage() {
                   className="input"
                 />
               </div>
-
-              {/* Stock */}
 
               <div>
                 <label className="mb-2 block text-sm font-bold">
