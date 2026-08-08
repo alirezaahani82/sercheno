@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Search,
   MapPin,
@@ -14,16 +14,29 @@ import {
   Loader2,
 } from "lucide-react";
 
+import { supabase } from "@/lib/supabase";
+
 type Product = {
   id: string;
-  title: string;
-  description?: string | null;
-  category?: string | null;
-  seller?: string | null;
-  city?: string | null;
-  rating?: string | number | null;
-  image?: string | null;
-  status?: string | null;
+  name: string | null;
+  category: string | null;
+  price: number | null;
+  customer_price: number | null;
+  cooperation_price: number | null;
+  stock: number | null;
+  unit: string | null;
+  description: string | null;
+  seller_id: string | null;
+  status: string | null;
+  created_at: string | null;
+  brand: string | null;
+  model: string | null;
+  min_order: number | null;
+};
+
+type StoreInfo = {
+  id: string;
+  name: string | null;
 };
 
 const categories = [
@@ -54,6 +67,8 @@ const cities = [
 
 export default function InsulationPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [stores, setStores] = useState<Record<string, string>>({});
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -63,32 +78,71 @@ export default function InsulationPage() {
   const [sort, setSort] = useState("جدیدترین");
 
   useEffect(() => {
-    async function loadProducts() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await fetch("/api/products?category=insulation", {
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error("خطا در دریافت محصولات");
-        }
-
-        const data = await response.json();
-
-        setProducts(Array.isArray(data.products) ? data.products : []);
-      } catch (err) {
-        console.error(err);
-        setError("دریافت محصولات با خطا مواجه شد.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadProducts();
   }, []);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const { data, error: productError } = await supabase
+        .from("products")
+        .select(
+          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+        )
+        .eq("category", "insulation")
+        .eq("status", "active")
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (productError) {
+        console.error("INSULATION PRODUCTS ERROR:", productError);
+        setError("دریافت محصولات با خطا مواجه شد.");
+        return;
+      }
+
+      const productList = data || [];
+
+      setProducts(productList);
+
+      const sellerIds = [
+        ...new Set(
+          productList
+            .map((product) => product.seller_id)
+            .filter(Boolean)
+        ),
+      ];
+
+      if (sellerIds.length > 0) {
+        const { data: storeData, error: storeError } =
+          await supabase
+            .from("stores")
+            .select("id,name")
+            .in("id", sellerIds);
+
+        if (storeError) {
+          console.error("INSULATION STORE ERROR:", storeError);
+        }
+
+        const storeMap: Record<string, string> = {};
+
+        (storeData || []).forEach((store: StoreInfo) => {
+          storeMap[store.id] = store.name || "فروشگاه";
+        });
+
+        setStores(storeMap);
+      } else {
+        setStores({});
+      }
+    } catch (err) {
+      console.error("INSULATION LOAD ERROR:", err);
+      setError("دریافت محصولات با خطا مواجه شد.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -103,7 +157,10 @@ export default function InsulationPage() {
     if (city !== "همه شهرها") {
       result = result.filter(
         (product) =>
-          product.city?.trim() === city
+          product.description
+            ?.toLowerCase()
+            .includes(city.toLowerCase()) ||
+          stores[product.seller_id || ""] === city
       );
     }
 
@@ -111,12 +168,16 @@ export default function InsulationPage() {
       const query = search.trim().toLowerCase();
 
       result = result.filter((product) => {
+        const sellerName =
+          stores[product.seller_id || ""] || "";
+
         const text = [
-          product.title,
+          product.name,
           product.description,
           product.category,
-          product.seller,
-          product.city,
+          product.brand,
+          product.model,
+          sellerName,
         ]
           .filter(Boolean)
           .join(" ")
@@ -127,14 +188,36 @@ export default function InsulationPage() {
     }
 
     if (sort === "بیشترین امتیاز") {
+      // فعلاً امتیاز در جدول products وجود ندارد،
+      // بنابراین ترتیب ثبت محصولات حفظ می‌شود.
+      result = [...result];
+    }
+
+    if (sort === "ارزان‌ترین") {
       result.sort(
         (a, b) =>
-          Number(b.rating || 0) - Number(a.rating || 0)
+          Number(
+            a.customer_price ??
+              a.price ??
+              0
+          ) -
+          Number(
+            b.customer_price ??
+              b.price ??
+              0
+          )
       );
     }
 
     return result;
-  }, [products, search, city, category, sort]);
+  }, [
+    products,
+    search,
+    city,
+    category,
+    sort,
+    stores,
+  ]);
 
   return (
     <main
@@ -142,6 +225,7 @@ export default function InsulationPage() {
       className="min-h-screen bg-slate-50 text-slate-900"
     >
       {/* HEADER */}
+
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
 
@@ -202,7 +286,7 @@ export default function InsulationPage() {
 
             <Link
               href="/login"
-              className="hidden rounded-xl px-4 py-3 text-sm font-bold sm:block"
+              className="hidden rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100 sm:block"
             >
               ورود
             </Link>
@@ -219,6 +303,7 @@ export default function InsulationPage() {
       </header>
 
       {/* HERO */}
+
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
 
         <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
@@ -263,6 +348,7 @@ export default function InsulationPage() {
             </p>
 
             {/* SEARCH */}
+
             <div className="mx-auto mt-8 rounded-3xl bg-white p-3 shadow-2xl">
 
               <div className="flex flex-col gap-3 lg:flex-row">
@@ -304,7 +390,7 @@ export default function InsulationPage() {
                 </div>
 
                 <button
-                  onClick={() => {}}
+                  type="button"
                   className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
                 >
                   جست‌وجو
@@ -318,6 +404,7 @@ export default function InsulationPage() {
       </section>
 
       {/* CATEGORIES */}
+
       <section className="mx-auto max-w-7xl px-5 py-10">
 
         <div className="mb-6">
@@ -342,6 +429,7 @@ export default function InsulationPage() {
 
             <button
               key={item}
+              type="button"
               onClick={() => setCategory(item)}
               className={`rounded-full px-5 py-3 text-sm font-bold transition ${
                 category === item
@@ -358,11 +446,13 @@ export default function InsulationPage() {
       </section>
 
       {/* PRODUCTS */}
+
       <section className="mx-auto max-w-7xl px-5 pb-16">
 
         <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
 
           {/* FILTER */}
+
           <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
 
             <h3 className="font-black">
@@ -471,6 +561,7 @@ export default function InsulationPage() {
           </aside>
 
           {/* PRODUCT LIST */}
+
           <div>
 
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -532,6 +623,7 @@ export default function InsulationPage() {
                 </p>
 
                 <button
+                  type="button"
                   onClick={() =>
                     window.location.reload()
                   }
@@ -576,105 +668,154 @@ export default function InsulationPage() {
 
                 <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
 
-                  {filteredProducts.map((product) => (
+                  {filteredProducts.map((product) => {
 
-                    <div
-                      key={product.id}
-                      className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                    >
+                    const storeName =
+                      product.seller_id
+                        ? stores[product.seller_id] ||
+                          "فروشگاه"
+                        : "فروشگاه نامشخص";
 
-                      <div className="relative h-56 overflow-hidden bg-slate-100">
+                    const customerPrice =
+                      product.customer_price ??
+                      product.price ??
+                      0;
 
-                        {product.image ? (
+                    return (
+                      <div
+                        key={product.id}
+                        className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                      >
 
-                          <img
-                            src={product.image}
-                            alt={product.title}
-                            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                          />
+                        {/* IMAGE */}
 
-                        ) : (
+                        <div className="relative flex h-56 items-center justify-center overflow-hidden bg-slate-100">
 
-                          <div className="flex h-full items-center justify-center">
+                          <Package className="h-16 w-16 text-slate-300" />
 
-                            <Package className="h-16 w-16 text-slate-300" />
-
+                          <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
+                            {product.category || "عایق ساختمانی"}
                           </div>
-
-                        )}
-
-                        <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
-                          {product.category || "عایق ساختمانی"}
-                        </div>
-
-                      </div>
-
-                      <div className="p-5">
-
-                        <div className="flex items-center justify-between">
-
-                          <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
-
-                            <Star className="h-4 w-4 fill-current" />
-
-                            {product.rating || "۵.۰"}
-
-                          </div>
-
-                          <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
-
-                            <CheckCircle2 className="h-4 w-4" />
-
-                            تأییدشده
-
-                          </span>
 
                         </div>
 
-                        <h3 className="mt-4 font-black">
-                          {product.title}
-                        </h3>
+                        {/* CONTENT */}
 
-                        {product.description && (
+                        <div className="p-5">
 
-                          <p className="mt-2 line-clamp-2 text-sm leading-7 text-slate-500">
-                            {product.description}
-                          </p>
+                          <div className="flex items-center justify-between">
 
-                        )}
+                            <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
 
-                        {product.seller && (
+                              <Star className="h-4 w-4 fill-current" />
 
-                          <div className="mt-3 flex items-center gap-2 text-sm font-bold text-slate-700">
+                              ۵.۰
+
+                            </div>
+
+                            <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+
+                              <CheckCircle2 className="h-4 w-4" />
+
+                              تأییدشده
+
+                            </span>
+
+                          </div>
+
+                          <h3 className="mt-4 font-black">
+                            {product.name ||
+                              "محصول بدون نام"}
+                          </h3>
+
+                          {product.brand && (
+                            <p className="mt-2 text-sm text-slate-500">
+                              برند: {product.brand}
+                            </p>
+                          )}
+
+                          {product.model && (
+                            <p className="mt-1 text-sm text-slate-500">
+                              مدل: {product.model}
+                            </p>
+                          )}
+
+                          {product.description && (
+                            <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                              {product.description}
+                            </p>
+                          )}
+
+                          {/* SELLER */}
+
+                          <div className="mt-4 flex items-center gap-2 text-sm font-bold text-slate-700">
 
                             <Building2 className="h-4 w-4 text-blue-700" />
 
-                            {product.seller}
+                            {storeName}
 
                           </div>
 
-                        )}
+                          {/* CITY */}
 
-                        <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
+                          <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
 
-                          <MapPin className="h-4 w-4" />
+                            <MapPin className="h-4 w-4" />
 
-                          {product.city || "تبریز"}
+                            تبریز
+
+                          </div>
+
+                          {/* PRICE */}
+
+                          <div className="mt-5 flex items-center justify-between rounded-xl bg-slate-50 p-3">
+
+                            <span className="text-xs font-bold text-slate-500">
+                              قیمت مشتری
+                            </span>
+
+                            <span className="font-black text-blue-700">
+                              {customerPrice.toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              تومان
+                            </span>
+
+                          </div>
+
+                          {/* STOCK */}
+
+                          <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                            <span className="text-xs font-bold text-slate-500">
+                              موجودی
+                            </span>
+
+                            <span className="font-black">
+                              {(product.stock ?? 0).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              {product.unit || ""}
+                            </span>
+
+                          </div>
+
+                          {/* DETAILS */}
+
+                          <Link
+                            href={`/materials/insulation/${product.id}`}
+                            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                          >
+                            مشاهده محصول
+
+                            <ArrowLeft className="h-4 w-4" />
+
+                          </Link>
 
                         </div>
-
-                        <Link
-                          href={`/materials/insulation/${product.id}`}
-                          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
-                        >
-                          مشاهده محصول
-                          <ArrowLeft className="h-4 w-4" />
-                        </Link>
-
                       </div>
-                    </div>
-
-                  ))}
+                    );
+                  })}
 
                 </div>
 
@@ -685,6 +826,7 @@ export default function InsulationPage() {
       </section>
 
       {/* BULK */}
+
       <section className="mx-auto max-w-7xl px-5 pb-16">
 
         <div className="overflow-hidden rounded-[2rem] bg-gradient-to-l from-slate-900 to-blue-950 p-8 text-white lg:p-12">
@@ -758,7 +900,9 @@ export default function InsulationPage() {
                 className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-black text-blue-900"
               >
                 ثبت فروشگاه و محصول
+
                 <ArrowLeft className="h-4 w-4" />
+
               </Link>
 
             </div>
@@ -768,6 +912,7 @@ export default function InsulationPage() {
       </section>
 
       {/* CTA */}
+
       <section className="px-5 pb-16">
 
         <div className="mx-auto max-w-7xl rounded-[2rem] bg-blue-700 px-6 py-14 text-center text-white">
@@ -789,13 +934,16 @@ export default function InsulationPage() {
             className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
           >
             ثبت فروشگاه
+
             <ArrowLeft className="h-4 w-4" />
+
           </Link>
 
         </div>
       </section>
 
       {/* FOOTER */}
+
       <footer className="bg-slate-950 text-slate-300">
 
         <div className="mx-auto max-w-7xl px-5 py-12">
