@@ -1,113 +1,189 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Search,
+  ArrowRight,
   MapPin,
-  ArrowLeft,
+  Search,
+  ShieldCheck,
   Star,
-  CheckCircle2,
-  Package,
-  Building2,
-  Phone,
 } from "lucide-react";
 
-const products = [
-  {
-    title: "سنگ تراورتن نما",
-    type: "تراورتن",
-    seller: "سنگبری آذربایجان",
-    city: "تبریز",
-    rating: "۴.۹",
-    image: "/materials/stone-tile.jpg",
-  },
-  {
-    title: "سنگ مرمریت",
-    type: "مرمریت",
-    seller: "سنگ ساختمانی سهند",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/stone-tile.jpg",
-  },
-  {
-    title: "سنگ گرانیت",
-    type: "گرانیت",
-    seller: "سنگبری تبریز",
-    city: "تبریز",
-    rating: "۴.۷",
-    image: "/materials/stone-tile.jpg",
-  },
-  {
-    title: "اسلب سنگ ساختمانی",
-    type: "اسلب",
-    seller: "سنگ آذربایجان",
-    city: "تبریز",
-    rating: "۴.۹",
-    image: "/materials/stone-tile.jpg",
-  },
-  {
-    title: "کاشی دیوار",
-    type: "کاشی",
-    seller: "کاشی آذران",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/stone-tile.jpg",
-  },
-  {
-    title: "سرامیک کف",
-    type: "سرامیک",
-    seller: "سرامیک نوین",
-    city: "تبریز",
-    rating: "۴.۸",
-    image: "/materials/stone-tile.jpg",
-  },
-  {
-    title: "سرامیک پرسلان",
-    type: "پرسلان",
-    seller: "فروشگاه سرامیک سهند",
-    city: "تبریز",
-    rating: "۴.۹",
-    image: "/materials/stone-tile.jpg",
-  },
-  {
-    title: "سرامیک اسلب",
-    type: "سرامیک اسلب",
-    seller: "نمایشگاه ساختمانی آذربایجان",
-    city: "تبریز",
-    rating: "۴.۷",
-    image: "/materials/stone-tile.jpg",
-  },
-];
+import { supabase } from "@/lib/supabase";
 
-const categories = [
-  "همه",
-  "تراورتن",
-  "مرمریت",
-  "گرانیت",
-  "سنگ چینی",
-  "لایم‌استون",
-  "اسلب",
-  "سنگ پله",
-  "سنگ آنتیک",
-  "کاشی",
-  "سرامیک",
-  "پرسلان",
-  "موزاییک",
-  "قرنیز",
-];
+type Product = {
+  id: string;
+  name: string | null;
+  category: string | null;
+  price: number | null;
+  customer_price: number | null;
+  cooperation_price: number | null;
+  stock: number | null;
+  unit: string | null;
+  description: string | null;
+  seller_id: string | null;
+  status: string | null;
+  created_at: string | null;
+  brand: string | null;
+  model: string | null;
+  min_order: number | null;
+};
+
+type StoreInfo = {
+  id: string;
+  name: string | null;
+};
 
 export default function StoneTilePage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [stores, setStores] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [search, setSearch] = useState("");
+  const [selectedType, setSelectedType] = useState("همه");
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+        )
+        .eq("category", "stone-tile")
+        .eq("status", "active")
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (error) {
+        console.error("STONE TILE PRODUCTS ERROR:", error);
+        setError("دریافت محصولات سنگ و کاشی با خطا مواجه شد.");
+        return;
+      }
+
+      const productList = data || [];
+
+      setProducts(productList);
+
+      const sellerIds = [
+        ...new Set(
+          productList
+            .map((product) => product.seller_id)
+            .filter(
+              (id): id is string =>
+                Boolean(id)
+            )
+        ),
+      ];
+
+      if (sellerIds.length > 0) {
+        const {
+          data: storeData,
+          error: storeError,
+        } = await supabase
+          .from("stores")
+          .select("id,name")
+          .in("id", sellerIds);
+
+        if (storeError) {
+          console.error(
+            "STONE TILE STORE ERROR:",
+            storeError
+          );
+        }
+
+        const storeMap: Record<string, string> = {};
+
+        (storeData || []).forEach(
+          (store: StoreInfo) => {
+            storeMap[store.id] =
+              store.name || "فروشگاه";
+          }
+        );
+
+        setStores(storeMap);
+      } else {
+        setStores({});
+      }
+    } catch (err) {
+      console.error(
+        "STONE TILE LOAD ERROR:",
+        err
+      );
+
+      setError(
+        "دریافت محصولات سنگ و کاشی با خطا مواجه شد."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = products.filter(
+    (product) => {
+      const query = search
+        .trim()
+        .toLowerCase();
+
+      const matchesSearch =
+        !query ||
+        product.name
+          ?.toLowerCase()
+          .includes(query) ||
+        product.brand
+          ?.toLowerCase()
+          .includes(query) ||
+        product.model
+          ?.toLowerCase()
+          .includes(query) ||
+        product.description
+          ?.toLowerCase()
+          .includes(query);
+
+      const matchesType =
+        selectedType === "همه" ||
+        product.name
+          ?.toLowerCase()
+          .includes(
+            selectedType.toLowerCase()
+          ) ||
+        product.description
+          ?.toLowerCase()
+          .includes(
+            selectedType.toLowerCase()
+          );
+
+      return (
+        matchesSearch && matchesType
+      );
+    }
+  );
+
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+      {/* HEADER */}
 
-          <Link href="/" className="flex items-center gap-3">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+          <Link
+            href="/"
+            className="flex items-center gap-3"
+          >
             <img
               src="/logo.png"
-              alt="لوگوی سرچنو"
+              alt="سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
@@ -122,445 +198,372 @@ export default function StoneTilePage() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
-            <Link href="/">خانه</Link>
-
-            <Link
-              href="/materials"
-              className="font-bold text-blue-700"
-            >
-              مصالح و تجهیزات
-            </Link>
-
-            <Link href="/service">
-              خدمات ساختمانی
-            </Link>
-
-            <Link href="/about">
-              درباره سرچنو
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-2">
-
-            <Link
-              href="/login"
-              className="hidden rounded-xl px-4 py-3 text-sm font-bold sm:block"
-            >
-              ورود
-            </Link>
-
-            <Link
-              href="/register"
-              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20"
-            >
-              ثبت‌نام
-            </Link>
-
-          </div>
+          <Link
+            href="/materials"
+            className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
+          >
+            <ArrowRight className="h-4 w-4" />
+            بازگشت به مصالح
+          </Link>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
+      {/* HERO */}
 
-        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
+      <section className="relative overflow-hidden">
+        <div className="relative h-[420px]">
+          <img
+            src="/materials/stone-tile.jpg"
+            alt="سنگ و کاشی ساختمانی"
+            className="h-full w-full object-cover"
+          />
 
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/60 to-slate-950/20" />
 
-        <div className="relative mx-auto max-w-7xl px-5 py-14 lg:py-20">
+          <div className="absolute inset-0 flex items-center">
+            <div className="mx-auto w-full max-w-7xl px-5 text-white">
+              <div className="max-w-2xl">
+                <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
+                  مصالح ساختمانی
+                </span>
 
-          <div className="mx-auto max-w-4xl text-center text-white">
+                <h1 className="mt-5 text-4xl font-black sm:text-6xl">
+                  سنگ و کاشی
+                </h1>
 
-            <Link
-              href="/materials"
-              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              بازگشت به مصالح و تجهیزات
-            </Link>
+                <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
+                  انواع سنگ ساختمانی، سنگ نما،
+                  سنگ کف، کاشی، سرامیک، پرسلان و
+                  محصولات مرتبط را از فروشندگان و
+                  تأمین‌کنندگان معتبر در سرچنو پیدا کنید.
+                </p>
 
-            <h1 className="text-3xl font-black leading-tight sm:text-5xl">
-              سنگ، کاشی و سرامیک
-              <span className="mt-2 block text-cyan-300">
-                ساختمانی
-              </span>
-            </h1>
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    سنگ نما
+                  </span>
 
-            <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-              انواع سنگ نما، تراورتن، مرمریت، گرانیت،
-              اسلب، کاشی، سرامیک و پرسلان را از فروشندگان
-              و تأمین‌کنندگان سرچنو پیدا کنید.
-            </p>
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    سنگ کف
+                  </span>
 
-            {/* Search */}
-            <div className="mx-auto mt-8 rounded-3xl bg-white p-3 shadow-2xl">
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    کاشی
+                  </span>
 
-              <div className="flex flex-col gap-3 lg:flex-row">
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    سرامیک
+                  </span>
 
-                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
-
-                  <Search className="h-5 w-5 text-slate-400" />
-
-                  <input
-                    type="text"
-                    placeholder="مثلاً تراورتن، مرمریت، کاشی، پرسلان..."
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
-                  />
-
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    پرسلان
+                  </span>
                 </div>
-
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
-
-                  <MapPin className="h-5 w-5 text-slate-400" />
-
-                  <select className="w-full bg-transparent text-sm text-slate-700 outline-none">
-                    <option>تبریز</option>
-                    <option>تهران</option>
-                    <option>ارومیه</option>
-                    <option>زنجان</option>
-                    <option>همه شهرها</option>
-                  </select>
-
-                </div>
-
-                <button className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800">
-                  جست‌وجو
-                </button>
-
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* Category buttons */}
+      {/* SEARCH */}
+
       <section className="mx-auto max-w-7xl px-5 py-10">
+        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row">
+            <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
+              <Search className="h-5 w-5 text-slate-400" />
 
-        <div className="mb-6">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                placeholder="مثلاً سنگ تراورتن، سرامیک، کاشی، پرسلان..."
+                className="w-full bg-transparent outline-none"
+              />
+            </div>
 
+            <button
+              type="button"
+              className="rounded-2xl bg-blue-700 px-8 py-4 font-black text-white hover:bg-blue-800"
+            >
+              جست‌وجو
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* CATEGORIES */}
+
+      <section className="mx-auto max-w-7xl px-5 pb-14">
+        <div className="mb-7">
           <span className="text-sm font-bold text-blue-700">
             دسته‌بندی
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            نوع سنگ، کاشی یا سرامیک را انتخاب کنید
+            چه نوع محصولی نیاز دارید؟
           </h2>
 
+          <p className="mt-3 text-sm text-slate-500">
+            نوع سنگ یا کاشی مورد نیاز خود را انتخاب کنید.
+          </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-
-          {categories.map((category, index) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            "همه",
+            "سنگ نما",
+            "سنگ تراورتن",
+            "سنگ مرمر",
+            "سنگ گرانیت",
+            "سنگ کف",
+            "کاشی",
+            "سرامیک",
+            "پرسلان",
+            "موزاییک",
+            "سنگ آنتیک",
+            "چسب کاشی",
+          ].map((item) => (
             <button
-              key={category}
-              className={`rounded-full px-5 py-3 text-sm font-bold transition ${
-                index === 0
-                  ? "bg-blue-700 text-white"
-                  : "border border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700"
+              key={item}
+              type="button"
+              onClick={() =>
+                setSelectedType(item)
+              }
+              className={`rounded-2xl border p-5 text-right font-bold transition ${
+                selectedType === item
+                  ? "border-blue-700 bg-blue-700 text-white shadow-lg"
+                  : "border-slate-200 bg-white text-slate-800 hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
               }`}
             >
-              {category}
+              {item}
             </button>
           ))}
-
         </div>
       </section>
 
-      {/* Products */}
-      <section className="mx-auto max-w-7xl px-5 pb-16">
+      {/* PRODUCTS */}
 
-        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-5">
+          <div className="mb-8">
+            <span className="text-sm font-bold text-emerald-600">
+              محصولات تأییدشده
+            </span>
 
-          {/* Filters */}
-          <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
+            <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+              محصولات سنگ و کاشی
+            </h2>
 
-            <h3 className="font-black">
-              فیلتر محصولات
-            </h3>
+            <p className="mt-3 text-sm text-slate-500">
+              محصولاتی که توسط تیم سرچنو تأیید شده‌اند
+              در این بخش نمایش داده می‌شوند.
+            </p>
+          </div>
 
-            <div className="mt-7 space-y-6">
+          {/* LOADING */}
 
-              <div>
+          {loading ? (
+            <div className="py-16 text-center">
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
 
-                <label className="text-sm font-bold">
-                  نوع محصول
-                </label>
-
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-
-                  <option>همه موارد</option>
-                  <option>سنگ تراورتن</option>
-                  <option>مرمریت</option>
-                  <option>گرانیت</option>
-                  <option>اسلب</option>
-                  <option>کاشی</option>
-                  <option>سرامیک</option>
-                  <option>پرسلان</option>
-
-                </select>
-
-              </div>
-
-              <div>
-
-                <label className="text-sm font-bold">
-                  کاربرد
-                </label>
-
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-
-                  <option>همه کاربردها</option>
-                  <option>نمای ساختمان</option>
-                  <option>کف</option>
-                  <option>دیوار</option>
-                  <option>پله</option>
-                  <option>آشپزخانه</option>
-                  <option>سرویس بهداشتی</option>
-                  <option>دکوراسیون داخلی</option>
-
-                </select>
-
-              </div>
-
-              <div>
-
-                <label className="text-sm font-bold">
-                  شهر
-                </label>
-
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-
-                  <option>همه شهرها</option>
-                  <option>تبریز</option>
-                  <option>تهران</option>
-                  <option>ارومیه</option>
-
-                </select>
-
-              </div>
-
-              <div className="space-y-3 text-sm">
-
-                <label className="flex items-center gap-3">
-                  <input type="checkbox" />
-                  فروش عمده
-                </label>
-
-                <label className="flex items-center gap-3">
-                  <input type="checkbox" />
-                  فروش جزئی
-                </label>
-
-                <label className="flex items-center gap-3">
-                  <input type="checkbox" />
-                  فقط تأمین‌کنندگان تأییدشده
-                </label>
-
-              </div>
-
+              <p className="mt-5 font-bold text-slate-500">
+                در حال دریافت محصولات تأییدشده...
+              </p>
             </div>
-          </aside>
+          ) : error ? (
+            /* ERROR */
 
-          {/* Product list */}
-          <div>
-
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-              <div>
-
-                <h2 className="text-2xl font-black">
-                  محصولات سنگ، کاشی و سرامیک
-                </h2>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  محصولات ثبت‌شده توسط فروشندگان سرچنو
-                </p>
-
+            <div className="rounded-3xl border border-red-200 bg-red-50 p-10 text-center">
+              <div className="text-4xl">
+                ⚠️
               </div>
 
-              <select className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none">
+              <h3 className="mt-4 text-xl font-black text-red-700">
+                {error}
+              </h3>
 
-                <option>جدیدترین</option>
-                <option>بیشترین امتیاز</option>
-                <option>ارزان‌ترین</option>
-
-              </select>
-
+              <button
+                type="button"
+                onClick={loadProducts}
+                className="mt-6 rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white"
+              >
+                تلاش مجدد
+              </button>
             </div>
+          ) : filteredProducts.length === 0 ? (
+            /* EMPTY */
 
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
+                🪨
+              </div>
 
-              {products.map((product) => (
-                <div
-                  key={product.title}
-                  className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                >
+              <h3 className="mt-5 text-xl font-black">
+                محصولی پیدا نشد
+              </h3>
 
-                  <div className="relative h-56 overflow-hidden bg-slate-100">
+              <p className="mt-2 text-sm text-slate-500">
+                در حال حاضر محصول تأییدشده‌ای در
+                این دسته وجود ندارد.
+              </p>
+            </div>
+          ) : (
+            /* PRODUCT GRID */
 
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredProducts.map(
+                (product) => (
+                  <div
+                    key={product.id}
+                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                  >
+                    {/* PRODUCT IMAGE PLACEHOLDER */}
 
-                    <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
-                      {product.type}
+                    <div className="flex h-52 items-center justify-center bg-slate-100 text-7xl">
+                      🪨
                     </div>
 
-                  </div>
+                    <div className="p-6">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                          سنگ و کاشی
+                        </span>
 
-                  <div className="p-5">
-
-                    <div className="flex items-center justify-between">
-
-                      <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
-
-                        <Star className="h-4 w-4 fill-current" />
-
-                        {product.rating}
-
+                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                          <ShieldCheck className="h-3 w-3" />
+                          تأییدشده
+                        </span>
                       </div>
 
-                      <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+                      <h3 className="mt-4 text-lg font-black">
+                        {product.name ||
+                          "محصول بدون نام"}
+                      </h3>
 
-                        <CheckCircle2 className="h-4 w-4" />
+                      {product.category && (
+                        <p className="mt-2 text-sm text-blue-700">
+                          دسته:{" "}
+                          {product.category}
+                        </p>
+                      )}
 
-                        موجود
+                      {product.brand && (
+                        <p className="mt-2 text-sm text-slate-500">
+                          برند: {product.brand}
+                        </p>
+                      )}
 
-                      </span>
+                      {product.model && (
+                        <p className="mt-1 text-sm text-slate-500">
+                          مدل: {product.model}
+                        </p>
+                      )}
 
+                      {product.description && (
+                        <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                          {product.description}
+                        </p>
+                      )}
+
+                      <div className="mt-5 space-y-3">
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+                          <span className="font-bold text-slate-500">
+                            قیمت مشتری
+                          </span>
+
+                          <span className="font-black text-blue-700">
+                            {(
+                              product.customer_price ??
+                              product.price ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+                          <span className="font-bold text-slate-500">
+                            حداقل سفارش
+                          </span>
+
+                          <span className="font-black">
+                            {(
+                              product.min_order ??
+                              1
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit || ""}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+                          <span className="font-bold text-slate-500">
+                            موجودی
+                          </span>
+
+                          <span className="font-black">
+                            {(
+                              product.stock ?? 0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit || ""}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+                        <MapPin className="h-4 w-4" />
+
+                        {product.seller_id
+                          ? stores[
+                              product.seller_id
+                            ] ||
+                            "فروشگاه"
+                          : "فروشگاه نامشخص"}
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
+                        <Star className="h-4 w-4 fill-current" />
+
+                        فروشنده تأییدشده
+                      </div>
+
+                      {/* PRODUCT DETAIL */}
+
+                      <Link
+                        href={`/materials/stone-tile/${product.id}`}
+                        className="mt-5 flex w-full items-center justify-center rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                      >
+                        مشاهده جزئیات محصول
+                      </Link>
                     </div>
-
-                    <h3 className="mt-4 font-black">
-                      {product.title}
-                    </h3>
-
-                    <p className="mt-2 text-sm text-slate-500">
-                      {product.seller}
-                    </p>
-
-                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-
-                      <MapPin className="h-4 w-4" />
-
-                      {product.city}
-
-                    </div>
-
-                    <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800">
-
-                      مشاهده محصول
-
-                      <ArrowLeft className="h-4 w-4" />
-
-                    </button>
-
                   </div>
-
-                </div>
-              ))}
-
+                )
+              )}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Bulk section */}
-      <section className="mx-auto max-w-7xl px-5 pb-16">
-
-        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-l from-slate-900 to-blue-950 p-8 text-white lg:p-12">
-
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-
-            <div>
-
-              <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold">
-                خرید عمده
-              </span>
-
-              <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-                خرید عمده سنگ، کاشی و سرامیک
-              </h2>
-
-              <p className="mt-4 leading-8 text-slate-300">
-                برای پروژه‌های ساختمانی بزرگ می‌توانید
-                تأمین‌کنندگان عمده سنگ، کاشی، سرامیک و
-                اسلب را در سرچنو پیدا کنید.
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش متری
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش عمده
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  سفارش پروژه‌ای
-                </span>
-
-              </div>
-
-            </div>
-
-            <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
-
-              <div className="flex items-center gap-4">
-
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
-
-                  <Package className="h-7 w-7" />
-
-                </div>
-
-                <div>
-
-                  <h3 className="font-black">
-                    نیاز به تأمین پروژه دارید؟
-                  </h3>
-
-                  <p className="mt-1 text-sm text-slate-300">
-                    با فروشندگان و تأمین‌کنندگان ارتباط بگیرید.
-                  </p>
-
-                </div>
-
-              </div>
-
-              <Link
-                href="/register"
-                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-black text-blue-900"
-              >
-                ثبت فروشگاه و محصول
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-
-            </div>
-
-          </div>
+          )}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="px-5 pb-16">
 
-        <div className="mx-auto max-w-7xl rounded-[2rem] bg-blue-700 px-6 py-14 text-center text-white">
-
-          <Building2 className="mx-auto h-10 w-10" />
-
-          <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-            فروشنده سنگ، کاشی یا سرامیک هستید؟
+      <section className="px-5 py-16">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-l from-blue-700 to-blue-950 px-6 py-14 text-center text-white">
+          <h2 className="text-2xl font-black sm:text-3xl">
+            فروشنده سنگ و کاشی هستید؟
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه خود را در سرچنو ثبت کنید و محصولاتتان
-            را به خریداران و سازندگان معرفی کنید.
+            فروشگاه خود را در سرچنو ثبت کنید و
+            محصولات سنگ، کاشی و سرامیک خود را
+            به خریداران معرفی کنید.
           </p>
 
           <Link
@@ -568,121 +571,28 @@ export default function StoneTilePage() {
             className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
           >
             ثبت فروشگاه
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
-
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-950 text-slate-300">
+      {/* FOOTER */}
 
-        <div className="mx-auto max-w-7xl px-5 py-12">
-
-          <div className="grid gap-10 md:grid-cols-4">
-
-            <div className="md:col-span-2">
-
-              <Link href="/" className="flex items-center gap-3">
-
-                <img
-                  src="/logo.png"
-                  alt="سرچنو"
-                  className="h-12 w-12 rounded-xl object-contain"
-                />
-
-                <div>
-
-                  <div className="text-xl font-black text-white">
-                    سرچنو
-                  </div>
-
-                  <div className="text-xs text-slate-500">
-                    بازار هوشمند ساخت‌وساز
-                  </div>
-
-                </div>
-
-              </Link>
-
-              <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
-                پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان،
-                تأمین‌کنندگان و متخصصان صنعت ساختمان.
-              </p>
-
-            </div>
-
-            <div>
-
-              <h3 className="font-bold text-white">
-                خدمات سرچنو
-              </h3>
-
-              <div className="mt-5 space-y-3 text-sm">
-
-                <Link
-                  href="/materials"
-                  className="block hover:text-white"
-                >
-                  مصالح و تجهیزات
-                </Link>
-
-                <Link
-                  href="/service"
-                  className="block hover:text-white"
-                >
-                  خدمات ساختمانی
-                </Link>
-
-                <Link
-                  href="/register"
-                  className="block hover:text-white"
-                >
-                  ثبت فروشگاه
-                </Link>
-
-              </div>
-
-            </div>
-
-            <div>
-
-              <h3 className="font-bold text-white">
-                ارتباط با ما
-              </h3>
-
-              <div className="mt-5 space-y-3 text-sm">
-
-                <Link
-                  href="/about"
-                  className="block hover:text-white"
-                >
-                  درباره سرچنو
-                </Link>
-
-                <p className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  تماس با ما
-                </p>
-
-                <p>قوانین و مقررات</p>
-
-                <p>پشتیبانی</p>
-
-              </div>
-
-            </div>
-
+      <footer className="bg-slate-950 py-10 text-center text-sm text-slate-400">
+        <div className="mx-auto max-w-7xl px-5">
+          <div className="font-black text-white">
+            سرچنو
           </div>
 
-          <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
+          <p className="mt-2">
+            بازار هوشمند ساخت‌وساز
+          </p>
+
+          <p className="mt-5 text-xs">
             © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
-          </div>
-
+          </p>
         </div>
-
       </footer>
-
     </main>
   );
 }
