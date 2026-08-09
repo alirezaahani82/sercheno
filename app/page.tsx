@@ -287,8 +287,6 @@ function AISercheno() {
 }
 
 export default function Home() {
-
-export default function Home() {
   return (
     <main
       dir="rtl"
