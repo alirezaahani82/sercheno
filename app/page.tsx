@@ -53,7 +53,7 @@ const materialCategories = [
     image: "/materials/mechanical-installations.jpg",
   },
   {
-    slug: "paint-coatings",
+    slug: "pnt-coatings",
     title: "رنگ و پوشش",
     count: "۶۳ فروشنده",
     image: "/materials/paint-coatings.jpg",
@@ -381,10 +381,6 @@ export default function Home() {
         </div>
       </section>
       
-      {/* AI SERCHENO */}
-      <section className="relative z-20 mx-auto -mt-10 max-w-6xl px-5">
-        <AISercheno />
-      </section>
 
       {/* Quick Actions */}
       
