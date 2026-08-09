@@ -289,7 +289,7 @@ function AISercheno() {
 export default function Home() {
   return (
     <main
-      dir="rtl"
+      dir="rtl" 
       className="min-h-screen bg-slate-50 text-slate-900"
     >
       {/* Header */}
