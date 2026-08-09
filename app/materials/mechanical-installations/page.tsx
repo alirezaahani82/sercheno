@@ -35,7 +35,7 @@ type StoreInfo = {
   name: string | null;
 };
 
-export default function MechanicalInstallationPage() {
+export default function MechanicalInstallationsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,7 @@ export default function MechanicalInstallationPage() {
        * دقیقاً مشابه صفحه brick-block
        *
        * فقط category تغییر کرده:
-       * mechanical-installation
+       * mechanical-installations
        *
        * فقط محصولات تأییدشده نمایش داده می‌شوند:
        * status = active
@@ -64,7 +64,7 @@ export default function MechanicalInstallationPage() {
         .select(
           "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
         )
-        .eq("category", "mechanical-installation")
+        .eq("category", "mechanical-installations")
         .eq("status", "active")
         .order("created_at", {
           ascending: false,
@@ -72,7 +72,7 @@ export default function MechanicalInstallationPage() {
 
       if (error) {
         console.error(
-          "MECHANICAL INSTALLATION PRODUCTS ERROR:",
+          "MECHANICAL INSTALLATIONS PRODUCTS ERROR:",
           error
         );
         return;
@@ -121,7 +121,7 @@ export default function MechanicalInstallationPage() {
       }
     } catch (error) {
       console.error(
-        "MECHANICAL INSTALLATION LOAD ERROR:",
+        "MECHANICAL INSTALLATIONS LOAD ERROR:",
         error
       );
     } finally {
@@ -209,7 +209,7 @@ export default function MechanicalInstallationPage() {
         <div className="relative h-[420px]">
 
           <img
-            src="/materials/mechanical-installation.jpg"
+            src="/materials/mechanical-installations.jpg"
             alt="تأسیسات مکانیکی ساختمان"
             className="h-full w-full object-cover"
           />
