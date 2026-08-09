@@ -153,7 +153,7 @@ export default function IronSteelPage() {
         product.description?.trim() || "";
 
       const combinedText =
-        ${categoryText} ${titleText} ${descriptionText}
+        `${categoryText} ${titleText} ${descriptionText}`
           .toLowerCase();
 
       return ironKeywords.some((keyword) =>
@@ -212,7 +212,8 @@ export default function IronSteelPage() {
     search,
     sort,
   ]);
-return (
+
+  return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
@@ -347,7 +348,8 @@ return (
                 <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
 
                   <Search className="h-5 w-5 text-slate-400" />
-<input
+
+                  <input
                     value={search}
                     onChange={(e) =>
                       setSearch(e.target.value)
@@ -426,11 +428,11 @@ return (
               onClick={() =>
                 setCategory(item)
               }
-              className={rounded-full px-5 py-3 text-sm font-bold transition ${
+              className={`rounded-full px-5 py-3 text-sm font-bold transition ${
                 category === item
                   ? "bg-blue-700 text-white"
                   : "border border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700"
-              }}
+              }`}
             >
               {item}
             </button>
@@ -492,7 +494,8 @@ return (
                 <label className="text-sm font-bold">
                   شهر
                 </label>
-<select
+
+                <select
                   value={city}
                   onChange={(e) =>
                     setCity(e.target.value)
@@ -651,7 +654,8 @@ return (
             {!loading &&
               !error &&
               filteredProducts.length === 0 && (
-<div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center">
+
+                <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center">
 
                   <Package className="mx-auto h-12 w-12 text-slate-300" />
 
@@ -764,13 +768,14 @@ return (
                         </div>
 
                         <Link
-                          href={/materials/iron-steel/${product.id}}
+                          href={`/materials/iron-steel/${product.id}`}
                           className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
                         >
                           مشاهده محصول
                           <ArrowLeft className="h-4 w-4" />
                         </Link>
-</div>
+
+                      </div>
 
                     </div>
 
@@ -816,5 +821,208 @@ return (
                   فروش کیلویی
                 </span>
 
-                <span className="rounded-xl bg-white/10
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  فروش شاخه‌ای
+                </span>
 
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  فروش تنی
+                </span>
+
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  فروش عمده
+                </span>
+
+              </div>
+
+            </div>
+
+            <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
+
+              <div className="flex items-center gap-4">
+
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
+
+                  <Package className="h-7 w-7" />
+
+                </div>
+
+                <div>
+
+                  <h3 className="font-black">
+                    نیاز به آهن‌آلات پروژه دارید؟
+                  </h3>
+
+                  <p className="mt-1 text-sm text-slate-300">
+                    با فروشندگان و تأمین‌کنندگان ارتباط بگیرید.
+                  </p>
+
+                </div>
+
+              </div>
+
+              <Link
+                href="/register"
+                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-black text-blue-900"
+              >
+                ثبت فروشگاه و محصول
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* CTA */}
+
+      <section className="px-5 pb-16">
+
+        <div className="mx-auto max-w-7xl rounded-[2rem] bg-blue-700 px-6 py-14 text-center text-white">
+
+          <Building2 className="mx-auto h-10 w-10" />
+
+          <h2 className="mt-5 text-2xl font-black sm:text-3xl">
+            فروشنده یا تأمین‌کننده آهن‌آلات هستید؟
+          </h2>
+
+          <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
+            فروشگاه خود را در سرچنو ثبت کنید و محصولات آهن و
+            فولاد خود را به خریداران و سازندگان معرفی کنید.
+          </p>
+
+          <Link
+            href="/register"
+            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
+          >
+            ثبت فروشگاه
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+
+        </div>
+
+      </section>
+
+      {/* FOOTER */}
+
+      <footer className="bg-slate-950 text-slate-300">
+
+        <div className="mx-auto max-w-7xl px-5 py-12">
+
+          <div className="grid gap-10 md:grid-cols-4">
+
+            <div className="md:col-span-2">
+
+              <Link
+                href="/"
+                className="flex items-center gap-3"
+              >
+
+                <img
+                  src="/logo.png"
+                  alt="سرچنو"
+                  className="h-12 w-12 rounded-xl object-contain"
+                />
+
+                <div>
+
+                  <div className="text-xl font-black text-white">
+                    سرچنو
+                  </div>
+
+                  <div className="text-xs text-slate-500">
+                    بازار هوشمند ساخت‌وساز
+                  </div>
+
+                </div>
+
+              </Link>
+
+              <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
+                پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان،
+                تأمین‌کنندگان و متخصصان صنعت ساختمان.
+              </p>
+
+            </div>
+
+            <div>
+
+              <h3 className="font-bold text-white">
+                خدمات سرچنو
+              </h3>
+
+              <div className="mt-5 space-y-3 text-sm">
+
+                <Link
+                  href="/materials"
+                  className="block hover:text-white"
+                >
+                  مصالح و تجهیزات
+                </Link>
+
+                <Link
+                  href="/service"
+                  className="block hover:text-white"
+                >
+                  خدمات ساختمانی
+                </Link>
+
+                <Link
+                  href="/register"
+                  className="block hover:text-white"
+                >
+                  ثبت فروشگاه
+                </Link>
+
+              </div>
+
+            </div>
+
+            <div>
+
+              <h3 className="font-bold text-white">
+                ارتباط با ما
+              </h3>
+
+              <div className="mt-5 space-y-3 text-sm">
+
+                <Link
+                  href="/about"
+                  className="block hover:text-white"
+                >
+                  درباره سرچنو
+                </Link>
+
+                <p className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  تماس با ما
+                </p>
+
+                <p>
+                  قوانین و مقررات
+                </p>
+
+                <p>
+                  پشتیبانی
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
+            © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
+          </div>
+
+        </div>
+
+      </footer>
+
+    </main>
+  );
+}
