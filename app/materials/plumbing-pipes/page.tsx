@@ -1,173 +1,195 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
-  Search,
+  ArrowRight,
   MapPin,
-  ArrowLeft,
+  Search,
+  ShieldCheck,
   Star,
-  CheckCircle2,
-  Package,
+  Droplets,
+  Wrench,
   Building2,
   Phone,
-  Loader2,
-  SlidersHorizontal,
-  ShieldCheck,
-  Truck,
 } from "lucide-react";
+
+import { supabase } from "@/lib/supabase";
 
 type Product = {
   id: string;
-  title: string;
-  description?: string | null;
-  category?: string | null;
-  seller?: string | null;
-  city?: string | null;
-  rating?: string | number | null;
-  image?: string | null;
-  status?: string | null;
+  name: string | null;
+  category: string | null;
+  price: number | null;
+  customer_price: number | null;
+  cooperation_price: number | null;
+  stock: number | null;
+  unit: string | null;
+  description: string | null;
+  seller_id: string | null;
+  status: string | null;
+  created_at: string | null;
+  brand: string | null;
+  model: string | null;
+  min_order: number | null;
 };
 
-const categories = [
-  "همه",
+type StoreInfo = {
+  id: string;
+  name: string | null;
+};
+
+const subCategories = [
   "لوله آب",
   "لوله فاضلاب",
   "لوله PVC",
-  "لوله پلیکا",
   "لوله پلی‌اتیلن",
   "لوله پنج‌لایه",
-  "لوله PEX",
-  "لوله UPVC",
-  "لوله فلزی",
+  "اتصالات آب",
+  "اتصالات فاضلاب",
+  "شیرآلات",
+  "لوله پوش‌فیت",
   "لوله گالوانیزه",
-  "لوله مسی",
-  "اتصالات لوله",
-  "شیرآلات صنعتی",
-  "فلنج",
-  "زانو",
-  "سه‌راهی",
-  "تبدیل",
-  "بوشن",
-  "چسب و مواد آب‌بندی",
-];
-
-const cities = [
-  "همه شهرها",
-  "تبریز",
-  "تهران",
-  "ارومیه",
-  "زنجان",
-  "اردبیل",
-  "مراغه",
+  "پمپ آب",
+  "تجهیزات تأسیسات",
 ];
 
 export default function PlumbingPipesPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
   const [search, setSearch] = useState("");
-  const [city, setCity] = useState("همه شهرها");
-  const [category, setCategory] = useState("همه");
-  const [sort, setSort] = useState("جدیدترین");
-
-  async function loadProducts() {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await fetch(
-        "/api/products?category=plumbing-pipes",
-        {
-          cache: "no-store",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("خطا در دریافت محصولات");
-      }
-
-      const data = await response.json();
-
-      setProducts(
-        Array.isArray(data.products)
-          ? data.products
-          : []
-      );
-    } catch (err) {
-      console.error("PLUMBING PRODUCTS ERROR:", err);
-
-      setError(
-        "دریافت محصولات لوله و تأسیسات با خطا مواجه شد."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [selectedType, setSelectedType] = useState("همه");
 
   useEffect(() => {
     loadProducts();
   }, []);
 
+  async function loadProducts() {
+    try {
+      setLoading(true);
+
+      /*
+       * محصولات تأییدشده دسته لوله و تأسیسات
+       */
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+        )
+        .eq("category", "plumbing-pipes")
+        .eq("status", "active")
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (error) {
+        console.error("PLUMBING PRODUCTS ERROR:", error);
+        setProducts([]);
+        return;
+      }
+
+      const productList = (data || []) as Product[];
+
+      setProducts(productList);
+
+      /*
+       * دریافت فروشگاه‌های مربوط به محصولات
+       */
+      const sellerIds = [
+        ...new Set(
+          productList
+            .map((product) => product.seller_id)
+            .filter(
+              (id): id is string =>
+                Boolean(id)
+            )
+        ),
+      ];
+
+      if (sellerIds.length === 0) {
+        setStores({});
+        return;
+      }
+
+      const { data: storeData, error: storeError } =
+        await supabase
+          .from("stores")
+          .select("id,name")
+          .in("id", sellerIds);
+
+      if (storeError) {
+        console.error(
+          "PLUMBING STORE ERROR:",
+          storeError
+        );
+
+        setStores({});
+        return;
+      }
+
+      const storeMap: Record<string, string> = {};
+
+      (storeData || []).forEach(
+        (store: StoreInfo) => {
+          storeMap[store.id] =
+            store.name || "فروشگاه";
+        }
+      );
+
+      setStores(storeMap);
+    } catch (error) {
+      console.error(
+        "PLUMBING LOAD ERROR:",
+        error
+      );
+
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /*
+   * فیلتر و جست‌وجوی واقعی
+   */
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    const searchText = search
+      .trim()
+      .toLowerCase();
 
-    // دسته‌بندی
-    if (category !== "همه") {
-      result = result.filter(
-        (product) =>
-          product.category?.trim() === category
-      );
-    }
+    return products.filter((product) => {
+      const matchesSearch =
+        !searchText ||
+        product.name
+          ?.toLowerCase()
+          .includes(searchText) ||
+        product.brand
+          ?.toLowerCase()
+          .includes(searchText) ||
+        product.model
+          ?.toLowerCase()
+          .includes(searchText) ||
+        product.description
+          ?.toLowerCase()
+          .includes(searchText);
 
-    // شهر
-    if (city !== "همه شهرها") {
-      result = result.filter(
-        (product) =>
-          product.city?.trim() === city
-      );
-    }
+      const matchesType =
+        selectedType === "همه" ||
+        product.name
+          ?.toLowerCase()
+          .includes(
+            selectedType.toLowerCase()
+          ) ||
+        product.description
+          ?.toLowerCase()
+          .includes(
+            selectedType.toLowerCase()
+          );
 
-    // جست‌وجو
-    if (search.trim()) {
-      const query = search
-        .trim()
-        .toLowerCase();
-
-      result = result.filter((product) => {
-        const text = [
-          product.title,
-          product.description,
-          product.category,
-          product.seller,
-          product.city,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return text.includes(query);
-      });
-    }
-
-    // مرتب‌سازی
-    if (sort === "بیشترین امتیاز") {
-      result.sort(
-        (a, b) =>
-          Number(b.rating || 0) -
-          Number(a.rating || 0)
-      );
-    }
-
-    return result;
-  }, [
-    products,
-    search,
-    city,
-    category,
-    sort,
-  ]);
+      return matchesSearch && matchesType;
+    });
+  }, [products, search, selectedType]);
 
   return (
     <main
@@ -178,7 +200,6 @@ export default function PlumbingPipesPage() {
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-
           <Link
             href="/"
             className="flex items-center gap-3"
@@ -201,11 +222,7 @@ export default function PlumbingPipesPage() {
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
-
-            <Link
-              href="/"
-              className="hover:text-blue-700"
-            >
+            <Link href="/">
               خانه
             </Link>
 
@@ -216,24 +233,16 @@ export default function PlumbingPipesPage() {
               مصالح و تجهیزات
             </Link>
 
-            <Link
-              href="/service"
-              className="hover:text-blue-700"
-            >
+            <Link href="/service">
               خدمات ساختمانی
             </Link>
 
-            <Link
-              href="/about"
-              className="hover:text-blue-700"
-            >
+            <Link href="/about">
               درباره سرچنو
             </Link>
-
           </nav>
 
           <div className="flex items-center gap-2">
-
             <Link
               href="/login"
               className="hidden rounded-xl px-4 py-3 text-sm font-bold sm:block"
@@ -243,11 +252,10 @@ export default function PlumbingPipesPage() {
 
             <Link
               href="/register"
-              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
+              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20"
             >
               ثبت‌نام
             </Link>
-
           </div>
         </div>
       </header>
@@ -255,654 +263,408 @@ export default function PlumbingPipesPage() {
       {/* ================= HERO ================= */}
 
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-cyan-700">
-
-        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-cyan-300/20 blur-3xl" />
 
         <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
 
-        <div className="relative mx-auto max-w-7xl px-5 py-10 lg:py-14">
-
-          {/* تصویر بالای صفحه */}
-
-          <div className="mx-auto mb-9 max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl">
-
+        <div className="relative mx-auto max-w-7xl px-5 py-12 lg:py-16">
+          <div className="relative mx-auto mb-10 h-64 max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
             <img
               src="/materials/plumbing-pipes.jpg"
-              alt="لوله و تأسیسات ساختمانی"
-              className="h-64 w-full object-cover sm:h-80 lg:h-[400px]"
+              alt="لوله و تجهیزات تأسیسات ساختمان"
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display =
+                  "none";
+              }}
             />
 
+            <div className="absolute inset-0 bg-gradient-to-l from-blue-950/90 via-blue-900/60 to-transparent" />
+
+            <div className="absolute inset-0 flex items-center px-8">
+              <div className="text-white">
+                <Droplets className="h-14 w-14 text-cyan-300" />
+
+                <h2 className="mt-4 text-2xl font-black sm:text-3xl">
+                  لوله، اتصالات و تجهیزات تأسیسات
+                </h2>
+
+                <p className="mt-2 text-sm text-blue-100">
+                  تأمین تجهیزات مورد نیاز پروژه‌های ساختمانی
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="mx-auto max-w-4xl text-center text-white">
-
             <Link
               href="/materials"
-              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur transition hover:bg-white/20"
+              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" />
               بازگشت به مصالح و تجهیزات
             </Link>
 
             <h1 className="text-3xl font-black leading-tight sm:text-5xl">
-
-              لوله و تأسیسات
-
+              لوله، اتصالات و
               <span className="mt-2 block text-cyan-300">
-                ساختمانی
+                تأسیسات ساختمان
               </span>
-
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-
-              انواع لوله‌های آب و فاضلاب، PVC، پلیکا،
-              پلی‌اتیلن، پنج‌لایه، PEX، UPVC، فلزی،
-              گالوانیزه، مسی و انواع اتصالات و تجهیزات
-              تأسیسات ساختمان را از تأمین‌کنندگان
-              معتبر سرچنو پیدا کنید.
-
+              انواع لوله آب، فاضلاب، PVC، پلی‌اتیلن،
+              پنج‌لایه، پوش‌فیت، اتصالات، شیرآلات،
+              پمپ آب و تجهیزات تأسیسات ساختمان را
+              از فروشندگان و تأمین‌کنندگان سرچنو پیدا کنید.
             </p>
 
-            {/* SEARCH */}
+            {/* Search */}
 
-            <div className="mx-auto mt-8 rounded-3xl bg-white p-3 shadow-2xl">
-
+            <div className="mx-auto mt-8 rounded-3xl bg-white p-3 text-right shadow-2xl">
               <div className="flex flex-col gap-3 lg:flex-row">
-
                 <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
-
                   <Search className="h-5 w-5 text-slate-400" />
 
                   <input
+                    type="text"
                     value={search}
                     onChange={(e) =>
                       setSearch(e.target.value)
                     }
-                    type="text"
-                    placeholder="مثلاً لوله پنج‌لایه، پلیکا، PVC، زانو..."
+                    placeholder="مثلاً لوله پنج‌لایه، PVC، پوش‌فیت..."
                     className="w-full bg-transparent text-sm text-slate-800 outline-none"
                   />
-
                 </div>
 
                 <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
-
                   <MapPin className="h-5 w-5 text-slate-400" />
 
-                  <select
-                    value={city}
-                    onChange={(e) =>
-                      setCity(e.target.value)
-                    }
-                    className="w-full bg-transparent text-sm text-slate-700 outline-none"
-                  >
-
-                    {cities.map((item) => (
-                      <option key={item}>
-                        {item}
-                      </option>
-                    ))}
-
+                  <select className="w-full bg-transparent text-sm text-slate-700 outline-none">
+                    <option>تبریز</option>
+                    <option>تهران</option>
+                    <option>ارومیه</option>
+                    <option>زنجان</option>
+                    <option>همه شهرها</option>
                   </select>
-
                 </div>
 
                 <button
-                  onClick={() => {}}
+                  type="button"
                   className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
                 >
                   جست‌وجو
                 </button>
-
               </div>
-
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* ================= CATEGORY ================= */}
+      {/* ================= SUB CATEGORIES ================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-10">
-
-        <div className="mb-6">
-
+        <div className="mb-7">
           <span className="text-sm font-bold text-blue-700">
-            دسته‌بندی لوله و تأسیسات
+            دسته‌بندی تأسیسات
           </span>
 
           <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-            محصولات تأسیسات ساختمانی
+            چه نوع محصولی نیاز دارید؟
           </h2>
 
-          <p className="mt-2 text-sm text-slate-500">
-            نوع لوله یا تجهیزات مورد نیاز خود را انتخاب کنید.
+          <p className="mt-3 text-sm text-slate-500">
+            دسته مورد نیاز خود را انتخاب کنید.
           </p>
-
         </div>
 
-        <div className="flex flex-wrap gap-3">
-
-          {categories.map((item) => (
-
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {subCategories.map((item) => (
             <button
               key={item}
+              type="button"
               onClick={() =>
-                setCategory(item)
+                setSelectedType(
+                  selectedType === item
+                    ? "همه"
+                    : item
+                )
               }
-              className={`rounded-full px-5 py-3 text-sm font-bold transition ${
-                category === item
-                  ? "bg-blue-700 text-white"
-                  : "border border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700"
+              className={`rounded-2xl border p-5 text-right font-bold transition hover:-translate-y-1 hover:shadow-lg ${
+                selectedType === item
+                  ? "border-blue-600 bg-blue-700 text-white"
+                  : "border-slate-200 bg-white hover:border-blue-300 hover:text-blue-700"
               }`}
             >
               {item}
             </button>
-
           ))}
-
         </div>
       </section>
 
       {/* ================= PRODUCTS ================= */}
 
-      <section className="mx-auto max-w-7xl px-5 pb-16">
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-5">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <span className="text-sm font-bold text-emerald-600">
+                محصولات تأییدشده
+              </span>
 
-        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+              <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+                محصولات لوله و تأسیسات
+              </h2>
 
-          {/* FILTER */}
+              <p className="mt-3 text-sm text-slate-500">
+                فقط محصولاتی که توسط ادمین سرچنو تأیید
+                شده‌اند نمایش داده می‌شوند.
+              </p>
+            </div>
 
-          <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
+            <div className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold text-slate-600">
+              {filteredProducts.length.toLocaleString(
+                "fa-IR"
+              )}{" "}
+              محصول
+            </div>
+          </div>
 
-            <div className="flex items-center justify-between">
+          {/* Loading */}
 
-              <h3 className="font-black">
-                فیلتر محصولات
+          {loading ? (
+            <div className="py-16 text-center">
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
+
+              <p className="mt-5 font-bold text-slate-500">
+                در حال دریافت محصولات...
+              </p>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
+                🚰
+              </div>
+
+              <h3 className="mt-5 text-xl font-black">
+                محصولی پیدا نشد
               </h3>
 
-              <SlidersHorizontal className="h-5 w-5 text-blue-700" />
-
+              <p className="mt-2 text-sm text-slate-500">
+                در حال حاضر محصول تأییدشده‌ای در
+                دسته لوله و تأسیسات وجود ندارد.
+              </p>
             </div>
-
-            <div className="mt-7 space-y-6">
-
-              <div>
-
-                <label className="text-sm font-bold">
-                  نوع محصول
-                </label>
-
-                <select
-                  value={category}
-                  onChange={(e) =>
-                    setCategory(e.target.value)
-                  }
-                  className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none"
-                >
-
-                  {categories.map((item) => (
-                    <option key={item}>
-                      {item}
-                    </option>
-                  ))}
-
-                </select>
-
-              </div>
-
-              <div>
-
-                <label className="text-sm font-bold">
-                  شهر
-                </label>
-
-                <select
-                  value={city}
-                  onChange={(e) =>
-                    setCity(e.target.value)
-                  }
-                  className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none"
-                >
-
-                  {cities.map((item) => (
-                    <option key={item}>
-                      {item}
-                    </option>
-                  ))}
-
-                </select>
-
-              </div>
-
-              <div>
-
-                <label className="text-sm font-bold">
-                  نحوه فروش
-                </label>
-
-                <div className="mt-3 space-y-3 text-sm">
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    متری
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    شاخه‌ای
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    عددی
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    کیلویی
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    عمده
-                  </label>
-
-                </div>
-
-              </div>
-
-              <div className="border-t border-slate-100 pt-5">
-
-                <label className="flex items-center gap-3 text-sm">
-
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4"
-                  />
-
-                  فقط تأمین‌کنندگان تأییدشده
-
-                </label>
-
-              </div>
-
-            </div>
-          </aside>
-
-          {/* PRODUCT LIST */}
-
-          <div>
-
-            <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-
-              <div>
-
-                <h2 className="text-2xl font-black">
-                  محصولات لوله و تأسیسات
-                </h2>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  فقط محصولات تأییدشده توسط مدیریت سرچنو نمایش داده می‌شوند.
-                </p>
-
-              </div>
-
-              <select
-                value={sort}
-                onChange={(e) =>
-                  setSort(e.target.value)
-                }
-                className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none"
-              >
-
-                <option>جدیدترین</option>
-                <option>بیشترین امتیاز</option>
-                <option>ارزان‌ترین</option>
-
-              </select>
-
-            </div>
-
-            {/* LOADING */}
-
-            {loading && (
-
-              <div className="flex min-h-64 items-center justify-center rounded-3xl border border-slate-200 bg-white">
-
-                <div className="text-center">
-
-                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-700" />
-
-                  <p className="mt-4 text-sm text-slate-500">
-                    در حال دریافت محصولات تأییدشده...
-                  </p>
-
-                </div>
-
-              </div>
-
-            )}
-
-            {/* ERROR */}
-
-            {!loading && error && (
-
-              <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
-
-                <p className="font-bold text-red-700">
-                  {error}
-                </p>
-
-                <button
-                  onClick={loadProducts}
-                  className="mt-5 rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-red-700"
-                >
-                  تلاش مجدد
-                </button>
-
-              </div>
-
-            )}
-
-            {/* EMPTY */}
-
-            {!loading &&
-              !error &&
-              filteredProducts.length === 0 && (
-
-                <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center">
-
-                  <Package className="mx-auto h-14 w-14 text-slate-300" />
-
-                  <h3 className="mt-5 text-xl font-black">
-                    هنوز محصول تأییدشده‌ای وجود ندارد
-                  </h3>
-
-                  <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500">
-
-                    محصولات ثبت‌شده پس از بررسی و
-                    تأیید مدیریت سرچنو در این صفحه
-                    نمایش داده خواهند شد.
-
-                  </p>
-
-                  <Link
-                    href="/register"
-                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white"
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredProducts.map(
+                (product) => (
+                  <div
+                    key={product.id}
+                    className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                   >
-                    ثبت فروشگاه و محصول
-                    <ArrowLeft className="h-4 w-4" />
-                  </Link>
+                    {/* Product image placeholder */}
 
-                </div>
+                    <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 to-slate-100">
+                      <Droplets className="h-20 w-20 text-blue-300 transition duration-500 group-hover:scale-110" />
 
-              )}
-
-            {/* PRODUCTS */}
-
-            {!loading &&
-              !error &&
-              filteredProducts.length > 0 && (
-
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-
-                  {filteredProducts.map((product) => (
-
-                    <div
-                      key={product.id}
-                      className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                    >
-
-                      {/* IMAGE */}
-
-                      <div className="relative h-56 overflow-hidden bg-slate-100">
-
-                        {product.image ? (
-
-                          <img
-                            src={product.image}
-                            alt={product.title}
-                            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                          />
-
-                        ) : (
-
-                          <div className="flex h-full items-center justify-center">
-
-                            <Package className="h-16 w-16 text-slate-300" />
-
-                          </div>
-
-                        )}
-
-                        <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
-                          {product.category || "لوله و تأسیسات"}
-                        </div>
-
-                      </div>
-
-                      {/* INFO */}
-
-                      <div className="p-5">
-
-                        <div className="flex items-center justify-between">
-
-                          <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
-
-                            <Star className="h-4 w-4 fill-current" />
-
-                            {product.rating || "۵.۰"}
-
-                          </div>
-
-                          <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
-
-                            <CheckCircle2 className="h-4 w-4" />
-
-                            تأییدشده
-
-                          </span>
-
-                        </div>
-
-                        <h3 className="mt-4 font-black">
-                          {product.title}
-                        </h3>
-
-                        {product.description && (
-
-                          <p className="mt-2 line-clamp-2 text-sm leading-7 text-slate-500">
-                            {product.description}
-                          </p>
-
-                        )}
-
-                        {product.seller && (
-
-                          <div className="mt-3 flex items-center gap-2 text-sm font-bold text-slate-700">
-
-                            <Building2 className="h-4 w-4 text-blue-700" />
-
-                            {product.seller}
-
-                          </div>
-
-                        )}
-
-                        <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-
-                          <MapPin className="h-4 w-4" />
-
-                          {product.city || "تبریز"}
-
-                        </div>
-
-                        <Link
-                          href={`/materials/plumbing-pipes/${product.id}`}
-                          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
-                        >
-
-                          مشاهده محصول
-
-                          <ArrowLeft className="h-4 w-4" />
-
-                        </Link>
-
+                      <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700">
+                        تأسیسات
                       </div>
                     </div>
 
-                  ))}
+                    <div className="p-6">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                          {product.category ||
+                            "plumbing-pipes"}
+                        </span>
 
-                </div>
+                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                          <ShieldCheck className="h-3 w-3" />
+                          تأییدشده
+                        </span>
+                      </div>
 
+                      <h3 className="mt-4 text-lg font-black">
+                        {product.name ||
+                          "محصول بدون نام"}
+                      </h3>
+
+                      {product.brand && (
+                        <p className="mt-2 text-sm text-slate-500">
+                          برند: {product.brand}
+                        </p>
+                      )}
+
+                      {product.model && (
+                        <p className="mt-1 text-sm text-slate-500">
+                          مدل: {product.model}
+                        </p>
+                      )}
+
+                      {product.description && (
+                        <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                          {product.description}
+                        </p>
+                      )}
+
+                      <div className="mt-5 space-y-3">
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+                          <span className="font-bold text-slate-500">
+                            قیمت مشتری
+                          </span>
+
+                          <span className="font-black text-blue-700">
+                            {(
+                              product.customer_price ??
+                              product.price ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+                          <span className="font-bold text-slate-500">
+                            حداقل سفارش
+                          </span>
+
+                          <span className="font-black">
+                            {(
+                              product.min_order ??
+                              1
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit || ""}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+                          <span className="font-bold text-slate-500">
+                            موجودی
+                          </span>
+
+                          <span className="font-black">
+                            {(
+                              product.stock ?? 0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit || ""}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Store */}
+
+                      <div className="mt-5 flex items-center gap-2 text-xs text-slate-500">
+                        <Building2 className="h-4 w-4 text-blue-600" />
+
+                        {product.seller_id
+                          ? stores[
+                              product.seller_id
+                            ] ||
+                            "فروشگاه"
+                          : "فروشگاه نامشخص"}
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
+                        <MapPin className="h-4 w-4" />
+
+                        تبریز
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
+                        <Star className="h-4 w-4 fill-current" />
+
+                        فروشنده تأییدشده
+                      </div>
+
+                      <button
+                        type="button"
+                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                      >
+                        مشاهده جزئیات محصول
+                      </button>
+                    </div>
+                  </div>
+                )
               )}
-
-          </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ================= FEATURES ================= */}
+      {/* ================= PROJECT SECTION ================= */}
 
-      <section className="mx-auto max-w-7xl px-5 pb-16">
-
-        <div className="grid gap-5 md:grid-cols-3">
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6">
-
-            <ShieldCheck className="h-9 w-9 text-blue-700" />
-
-            <h3 className="mt-4 font-black">
-              تأمین‌کنندگان تأییدشده
-            </h3>
-
-            <p className="mt-2 text-sm leading-7 text-slate-500">
-              محصولات پس از بررسی مدیریت سرچنو
-              در بازار نمایش داده می‌شوند.
-            </p>
-
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6">
-
-            <Package className="h-9 w-9 text-blue-700" />
-
-            <h3 className="mt-4 font-black">
-              تنوع محصولات
-            </h3>
-
-            <p className="mt-2 text-sm leading-7 text-slate-500">
-              از لوله‌های ساختمانی تا انواع اتصالات
-              و تجهیزات تأسیسات.
-            </p>
-
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6">
-
-            <Truck className="h-9 w-9 text-blue-700" />
-
-            <h3 className="mt-4 font-black">
-              مناسب پروژه‌های ساختمانی
-            </h3>
-
-            <p className="mt-2 text-sm leading-7 text-slate-500">
-              امکان پیدا کردن تأمین‌کننده برای
-              پروژه‌های کوچک و عمده.
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ================= BULK ================= */}
-
-      <section className="mx-auto max-w-7xl px-5 pb-16">
-
-        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-l from-slate-950 to-blue-950 p-8 text-white lg:p-12">
-
+      <section className="mx-auto max-w-7xl px-5 py-16">
+        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-l from-blue-950 to-cyan-800 p-8 text-white lg:p-12">
           <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-
             <div>
-
               <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold">
-                تأمین عمده پروژه
+                تأمین تأسیسات پروژه
               </span>
 
               <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-                تأمین عمده لوله و تجهیزات تأسیسات
+                تأمین عمده لوله و تجهیزات ساختمانی
               </h2>
 
-              <p className="mt-4 leading-8 text-slate-300">
-
-                برای پروژه‌های ساختمانی، عمرانی،
-                تجاری و صنعتی می‌توانید تأمین‌کنندگان
-                انواع لوله و اتصالات را پیدا کنید.
-
+              <p className="mt-4 leading-8 text-blue-100">
+                برای پروژه‌های ساختمانی می‌توانید
+                انواع لوله، اتصالات، شیرآلات، پمپ
+                و تجهیزات تأسیسات را از فروشندگان
+                و تأمین‌کنندگان سرچنو پیدا کنید.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش متری
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش شاخه‌ای
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش عددی
-                </span>
-
                 <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
                   فروش عمده
                 </span>
 
-              </div>
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  فروش خرده
+                </span>
 
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  تأمین پروژه
+                </span>
+
+                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  فروش تأییدشده
+                </span>
+              </div>
             </div>
 
             <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
-
               <div className="flex items-center gap-4">
-
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
-
-                  <Package className="h-7 w-7" />
-
+                  <Wrench className="h-7 w-7" />
                 </div>
 
                 <div>
-
                   <h3 className="font-black">
-                    نیاز به تأمین لوله و اتصالات دارید؟
+                    نیاز به تأمین تجهیزات دارید؟
                   </h3>
 
-                  <p className="mt-1 text-sm text-slate-300">
-                    با فروشندگان و تأمین‌کنندگان ارتباط بگیرید.
+                  <p className="mt-1 text-sm text-blue-100">
+                    با فروشندگان و تأمین‌کنندگان
+                    ارتباط بگیرید.
                   </p>
-
                 </div>
-
               </div>
 
               <Link
                 href="/register"
                 className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-black text-blue-900"
               >
-
                 ثبت فروشگاه و محصول
-
-                <ArrowLeft className="h-4 w-4" />
-
+                <ArrowRight className="h-4 w-4" />
               </Link>
-
             </div>
-
           </div>
         </div>
       </section>
@@ -910,53 +672,38 @@ export default function PlumbingPipesPage() {
       {/* ================= CTA ================= */}
 
       <section className="px-5 pb-16">
-
         <div className="mx-auto max-w-7xl rounded-[2rem] bg-blue-700 px-6 py-14 text-center text-white">
-
-          <Building2 className="mx-auto h-10 w-10" />
+          <Droplets className="mx-auto h-10 w-10" />
 
           <h2 className="mt-5 text-2xl font-black sm:text-3xl">
             فروشنده یا تأمین‌کننده لوله و تأسیسات هستید؟
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-
-            فروشگاه خود را در سرچنو ثبت کنید
-            و محصولات لوله و تأسیسات خود را
-            به سازندگان و خریداران معرفی کنید.
-
+            فروشگاه خود را در سرچنو ثبت کنید و محصولات
+            خود را به سازندگان و خریداران معرفی کنید.
           </p>
 
           <Link
             href="/register"
             className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
           >
-
             ثبت فروشگاه
-
-            <ArrowLeft className="h-4 w-4" />
-
+            <ArrowRight className="h-4 w-4" />
           </Link>
-
         </div>
-
       </section>
 
       {/* ================= FOOTER ================= */}
 
       <footer className="bg-slate-950 text-slate-300">
-
         <div className="mx-auto max-w-7xl px-5 py-12">
-
           <div className="grid gap-10 md:grid-cols-4">
-
             <div className="md:col-span-2">
-
               <Link
                 href="/"
                 className="flex items-center gap-3"
               >
-
                 <img
                   src="/logo.png"
                   alt="سرچنو"
@@ -964,7 +711,6 @@ export default function PlumbingPipesPage() {
                 />
 
                 <div>
-
                   <div className="text-xl font-black text-white">
                     سرچنو
                   </div>
@@ -972,29 +718,22 @@ export default function PlumbingPipesPage() {
                   <div className="text-xs text-slate-500">
                     بازار هوشمند ساخت‌وساز
                   </div>
-
                 </div>
-
               </Link>
 
               <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
-
-                پلتفرم جست‌وجو، مقایسه و ارتباط
-                با فروشندگان، تأمین‌کنندگان و
-                متخصصان صنعت ساختمان.
-
+                پلتفرم جست‌وجو، مقایسه و ارتباط با
+                فروشندگان، تأمین‌کنندگان و متخصصان
+                صنعت ساختمان.
               </p>
-
             </div>
 
             <div>
-
               <h3 className="font-bold text-white">
                 خدمات سرچنو
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
-
                 <Link
                   href="/materials"
                   className="block hover:text-white"
@@ -1015,19 +754,15 @@ export default function PlumbingPipesPage() {
                 >
                   ثبت فروشگاه
                 </Link>
-
               </div>
-
             </div>
 
             <div>
-
               <h3 className="font-bold text-white">
                 ارتباط با ما
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
-
                 <Link
                   href="/about"
                   className="block hover:text-white"
@@ -1036,37 +771,22 @@ export default function PlumbingPipesPage() {
                 </Link>
 
                 <p className="flex items-center gap-2">
-
                   <Phone className="h-4 w-4" />
-
                   تماس با ما
-
                 </p>
 
-                <p>
-                  قوانین و مقررات
-                </p>
+                <p>قوانین و مقررات</p>
 
-                <p>
-                  پشتیبانی
-                </p>
-
+                <p>پشتیبانی</p>
               </div>
-
             </div>
-
           </div>
 
           <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
-
             © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
-
           </div>
-
         </div>
-
       </footer>
-
     </main>
   );
 }
