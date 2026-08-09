@@ -588,215 +588,130 @@ export default function Home() {
         </div>
       </section>
 
-      function AISercheno() {
-  const [question, setQuestion] = useState("");
-  const [submittedQuestion, setSubmittedQuestion] = useState("");
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    const text = question.trim();
-
-    if (!text) return;
-
-    setSubmittedQuestion(text);
-    setQuestion("");
-  }
-
-  return (
-    <div className="relative overflow-hidden rounded-[2.5rem] border border-blue-200 bg-slate-950 shadow-2xl">
-      {/* Background image */}
-      <div className="absolute inset-0">
-        <img
-          src="/hush.jpg"
-          alt=""
-          className="h-full w-full object-cover opacity-30"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-l from-slate-950/95 via-blue-950/90 to-slate-950/80" />
-      </div>
-
-      {/* Decorative glow */}
-      <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
-
-      <div className="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl" />
-
-      <div className="relative z-10 p-6 sm:p-8 lg:p-10">
-        <div className="grid gap-8 lg:grid-cols-[1fr_320px] lg:items-center">
-          
-          {/* Main */}
-          <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 text-3xl shadow-lg">
-                🧠
+            {/* AI SERCHENO */}
+      <section className="mx-auto max-w-7xl px-5 py-12">
+        <div
+          className="relative overflow-hidden rounded-[2.5rem] border border-blue-200 shadow-2xl"
+          style={{
+            backgroundImage:
+              "linear-gradient(90deg, rgba(2,6,23,0.94), rgba(15,23,42,0.78)), url('/hush.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="relative z-10 grid gap-8 p-7 sm:p-10 lg:grid-cols-[1fr_360px] lg:items-center lg:p-12">
+            
+            {/* متن */}
+            <div className="text-white">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-black text-cyan-200">
+                🤖 AI SERCHENO
+                <span>•</span>
+                هوش مصنوعی سرچنو
               </div>
 
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-black text-white sm:text-2xl">
-                    AI SERCHENO
-                  </span>
+              <h2 className="mt-5 text-3xl font-black leading-tight sm:text-4xl">
+                می‌خواهید بدانید پروژه‌تان
+                <span className="block text-cyan-300">
+                  چقدر بودجه نیاز دارد؟
+                </span>
+              </h2>
 
-                  <span className="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-[10px] font-black text-cyan-200">
-                    هوش مصنوعی سرچنو
-                  </span>
-                </div>
+              <p className="mt-5 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
+                سؤال خود را از هوش مصنوعی سرچنو بپرسید.
+                در آینده این بخش می‌تواند با استفاده از اطلاعات
+                محصولات، قیمت‌ها، فروشندگان و متخصصان خود سرچنو،
+                برآورد دقیق‌تری از نیازهای پروژه شما ارائه دهد.
+              </p>
 
-                <p className="mt-1 text-xs text-slate-400">
-                  دستیار هوشمند پروژه‌های ساختمانی
-                </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <span className="rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
+                  📊 برآورد هزینه
+                </span>
+
+                <span className="rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
+                  🧱 پیشنهاد مصالح
+                </span>
+
+                <span className="rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
+                  👷 پیشنهاد متخصص
+                </span>
+
+                <span className="rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
+                  🏗️ تحلیل پروژه
+                </span>
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-7 text-slate-300">
+                <span className="font-black text-cyan-300">
+                  مثال:
+                </span>{" "}
+                ۲۰۰ متر زمین دارم، می‌خواهم ۴ طبقه و ۸ واحد بسازم.
+                برای شروع به چه مصالحی نیاز دارم و حدود بودجه پروژه چقدر است؟
               </div>
             </div>
 
-            <h2 className="mt-7 text-2xl font-black leading-relaxed text-white sm:text-3xl">
-              قبل از شروع پروژه،
-              <span className="text-cyan-300"> از سرچنو سؤال بپرسید.</span>
-            </h2>
-
-            <p className="mt-4 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
-              درباره ساخت‌وساز، مصالح، تجهیزات، خدمات، برآورد اولیه هزینه،
-              نیازهای پروژه و انتخاب متخصص سؤال کنید.
-              در نسخه آینده، AI سرچنو پاسخ‌ها را با استفاده از
-              داده‌های واقعی بازار سرچنو و سایر منابع هوش مصنوعی تکمیل می‌کند.
-            </p>
-
-            {/* Question form */}
-            <form
-              onSubmit={handleSubmit}
-              className="mt-7 rounded-3xl border border-white/10 bg-white/10 p-2 backdrop-blur-md"
-            >
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="flex min-h-[58px] flex-1 items-center gap-3 rounded-2xl bg-white px-5">
-                  <span className="text-xl">💬</span>
-
-                  <input
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    type="text"
-                    placeholder="مثلاً برای ساخت ۵۰۰ متر ساختمان چند تن میلگرد نیاز دارم؟"
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
-                  />
+            {/* باکس سؤال */}
+            <div className="rounded-[2rem] border border-white/10 bg-white/95 p-5 shadow-2xl">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-700 text-2xl shadow-lg">
+                  🤖
                 </div>
+
+                <div>
+                  <h3 className="font-black text-slate-900">
+                    از هوش مصنوعی سرچنو بپرسید
+                  </h3>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    پاسخ هوشمند مخصوص پروژه‌های ساختمانی
+                  </p>
+                </div>
+              </div>
+
+              <form
+                className="mt-5"
+                onSubmit={(e) => {
+                  e.preventDefault();
+
+                  const form = e.currentTarget;
+                  const input =
+                    form.elements.namedItem("ai-question") as HTMLInputElement;
+
+                  if (!input.value.trim()) return;
+
+                  alert(
+                    "سؤال شما ثبت شد. موتور هوش مصنوعی سرچنو به‌زودی فعال می‌شود."
+                  );
+
+                  input.value = "";
+                }}
+              >
+                <textarea
+                  name="ai-question"
+                  rows={5}
+                  placeholder="مثلاً برای ساخت یک ساختمان ۴ طبقه با ۸ واحد چه مصالحی نیاز دارم و حدود هزینه هر بخش چقدر می‌شود؟"
+                  className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 text-slate-800 outline-none transition focus:ring-2 focus:ring-blue-600"
+                />
 
                 <button
                   type="submit"
-                  className="min-h-[58px] rounded-2xl bg-cyan-400 px-7 text-sm font-black text-slate-950 transition hover:bg-cyan-300"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 py-4 text-sm font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
                 >
-                  پرسیدن از AI
-                  <span className="mr-2">→</span>
+                  🤖 پرسیدن از AI SERCHENO
+                  <span>←</span>
                 </button>
-              </div>
-            </form>
+              </form>
 
-            {/* Popular AI questions */}
-            <div className="mt-5">
-              <p className="mb-3 text-xs font-bold text-slate-400">
-                نمونه سؤال:
-              </p>
-
-              <div className="flex flex-wrap gap-2">
-                {[
-                  "برای ساخت ۲۰۰ متر ساختمان چه مصالحی لازم دارم؟",
-                  "هزینه تقریبی ساخت یک ساختمان چقدر است؟",
-                  "برای پروژه من چه نوع میلگردی مناسب است؟",
-                  "چطور پیمانکار مناسب پیدا کنم؟",
-                ].map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setQuestion(item)}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-200"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Temporary response */}
-            {submittedQuestion && (
-              <div className="mt-6 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-5">
-                <div className="flex items-start gap-3">
-                  <div className="text-xl">🤖</div>
-
-                  <div>
-                    <p className="text-xs font-bold text-cyan-300">
-                      سؤال شما ثبت شد
-                    </p>
-
-                    <p className="mt-2 text-sm leading-7 text-white">
-                      {submittedQuestion}
-                    </p>
-
-                    <p className="mt-3 text-xs leading-6 text-slate-400">
-                      موتور هوش مصنوعی سرچنو در حال توسعه است.
-                      در مرحله بعد، همین سؤال به سیستم AI سرچنو ارسال می‌شود
-                      تا پاسخ آن بر اساس اطلاعات و قیمت‌های واقعی موجود در
-                      سرچنو تولید شود.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Side card */}
-          <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur-md">
-            <div className="text-4xl">🏗️</div>
-
-            <h3 className="mt-5 text-xl font-black text-white">
-              می‌خواهی بدانی پروژه‌ات چقدر بودجه می‌خواهد؟
-            </h3>
-
-            <p className="mt-3 text-sm leading-7 text-slate-300">
-              اطلاعات پروژه‌ات را به AI سرچنو بده؛
-              در آینده می‌توانی برآورد اولیه مصالح، تجهیزات،
-              خدمات و هزینه پروژه را دریافت کنی.
-            </p>
-
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
-                <span>📐</span>
-                <span className="text-xs text-slate-300">
-                  متراژ و تعداد طبقات
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
-                <span>🧱</span>
-                <span className="text-xs text-slate-300">
-                  مصالح و تجهیزات مورد نیاز
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
-                <span>💰</span>
-                <span className="text-xs text-slate-300">
-                  برآورد اولیه هزینه
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
-                <span>👷</span>
-                <span className="text-xs text-slate-300">
-                  متخصصان و خدمات مورد نیاز
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-2xl bg-cyan-300/10 p-4">
-              <p className="text-xs font-bold leading-6 text-cyan-200">
-                هدف AI سرچنو:
-                اتصال هوش مصنوعی به داده‌های واقعی بازار ساخت‌وساز.
+              <p className="mt-4 text-center text-[11px] leading-5 text-slate-400">
+                موتور هوش مصنوعی سرچنو در حال توسعه است و در نسخه آینده
+                به داده‌های واقعی محصولات و قیمت‌های سرچنو متصل خواهد شد.
               </p>
             </div>
+
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
+      </section>
+      
       {/* Popular Services */}
       <section className="mx-auto max-w-7xl px-5 py-20">
         <div className="rounded-[2.5rem] bg-slate-900 p-8 text-white sm:p-12">
