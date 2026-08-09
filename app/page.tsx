@@ -940,6 +940,18 @@ export default function Home() {
           <div className="mt-12 border-t border-white/10 pt-7 text-center text-xs text-slate-500">
             <p>© ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.</p>
 
+            <div className="flex flex-col items-center justify-center">
+  <img
+    src="/etehadiye.png"
+    alt="لوگوی اتحادیه"
+    className="h-24 w-auto object-contain"
+  />
+
+  <p className="mt-3 text-xs text-slate-400">
+    اتحادیه کسب و کار های مجازی
+  </p>
+</div>
+
             <p className="mt-2">
               شرکت امیر توان پویای گستر
             </p>
