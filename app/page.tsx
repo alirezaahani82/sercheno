@@ -184,16 +184,23 @@ const popularServices = [
 function SupportChat() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
- const [sending, setSending] = useState(false);
- const [userName, setUserName] = useState("");
-const [userPhone, setUserPhone] = useState("");
+  const [sending, setSending] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [userPhone, setUserPhone] = useState("");
   const [adminReply, setAdminReply] = useState("");
   const [repliedAt, setRepliedAt] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!message.trim()) return;
+    if (
+      !userName.trim() ||
+      !userPhone.trim() ||
+      !message.trim()
+    ) {
+      alert("نام، شماره تماس و پیام را کامل وارد کنید.");
+      return;
+    }
 
     setSending(true);
 
@@ -204,26 +211,26 @@ const [userPhone, setUserPhone] = useState("");
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-  user_name: userName.trim(),
-  user_phone: userPhone.trim(),
-  message: message.trim(),
-}),
+          user_name: userName.trim(),
+          user_phone: userPhone.trim(),
+          message: message.trim(),
+        }),
       });
 
       if (!res.ok) {
         throw new Error("خطا در ارسال پیام");
       }
-     
-     localStorage.setItem(
-  "sercheno_support_phone",
-  userPhone.trim()
-);
 
-setMessage("");
+      localStorage.setItem(
+        "sercheno_support_phone",
+        userPhone.trim()
+      );
 
-alert("پیام شما با موفقیت برای پشتیبانی ارسال شد.");
+      setMessage("");
 
-setOpen(false);
+      alert("پیام شما با موفقیت برای پشتیبانی ارسال شد.");
+
+      setOpen(false);
     } catch (error) {
       alert("ارسال پیام انجام نشد. دوباره تلاش کنید.");
     } finally {
@@ -231,52 +238,60 @@ setOpen(false);
     }
   }
 
- useEffect(() => {
-  function openSupportChat() {
-    setOpen(true);
-  }
-
-  window.addEventListener(
-    "open-sercheno-support",
-     openSupportChat
-    );
-  };
-}, []);
+  // باز کردن پنجره پشتیبانی با کلیک روی اعلان
   useEffect(() => {
-  async function loadReply() {
-    try {
-      const savedPhone =
-        localStorage.getItem("sercheno_support_phone");
-
-      if (!savedPhone) return;
-
-      const response = await fetch(
-        `/api/support?phone=${encodeURIComponent(savedPhone)}`
-      );
-
-      if (!response.ok) return;
-
-      const data = await response.json();
-
-      if (data.hasNewMessage && data.data) {
-        setAdminReply(data.data.admin_reply || "");
-        setRepliedAt(data.data.replied_at || "");
-      }
-    } catch (error) {
-      console.error("LOAD SUPPORT REPLY ERROR:", error);
+    function openSupportChat() {
+      setOpen(true);
     }
-  }
 
-  loadReply();
-}, []);
-
-  return
-    window.removeEventListener(
+    window.addEventListener(
       "open-sercheno-support",
       openSupportChat
     );
-  };
-}, []);
+
+    return () => {
+      window.removeEventListener(
+        "open-sercheno-support",
+        openSupportChat
+      );
+    };
+  }, []);
+
+  // دریافت پاسخ پشتیبانی
+  useEffect(() => {
+    async function loadReply() {
+      try {
+        const savedPhone =
+          localStorage.getItem("sercheno_support_phone");
+
+        if (!savedPhone) return;
+
+        const response = await fetch(
+          `/api/support?phone=${encodeURIComponent(savedPhone)}`
+        );
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        if (data.data) {
+          setAdminReply(data.data.admin_reply || "");
+          setRepliedAt(data.data.replied_at || "");
+        }
+      } catch (error) {
+        console.error(
+          "LOAD SUPPORT REPLY ERROR:",
+          error
+        );
+      }
+    }
+
+    loadReply();
+
+    const interval = setInterval(loadReply, 15000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
@@ -293,7 +308,8 @@ setOpen(false);
       {/* پنجره پشتیبانی */}
       {open && (
         <div className="fixed bottom-24 left-6 z-[9999] w-[calc(100vw-3rem)] max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
-          
+
+          {/* Header */}
           <div className="bg-blue-700 p-5 text-white">
             <div className="flex items-center gap-3">
               <img
@@ -314,67 +330,79 @@ setOpen(false);
             </div>
           </div>
 
-<form onSubmit={handleSubmit} className="p-5 space-y-3">
+          {/* پاسخ ادمین */}
+          {adminReply && (
+            <div className="border-b border-slate-200 bg-emerald-50 p-5">
+              <div className="mb-2 text-sm font-black text-emerald-800">
+                💬 پاسخ پشتیبانی
+              </div>
 
-  <input
-    type="text"
-    value={userName}
-    onChange={(e) => setUserName(e.target.value)}
-    placeholder="نام و نام خانوادگی"
-    required
-    className="w-full rounded-2xl bg-slate-100 p-4 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
-  />
+              <div className="rounded-2xl bg-white p-4 text-sm leading-7 text-slate-700 shadow-sm">
+                {adminReply}
+              </div>
 
-  <input
-    type="tel"
-    value={userPhone}
-    onChange={(e) => setUserPhone(e.target.value)}
-    placeholder="شماره تماس"
-    required
-    dir="ltr"
-    className="w-full rounded-2xl bg-slate-100 p-4 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
-  />
+              {repliedAt && (
+                <div className="mt-2 text-[11px] text-slate-400">
+                  پاسخ داده شده توسط پشتیبانی سرچنو
+                </div>
+              )}
+            </div>
+          )}
 
-  <textarea
-    value={message}
-    onChange={(e) => setMessage(e.target.value)}
-    rows={5}
-    placeholder="پیام خود را بنویسید..."
-    required
-    className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
-  />
+          {/* فرم */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-3 p-5"
+          >
+            <input
+              type="text"
+              value={userName}
+              onChange={(e) =>
+                setUserName(e.target.value)
+              }
+              placeholder="نام و نام خانوادگی"
+              required
+              className="w-full rounded-2xl bg-slate-100 p-4 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
+            />
 
-  <button
-    type="submit"
-    disabled={sending}
-    className="mt-2 w-full rounded-2xl bg-blue-700 py-4 text-sm font-black text-white transition hover:bg-blue-800 disabled:opacity-50"
-  >
-    {sending ? "در حال ارسال..." : "ارسال پیام"}
-  </button>
-{adminReply && (
-  <div className="border-b border-slate-200 bg-emerald-50 p-5">
-    <div className="mb-2 text-sm font-black text-emerald-800">
-      💬 پاسخ پشتیبانی
-    </div>
+            <input
+              type="tel"
+              value={userPhone}
+              onChange={(e) =>
+                setUserPhone(e.target.value)
+              }
+              placeholder="شماره تماس"
+              required
+              dir="ltr"
+              className="w-full rounded-2xl bg-slate-100 p-4 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
+            />
 
-    <div className="rounded-2xl bg-white p-4 text-sm leading-7 text-slate-700 shadow-sm">
-      {adminReply}
-    </div>
+            <textarea
+              value={message}
+              onChange={(e) =>
+                setMessage(e.target.value)
+              }
+              rows={5}
+              placeholder="پیام خود را بنویسید..."
+              required
+              className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
+            />
 
-    {repliedAt && (
-      <div className="mt-2 text-[11px] text-slate-400">
-        پاسخ داده شده توسط پشتیبانی سرچنو
-      </div>
-    )}
-  </div>
-)}
-</form>
+            <button
+              type="submit"
+              disabled={sending}
+              className="mt-2 w-full rounded-2xl bg-blue-700 py-4 text-sm font-black text-white transition hover:bg-blue-800 disabled:opacity-50"
+            >
+              {sending
+                ? "در حال ارسال..."
+                : "ارسال پیام"}
+            </button>
+          </form>
         </div>
       )}
     </>
   );
 }
-
 function SupportNotification() {
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [phone, setPhone] = useState("");
