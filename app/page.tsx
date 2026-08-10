@@ -784,7 +784,7 @@ export default function Home() {
             const form = e.currentTarget;
 
             const input =
-              form.elements.namedItem("ai-question") as HTMLElement;
+              form.elements.namedItem("ai-question") as HTMLTextAreaElement;
 
             if (!input.value.trim()) return;
 
