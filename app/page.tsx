@@ -308,17 +308,17 @@ function SupportNotification() {
   const [phone, setPhone] = useState("");
 
   useEffect(() => {
-    const savedPhone = localStorage.getItem("sercheno_support_phone");
+const savedPhone = localStorage.getItem("sercheno_support_phone");
 
-    if (!savedPhone) return;
+if (savedPhone === null) return;
 
-    setPhone(savedPhone);
+setPhone(savedPhone);
 
-    async function checkMessage() {
-      try {
-        const response = await fetch(
-          `/api/support?phone=${encodeURIComponent(savedPhone)}`
-        );
+async function checkMessage() {
+  try {
+    const response = await fetch(
+      `/api/support?phone=${encodeURIComponent(savedPhone)}`
+    );
 
         if (!response.ok) return;
 
