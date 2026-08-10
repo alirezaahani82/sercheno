@@ -11,8 +11,8 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const message = body.message?.trim();
-    const userName = body.userName?.trim() || null;
-    const userPhone = body.userPhone?.trim() || null;
+    const userName = body.userName?.trim();
+    const userPhone = body.userPhone?.trim();
 
     if (!message) {
       return NextResponse.json(
