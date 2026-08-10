@@ -213,7 +213,7 @@ const [userPhone, setUserPhone] = useState("");
       if (!res.ok) {
         throw new Error("خطا در ارسال پیام");
       }
-
+     
      localStorage.setItem(
   "sercheno_support_phone",
   userPhone.trim()
@@ -230,6 +230,53 @@ setOpen(false);
       setSending(false);
     }
   }
+
+ useEffect(() => {
+  function openSupportChat() {
+    setOpen(true);
+  }
+
+  window.addEventListener(
+    "open-sercheno-support",
+     openSupportChat
+    );
+  };
+}, []);
+  useEffect(() => {
+  async function loadReply() {
+    try {
+      const savedPhone =
+        localStorage.getItem("sercheno_support_phone");
+
+      if (!savedPhone) return;
+
+      const response = await fetch(
+        `/api/support?phone=${encodeURIComponent(savedPhone)}`
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (data.hasNewMessage && data.data) {
+        setAdminReply(data.data.admin_reply || "");
+        setRepliedAt(data.data.replied_at || "");
+      }
+    } catch (error) {
+      console.error("LOAD SUPPORT REPLY ERROR:", error);
+    }
+  }
+
+  loadReply();
+}, []);
+
+  return
+    window.removeEventListener(
+      "open-sercheno-support",
+      openSupportChat
+    );
+  };
+}, []);
 
   return (
     <>
@@ -304,7 +351,23 @@ setOpen(false);
   >
     {sending ? "در حال ارسال..." : "ارسال پیام"}
   </button>
+{adminReply && (
+  <div className="border-b border-slate-200 bg-emerald-50 p-5">
+    <div className="mb-2 text-sm font-black text-emerald-800">
+      💬 پاسخ پشتیبانی
+    </div>
 
+    <div className="rounded-2xl bg-white p-4 text-sm leading-7 text-slate-700 shadow-sm">
+      {adminReply}
+    </div>
+
+    {repliedAt && (
+      <div className="mt-2 text-[11px] text-slate-400">
+        پاسخ داده شده توسط پشتیبانی سرچنو
+      </div>
+    )}
+  </div>
+)}
 </form>
         </div>
       )}
