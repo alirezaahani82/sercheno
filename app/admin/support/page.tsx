@@ -1,133 +1,134 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 type SupportMessage = {
-  id: number;
-  user_name: string;
-  user_phone: string;
-  message: string;
+  id: number | string;
+  user_name: string | null;
+  user_phone: string | null;
+  message: string | null;
   admin_reply: string | null;
   status: string | null;
-  created_at: string;
+  created_at: string | null;
   replied_at: string | null;
 };
 
-export default function AdminSupportPage() {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export default function SupportAdminPage() {
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [reply, setReply] = useState<Record<number, string>>({});
-  const [sending, setSending] = useState<number | null>(null);
+  const [error, setError] = useState("");
 
   async function loadMessages() {
-    try {
-      const response = await fetch("/api/support");
+    setLoading(true);
+    setError("");
 
-      const data = await response.json();
+    const { data, error } = await supabase
+      .from("support_messages")
+      .select(
+        "id,user_name,user_phone,message,admin_reply,status,created_at,replied_at"
+      )
+      .order("created_at", { ascending: false });
 
-      if (response.ok) {
-        setMessages(data.messages || []);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    if (error) {
+      console.error("SUPPORT ADMIN ERROR:", error);
+      setError(error.message);
+      setMessages([]);
+    } else {
+      setMessages(data || []);
     }
+
+    setLoading(false);
   }
 
   useEffect(() => {
     loadMessages();
   }, []);
 
-  async function handleReply(id: number) {
-    const text = reply[id]?.trim();
-
-    if (!text) {
-      alert("لطفاً پاسخ را بنویسید.");
-      return;
-    }
-
-    setSending(id);
-
-    try {
-      const response = await fetch("/api/support", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id,
-          admin_reply: text,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.error || "خطا در ارسال پاسخ");
-        return;
-      }
-
-      setReply((prev) => ({
-        ...prev,
-        [id]: "",
-      }));
-
-      await loadMessages();
-
-      alert("پاسخ با موفقیت ثبت شد.");
-    } catch (error) {
-      console.error(error);
-      alert("خطا در ارتباط با سرور");
-    } finally {
-      setSending(null);
-    }
-  }
-
   return (
-    <main dir="rtl" className="min-h-screen bg-slate-100 p-5">
+    <main
+      dir="rtl"
+      className="min-h-screen bg-slate-100 px-5 py-10 text-slate-900"
+    >
       <div className="mx-auto max-w-6xl">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-black">
+              پشتیبانی سرچنو
+            </h1>
 
-        <div className="mb-8 rounded-3xl bg-white p-6 shadow">
-          <h1 className="text-3xl font-black text-slate-900">
-            پشتیبانی سرچنو
-          </h1>
+            <p className="mt-2 text-sm text-slate-500">
+              پیام‌های کاربران را از اینجا مشاهده و مدیریت کنید.
+            </p>
+          </div>
 
-          <p className="mt-2 text-sm text-slate-500">
-            مدیریت پیام‌های کاربران و پاسخ به درخواست‌های پشتیبانی
-          </p>
+          <button
+            onClick={loadMessages}
+            className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800"
+          >
+            🔄 بروزرسانی
+          </button>
         </div>
 
-        {loading ? (
-          <div className="rounded-3xl bg-white p-10 text-center">
-            در حال دریافت پیام‌ها...
+        {loading && (
+          <div className="rounded-3xl bg-white p-10 text-center shadow">
+            <p className="font-bold text-slate-600">
+              در حال دریافت پیام‌ها...
+            </p>
           </div>
-        ) : messages.length === 0 ? (
-          <div className="rounded-3xl bg-white p-10 text-center text-slate-500">
-            هنوز پیامی دریافت نشده است.
-          </div>
-        ) : (
-          <div className="space-y-6">
+        )}
 
+        {!loading && error && (
+          <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-red-700">
+            <p className="font-black">
+              خطا در دریافت پیام‌ها
+            </p>
+
+            <p className="mt-2 text-sm">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {!loading && !error && messages.length === 0 && (
+          <div className="rounded-3xl bg-white p-10 text-center shadow">
+            <div className="text-5xl">📭</div>
+
+            <h2 className="mt-4 text-xl font-black">
+              هنوز پیامی دریافت نشده است
+            </h2>
+
+            <p className="mt-2 text-sm text-slate-500">
+              اگر در جدول Supabase پیام وجود دارد، احتمالاً مشکل از
+              دسترسی RLS جدول است.
+            </p>
+          </div>
+        )}
+
+        {!loading && !error && messages.length > 0 && (
+          <div className="space-y-5">
             {messages.map((item) => (
               <div
                 key={item.id}
                 className="rounded-3xl bg-white p-6 shadow-lg"
               >
-
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 md:flex-row md:items-center md:justify-between">
-
                   <div>
-                    <h2 className="text-xl font-black text-slate-900">
-                      {item.user_name}
+                    <h2 className="text-lg font-black">
+                      {item.user_name || "بدون نام"}
                     </h2>
 
                     <p className="mt-1 text-sm text-slate-500">
-                      📞 {item.user_phone}
+                      📞 {item.user_phone || "شماره ثبت نشده"}
                     </p>
                   </div>
 
-                  <div className="text-left">
+                  <div>
                     <span
                       className={`rounded-full px-4 py-2 text-xs font-black ${
                         item.status === "replied"
@@ -139,70 +140,50 @@ export default function AdminSupportPage() {
                         ? "پاسخ داده شده"
                         : "در انتظار پاسخ"}
                     </span>
-
-                    <p className="mt-2 text-xs text-slate-400">
-                      {new Date(item.created_at).toLocaleString("fa-IR")}
-                    </p>
                   </div>
-
                 </div>
 
-                <div className="mt-5 rounded-2xl bg-slate-100 p-5">
-                  <div className="mb-2 text-xs font-black text-blue-700">
+                <div className="mt-5 rounded-2xl bg-slate-50 p-5">
+                  <p className="text-xs font-bold text-slate-400">
                     پیام کاربر
-                  </div>
+                  </p>
 
-                  <p className="leading-8 text-slate-700">
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-8 text-slate-700">
                     {item.message}
                   </p>
                 </div>
 
                 {item.admin_reply && (
-                  <div className="mt-4 rounded-2xl bg-emerald-50 p-5">
-                    <div className="mb-2 text-xs font-black text-emerald-700">
-                      پاسخ پشتیبان
-                    </div>
+                  <div className="mt-4 rounded-2xl bg-blue-50 p-5">
+                    <p className="text-xs font-bold text-blue-500">
+                      پاسخ پشتیبانی
+                    </p>
 
-                    <p className="leading-8 text-slate-700">
+                    <p className="mt-3 whitespace-pre-wrap text-sm leading-8 text-blue-900">
                       {item.admin_reply}
                     </p>
                   </div>
                 )}
 
-                <div className="mt-5">
+                <div className="mt-5 flex flex-wrap gap-5 text-xs text-slate-400">
+                  <span>
+                    🕐 ارسال:{" "}
+                    {item.created_at
+                      ? new Date(item.created_at).toLocaleString("fa-IR")
+                      : "-"}
+                  </span>
 
-                  <textarea
-                    value={reply[item.id] || ""}
-                    onChange={(e) =>
-                      setReply((prev) => ({
-                        ...prev,
-                        [item.id]: e.target.value,
-                      }))
-                    }
-                    rows={4}
-                    placeholder="پاسخ خود را برای کاربر بنویسید..."
-                    className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 outline-none focus:ring-2 focus:ring-blue-600"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => handleReply(item.id)}
-                    disabled={sending === item.id}
-                    className="mt-3 rounded-2xl bg-blue-700 px-7 py-4 text-sm font-black text-white transition hover:bg-blue-800 disabled:opacity-50"
-                  >
-                    {sending === item.id
-                      ? "در حال ثبت پاسخ..."
-                      : "ثبت پاسخ"}
-                  </button>
-
+                  {item.replied_at && (
+                    <span>
+                      ✅ پاسخ:{" "}
+                      {new Date(item.replied_at).toLocaleString("fa-IR")}
+                    </span>
+                  )}
                 </div>
-
               </div>
             ))}
-
           </div>
         )}
-
       </div>
     </main>
   );
