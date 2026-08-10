@@ -184,7 +184,9 @@ const popularServices = [
 function SupportChat() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [sending, setSending] = useState(false);
+ const [sending, setSending] = useState(false);
+ const [userName, setUserName] = useState("");
+const [userPhone, setUserPhone] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -200,8 +202,10 @@ function SupportChat() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: message.trim(),
-        }),
+  user_name: userName.trim(),
+  user_phone: userPhone.trim(),
+  message: message.trim(),
+}),
       });
 
       if (!res.ok) {
@@ -254,23 +258,45 @@ function SupportChat() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-5">
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={5}
-              placeholder="پیام خود را بنویسید..."
-              className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
-            />
+<form onSubmit={handleSubmit} className="p-5 space-y-3">
 
-            <button
-              type="submit"
-              disabled={sending}
-              className="mt-3 w-full rounded-2xl bg-blue-700 py-4 text-sm font-black text-white transition hover:bg-blue-800 disabled:opacity-50"
-            >
-              {sending ? "در حال ارسال..." : "ارسال پیام"}
-            </button>
-          </form>
+  <input
+    type="text"
+    value={userName}
+    onChange={(e) => setUserName(e.target.value)}
+    placeholder="نام و نام خانوادگی"
+    required
+    className="w-full rounded-2xl bg-slate-100 p-4 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
+  />
+
+  <input
+    type="tel"
+    value={userPhone}
+    onChange={(e) => setUserPhone(e.target.value)}
+    placeholder="شماره تماس"
+    required
+    dir="ltr"
+    className="w-full rounded-2xl bg-slate-100 p-4 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
+  />
+
+  <textarea
+    value={message}
+    onChange={(e) => setMessage(e.target.value)}
+    rows={5}
+    placeholder="پیام خود را بنویسید..."
+    required
+    className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
+  />
+
+  <button
+    type="submit"
+    disabled={sending}
+    className="mt-2 w-full rounded-2xl bg-blue-700 py-4 text-sm font-black text-white transition hover:bg-blue-800 disabled:opacity-50"
+  >
+    {sending ? "در حال ارسال..." : "ارسال پیام"}
+  </button>
+
+</form>
         </div>
       )}
     </>
@@ -758,7 +784,7 @@ export default function Home() {
             const form = e.currentTarget;
 
             const input =
-              form.elements.namedItem("ai-question") as HTMLTextAreaElement;
+              form.elements.namedItem("ai-question") as HTMLElement;
 
             if (!input.value.trim()) return;
 
