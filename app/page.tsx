@@ -181,6 +181,102 @@ const popularServices = [
   "لوله‌کش",
 ];
 
+function SupportChat() {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (!message.trim()) return;
+
+    setSending(true);
+
+    try {
+      const res = await fetch("/api/support", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: message.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("خطا در ارسال پیام");
+      }
+
+      setMessage("");
+      alert("پیام شما با موفقیت برای پشتیبانی ارسال شد.");
+      setOpen(false);
+    } catch (error) {
+      alert("ارسال پیام انجام نشد. دوباره تلاش کنید.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <>
+      {/* دکمه ثابت پشتیبانی */}
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="fixed bottom-6 left-6 z-[9999] flex h-16 w-16 items-center justify-center rounded-full bg-blue-700 text-3xl text-white shadow-2xl transition hover:scale-110 hover:bg-blue-800"
+        title="پشتیبانی سرچنو"
+      >
+        💬
+      </button>
+
+      {/* پنجره پشتیبانی */}
+      {open && (
+        <div className="fixed bottom-24 left-6 z-[9999] w-[calc(100vw-3rem)] max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          
+          <div className="bg-blue-700 p-5 text-white">
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.png"
+                alt="سرچنو"
+                className="h-11 w-11 rounded-xl bg-white object-contain p-1"
+              />
+
+              <div>
+                <h3 className="font-black">
+                  پشتیبانی سرچنو
+                </h3>
+
+                <p className="mt-1 text-xs text-blue-100">
+                  پیام خود را برای پشتیبان ارسال کنید
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-5">
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={5}
+              placeholder="پیام خود را بنویسید..."
+              className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
+            />
+
+            <button
+              type="submit"
+              disabled={sending}
+              className="mt-3 w-full rounded-2xl bg-blue-700 py-4 text-sm font-black text-white transition hover:bg-blue-800 disabled:opacity-50"
+            >
+              {sending ? "در حال ارسال..." : "ارسال پیام"}
+            </button>
+          </form>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function Home() {
   return (
     <main
@@ -1080,6 +1176,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      <SupportChat />
     </main>
   );
 }
