@@ -5,6 +5,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// دریافت پیام جدید از کاربر
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -57,6 +58,77 @@ export async function POST(request: Request) {
     return Response.json(
       {
         error: "خطا در ارسال پیام",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+
+// بررسی پاسخ پشتیبانی برای کاربر
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+
+    const phone = searchParams.get("phone")?.trim();
+
+    if (!phone) {
+      return Response.json(
+        {
+          error: "شماره تماس ارسال نشده است",
+          hasNewMessage: false,
+        },
+        { status: 400 }
+      );
+    }
+
+    console.log("CHECK SUPPORT PHONE:", phone);
+
+    const { data, error } = await supabase
+      .from("support_messages")
+      .select("id, message, admin_reply, status, replied_at")
+      .eq("user_phone", phone)
+      .eq("status", "replied")
+      .not("admin_reply", "is", null)
+      .order("replied_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("SUPABASE GET ERROR:", error);
+
+      return Response.json(
+        {
+          error: error.message,
+          hasNewMessage: false,
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!data) {
+      return Response.json({
+        hasNewMessage: false,
+      });
+    }
+
+    return Response.json({
+      hasNewMessage: true,
+      data: {
+        id: data.id,
+        message: data.message,
+        admin_reply: data.admin_reply,
+        status: data.status,
+        replied_at: data.replied_at,
+      },
+    });
+  } catch (error) {
+    console.error("SUPPORT GET ERROR:", error);
+
+    return Response.json(
+      {
+        error: "خطا در بررسی پاسخ پشتیبانی",
+        hasNewMessage: false,
       },
       { status: 500 }
     );
