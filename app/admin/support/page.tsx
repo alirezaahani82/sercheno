@@ -1,303 +1,207 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useState } from "react";
 
-export default function SupportAdminPage() {
+type SupportMessage = {
+  id: number;
+  user_name: string;
+  user_phone: string;
+  message: string;
+  admin_reply: string | null;
+  status: string | null;
+  created_at: string;
+  replied_at: string | null;
+};
+
+export default function AdminSupportPage() {
+  const [messages, setMessages] = useState<SupportMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [reply, setReply] = useState<Record<number, string>>({});
+  const [sending, setSending] = useState<number | null>(null);
+
+  async function loadMessages() {
+    try {
+      const response = await fetch("/api/support");
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessages(data.messages || []);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadMessages();
+  }, []);
+
+  async function handleReply(id: number) {
+    const text = reply[id]?.trim();
+
+    if (!text) {
+      alert("لطفاً پاسخ را بنویسید.");
+      return;
+    }
+
+    setSending(id);
+
+    try {
+      const response = await fetch("/api/support", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          admin_reply: text,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || "خطا در ارسال پاسخ");
+        return;
+      }
+
+      setReply((prev) => ({
+        ...prev,
+        [id]: "",
+      }));
+
+      await loadMessages();
+
+      alert("پاسخ با موفقیت ثبت شد.");
+    } catch (error) {
+      console.error(error);
+      alert("خطا در ارتباط با سرور");
+    } finally {
+      setSending(null);
+    }
+  }
+
   return (
-    <main dir="rtl" className="min-h-screen bg-slate-100">
-      <div className="mx-auto max-w-7xl px-5 py-8">
+    <main dir="rtl" className="min-h-screen bg-slate-100 p-5">
+      <div className="mx-auto max-w-6xl">
 
-        {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="text-sm font-bold text-blue-700">
-              پنل مدیریت سرچنو
-            </div>
+        <div className="mb-8 rounded-3xl bg-white p-6 shadow">
+          <h1 className="text-3xl font-black text-slate-900">
+            پشتیبانی سرچنو
+          </h1>
 
-            <h1 className="mt-2 text-3xl font-black text-slate-900">
-              پیام‌ها و پشتیبانی
-            </h1>
-
-            <p className="mt-2 text-sm text-slate-500">
-              مدیریت پیام‌های کاربران، درخواست‌های پشتیبانی، تیکت‌ها و ارتباط با مشتریان
-            </p>
-          </div>
-
-          <Link
-            href="/admin"
-            className="rounded-xl bg-slate-900 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-slate-800"
-          >
-            ← داشبورد اصلی
-          </Link>
+          <p className="mt-2 text-sm text-slate-500">
+            مدیریت پیام‌های کاربران و پاسخ به درخواست‌های پشتیبانی
+          </p>
         </div>
 
-        {/* Statistics */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="text-sm font-bold text-slate-500">
-              کل پیام‌ها
-            </div>
-            <div className="mt-3 text-3xl font-black text-slate-900">
-              ۰
-            </div>
+        {loading ? (
+          <div className="rounded-3xl bg-white p-10 text-center">
+            در حال دریافت پیام‌ها...
           </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="text-sm font-bold text-slate-500">
-              جدید
-            </div>
-            <div className="mt-3 text-3xl font-black text-blue-600">
-              ۰
-            </div>
+        ) : messages.length === 0 ? (
+          <div className="rounded-3xl bg-white p-10 text-center text-slate-500">
+            هنوز پیامی دریافت نشده است.
           </div>
+        ) : (
+          <div className="space-y-6">
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="text-sm font-bold text-slate-500">
-              در حال بررسی
-            </div>
-            <div className="mt-3 text-3xl font-black text-amber-500">
-              ۰
-            </div>
-          </div>
+            {messages.map((item) => (
+              <div
+                key={item.id}
+                className="rounded-3xl bg-white p-6 shadow-lg"
+              >
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="text-sm font-bold text-slate-500">
-              پاسخ‌داده‌شده
-            </div>
-            <div className="mt-3 text-3xl font-black text-emerald-600">
-              ۰
-            </div>
-          </div>
+                <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 md:flex-row md:items-center md:justify-between">
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="text-sm font-bold text-slate-500">
-              بسته‌شده
-            </div>
-            <div className="mt-3 text-3xl font-black text-slate-400">
-              ۰
-            </div>
-          </div>
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900">
+                      {item.user_name}
+                    </h2>
 
-        </div>
+                    <p className="mt-1 text-sm text-slate-500">
+                      📞 {item.user_phone}
+                    </p>
+                  </div>
 
-        {/* Support Management */}
-        <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+                  <div className="text-left">
+                    <span
+                      className={`rounded-full px-4 py-2 text-xs font-black ${
+                        item.status === "replied"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {item.status === "replied"
+                        ? "پاسخ داده شده"
+                        : "در انتظار پاسخ"}
+                    </span>
 
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                    <p className="mt-2 text-xs text-slate-400">
+                      {new Date(item.created_at).toLocaleString("fa-IR")}
+                    </p>
+                  </div>
 
-            <div>
-              <h2 className="text-xl font-black text-slate-900">
-                صندوق پیام‌ها و درخواست‌های پشتیبانی
-              </h2>
+                </div>
 
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                پیام‌های کاربران پس از اتصال این بخش به Supabase در این قسمت نمایش داده می‌شوند.
-              </p>
-            </div>
+                <div className="mt-5 rounded-2xl bg-slate-100 p-5">
+                  <div className="mb-2 text-xs font-black text-blue-700">
+                    پیام کاربر
+                  </div>
 
-            <button
-              type="button"
-              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-black text-white transition hover:bg-blue-800"
-            >
-              + ایجاد تیکت جدید
-            </button>
+                  <p className="leading-8 text-slate-700">
+                    {item.message}
+                  </p>
+                </div>
 
-          </div>
+                {item.admin_reply && (
+                  <div className="mt-4 rounded-2xl bg-emerald-50 p-5">
+                    <div className="mb-2 text-xs font-black text-emerald-700">
+                      پاسخ پشتیبان
+                    </div>
 
-          {/* Filters */}
-          <div className="mt-6 grid gap-3 md:grid-cols-4">
+                    <p className="leading-8 text-slate-700">
+                      {item.admin_reply}
+                    </p>
+                  </div>
+                )}
 
-            <input
-              type="text"
-              placeholder="جست‌وجوی نام، شماره یا موضوع..."
-              className="rounded-2xl bg-slate-100 px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-            />
+                <div className="mt-5">
 
-            <select className="rounded-2xl bg-slate-100 px-5 py-4 text-sm outline-none">
-              <option>همه وضعیت‌ها</option>
-              <option>جدید</option>
-              <option>در حال بررسی</option>
-              <option>پاسخ‌داده‌شده</option>
-              <option>بسته‌شده</option>
-            </select>
+                  <textarea
+                    value={reply[item.id] || ""}
+                    onChange={(e) =>
+                      setReply((prev) => ({
+                        ...prev,
+                        [item.id]: e.target.value,
+                      }))
+                    }
+                    rows={4}
+                    placeholder="پاسخ خود را برای کاربر بنویسید..."
+                    className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 outline-none focus:ring-2 focus:ring-blue-600"
+                  />
 
-            <select className="rounded-2xl bg-slate-100 px-5 py-4 text-sm outline-none">
-              <option>همه موضوعات</option>
-              <option>مشکل حساب کاربری</option>
-              <option>سفارش و خرید</option>
-              <option>پرداخت</option>
-              <option>فروشگاه</option>
-              <option>خدمات ساختمانی</option>
-              <option>مناقصات</option>
-              <option>گزارش تخلف</option>
-              <option>سایر</option>
-            </select>
+                  <button
+                    type="button"
+                    onClick={() => handleReply(item.id)}
+                    disabled={sending === item.id}
+                    className="mt-3 rounded-2xl bg-blue-700 px-7 py-4 text-sm font-black text-white transition hover:bg-blue-800 disabled:opacity-50"
+                  >
+                    {sending === item.id
+                      ? "در حال ثبت پاسخ..."
+                      : "ثبت پاسخ"}
+                  </button>
 
-            <button
-              type="button"
-              className="rounded-2xl bg-slate-900 px-6 py-4 text-sm font-black text-white transition hover:bg-slate-800"
-            >
-              جست‌وجو و فیلتر
-            </button>
+                </div>
+
+              </div>
+            ))}
 
           </div>
-
-          {/* Empty State */}
-          <div className="mt-8 rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
-
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-blue-50 text-4xl">
-              💬
-            </div>
-
-            <h3 className="mt-5 text-xl font-black text-slate-800">
-              هنوز پیام یا تیکتی ثبت نشده است
-            </h3>
-
-            <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-slate-500">
-              پیام‌ها و درخواست‌های پشتیبانی کاربران پس از اتصال این بخش به
-              Supabase در این قسمت نمایش داده خواهند شد.
-            </p>
-
-          </div>
-
-        </section>
-
-        {/* Support Categories */}
-        <section className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
-              👤
-            </div>
-
-            <h3 className="mt-5 font-black">
-              پشتیبانی کاربران
-            </h3>
-
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              مشکلات حساب کاربری، ثبت‌نام، ورود و اطلاعات کاربران.
-            </p>
-
-            <div className="mt-5 text-sm font-bold text-blue-700">
-              ۰ درخواست
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-3xl">
-              🛒
-            </div>
-
-            <h3 className="mt-5 font-black">
-              سفارش و خرید
-            </h3>
-
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              پیگیری سفارش‌ها، خرید مصالح و مشکلات مربوط به فروشگاه‌ها.
-            </p>
-
-            <div className="mt-5 text-sm font-bold text-emerald-700">
-              ۰ درخواست
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-3xl">
-              📋
-            </div>
-
-            <h3 className="mt-5 font-black">
-              پشتیبانی مناقصات
-            </h3>
-
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              مشکلات ثبت پروژه، شرکت در مناقصه، پیشنهادها و نتایج.
-            </p>
-
-            <div className="mt-5 text-sm font-bold text-amber-600">
-              ۰ درخواست
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-3xl">
-              🚨
-            </div>
-
-            <h3 className="mt-5 font-black">
-              گزارش تخلف
-            </h3>
-
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              بررسی گزارش‌های تخلف، محتوای نامناسب و مشکلات کاربران.
-            </p>
-
-            <div className="mt-5 text-sm font-bold text-red-600">
-              ۰ گزارش
-            </div>
-          </div>
-
-        </section>
-
-        {/* Admin Notes */}
-        <section className="mt-6 rounded-3xl bg-slate-900 p-7 text-white shadow-sm">
-
-          <div className="flex items-start gap-4">
-
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-3xl">
-              🛡️
-            </div>
-
-            <div>
-              <h2 className="text-xl font-black">
-                مدیریت ارتباط با کاربران
-              </h2>
-
-              <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-300">
-                در این بخش مدیر می‌تواند پیام‌ها را بررسی کند، به کاربران پاسخ
-                دهد، وضعیت تیکت‌ها را تغییر دهد، درخواست‌ها را به بخش مربوطه
-                ارجاع دهد و سوابق مکالمات را مشاهده کند.
-              </p>
-            </div>
-
-          </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-
-            <div className="rounded-2xl bg-white/10 p-5">
-              <div className="text-2xl">📥</div>
-              <h3 className="mt-3 font-black">
-                دریافت پیام
-              </h3>
-              <p className="mt-2 text-sm text-slate-400">
-                دریافت و دسته‌بندی پیام‌های کاربران
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white/10 p-5">
-              <div className="text-2xl">✉️</div>
-              <h3 className="mt-3 font-black">
-                پاسخ‌گویی
-              </h3>
-              <p className="mt-2 text-sm text-slate-400">
-                ارسال پاسخ و پیگیری درخواست
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white/10 p-5">
-              <div className="text-2xl">🗂️</div>
-              <h3 className="mt-3 font-black">
-                سوابق
-              </h3>
-              <p className="mt-2 text-sm text-slate-400">
-                نگهداری سوابق پیام‌ها و مکالمات
-              </p>
-            </div>
-
-          </div>
-
-        </section>
+        )}
 
       </div>
     </main>
