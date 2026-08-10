@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
  
 const materialCategories = [
   {
@@ -303,12 +303,83 @@ const [userPhone, setUserPhone] = useState("");
   );
 }
 
+function SupportNotification() {
+  const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [phone, setPhone] = useState("");
+
+  useEffect(() => {
+    const savedPhone = localStorage.getItem("sercheno_support_phone");
+
+    if (!savedPhone) return;
+
+    setPhone(savedPhone);
+
+    async function checkMessage() {
+      try {
+        const response = await fetch(
+          `/api/support?phone=${encodeURIComponent(savedPhone)}`
+        );
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        if (data.hasNewMessage) {
+          setHasNewMessage(true);
+        }
+      } catch (error) {
+        console.error("SUPPORT NOTIFICATION ERROR:", error);
+      }
+    }
+
+    checkMessage();
+
+    const interval = setInterval(checkMessage, 15000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!hasNewMessage || !phone) {
+    return null;
+  }
+
+  function openSupport() {
+    window.dispatchEvent(new Event("open-sercheno-support"));
+    setHasNewMessage(false);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={openSupport}
+      className="fixed right-5 top-24 z-[100] flex items-center gap-3 rounded-2xl border border-blue-200 bg-white px-5 py-3 text-right shadow-2xl transition hover:-translate-y-1 hover:shadow-blue-200"
+    >
+      <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-2xl">
+        🔔
+
+        <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white" />
+      </div>
+
+      <div>
+        <div className="text-sm font-black text-slate-900">
+          شما پیام جدید دارید
+        </div>
+
+        <div className="mt-1 text-xs text-slate-500">
+          پاسخ جدیدی از پشتیبانی سرچنو
+        </div>
+      </div>
+    </button>
+  );
+}
+
 export default function Home() {
   return (
     <main
       dir="rtl" 
       className="min-h-screen bg-slate-50 text-slate-900"
     >
+     <SupportNotification />
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
