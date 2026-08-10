@@ -187,6 +187,8 @@ function SupportChat() {
  const [sending, setSending] = useState(false);
  const [userName, setUserName] = useState("");
 const [userPhone, setUserPhone] = useState("");
+  const [adminReply, setAdminReply] = useState("");
+  const [repliedAt, setRepliedAt] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
