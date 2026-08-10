@@ -212,9 +212,16 @@ const [userPhone, setUserPhone] = useState("");
         throw new Error("خطا در ارسال پیام");
       }
 
-      setMessage("");
-      alert("پیام شما با موفقیت برای پشتیبانی ارسال شد.");
-      setOpen(false);
+     localStorage.setItem(
+  "sercheno_support_phone",
+  userPhone.trim()
+);
+
+setMessage("");
+
+alert("پیام شما با موفقیت برای پشتیبانی ارسال شد.");
+
+setOpen(false);
     } catch (error) {
       alert("ارسال پیام انجام نشد. دوباره تلاش کنید.");
     } finally {
@@ -307,37 +314,39 @@ function SupportNotification() {
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [phone, setPhone] = useState("");
 
-  useEffect(() => {
-const savedPhone = localStorage.getItem("sercheno_support_phone");
+ useEffect(() => {
+  const savedPhone = localStorage.getItem("sercheno_support_phone");
 
-if (savedPhone === null) return;
+  if (!savedPhone) return;
 
-setPhone(savedPhone);
+  const phoneValue = savedPhone;
 
-async function checkMessage() {
-  try {
-    const response = await fetch(
-      `/api/support?phone=${encodeURIComponent(savedPhone)}`
-    );
+  setPhone(phoneValue);
 
-        if (!response.ok) return;
+  async function checkMessage() {
+    try {
+      const response = await fetch(
+        `/api/support?phone=${encodeURIComponent(phoneValue)}`
+      );
 
-        const data = await response.json();
+      if (!response.ok) return;
 
-        if (data.hasNewMessage) {
-          setHasNewMessage(true);
-        }
-      } catch (error) {
-        console.error("SUPPORT NOTIFICATION ERROR:", error);
+      const data = await response.json();
+
+      if (data.hasNewMessage) {
+        setHasNewMessage(true);
       }
+    } catch (error) {
+      console.error("SUPPORT NOTIFICATION ERROR:", error);
     }
+  }
 
-    checkMessage();
+  checkMessage();
 
-    const interval = setInterval(checkMessage, 15000);
+  const interval = setInterval(checkMessage, 15000);
 
-    return () => clearInterval(interval);
-  }, []);
+  return () => clearInterval(interval);
+}, []);
 
   if (!hasNewMessage || !phone) {
     return null;
