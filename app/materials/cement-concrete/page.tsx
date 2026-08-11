@@ -3,15 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Search,
+  ArrowRight,
   MapPin,
-  ArrowLeft,
-  Star,
-  CheckCircle2,
+  Search,
   ShieldCheck,
-  Package,
-  Building2,
-  Phone,
+  Star,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
@@ -39,89 +35,414 @@ type StoreInfo = {
   name: string | null;
 };
 
+type CartItem = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+  storeName: string;
+};
+
 export default function CementConcretePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [cartCount, setCartCount] = useState(0);
+
+  const [quantities, setQuantities] = useState<
+    Record<string, number>
+  >({});
+
+  /* =========================
+     دریافت مقدار انتخاب‌شده
+  ========================= */
+
+  const getQuantity = (product: Product) => {
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    return (
+      quantities[product.id] ??
+      minOrder
+    );
+  };
+
+  /* =========================
+     افزایش مقدار خرید
+  ========================= */
+
+  const increaseQuantity = (
+    product: Product
+  ) => {
+    const current =
+      getQuantity(product);
+
+    const stock =
+      product.stock ?? 0;
+
+    if (
+      stock > 0 &&
+      current >= stock
+    ) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]:
+        current + 1,
+    }));
+  };
+
+  /* =========================
+     کاهش مقدار خرید
+  ========================= */
+
+  const decreaseQuantity = (
+    product: Product
+  ) => {
+    const current =
+      getQuantity(product);
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    if (
+      current <= minOrder
+    ) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]:
+        current - 1,
+    }));
+  };
+
+  /* =========================
+     افزودن محصول به سبد
+  ========================= */
+
+  const addToCart = (
+    product: Product
+  ) => {
+    const quantity =
+      getQuantity(product);
+
+    const price =
+      product.customer_price ??
+      product.price ??
+      0;
+
+    const storeName =
+      product.seller_id
+        ? stores[
+            product.seller_id
+          ] || "فروشگاه"
+        : "فروشگاه نامشخص";
+
+    const newItem: CartItem = {
+      productId:
+        product.id,
+
+      name:
+        product.name ||
+        "محصول بدون نام",
+
+      price,
+
+      quantity,
+
+      unit:
+        product.unit ||
+        "کیسه",
+
+      storeName,
+    };
+
+    const existingCart: CartItem[] =
+      JSON.parse(
+        localStorage.getItem(
+          "sercheno_cart"
+        ) || "[]"
+      );
+
+    const existingIndex =
+      existingCart.findIndex(
+        (item) =>
+          item.productId ===
+          product.id
+      );
+
+    if (
+      existingIndex >= 0
+    ) {
+      existingCart[
+        existingIndex
+      ].quantity += quantity;
+    } else {
+      existingCart.push(
+        newItem
+      );
+    }
+
+    localStorage.setItem(
+      "sercheno_cart",
+      JSON.stringify(
+        existingCart
+      )
+    );
+
+    window.dispatchEvent(
+      new Event(
+        "sercheno-cart-updated"
+      )
+    );
+
+    alert(
+      "محصول با موفقیت به سبد خرید اضافه شد."
+    );
+  };
+
+  /* =========================
+     دریافت محصولات
+  ========================= */
 
   useEffect(() => {
     loadProducts();
   }, []);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
+  /* =========================
+     بروزرسانی تعداد سبد
+  ========================= */
 
-      const { data, error } = await supabase
-        .from("products")
-        .select(
-          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
-        )
-        .eq("category", "cement-concrete")
-        .eq("status", "active")
-        .order("created_at", {
-          ascending: false,
-        });
+  useEffect(() => {
+    const updateCartCount =
+      () => {
+        try {
+          const cart =
+            JSON.parse(
+              localStorage.getItem(
+                "sercheno_cart"
+              ) || "[]"
+            );
 
-      if (error) {
-        console.error("CEMENT PRODUCTS ERROR:", error);
-        return;
-      }
+          const count =
+            cart.reduce(
+              (
+                total: number,
+                item: CartItem
+              ) =>
+                total +
+                Number(
+                  item.quantity ||
+                    0
+                ),
+              0
+            );
 
-      const productList = (data || []) as Product[];
+          setCartCount(
+            count
+          );
+        } catch (error) {
+          console.error(
+            "CART COUNT ERROR:",
+            error
+          );
 
-      setProducts(productList);
+          setCartCount(0);
+        }
+      };
 
-      const sellerIds = [
-        ...new Set(
-          productList
-            .map((product) => product.seller_id)
-            .filter((id): id is string => Boolean(id))
-        ),
-      ];
+    updateCartCount();
 
-      if (sellerIds.length === 0) {
-        setStores({});
-        return;
-      }
-
-      const { data: storeData, error: storeError } = await supabase
-        .from("stores")
-        .select("id,name")
-        .in("id", sellerIds);
-
-      if (storeError) {
-        console.error("STORE ERROR:", storeError);
-        return;
-      }
-
-      const storeMap: Record<string, string> = {};
-
-      ((storeData || []) as StoreInfo[]).forEach((store) => {
-        storeMap[store.id] = store.name || "فروشگاه";
-      });
-
-      setStores(storeMap);
-    } catch (error) {
-      console.error("LOAD PRODUCTS ERROR:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredProducts = products.filter((product) => {
-    const searchText = search.trim().toLowerCase();
-
-    if (!searchText) return true;
-
-    return (
-      product.name?.toLowerCase().includes(searchText) ||
-      product.brand?.toLowerCase().includes(searchText) ||
-      product.model?.toLowerCase().includes(searchText) ||
-      product.description?.toLowerCase().includes(searchText)
+    window.addEventListener(
+      "sercheno-cart-updated",
+      updateCartCount
     );
-  });
+
+    window.addEventListener(
+      "storage",
+      updateCartCount
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sercheno-cart-updated",
+        updateCartCount
+      );
+
+      window.removeEventListener(
+        "storage",
+        updateCartCount
+      );
+    };
+  }, []);
+
+  /* =========================
+     بارگذاری محصولات سیمان و بتن
+  ========================= */
+
+  const loadProducts =
+    async () => {
+      try {
+        setLoading(true);
+
+        const {
+          data,
+          error,
+        } = await supabase
+          .from("products")
+          .select(
+            "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+          )
+          .eq(
+            "category",
+            "cement-concrete"
+          )
+          .eq(
+            "status",
+            "active"
+          )
+          .order(
+            "created_at",
+            {
+              ascending:
+                false,
+            }
+          );
+
+        if (error) {
+          console.error(
+            "CEMENT PRODUCTS ERROR:",
+            error
+          );
+
+          return;
+        }
+
+        setProducts(
+          data || []
+        );
+
+        const sellerIds = [
+          ...new Set(
+            (data || [])
+              .map(
+                (product) =>
+                  product.seller_id
+              )
+              .filter(Boolean)
+          ),
+        ];
+
+        if (
+          sellerIds.length >
+          0
+        ) {
+          const {
+            data: storeData,
+            error:
+              storeError,
+          } =
+            await supabase
+              .from("stores")
+              .select(
+                "id,name"
+              )
+              .in(
+                "id",
+                sellerIds
+              );
+
+          if (storeError) {
+            console.error(
+              "STORE ERROR:",
+              storeError
+            );
+          }
+
+          const storeMap: Record<
+            string,
+            string
+          > = {};
+
+          (
+            storeData || []
+          ).forEach(
+            (
+              store: StoreInfo
+            ) => {
+              storeMap[
+                store.id
+              ] =
+                store.name ||
+                "فروشگاه";
+            }
+          );
+
+          setStores(
+            storeMap
+          );
+        }
+      } catch (error) {
+        console.error(
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  /* =========================
+     جستجوی محصولات
+  ========================= */
+
+  const filteredProducts =
+    products.filter(
+      (product) => {
+        const searchText =
+          search
+            .trim()
+            .toLowerCase();
+
+        if (
+          !searchText
+        ) {
+          return true;
+        }
+
+        return (
+          product.name
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.brand
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.model
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.description
+            ?.toLowerCase()
+            .includes(
+              searchText
+            )
+        );
+      }
+    );
 
   return (
     <main
@@ -130,15 +451,16 @@ export default function CementConcretePage() {
     >
       {/* ================= HEADER ================= */}
 
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
+
           <Link
             href="/"
             className="flex items-center gap-3"
           >
             <img
               src="/logo.png"
-              alt="لوگوی سرچنو"
+              alt="سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
@@ -153,601 +475,628 @@ export default function CementConcretePage() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
-            <Link href="/">
-              خانه
-            </Link>
+          <Link
+            href="/cart"
+            className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
+            title="سبد خرید"
+          >
+            🛒
 
-            <Link
-              href="/materials"
-              className="font-bold text-blue-700"
-            >
-              مصالح و تجهیزات
-            </Link>
+            {cartCount >
+              0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                {cartCount.toLocaleString(
+                  "fa-IR"
+                )}
+              </span>
+            )}
+          </Link>
 
-            <Link href="/service">
-              خدمات ساختمانی
-            </Link>
+          <Link
+            href="/materials"
+            className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
+          >
+            <ArrowRight className="h-4 w-4" />
 
-            <Link href="/about">
-              درباره سرچنو
-            </Link>
-          </nav>
+            بازگشت به مصالح
+          </Link>
 
-          <div className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="hidden rounded-xl px-4 py-3 text-sm font-bold sm:block"
-            >
-              ورود
-            </Link>
-
-            <Link
-              href="/register"
-              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20"
-            >
-              ثبت‌نام
-            </Link>
-          </div>
         </div>
       </header>
 
       {/* ================= HERO ================= */}
 
-      <section className="relative min-h-[420px] overflow-hidden">
-        <img
-          src="/materials/cement-concrete.jpg"
-          alt="سیمان و مصالح ساختمانی"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+      <section className="relative overflow-hidden">
 
-        <div className="absolute inset-0 bg-blue-950/75" />
+        <div className="relative h-[420px]">
 
-        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
+          <img
+            src="/materials/cement-concrete.jpg"
+            alt="سیمان، گچ و مصالح پودری"
+            className="h-full w-full object-cover"
+          />
 
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/65 to-slate-950/20" />
 
-        <div className="relative mx-auto max-w-7xl px-5 py-14 lg:py-20">
-          <div className="mx-auto max-w-4xl text-center text-white">
-            <Link
-              href="/materials"
-              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              بازگشت به مصالح و تجهیزات
-            </Link>
+          <div className="absolute inset-0 flex items-center">
 
-            <h1 className="text-3xl font-black leading-tight sm:text-5xl">
-              سیمان، گچ و مصالح
-              <span className="mt-2 block text-cyan-300">
-                ساختمانی
-              </span>
-            </h1>
+            <div className="mx-auto w-full max-w-7xl px-5 text-white">
 
-            <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-              انواع سیمان، سیمان فله‌ای، گچ، پودر سنگ،
-              سنگ‌پی، ماسه و سایر مصالح مورد نیاز پروژه‌های
-              ساختمانی را از تأمین‌کنندگان پیدا کنید.
-            </p>
+              <div className="max-w-3xl">
 
-            {/* Search */}
+                <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
+                  مصالح پودری و فرآورده‌های سیمانی
+                </span>
 
-            <div className="mx-auto mt-8 rounded-3xl bg-white p-3 shadow-2xl">
-              <div className="flex flex-col gap-3 lg:flex-row">
-                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
-                  <Search className="h-5 w-5 text-slate-400" />
+                <h1 className="mt-5 text-4xl font-black sm:text-6xl">
+                  سیمان، گچ و بتن
+                </h1>
 
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
-                    }
-                    placeholder="مثلاً سیمان تیپ ۲، گچ، ماسه شسته..."
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
-                  />
+                <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
+                  انواع سیمان، گچ، بتن خشک، ملات خشک و
+                  مصالح پودری ساختمانی را از فروشندگان
+                  و تأمین‌کنندگان معتبر در سرچنو پیدا کنید.
+                </p>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    سیمان
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    گچ ساختمانی
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    ملات خشک
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    بتن خشک
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    پودرهای ساختمانی
+                  </span>
+
                 </div>
 
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
-                  <MapPin className="h-5 w-5 text-slate-400" />
-
-                  <select className="w-full bg-transparent text-sm text-slate-700 outline-none">
-                    <option>تبریز</option>
-                    <option>تهران</option>
-                    <option>ارومیه</option>
-                    <option>زنجان</option>
-                    <option>همه شهرها</option>
-                  </select>
-                </div>
-
-                <button
-                  type="button"
-                  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white hover:bg-blue-800"
-                >
-                  جست‌وجو
-                </button>
               </div>
+
             </div>
+
           </div>
+
         </div>
       </section>
 
-      {/* ================= CATEGORIES ================= */}
+      {/* ================= SEARCH ================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-10">
-        <div className="mb-6">
+
+        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+
+          <div className="flex flex-col gap-3 md:flex-row">
+
+            <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
+
+              <Search className="h-5 w-5 text-slate-400" />
+
+              <input
+                type="text"
+                value={search}
+                onChange={(
+                  e
+                ) =>
+                  setSearch(
+                    e.target.value
+                  )
+                }
+                placeholder="مثلاً سیمان تیپ ۲، گچ ساختمانی، ملات خشک..."
+                className="w-full bg-transparent outline-none"
+              />
+
+            </div>
+
+            <button
+              type="button"
+              className="rounded-2xl bg-blue-700 px-8 py-4 font-black text-white hover:bg-blue-800"
+            >
+              جست‌وجو
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ================= SUB CATEGORIES ================= */}
+
+      <section className="mx-auto max-w-7xl px-5 pb-14">
+
+        <div className="mb-7">
+
           <span className="text-sm font-bold text-blue-700">
-            دسته‌بندی
+            دسته‌بندی تخصصی
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            مصالح مورد نیاز خود را انتخاب کنید
+            چه نوع مصالح پودری نیاز دارید؟
           </h2>
+
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+            محصولات این گروه بر اساس نوع مصرف، ترکیب،
+            کاربرد و شکل عرضه دسته‌بندی شده‌اند.
+          </p>
+
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
           {[
-            "همه",
-            "سیمان کیسه‌ای",
-            "سیمان فله",
+            "سیمان تیپ ۱",
+            "سیمان تیپ ۲",
+            "سیمان تیپ ۳",
+            "سیمان تیپ ۵",
             "سیمان سفید",
-            "گچ",
-            "گچ پلیمری",
+            "سیمان پوزولانی",
+            "گچ ساختمانی",
+            "گچ سفیدکاری",
+            "گچ و خاک",
+            "ملات خشک",
+            "بتن خشک",
             "پودر سنگ",
-            "سنگ‌پی",
-            "ماسه",
-            "شن",
-            "مصالح زیرسازی",
-          ].map((category, index) => (
-            <button
-              key={category}
-              type="button"
-              className={`rounded-full px-5 py-3 text-sm font-bold transition ${
-                index === 0
-                  ? "bg-blue-700 text-white"
-                  : "border border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+            "پودر بندکشی",
+            "چسب بتن",
+            "افزودنی‌های بتن",
+            "مصالح پودری ویژه",
+          ].map(
+            (item) => (
+              <button
+                key={item}
+                type="button"
+                className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
+              >
+                {item}
+              </button>
+            )
+          )}
+
         </div>
+
       </section>
 
       {/* ================= PRODUCTS ================= */}
 
-      <section className="mx-auto max-w-7xl px-5 pb-16">
-        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+      <section className="bg-white py-16">
 
-          {/* Filters */}
+        <div className="mx-auto max-w-7xl px-5">
 
-          <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
-            <h3 className="font-black">
-              فیلتر محصولات
-            </h3>
+          <div className="mb-8">
 
-            <div className="mt-7 space-y-6">
-              <div>
-                <label className="text-sm font-bold">
-                  نوع مصالح
-                </label>
+            <span className="text-sm font-bold text-emerald-600">
+              محصولات تأییدشده
+            </span>
 
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-                  <option>همه موارد</option>
-                  <option>سیمان کیسه‌ای</option>
-                  <option>سیمان فله</option>
-                  <option>سیمان سفید</option>
-                  <option>گچ</option>
-                  <option>پودر سنگ</option>
-                  <option>سنگ‌پی</option>
-                  <option>ماسه</option>
-                  <option>شن</option>
-                </select>
-              </div>
+            <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+              محصولات سیمان، گچ و بتن
+            </h2>
 
-              <div>
-                <label className="text-sm font-bold">
-                  شهر
-                </label>
+            <p className="mt-3 text-sm text-slate-500">
+              محصولاتی که توسط تیم سرچنو تأیید شده‌اند
+              در این بخش نمایش داده می‌شوند.
+            </p>
 
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-                  <option>همه شهرها</option>
-                  <option>تبریز</option>
-                  <option>تهران</option>
-                  <option>ارومیه</option>
-                  <option>زنجان</option>
-                </select>
-              </div>
+          </div>
 
-              <div>
-                <label className="text-sm font-bold">
-                  نحوه فروش
-                </label>
+          {loading ? (
 
-                <div className="mt-3 space-y-3 text-sm">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    کیسه‌ای
-                  </label>
+            <div className="py-16 text-center">
 
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    فله‌ای
-                  </label>
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
 
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    کیلویی
-                  </label>
+              <p className="mt-5 font-bold text-slate-500">
+                در حال دریافت محصولات...
+              </p>
 
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    تنی
-                  </label>
-                </div>
-              </div>
-
-              <div className="border-t border-slate-100 pt-5">
-                <label className="flex items-center gap-3 text-sm">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4"
-                  />
-                  فقط تأمین‌کنندگان تأییدشده
-                </label>
-              </div>
-            </div>
-          </aside>
-
-          {/* Products */}
-
-          <div>
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-black">
-                  محصولات سیمان و مصالح
-                </h2>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  مشاهده محصولات ثبت‌شده توسط فروشندگان سرچنو
-                </p>
-              </div>
-
-              <select className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none">
-                <option>جدیدترین</option>
-                <option>بیشترین امتیاز</option>
-                <option>ارزان‌ترین</option>
-              </select>
             </div>
 
-            {/* Loading */}
+          ) : filteredProducts.length ===
+            0 ? (
 
-            {loading ? (
-              <div className="py-16 text-center">
-                <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
+            <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
 
-                <p className="mt-5 font-bold text-slate-500">
-                  در حال دریافت محصولات...
-                </p>
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
+                🏗️
               </div>
-            ) : filteredProducts.length === 0 ? (
-              /* Empty */
 
-              <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
-                  🧱
-                </div>
+              <h3 className="mt-5 text-xl font-black">
+                محصولی پیدا نشد
+              </h3>
 
-                <h3 className="mt-5 text-xl font-black">
-                  محصولی پیدا نشد
-                </h3>
+              <p className="mt-2 text-sm text-slate-500">
+                در حال حاضر محصول تأییدشده‌ای در این دسته وجود ندارد.
+              </p>
 
-                <p className="mt-2 text-sm text-slate-500">
-                  در حال حاضر محصول تأییدشده‌ای در این دسته وجود ندارد.
-                </p>
-              </div>
-            ) : (
-              /* Product Cards */
+            </div>
 
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {filteredProducts.map((product) => (
+          ) : (
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+              {filteredProducts.map(
+                (
+                  product
+                ) => (
+
                   <div
-                    key={product.id}
+                    key={
+                      product.id
+                    }
                     className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                   >
-                    {/* Image placeholder */}
 
-                    <div className="flex h-56 items-center justify-center bg-slate-100 text-6xl">
+                    {/* Product Icon */}
+
+                    <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
                       🧱
                     </div>
 
-                    <div className="p-5">
+                    <div className="p-6">
+
+                      {/* Status */}
+
                       <div className="flex items-center justify-between gap-3">
+
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                          سیمان و مصالح
+                          سیمان، گچ و بتن
                         </span>
 
-                        <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
-                          <CheckCircle2 className="h-4 w-4" />
+                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+
+                          <ShieldCheck className="h-3 w-3" />
+
                           تأییدشده
+
                         </span>
+
                       </div>
 
+                      {/* Name */}
+
                       <h3 className="mt-4 text-lg font-black">
-                        {product.name || "محصول بدون نام"}
+                        {product.name ||
+                          "محصول بدون نام"}
                       </h3>
+
+                      {/* Brand */}
 
                       {product.brand && (
                         <p className="mt-2 text-sm text-slate-500">
-                          برند: {product.brand}
+                          برند:{" "}
+                          {product.brand}
                         </p>
                       )}
+
+                      {/* Model */}
 
                       {product.model && (
                         <p className="mt-1 text-sm text-slate-500">
-                          مدل: {product.model}
+                          مدل:{" "}
+                          {product.model}
                         </p>
                       )}
+
+                      {/* Description */}
 
                       {product.description && (
                         <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                          {product.description}
+                          {
+                            product.description
+                          }
                         </p>
                       )}
 
+                      {/* Price */}
+
                       <div className="mt-5 space-y-3">
+
                         <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
                           <span className="font-bold text-slate-500">
                             قیمت مشتری
                           </span>
 
                           <span className="font-black text-blue-700">
+
                             {(
                               product.customer_price ??
                               product.price ??
                               0
-                            ).toLocaleString("fa-IR")}{" "}
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
                             تومان
+
                           </span>
+
                         </div>
 
+                        {/* ================= مقدار خرید ================= */}
+
+                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+                          <div className="mb-3 flex items-center justify-between">
+
+                            <span className="text-sm font-black text-slate-800">
+                              مقدار خرید
+                            </span>
+
+                            <span className="text-xs font-bold text-slate-400">
+                              واحد فروش:{" "}
+                              {product.unit ||
+                                "کیسه"}
+                            </span>
+
+                          </div>
+
+                          <div className="flex items-center gap-2">
+
+                            {/* Minus */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                decreaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm hover:bg-red-50 hover:text-red-600"
+                            >
+                              −
+                            </button>
+
+                            {/* Number */}
+
+                            <input
+                              type="number"
+                              min={
+                                product.min_order ||
+                                1
+                              }
+                              max={
+                                product.stock ||
+                                undefined
+                              }
+                              value={
+                                quantities[
+                                  product.id
+                                ] ??
+                                product.min_order ??
+                                1
+                              }
+                              onChange={(
+                                e
+                              ) => {
+                                const value =
+                                  Number(
+                                    e.target
+                                      .value
+                                  );
+
+                                const minOrder =
+                                  Math.max(
+                                    product.min_order ??
+                                      1,
+                                    1
+                                  );
+
+                                const stock =
+                                  product.stock ??
+                                  0;
+
+                                if (
+                                  Number.isNaN(
+                                    value
+                                  )
+                                ) {
+                                  return;
+                                }
+
+                                if (
+                                  value <
+                                  minOrder
+                                ) {
+                                  return;
+                                }
+
+                                if (
+                                  stock >
+                                    0 &&
+                                  value >
+                                    stock
+                                ) {
+                                  return;
+                                }
+
+                                setQuantities(
+                                  (
+                                    prev
+                                  ) => ({
+                                    ...prev,
+                                    [product.id]:
+                                      value,
+                                  })
+                                );
+                              }}
+                              className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                            />
+
+                            {/* Plus */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                increaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white hover:bg-blue-800"
+                            >
+                              +
+                            </button>
+
+                          </div>
+
+                          <p className="mt-3 text-center text-xs text-slate-400">
+
+                            حداقل خرید:{" "}
+                            {(
+                              product.min_order ??
+                              1
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              "واحد"}
+
+                          </p>
+
+                        </div>
+
+                        {/* Stock */}
+
                         <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
                           <span className="font-bold text-slate-500">
                             موجودی
                           </span>
 
                           <span className="font-black">
-                            {(product.stock ?? 0).toLocaleString(
+
+                            {(
+                              product.stock ??
+                              0
+                            ).toLocaleString(
                               "fa-IR"
                             )}{" "}
-                            {product.unit || ""}
+                            {product.unit ||
+                              ""}
+
                           </span>
+
                         </div>
 
-                        {product.min_order !== null && (
-                          <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
-                            <span className="font-bold text-slate-500">
-                              حداقل سفارش
-                            </span>
-
-                            <span className="font-black">
-                              {product.min_order.toLocaleString(
-                                "fa-IR"
-                              )}
-                            </span>
-                          </div>
-                        )}
                       </div>
 
+                      {/* ================= مبلغ کل خرید ================= */}
+
+                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+                        <div className="flex items-center justify-between gap-3">
+
+                          <span className="text-sm font-bold text-slate-600">
+                            مبلغ کل خرید
+                          </span>
+
+                          <span className="text-lg font-black text-blue-700">
+
+                            {(
+                              (
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ) *
+                              getQuantity(
+                                product
+                              )
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
+
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      {/* Store */}
+
                       <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+
                         <MapPin className="h-4 w-4" />
 
                         {product.seller_id
-                          ? stores[product.seller_id] ||
+                          ? stores[
+                              product
+                                .seller_id
+                            ] ||
                             "فروشگاه"
                           : "فروشگاه نامشخص"}
+
                       </div>
 
+                      {/* Seller */}
+
                       <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
+
                         <Star className="h-4 w-4 fill-current" />
+
                         فروشنده تأییدشده
+
                       </div>
+
+                      {/* Buy */}
 
                       <button
                         type="button"
-                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white hover:bg-blue-800"
+                        onClick={() =>
+                          addToCart(
+                            product
+                          )
+                        }
+                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
                       >
-                        مشاهده جزئیات محصول
+                        خرید محصول
                       </button>
+
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+                )
+              )}
 
-      {/* ================= BULK ================= */}
-
-      <section className="mx-auto max-w-7xl px-5 pb-16">
-        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-l from-slate-900 to-blue-950 p-8 text-white lg:p-12">
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-            <div>
-              <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold">
-                خرید عمده
-              </span>
-
-              <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-                خرید سیمان فله‌ای و مصالح عمده
-              </h2>
-
-              <p className="mt-4 leading-8 text-slate-300">
-                اگر برای پروژه ساختمانی خود به حجم بالایی از
-                سیمان، ماسه، شن یا سایر مصالح نیاز دارید،
-                تأمین‌کنندگان عمده را در سرچنو پیدا کنید.
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش کیلویی
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش تنی
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش فله‌ای
-                </span>
-              </div>
             </div>
 
-            <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
-                  <Package className="h-7 w-7" />
-                </div>
+          )}
 
-                <div>
-                  <h3 className="font-black">
-                    نیاز به تأمین عمده دارید؟
-                  </h3>
-
-                  <p className="mt-1 text-sm text-slate-300">
-                    با فروشندگان و تأمین‌کنندگان ارتباط بگیرید.
-                  </p>
-                </div>
-              </div>
-
-              <Link
-                href="/register"
-                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-black text-blue-900"
-              >
-                ثبت فروشگاه و محصول
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= CTA ================= */}
-
-      <section className="px-5 pb-16">
-        <div className="mx-auto max-w-7xl rounded-[2rem] bg-blue-700 px-6 py-14 text-center text-white">
-          <Building2 className="mx-auto h-10 w-10" />
-
-          <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-            فروشنده سیمان، گچ یا مصالح هستید؟
-          </h2>
-
-          <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه خود را در سرچنو ثبت کنید و محصولاتتان را
-            در معرض دید خریداران و سازندگان قرار دهید.
-          </p>
-
-          <Link
-            href="/register"
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
-          >
-            ثبت فروشگاه
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
         </div>
       </section>
 
       {/* ================= FOOTER ================= */}
 
-      <footer className="bg-slate-950 text-slate-300">
-        <div className="mx-auto max-w-7xl px-5 py-12">
-          <div className="grid gap-10 md:grid-cols-4">
-            <div className="md:col-span-2">
-              <Link
-                href="/"
-                className="flex items-center gap-3"
-              >
-                <img
-                  src="/logo.png"
-                  alt="سرچنو"
-                  className="h-12 w-12 rounded-xl object-contain"
-                />
+      <footer className="bg-slate-950 py-10 text-center text-sm text-slate-400">
 
-                <div>
-                  <div className="text-xl font-black text-white">
-                    سرچنو
-                  </div>
+        <div className="mx-auto max-w-7xl px-5">
 
-                  <div className="text-xs text-slate-500">
-                    بازار هوشمند ساخت‌وساز
-                  </div>
-                </div>
-              </Link>
-
-              <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
-                پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان،
-                تأمین‌کنندگان و متخصصان صنعت ساختمان.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-white">
-                خدمات سرچنو
-              </h3>
-
-              <div className="mt-5 space-y-3 text-sm">
-                <Link
-                  href="/materials"
-                  className="block"
-                >
-                  مصالح و تجهیزات
-                </Link>
-
-                <Link
-                  href="/service"
-                  className="block"
-                >
-                  خدمات ساختمانی
-                </Link>
-
-                <Link
-                  href="/register"
-                  className="block"
-                >
-                  ثبت فروشگاه
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-white">
-                ارتباط با ما
-              </h3>
-
-              <div className="mt-5 space-y-3 text-sm">
-                <Link
-                  href="/about"
-                  className="block"
-                >
-                  درباره سرچنو
-                </Link>
-
-                <p className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  تماس با ما
-                </p>
-
-                <p>قوانین و مقررات</p>
-                <p>پشتیبانی</p>
-              </div>
-            </div>
+          <div className="font-black text-white">
+            سرچنو
           </div>
 
-          <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
+          <p className="mt-2">
+            بازار هوشمند ساخت‌وساز
+          </p>
+
+          <p className="mt-5 text-xs">
             © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
-          </div>
+          </p>
+
         </div>
+
       </footer>
+
     </main>
   );
 }
