@@ -54,7 +54,7 @@ export default function BrickBlockPage() {
   const [search, setSearch] = useState("");
   const [cartCount, setCartCount] = useState(0);
   const addToCart = (product: Product) => {
-  const quantity = product.min_order ?? 1;
+  const quantity = getQuantity(product);
 
   const price =
     product.customer_price ??
