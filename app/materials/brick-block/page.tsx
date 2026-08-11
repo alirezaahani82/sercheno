@@ -52,6 +52,7 @@ export default function BrickBlockPage() {
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [cartCount, setCartCount] = useState(0);
   const addToCart = (product: Product) => {
   const quantity = product.min_order ?? 1;
 
@@ -91,6 +92,8 @@ export default function BrickBlockPage() {
     "sercheno_cart",
     JSON.stringify(existingCart)
   );
+    
+    window.dispatchEvent(new Event("sercheno-cart-updated"));
 
   alert("محصول با موفقیت به سبد خرید اضافه شد.");
 };
@@ -99,6 +102,50 @@ export default function BrickBlockPage() {
   useEffect(() => {
     loadProducts();
   }, []);
+  useEffect(() => {
+  const updateCartCount = () => {
+    try {
+      const cart = JSON.parse(
+        localStorage.getItem("sercheno_cart") || "[]"
+      );
+
+      const count = cart.reduce(
+        (total: number, item: CartItem) =>
+          total + Number(item.quantity || 0),
+        0
+      );
+
+      setCartCount(count);
+    } catch (error) {
+      console.error("CART COUNT ERROR:", error);
+      setCartCount(0);
+    }
+  };
+
+  updateCartCount();
+
+  window.addEventListener(
+    "sercheno-cart-updated",
+    updateCartCount
+  );
+
+  window.addEventListener(
+    "storage",
+    updateCartCount
+  );
+
+  return () => {
+    window.removeEventListener(
+      "sercheno-cart-updated",
+      updateCartCount
+    );
+
+    window.removeEventListener(
+      "storage",
+      updateCartCount
+    );
+  };
+}, []);
 
   const loadProducts = async () => {
     try {
