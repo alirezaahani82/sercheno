@@ -547,6 +547,32 @@ const decreaseQuantity = (product: Product) => {
 
                       </div>
 
+                      {/* مبلغ کل خرید */}
+
+<div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+  <div className="flex items-center justify-between gap-3">
+
+    <span className="text-sm font-bold text-slate-600">
+      مبلغ کل خرید
+    </span>
+
+    <span className="text-lg font-black text-blue-700">
+      {(
+        (product.customer_price ??
+          product.price ??
+          0) *
+        (quantities[product.id] ??
+          product.min_order ??
+          1)
+      ).toLocaleString("fa-IR")}{" "}
+      تومان
+    </span>
+
+  </div>
+
+</div>
+
                       <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
 
                         <MapPin className="h-4 w-4" />
