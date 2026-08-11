@@ -35,122 +35,415 @@ type StoreInfo = {
   name: string | null;
 };
 
+type CartItem = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+  storeName: string;
+};
+
 export default function SanitaryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [cartCount, setCartCount] = useState(0);
+
+  const [quantities, setQuantities] = useState<
+    Record<string, number>
+  >({});
+
+  /* =========================
+     مقدار خرید
+  ========================= */
+
+  const getQuantity = (product: Product) => {
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    return quantities[product.id] ?? minOrder;
+  };
+
+  /* =========================
+     افزایش مقدار
+  ========================= */
+
+  const increaseQuantity = (
+    product: Product
+  ) => {
+    const current = getQuantity(product);
+    const stock = product.stock ?? 0;
+
+    if (stock > 0 && current >= stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current + 1,
+    }));
+  };
+
+  /* =========================
+     کاهش مقدار
+  ========================= */
+
+  const decreaseQuantity = (
+    product: Product
+  ) => {
+    const current = getQuantity(product);
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    if (current <= minOrder) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current - 1,
+    }));
+  };
+
+  /* =========================
+     تغییر مستقیم تعداد
+  ========================= */
+
+  const changeQuantity = (
+    product: Product,
+    value: string
+  ) => {
+    if (value === "") {
+      return;
+    }
+
+    const quantity = Number(value);
+
+    if (Number.isNaN(quantity)) {
+      return;
+    }
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    const stock = product.stock ?? 0;
+
+    if (quantity < minOrder) {
+      return;
+    }
+
+    if (stock > 0 && quantity > stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: quantity,
+    }));
+  };
+
+  /* =========================
+     افزودن به سبد خرید
+  ========================= */
+
+  const addToCart = (
+    product: Product
+  ) => {
+    const quantity = getQuantity(product);
+
+    const price =
+      product.customer_price ??
+      product.price ??
+      0;
+
+    const storeName =
+      product.seller_id
+        ? stores[product.seller_id] ||
+          "فروشگاه"
+        : "فروشگاه نامشخص";
+
+    const newItem: CartItem = {
+      productId: product.id,
+
+      name:
+        product.name ||
+        "محصول بدون نام",
+
+      price,
+
+      quantity,
+
+      unit:
+        product.unit ||
+        "عدد",
+
+      storeName,
+    };
+
+    const existingCart: CartItem[] =
+      JSON.parse(
+        localStorage.getItem(
+          "sercheno_cart"
+        ) || "[]"
+      );
+
+    const existingIndex =
+      existingCart.findIndex(
+        (item) =>
+          item.productId ===
+          product.id
+      );
+
+    if (existingIndex >= 0) {
+      existingCart[
+        existingIndex
+      ].quantity += quantity;
+    } else {
+      existingCart.push(newItem);
+    }
+
+    localStorage.setItem(
+      "sercheno_cart",
+      JSON.stringify(existingCart)
+    );
+
+    window.dispatchEvent(
+      new Event("sercheno-cart-updated")
+    );
+
+    alert(
+      "محصول با موفقیت به سبد خرید اضافه شد."
+    );
+  };
+
+  /* =========================
+     دریافت محصولات
+  ========================= */
 
   useEffect(() => {
     loadProducts();
   }, []);
 
+  /* =========================
+     بروزرسانی شمارنده سبد
+  ========================= */
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      try {
+        const cart: CartItem[] =
+          JSON.parse(
+            localStorage.getItem(
+              "sercheno_cart"
+            ) || "[]"
+          );
+
+        const count = cart.reduce(
+          (
+            total: number,
+            item: CartItem
+          ) =>
+            total +
+            Number(item.quantity || 0),
+          0
+        );
+
+        setCartCount(count);
+      } catch (error) {
+        console.error(
+          "CART COUNT ERROR:",
+          error
+        );
+
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+
+    window.addEventListener(
+      "sercheno-cart-updated",
+      updateCartCount
+    );
+
+    window.addEventListener(
+      "storage",
+      updateCartCount
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sercheno-cart-updated",
+        updateCartCount
+      );
+
+      window.removeEventListener(
+        "storage",
+        updateCartCount
+      );
+    };
+  }, []);
+
+  /* =========================
+     بارگذاری محصولات بهداشتی
+  ========================= */
+
   const loadProducts = async () => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("products")
         .select(
           "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
         )
-        .eq("category", "sanitary")
-        .eq("status", "active")
-        .order("created_at", {
-          ascending: false,
-        });
+        .eq(
+          "category",
+          "sanitary"
+        )
+        .eq(
+          "status",
+          "active"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
       if (error) {
-        console.error("SANITARY PRODUCTS ERROR:", error);
+        console.error(
+          "SANITARY PRODUCTS ERROR:",
+          error
+        );
+
         return;
       }
 
-      const productData = data || [];
-
-      setProducts(productData);
+      setProducts(data || []);
 
       const sellerIds = [
         ...new Set(
-          productData
-            .map((product) => product.seller_id)
-            .filter(
-              (id): id is string =>
-                Boolean(id)
+          (data || [])
+            .map(
+              (product) =>
+                product.seller_id
             )
+            .filter(Boolean)
         ),
       ];
 
       if (sellerIds.length > 0) {
-        const { data: storeData, error: storeError } =
-          await supabase
-            .from("stores")
-            .select("id,name")
-            .in("id", sellerIds);
+        const {
+          data: storeData,
+          error: storeError,
+        } = await supabase
+          .from("stores")
+          .select("id,name")
+          .in(
+            "id",
+            sellerIds
+          );
 
         if (storeError) {
           console.error(
-            "SANITARY STORE ERROR:",
+            "STORE ERROR:",
             storeError
           );
         }
 
-        const storeMap: Record<string, string> = {};
+        const storeMap: Record<
+          string,
+          string
+        > = {};
 
-        (storeData || []).forEach(
-          (store: StoreInfo) => {
-            storeMap[store.id] =
-              store.name || "فروشگاه";
+        (
+          storeData || []
+        ).forEach(
+          (
+            store: StoreInfo
+          ) => {
+            storeMap[
+              store.id
+            ] =
+              store.name ||
+              "فروشگاه";
           }
         );
 
         setStores(storeMap);
       }
     } catch (error) {
-      console.error(
-        "SANITARY LOAD ERROR:",
-        error
-      );
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProducts = products.filter(
-    (product) => {
-      const searchText = search
-        .trim()
-        .toLowerCase();
+  /* =========================
+     جستجوی محصولات
+  ========================= */
 
-      if (!searchText) {
-        return true;
+  const filteredProducts =
+    products.filter(
+      (product) => {
+        const searchText =
+          search
+            .trim()
+            .toLowerCase();
+
+        if (!searchText) {
+          return true;
+        }
+
+        return (
+          product.name
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.brand
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.model
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.description
+            ?.toLowerCase()
+            .includes(
+              searchText
+            )
+        );
       }
-
-      return (
-        product.name
-          ?.toLowerCase()
-          .includes(searchText) ||
-        product.brand
-          ?.toLowerCase()
-          .includes(searchText) ||
-        product.model
-          ?.toLowerCase()
-          .includes(searchText) ||
-        product.description
-          ?.toLowerCase()
-          .includes(searchText)
-      );
-    }
-  );
+    );
 
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* Header */}
+
+      {/* ================= HEADER ================= */}
 
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
 
           <Link
             href="/"
@@ -174,17 +467,34 @@ export default function SanitaryPage() {
           </Link>
 
           <Link
+            href="/cart"
+            className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
+            title="سبد خرید"
+          >
+            🛒
+
+            {cartCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                {cartCount.toLocaleString(
+                  "fa-IR"
+                )}
+              </span>
+            )}
+          </Link>
+
+          <Link
             href="/materials"
             className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
           >
             <ArrowRight className="h-4 w-4" />
+
             بازگشت به مصالح
           </Link>
 
         </div>
       </header>
 
-      {/* Hero */}
+      {/* ================= HERO ================= */}
 
       <section className="relative overflow-hidden">
 
@@ -192,56 +502,56 @@ export default function SanitaryPage() {
 
           <img
             src="/materials/sanitary.jpg"
-            alt="تأسیسات و تجهیزات بهداشتی ساختمان"
+            alt="لوازم بهداشتی ساختمان"
             className="h-full w-full object-cover"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/60 to-slate-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/65 to-slate-950/20" />
 
           <div className="absolute inset-0 flex items-center">
 
             <div className="mx-auto w-full max-w-7xl px-5 text-white">
 
-              <div className="max-w-2xl">
+              <div className="max-w-3xl">
 
                 <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
-                  تجهیزات ساختمانی
+                  لوازم بهداشتی و تجهیزات سرویس ساختمان
                 </span>
 
                 <h1 className="mt-5 text-4xl font-black sm:text-6xl">
-                  تأسیسات بهداشتی
-                  <span className="mt-2 block text-cyan-300">
-                    ساختمان
-                  </span>
+                  لوازم بهداشتی
                 </h1>
 
                 <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
-                  انواع شیرآلات، روشویی، توالت،
-                  سینک، وان، کابین دوش و تجهیزات
-                  بهداشتی ساختمان را از فروشندگان
-                  و تأمین‌کنندگان معتبر در سرچنو پیدا کنید.
+                  انواع تجهیزات و لوازم بهداشتی
+                  مورد نیاز ساختمان شامل توالت،
+                  روشویی، شیرآلات، دوش، وان،
+                  کابین دوش، سینک، فلاش‌تانک،
+                  اکسسوری سرویس بهداشتی و سایر
+                  محصولات را از تأمین‌کنندگان معتبر
+                  در سرچنو پیدا و خریداری کنید.
                 </p>
 
                 <div className="mt-7 flex flex-wrap gap-3">
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    شیرآلات
+                    شیرآلات بهداشتی
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    روشویی
+                    روشویی و کابینت
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    توالت
+                    توالت و فلاش‌تانک
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    سینک
+                    دوش و کابین دوش
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    وان و کابین دوش
+                    سینک و اکسسوری
                   </span>
 
                 </div>
@@ -253,10 +563,9 @@ export default function SanitaryPage() {
           </div>
 
         </div>
-
       </section>
 
-      {/* Search */}
+      {/* ================= SEARCH ================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-10">
 
@@ -272,9 +581,11 @@ export default function SanitaryPage() {
                 type="text"
                 value={search}
                 onChange={(e) =>
-                  setSearch(e.target.value)
+                  setSearch(
+                    e.target.value
+                  )
                 }
-                placeholder="مثلاً شیر ظرفشویی، روشویی، توالت فرنگی..."
+                placeholder="مثلاً شیر ظرفشویی، روشویی، توالت فرنگی، فلاش‌تانک، دوش..."
                 className="w-full bg-transparent outline-none"
               />
 
@@ -293,23 +604,25 @@ export default function SanitaryPage() {
 
       </section>
 
-      {/* Sub Categories */}
+      {/* ================= SUB CATEGORIES ================= */}
 
       <section className="mx-auto max-w-7xl px-5 pb-14">
 
         <div className="mb-7">
 
           <span className="text-sm font-bold text-blue-700">
-            دسته‌بندی
+            دسته‌بندی تخصصی
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            چه تجهیزات بهداشتی نیاز دارید؟
+            چه لوازم بهداشتی نیاز دارید؟
           </h2>
 
-          <p className="mt-3 text-sm text-slate-500">
-            محصولات مورد نیاز سرویس بهداشتی،
-            حمام و آشپزخانه را پیدا کنید.
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+            محصولات بهداشتی بر اساس نوع محصول،
+            محل استفاده، جنس، برند، مدل، کاربرد
+            و سبک طراحی در پروژه‌های ساختمانی
+            دسته‌بندی شده‌اند.
           </p>
 
         </div>
@@ -317,35 +630,154 @@ export default function SanitaryPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
           {[
-            "شیرآلات",
+            "شیرآلات بهداشتی",
+            "شیر روشویی",
+            "شیر ظرفشویی",
+            "شیر حمام",
+            "شیر توالت",
+            "شیر دوش",
+            "شیرآلات اهرمی",
+            "شیرآلات کلاسیک",
+            "شیرآلات توکار",
+            "شیرآلات هوشمند",
+
             "روشویی",
+            "روشویی کابینتی",
+            "روشویی پایه‌دار",
+            "روشویی دیواری",
+            "روشویی روکابینتی",
+            "روشویی توکار",
+            "روشویی سنگی",
+            "روشویی سرامیکی",
+            "کابینت روشویی",
+            "آینه و روشویی",
+
+            "توالت",
             "توالت فرنگی",
             "توالت ایرانی",
+            "توالت وال هنگ",
+            "توالت زمینی",
+            "توالت یک‌تکه",
+            "توالت دو تکه",
+            "توالت کم‌مصرف",
+            "توالت هوشمند",
+
             "فلاش‌تانک",
-            "سینک ظرفشویی",
-            "وان حمام",
+            "فلاش‌تانک توکار",
+            "فلاش‌تانک روکار",
+            "فلاش‌تانک دکمه‌ای",
+            "فلاش‌تانک دو زمانه",
+            "فلاش‌تانک وال هنگ",
+            "فلاش‌تانک کم‌مصرف",
+
+            "دوش و تجهیزات حمام",
+            "علم دوش",
+            "علم دوش ساده",
+            "علم دوش دوکاره",
+            "علم دوش یونیورست",
+            "دوش سقفی",
+            "دوش دستی",
+            "دوش توکار",
+            "پنل دوش",
+            "دوش ترموستاتیک",
+
             "کابین دوش",
-            "زیردوشی",
-            "آینه و باکس",
+            "کابین دوش شیشه‌ای",
+            "کابین دوش فریم‌لس",
+            "کابین دوش فریم‌دار",
+            "پارتیشن حمام",
+            "در شیشه‌ای حمام",
+            "شیشه حمام",
+
+            "وان و جکوزی",
+            "وان حمام",
+            "وان اکریلیک",
+            "وان فایبرگلاس",
+            "جکوزی",
+            "جکوزی خانگی",
+            "جکوزی توکار",
+            "جکوزی روکار",
+
+            "سینک",
+            "سینک ظرفشویی",
+            "سینک توکار",
+            "سینک روکار",
+            "سینک زیرکار",
+            "سینک استیل",
+            "سینک گرانیتی",
+            "سینک تک لگن",
+            "سینک دو لگن",
+
             "اکسسوری سرویس بهداشتی",
-            "فلاش‌والو و تجهیزات",
-          ].map((item) => (
+            "جا مایع",
+            "جا صابونی",
+            "جا حوله‌ای",
+            "حوله‌خشک‌کن",
+            "جاحوله‌ای دیواری",
+            "جای دستمال کاغذی",
+            "جای دستمال توالت",
+            "فرچه توالت",
+            "سطل سرویس بهداشتی",
+            "قلاب لباس",
+            "ست اکسسوری سرویس بهداشتی",
 
-            <button
-              key={item}
-              type="button"
-              className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
-            >
-              {item}
-            </button>
+            "آینه",
+            "آینه سرویس بهداشتی",
+            "آینه LED",
+            "آینه هوشمند",
+            "آینه ضدبخار",
+            "آینه دکوراتیو",
 
-          ))}
+            "لوازم نصب بهداشتی",
+            "شلنگ توالت",
+            "شلنگ شیرآلات",
+            "شلنگ پیسوار",
+            "پیسوار",
+            "سیفون روشویی",
+            "سیفون ظرفشویی",
+            "کف‌شور",
+            "کف‌شور خطی",
+            "کف‌شور سرامیکی",
+            "درپوش کف‌شور",
+
+            "محصولات سرامیکی بهداشتی",
+            "چینی بهداشتی",
+            "سرامیک روشویی",
+            "چینی توالت",
+            "لوازم سرامیکی حمام",
+
+            "تجهیزات بهداشتی عمومی",
+            "تجهیزات سرویس عمومی",
+            "شیرآلات عمومی",
+            "روشویی عمومی",
+            "توالت عمومی",
+            "تجهیزات سرویس اداری",
+            "تجهیزات سرویس تجاری",
+            "تجهیزات سرویس هتل",
+
+            "محصولات بهداشتی هوشمند",
+            "توالت هوشمند",
+            "فلاش‌تانک هوشمند",
+            "شیر هوشمند",
+            "آینه هوشمند",
+            "دوش هوشمند",
+          ].map(
+            (item) => (
+              <button
+                key={item}
+                type="button"
+                className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
+              >
+                {item}
+              </button>
+            )
+          )}
 
         </div>
 
       </section>
 
-      {/* Products */}
+      {/* ================= PRODUCTS ================= */}
 
       <section className="bg-white py-16">
 
@@ -358,11 +790,11 @@ export default function SanitaryPage() {
             </span>
 
             <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-              محصولات تأسیسات بهداشتی
+              محصولات لوازم بهداشتی
             </h2>
 
             <p className="mt-3 text-sm text-slate-500">
-              محصولاتی که توسط تیم سرچنو تأیید شده‌اند
+              محصولات تأییدشده توسط تیم سرچنو
               در این بخش نمایش داده می‌شوند.
             </p>
 
@@ -420,12 +852,15 @@ export default function SanitaryPage() {
                       <div className="flex items-center justify-between gap-3">
 
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                          تجهیزات بهداشتی
+                          لوازم بهداشتی
                         </span>
 
                         <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+
                           <ShieldCheck className="h-3 w-3" />
+
                           تأییدشده
+
                         </span>
 
                       </div>
@@ -437,19 +872,23 @@ export default function SanitaryPage() {
 
                       {product.brand && (
                         <p className="mt-2 text-sm text-slate-500">
-                          برند: {product.brand}
+                          برند:{" "}
+                          {product.brand}
                         </p>
                       )}
 
                       {product.model && (
                         <p className="mt-1 text-sm text-slate-500">
-                          مدل: {product.model}
+                          مدل:{" "}
+                          {product.model}
                         </p>
                       )}
 
                       {product.description && (
                         <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                          {product.description}
+                          {
+                            product.description
+                          }
                         </p>
                       )}
 
@@ -462,6 +901,7 @@ export default function SanitaryPage() {
                           </span>
 
                           <span className="font-black text-blue-700">
+
                             {(
                               product.customer_price ??
                               product.price ??
@@ -470,7 +910,92 @@ export default function SanitaryPage() {
                               "fa-IR"
                             )}{" "}
                             تومان
+
                           </span>
+
+                        </div>
+
+                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+                          <div className="mb-3 flex items-center justify-between">
+
+                            <span className="text-sm font-black text-slate-800">
+                              مقدار خرید
+                            </span>
+
+                            <span className="text-xs font-bold text-slate-400">
+                              واحد فروش:{" "}
+                              {product.unit ||
+                                "عدد"}
+                            </span>
+
+                          </div>
+
+                          <div className="flex items-center gap-2">
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                decreaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+                            >
+                              −
+                            </button>
+
+                            <input
+                              type="number"
+                              min={
+                                product.min_order ||
+                                1
+                              }
+                              max={
+                                product.stock ||
+                                undefined
+                              }
+                              value={
+                                quantities[
+                                  product.id
+                                ] ??
+                                product.min_order ??
+                                1
+                              }
+                              onChange={(e) =>
+                                changeQuantity(
+                                  product,
+                                  e.target.value
+                                )
+                              }
+                              className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                increaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white transition hover:bg-blue-800"
+                            >
+                              +
+                            </button>
+
+                          </div>
+
+                          <p className="mt-3 text-center text-xs text-slate-400">
+                            حداقل خرید:{" "}
+                            {(
+                              product.min_order ??
+                              1
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              "واحد"}
+                          </p>
 
                         </div>
 
@@ -481,12 +1006,46 @@ export default function SanitaryPage() {
                           </span>
 
                           <span className="font-black">
+
                             {(
-                              product.stock ?? 0
+                              product.stock ??
+                              0
                             ).toLocaleString(
                               "fa-IR"
                             )}{" "}
-                            {product.unit || ""}
+                            {product.unit ||
+                              ""}
+
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+                        <div className="flex items-center justify-between gap-3">
+
+                          <span className="text-sm font-bold text-slate-600">
+                            مبلغ کل خرید
+                          </span>
+
+                          <span className="text-lg font-black text-blue-700">
+
+                            {(
+                              (
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ) *
+                              getQuantity(
+                                product
+                              )
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
+
                           </span>
 
                         </div>
@@ -500,7 +1059,8 @@ export default function SanitaryPage() {
                         {product.seller_id
                           ? stores[
                               product.seller_id
-                            ] || "فروشگاه"
+                            ] ||
+                            "فروشگاه"
                           : "فروشگاه نامشخص"}
 
                       </div>
@@ -515,15 +1075,19 @@ export default function SanitaryPage() {
 
                       <button
                         type="button"
-                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white hover:bg-blue-800"
+                        onClick={() =>
+                          addToCart(
+                            product
+                          )
+                        }
+                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
                       >
-                        مشاهده جزئیات محصول
+                        خرید محصول
                       </button>
 
                     </div>
 
                   </div>
-
                 )
               )}
 
@@ -535,34 +1099,7 @@ export default function SanitaryPage() {
 
       </section>
 
-      {/* CTA */}
-
-      <section className="px-5 pb-16">
-
-        <div className="mx-auto max-w-7xl rounded-[2rem] bg-gradient-to-l from-blue-700 to-blue-950 px-6 py-14 text-center text-white">
-
-          <h2 className="text-2xl font-black sm:text-3xl">
-            فروشنده تجهیزات بهداشتی هستید؟
-          </h2>
-
-          <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه خود را در سرچنو ثبت کنید
-            و محصولات خود را به خریداران معرفی کنید.
-          </p>
-
-          <Link
-            href="/register"
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
-          >
-            ثبت فروشگاه
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-
-        </div>
-
-      </section>
-
-      {/* Footer */}
+      {/* ================= FOOTER ================= */}
 
       <footer className="bg-slate-950 py-10 text-center text-sm text-slate-400">
 
