@@ -35,59 +35,309 @@ type StoreInfo = {
   name: string | null;
 };
 
+type CartItem = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+  storeName: string;
+};
+
 export default function MechanicalInstallationsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [cartCount, setCartCount] = useState(0);
+
+  const [quantities, setQuantities] = useState<
+    Record<string, number>
+  >({});
+
+  /* =========================
+     مقدار خرید
+  ========================= */
+
+  const getQuantity = (product: Product) => {
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    return quantities[product.id] ?? minOrder;
+  };
+
+  /* =========================
+     افزایش مقدار
+  ========================= */
+
+  const increaseQuantity = (product: Product) => {
+    const current = getQuantity(product);
+    const stock = product.stock ?? 0;
+
+    if (stock > 0 && current >= stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current + 1,
+    }));
+  };
+
+  /* =========================
+     کاهش مقدار
+  ========================= */
+
+  const decreaseQuantity = (product: Product) => {
+    const current = getQuantity(product);
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    if (current <= minOrder) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current - 1,
+    }));
+  };
+
+  /* =========================
+     تغییر مستقیم تعداد
+  ========================= */
+
+  const changeQuantity = (
+    product: Product,
+    value: string
+  ) => {
+    if (value === "") {
+      return;
+    }
+
+    const quantity = Number(value);
+
+    if (Number.isNaN(quantity)) {
+      return;
+    }
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    const stock = product.stock ?? 0;
+
+    if (quantity < minOrder) {
+      return;
+    }
+
+    if (stock > 0 && quantity > stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: quantity,
+    }));
+  };
+
+  /* =========================
+     افزودن به سبد خرید
+  ========================= */
+
+  const addToCart = (product: Product) => {
+    const quantity = getQuantity(product);
+
+    const price =
+      product.customer_price ??
+      product.price ??
+      0;
+
+    const storeName =
+      product.seller_id
+        ? stores[product.seller_id] ||
+          "فروشگاه"
+        : "فروشگاه نامشخص";
+
+    const newItem: CartItem = {
+      productId: product.id,
+
+      name:
+        product.name ||
+        "محصول بدون نام",
+
+      price,
+
+      quantity,
+
+      unit:
+        product.unit ||
+        "عدد",
+
+      storeName,
+    };
+
+    const existingCart: CartItem[] =
+      JSON.parse(
+        localStorage.getItem(
+          "sercheno_cart"
+        ) || "[]"
+      );
+
+    const existingIndex =
+      existingCart.findIndex(
+        (item) =>
+          item.productId ===
+          product.id
+      );
+
+    if (existingIndex >= 0) {
+      existingCart[
+        existingIndex
+      ].quantity += quantity;
+    } else {
+      existingCart.push(newItem);
+    }
+
+    localStorage.setItem(
+      "sercheno_cart",
+      JSON.stringify(existingCart)
+    );
+
+    window.dispatchEvent(
+      new Event("sercheno-cart-updated")
+    );
+
+    alert(
+      "محصول با موفقیت به سبد خرید اضافه شد."
+    );
+  };
+
+  /* =========================
+     دریافت محصولات
+  ========================= */
 
   useEffect(() => {
     loadProducts();
   }, []);
 
+  /* =========================
+     بروزرسانی شمارنده سبد
+  ========================= */
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      try {
+        const cart: CartItem[] =
+          JSON.parse(
+            localStorage.getItem(
+              "sercheno_cart"
+            ) || "[]"
+          );
+
+        const count = cart.reduce(
+          (
+            total: number,
+            item: CartItem
+          ) =>
+            total +
+            Number(
+              item.quantity || 0
+            ),
+          0
+        );
+
+        setCartCount(count);
+      } catch (error) {
+        console.error(
+          "CART COUNT ERROR:",
+          error
+        );
+
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+
+    window.addEventListener(
+      "sercheno-cart-updated",
+      updateCartCount
+    );
+
+    window.addEventListener(
+      "storage",
+      updateCartCount
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sercheno-cart-updated",
+        updateCartCount
+      );
+
+      window.removeEventListener(
+        "storage",
+        updateCartCount
+      );
+    };
+  }, []);
+
+  /* =========================
+     بارگذاری محصولات تأسیسات مکانیکی
+  ========================= */
+
   const loadProducts = async () => {
     try {
       setLoading(true);
 
-      /*
-       * دقیقاً مشابه صفحه brick-block
-       *
-       * فقط category تغییر کرده:
-       * mechanical-installations
-       *
-       * فقط محصولات تأییدشده نمایش داده می‌شوند:
-       * status = active
-       */
-
-      const { data, error } = await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("products")
         .select(
           "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
         )
-        .eq("category", "mechanical-installations")
-        .eq("status", "active")
-        .order("created_at", {
-          ascending: false,
-        });
+        .eq(
+          "category",
+          "mechanical-installations"
+        )
+        .eq(
+          "status",
+          "active"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
       if (error) {
         console.error(
           "MECHANICAL INSTALLATIONS PRODUCTS ERROR:",
           error
         );
+
         return;
       }
 
       setProducts(data || []);
 
-      /*
-       * دریافت نام فروشگاه‌ها
-       */
-
       const sellerIds = [
         ...new Set(
           (data || [])
-            .map((product) => product.seller_id)
+            .map(
+              (product) =>
+                product.seller_id
+            )
             .filter(Boolean)
         ),
       ];
@@ -99,76 +349,89 @@ export default function MechanicalInstallationsPage() {
         } = await supabase
           .from("stores")
           .select("id,name")
-          .in("id", sellerIds);
+          .in(
+            "id",
+            sellerIds
+          );
 
         if (storeError) {
           console.error(
-            "MECHANICAL STORE ERROR:",
+            "STORE ERROR:",
             storeError
           );
         }
 
-        const storeMap: Record<string, string> = {};
+        const storeMap: Record<
+          string,
+          string
+        > = {};
 
-        (storeData || []).forEach(
-          (store: StoreInfo) => {
-            storeMap[store.id] =
-              store.name || "فروشگاه";
+        (
+          storeData || []
+        ).forEach(
+          (
+            store: StoreInfo
+          ) => {
+            storeMap[
+              store.id
+            ] =
+              store.name ||
+              "فروشگاه";
           }
         );
 
         setStores(storeMap);
       }
     } catch (error) {
-      console.error(
-        "MECHANICAL INSTALLATIONS LOAD ERROR:",
-        error
-      );
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  /*
-   * جست‌وجوی محصولات
-   */
+  /* =========================
+     جستجوی محصولات
+  ========================= */
 
-  const filteredProducts = products.filter(
-    (product) => {
-      const searchText = search
-        .trim()
-        .toLowerCase();
+  const filteredProducts =
+    products.filter(
+      (product) => {
+        const searchText =
+          search
+            .trim()
+            .toLowerCase();
 
-      if (!searchText) {
-        return true;
+        if (!searchText) {
+          return true;
+        }
+
+        return (
+          product.name
+            ?.toLowerCase()
+            .includes(searchText) ||
+          product.brand
+            ?.toLowerCase()
+            .includes(searchText) ||
+          product.model
+            ?.toLowerCase()
+            .includes(searchText) ||
+          product.description
+            ?.toLowerCase()
+            .includes(searchText)
+        );
       }
-
-      return (
-        product.name
-          ?.toLowerCase()
-          .includes(searchText) ||
-        product.brand
-          ?.toLowerCase()
-          .includes(searchText) ||
-        product.model
-          ?.toLowerCase()
-          .includes(searchText) ||
-        product.description
-          ?.toLowerCase()
-          .includes(searchText)
-      );
-    }
-  );
+    );
 
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* Header */}
+
+      {/* ================= HEADER ================= */}
 
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
 
           <Link
             href="/"
@@ -191,6 +454,24 @@ export default function MechanicalInstallationsPage() {
             </div>
           </Link>
 
+          {/* Cart */}
+
+          <Link
+            href="/cart"
+            className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
+            title="سبد خرید"
+          >
+            🛒
+
+            {cartCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                {cartCount.toLocaleString(
+                  "fa-IR"
+                )}
+              </span>
+            )}
+          </Link>
+
           <Link
             href="/materials"
             className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
@@ -202,7 +483,7 @@ export default function MechanicalInstallationsPage() {
         </div>
       </header>
 
-      {/* Hero */}
+      {/* ================= HERO ================= */}
 
       <section className="relative overflow-hidden">
 
@@ -214,16 +495,16 @@ export default function MechanicalInstallationsPage() {
             className="h-full w-full object-cover"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/60 to-slate-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/65 to-slate-950/20" />
 
           <div className="absolute inset-0 flex items-center">
 
             <div className="mx-auto w-full max-w-7xl px-5 text-white">
 
-              <div className="max-w-2xl">
+              <div className="max-w-3xl">
 
                 <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
-                  تجهیزات و مصالح ساختمانی
+                  تأسیسات مکانیکی ساختمان
                 </span>
 
                 <h1 className="mt-5 text-4xl font-black sm:text-6xl">
@@ -231,11 +512,12 @@ export default function MechanicalInstallationsPage() {
                 </h1>
 
                 <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
-                  انواع لوله، اتصالات، شیرآلات،
-                  تجهیزات گرمایشی، سرمایشی،
-                  پمپ، مخزن و تجهیزات تأسیسات مکانیکی
-                  ساختمان را از فروشندگان و تأمین‌کنندگان
-                  معتبر در سرچنو پیدا کنید.
+                  انواع تجهیزات و محصولات مورد نیاز
+                  برای اجرای تأسیسات مکانیکی ساختمان،
+                  از سیستم‌های لوله‌کشی آب و فاضلاب
+                  تا گرمایش، سرمایش، تهویه، موتورخانه
+                  و تجهیزات کنترلی را از تأمین‌کنندگان
+                  معتبر در سرچنو پیدا و خریداری کنید.
                 </p>
 
                 <div className="mt-7 flex flex-wrap gap-3">
@@ -245,15 +527,19 @@ export default function MechanicalInstallationsPage() {
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    شیرآلات
+                    پمپ و تجهیزات آبرسانی
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    پمپ و مخزن
+                    گرمایش
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    گرمایش و سرمایش
+                    سرمایش
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    تهویه و موتورخانه
                   </span>
 
                 </div>
@@ -267,7 +553,7 @@ export default function MechanicalInstallationsPage() {
         </div>
       </section>
 
-      {/* Search */}
+      {/* ================= SEARCH ================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-10">
 
@@ -283,9 +569,11 @@ export default function MechanicalInstallationsPage() {
                 type="text"
                 value={search}
                 onChange={(e) =>
-                  setSearch(e.target.value)
+                  setSearch(
+                    e.target.value
+                  )
                 }
-                placeholder="مثلاً لوله پنج‌لایه، پمپ، شیرآلات، رادیاتور..."
+                placeholder="مثلاً پمپ آب، لوله پنج‌لایه، شیرآلات، پکیج، رادیاتور..."
                 className="w-full bg-transparent outline-none"
               />
 
@@ -304,19 +592,26 @@ export default function MechanicalInstallationsPage() {
 
       </section>
 
-      {/* Sub Categories */}
+      {/* ================= SUB CATEGORIES ================= */}
 
       <section className="mx-auto max-w-7xl px-5 pb-14">
 
         <div className="mb-7">
 
           <span className="text-sm font-bold text-blue-700">
-            دسته‌بندی
+            دسته‌بندی تخصصی
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            چه نوع تجهیزات مکانیکی نیاز دارید؟
+            چه تجهیزاتی برای تأسیسات مکانیکی نیاز دارید؟
           </h2>
+
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+            محصولات تأسیسات مکانیکی بر اساس
+            سیستم مصرفی، محل نصب، نوع تجهیزات،
+            کاربرد، جنس، ظرفیت و نوع اجرای پروژه
+            دسته‌بندی شده‌اند.
+          </p>
 
         </div>
 
@@ -324,34 +619,162 @@ export default function MechanicalInstallationsPage() {
 
           {[
             "لوله و اتصالات",
+            "لوله آب",
+            "لوله فاضلاب",
             "لوله پنج‌لایه",
-            "لوله PVC و UPVC",
-            "اتصالات مکانیکی",
+            "لوله تک‌لایه",
+            "لوله پلی‌پروپیلن",
+            "لوله PVC",
+            "لوله UPVC",
+            "لوله پلی‌اتیلن",
+            "لوله مسی",
+            "لوله فولادی",
+            "لوله گالوانیزه",
+
+            "اتصالات لوله",
+            "زانو",
+            "سه‌راهی",
+            "چهارراهی",
+            "تبدیل",
+            "بوشن",
+            "مغزی",
+            "فلنج",
+            "اتصالات پنج‌لایه",
+            "اتصالات پلی‌پروپیلن",
+            "اتصالات پلی‌اتیلن",
+
             "شیرآلات",
+            "شیر آب",
+            "شیر فلکه",
+            "شیر یک‌طرفه",
+            "شیر پروانه‌ای",
+            "شیر توپی",
+            "شیر فشارشکن",
+            "شیر کنترل",
+            "شیرآلات ساختمانی",
+            "شیرآلات صنعتی",
+
+            "پمپ و آبرسانی",
             "پمپ آب",
-            "مخزن آب",
+            "پمپ خانگی",
+            "پمپ سیرکولاتور",
+            "پمپ طبقاتی",
+            "پمپ کف‌کش",
+            "پمپ لجن‌کش",
+            "پمپ شناور",
+            "پمپ بوستر",
+            "بوستر پمپ",
+            "منبع تحت فشار",
+            "منبع ذخیره آب",
+
+            "گرمایش",
+            "پکیج",
+            "پکیج دیواری",
+            "پکیج زمینی",
             "رادیاتور",
-            "پکیج و آبگرمکن",
-            "کولر و تجهیزات سرمایشی",
-            "فن و هواکش",
+            "رادیاتور پنلی",
+            "رادیاتور آلومینیومی",
+            "رادیاتور حوله‌ای",
+            "گرمایش از کف",
+            "کلکتور گرمایش از کف",
+            "دیگ آب گرم",
+            "دیگ چدنی",
+            "دیگ فولادی",
+
+            "موتورخانه",
+            "مشعل",
+            "دیگ موتورخانه",
+            "منبع کویل‌دار",
+            "منبع دوجداره",
+            "منبع انبساط",
+            "سختی‌گیر",
+            "فیلتر آب",
+            "رسوب‌گیر",
             "تجهیزات موتورخانه",
-          ].map((item) => (
 
-            <button
-              key={item}
-              type="button"
-              className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
-            >
-              {item}
-            </button>
+            "سرمایش",
+            "چیلر",
+            "چیلر تراکمی",
+            "چیلر جذبی",
+            "فن‌کویل",
+            "فن‌کویل سقفی",
+            "فن‌کویل زمینی",
+            "کولر گازی",
+            "اسپلیت",
+            "داکت اسپلیت",
 
-          ))}
+            "تهویه",
+            "هواساز",
+            "اگزاست فن",
+            "فن سانتریفیوژ",
+            "فن محوری",
+            "تهویه صنعتی",
+            "کانال هوا",
+            "دریچه هوا",
+            "دمپر",
+            "فیلتر هوا",
+
+            "تجهیزات فاضلاب",
+            "کف‌شور",
+            "سیفون",
+            "تله فاضلاب",
+            "چاه‌بازکن",
+            "پمپ فاضلاب",
+            "منهول",
+            "لوله فاضلاب ساختمان",
+
+            "تجهیزات کنترل",
+            "ترموستات",
+            "کنترلر دما",
+            "شیر ترموستاتیک",
+            "گیج فشار",
+            "گیج دما",
+            "فلومتر",
+            "پرشر سوئیچ",
+
+            "عایق تأسیسات",
+            "عایق لوله",
+            "عایق الاستومری",
+            "عایق پشم سنگ",
+            "عایق پشم شیشه",
+            "عایق حرارتی لوله",
+            "عایق صوتی تأسیسات",
+
+            "متعلقات نصب",
+            "بست لوله",
+            "ساپورت تأسیسات",
+            "بست فلزی",
+            "نوار تفلون",
+            "چسب لوله",
+            "واشر",
+            "پیچ و مهره تأسیسات",
+            "متعلقات موتورخانه",
+
+            "تجهیزات تأسیسات مکانیکی ساختمانی",
+            "تجهیزات تأسیسات مکانیکی صنعتی",
+            "تجهیزات آبرسانی",
+            "تجهیزات فاضلاب",
+            "تجهیزات گرمایشی",
+            "تجهیزات سرمایشی",
+            "تجهیزات تهویه مطبوع",
+            "تجهیزات موتورخانه",
+          ].map(
+            (item) => (
+              <button
+                key={item}
+                type="button"
+                className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
+              >
+                {item}
+              </button>
+            )
+          )}
 
         </div>
 
       </section>
 
-      {/* Products */}
+      {/* ================= PRODUCTS ================= */}
 
       <section className="bg-white py-16">
 
@@ -368,13 +791,11 @@ export default function MechanicalInstallationsPage() {
             </h2>
 
             <p className="mt-3 text-sm text-slate-500">
-              محصولاتی که توسط تیم سرچنو تأیید شده‌اند
+              محصولات تأییدشده توسط تیم سرچنو
               در این بخش نمایش داده می‌شوند.
             </p>
 
           </div>
-
-          {/* Loading */}
 
           {loading ? (
 
@@ -390,8 +811,6 @@ export default function MechanicalInstallationsPage() {
 
           ) : filteredProducts.length === 0 ? (
 
-            /* Empty */
-
             <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
 
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
@@ -403,14 +822,13 @@ export default function MechanicalInstallationsPage() {
               </h3>
 
               <p className="mt-2 text-sm text-slate-500">
-                در حال حاضر محصول تأییدشده‌ای در این دسته وجود ندارد.
+                در حال حاضر محصول تأییدشده‌ای
+                در این دسته وجود ندارد.
               </p>
 
             </div>
 
           ) : (
-
-            /* Products */
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
@@ -422,13 +840,15 @@ export default function MechanicalInstallationsPage() {
                     className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                   >
 
-                    {/* Product Image */}
+                    {/* Product Image/Icon */}
 
                     <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
                       🔧
                     </div>
 
                     <div className="p-6">
+
+                      {/* Status */}
 
                       <div className="flex items-center justify-between gap-3">
 
@@ -449,40 +869,37 @@ export default function MechanicalInstallationsPage() {
                       {/* Name */}
 
                       <h3 className="mt-4 text-lg font-black">
-                        {product.name || "محصول بدون نام"}
+                        {product.name ||
+                          "محصول بدون نام"}
                       </h3>
 
                       {/* Brand */}
 
                       {product.brand && (
-
                         <p className="mt-2 text-sm text-slate-500">
-                          برند: {product.brand}
+                          برند:{" "}
+                          {product.brand}
                         </p>
-
                       )}
 
                       {/* Model */}
 
                       {product.model && (
-
                         <p className="mt-1 text-sm text-slate-500">
-                          مدل: {product.model}
+                          مدل:{" "}
+                          {product.model}
                         </p>
-
                       )}
 
                       {/* Description */}
 
                       {product.description && (
-
                         <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
                           {product.description}
                         </p>
-
                       )}
 
-                      {/* Price / Stock */}
+                      {/* Price + Quantity */}
 
                       <div className="mt-5 space-y-3">
 
@@ -500,13 +917,100 @@ export default function MechanicalInstallationsPage() {
                               0
                             ).toLocaleString(
                               "fa-IR"
-                            )}
-
-                            {" "}تومان
+                            )}{" "}
+                            تومان
 
                           </span>
 
                         </div>
+
+                        {/* Quantity */}
+
+                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+                          <div className="mb-3 flex items-center justify-between">
+
+                            <span className="text-sm font-black text-slate-800">
+                              مقدار خرید
+                            </span>
+
+                            <span className="text-xs font-bold text-slate-400">
+                              واحد فروش:{" "}
+                              {product.unit ||
+                                "عدد"}
+                            </span>
+
+                          </div>
+
+                          <div className="flex items-center gap-2">
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                decreaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+                            >
+                              −
+                            </button>
+
+                            <input
+                              type="number"
+                              min={
+                                product.min_order ||
+                                1
+                              }
+                              max={
+                                product.stock ||
+                                undefined
+                              }
+                              value={
+                                quantities[
+                                  product.id
+                                ] ??
+                                product.min_order ??
+                                1
+                              }
+                              onChange={(e) =>
+                                changeQuantity(
+                                  product,
+                                  e.target.value
+                                )
+                              }
+                              className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                increaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white transition hover:bg-blue-800"
+                            >
+                              +
+                            </button>
+
+                          </div>
+
+                          <p className="mt-3 text-center text-xs text-slate-400">
+                            حداقل خرید:{" "}
+                            {(
+                              product.min_order ??
+                              1
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              "واحد"}
+                          </p>
+
+                        </div>
+
+                        {/* Stock */}
 
                         <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
 
@@ -516,13 +1020,46 @@ export default function MechanicalInstallationsPage() {
 
                           <span className="font-black">
 
-                            {(product.stock ?? 0).toLocaleString(
+                            {(
+                              product.stock ??
+                              0
+                            ).toLocaleString(
                               "fa-IR"
-                            )}
+                            )}{" "}
+                            {product.unit ||
+                              ""}
 
-                            {" "}
+                          </span>
 
-                            {product.unit || ""}
+                        </div>
+
+                      </div>
+
+                      {/* Total Price */}
+
+                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+                        <div className="flex items-center justify-between gap-3">
+
+                          <span className="text-sm font-bold text-slate-600">
+                            مبلغ کل خرید
+                          </span>
+
+                          <span className="text-lg font-black text-blue-700">
+
+                            {(
+                              (
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ) *
+                              getQuantity(
+                                product
+                              )
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
 
                           </span>
 
@@ -539,7 +1076,8 @@ export default function MechanicalInstallationsPage() {
                         {product.seller_id
                           ? stores[
                               product.seller_id
-                            ] || "فروشگاه"
+                            ] ||
+                            "فروشگاه"
                           : "فروشگاه نامشخص"}
 
                       </div>
@@ -554,19 +1092,23 @@ export default function MechanicalInstallationsPage() {
 
                       </div>
 
-                      {/* Details */}
+                      {/* Buy */}
 
                       <button
                         type="button"
-                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white hover:bg-blue-800"
+                        onClick={() =>
+                          addToCart(
+                            product
+                          )
+                        }
+                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
                       >
-                        مشاهده جزئیات محصول
+                        خرید محصول
                       </button>
 
                     </div>
 
                   </div>
-
                 )
               )}
 
@@ -578,39 +1120,7 @@ export default function MechanicalInstallationsPage() {
 
       </section>
 
-      {/* CTA */}
-
-      <section className="px-5 py-16">
-
-        <div className="mx-auto max-w-7xl rounded-[2rem] bg-gradient-to-l from-blue-700 to-blue-950 px-6 py-14 text-center text-white">
-
-          <div className="text-5xl">
-            🔧
-          </div>
-
-          <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-            فروشنده یا تأمین‌کننده تجهیزات مکانیکی هستید؟
-          </h2>
-
-          <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه خود را در سرچنو ثبت کنید و محصولات
-            تأسیسات مکانیکی خود را به خریداران و سازندگان
-            معرفی کنید.
-          </p>
-
-          <Link
-            href="/register"
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
-          >
-            ثبت فروشگاه
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-
-        </div>
-
-      </section>
-
-      {/* Footer */}
+      {/* ================= FOOTER ================= */}
 
       <footer className="bg-slate-950 py-10 text-center text-sm text-slate-400">
 
