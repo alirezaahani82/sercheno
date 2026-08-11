@@ -8,6 +8,9 @@ import {
   Search,
   ShieldCheck,
   Star,
+  ShoppingCart,
+  Minus,
+  Plus,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
@@ -40,6 +43,7 @@ export default function BrickBlockPage() {
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadProducts();
@@ -128,6 +132,32 @@ export default function BrickBlockPage() {
       );
     }
   );
+
+  const getQuantity = (product: Product) => {
+  const minOrder = Math.max(product.min_order ?? 1, 1);
+  return quantities[product.id] ?? minOrder;
+};
+
+const increaseQuantity = (product: Product) => {
+  const current = getQuantity(product);
+
+  setQuantities((prev) => ({
+    ...prev,
+    [product.id]: current + 1,
+  }));
+};
+
+const decreaseQuantity = (product: Product) => {
+  const current = getQuantity(product);
+  const minOrder = Math.max(product.min_order ?? 1, 1);
+
+  if (current <= minOrder) return;
+
+  setQuantities((prev) => ({
+    ...prev,
+    [product.id]: current - 1,
+  }));
+};
 
   return (
     <main
@@ -435,6 +465,55 @@ export default function BrickBlockPage() {
 
                         </div>
 
+                        {/* مقدار خرید */}
+
+<div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+  <div className="mb-3 flex items-center gap-2 text-sm font-black text-slate-800">
+    <ShoppingCart className="h-4 w-4 text-blue-700" />
+    مقدار خرید
+  </div>
+
+  <div className="flex items-center justify-between gap-3">
+
+    <button
+      type="button"
+      onClick={() => decreaseQuantity(product)}
+      className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+    >
+      <Minus className="h-4 w-4" />
+    </button>
+
+    <div className="flex-1 rounded-xl bg-white px-4 py-3 text-center shadow-sm">
+
+      <div className="text-lg font-black text-blue-700">
+        {getQuantity(product).toLocaleString("fa-IR")}
+      </div>
+
+      <div className="mt-1 text-xs font-bold text-slate-400">
+        {product.unit || "واحد"}
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      onClick={() => increaseQuantity(product)}
+      className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700 text-white shadow-sm transition hover:bg-blue-800"
+    >
+      <Plus className="h-4 w-4" />
+    </button>
+
+  </div>
+
+  <p className="mt-3 text-center text-xs text-slate-400">
+    حداقل خرید:{" "}
+    {(product.min_order ?? 1).toLocaleString("fa-IR")}{" "}
+    {product.unit || "واحد"}
+  </p>
+
+</div>
+
                         <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
 
                           <span className="font-bold text-slate-500">
@@ -472,12 +551,13 @@ export default function BrickBlockPage() {
 
                       </div>
 
-                      <button
-                        type="button"
-                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white hover:bg-blue-800"
-                      >
-                        مشاهده جزئیات محصول
-                      </button>
+                     <button
+  type="button"
+  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+>
+  <ShoppingCart className="h-4 w-4" />
+  خرید محصول
+</button>
 
                     </div>
 
