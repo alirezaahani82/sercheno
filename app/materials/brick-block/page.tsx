@@ -465,43 +465,59 @@ const decreaseQuantity = (product: Product) => {
 
                         </div>
 
-                        {/* مقدار خرید */}
+                       {/* مقدار خرید */}
 
 <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
 
-  <div className="mb-3 flex items-center gap-2 text-sm font-black text-slate-800">
-    <ShoppingCart className="h-4 w-4 text-blue-700" />
-    مقدار خرید
+  <div className="mb-3 flex items-center justify-between">
+
+    <span className="text-sm font-black text-slate-800">
+      مقدار خرید
+    </span>
+
+    <span className="text-xs font-bold text-slate-400">
+      واحد فروش: {product.unit || "عدد"}
+    </span>
+
   </div>
 
-  <div className="flex items-center justify-between gap-3">
+  <div className="flex items-center gap-2">
 
+    {/* منفی */}
     <button
       type="button"
       onClick={() => decreaseQuantity(product)}
-      className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm hover:bg-red-50 hover:text-red-600"
     >
-      <Minus className="h-4 w-4" />
+      −
     </button>
 
-    <div className="flex-1 rounded-xl bg-white px-4 py-3 text-center shadow-sm">
+    {/* ورود مستقیم عدد */}
+    <input
+      type="number"
+      min={product.min_order || 1}
+      max={product.stock || undefined}
+      value={quantities[product.id] ?? product.min_order ?? 1}
+      onChange={(e) => {
+        const value = Number(e.target.value);
 
-      <div className="text-lg font-black text-blue-700">
-        {getQuantity(product).toLocaleString("fa-IR")}
-      </div>
+        if (value < 1) return;
 
-      <div className="mt-1 text-xs font-bold text-slate-400">
-        {product.unit || "واحد"}
-      </div>
+        setQuantities((prev) => ({
+          ...prev,
+          [product.id]: value,
+        }));
+      }}
+      className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+    />
 
-    </div>
-
+    {/* مثبت */}
     <button
       type="button"
       onClick={() => increaseQuantity(product)}
-      className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700 text-white shadow-sm transition hover:bg-blue-800"
+      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white hover:bg-blue-800"
     >
-      <Plus className="h-4 w-4" />
+      +
     </button>
 
   </div>
