@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Search,
   MapPin,
-  Star,
+  Search,
   ShieldCheck,
-  Phone,
+  Star,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
@@ -36,33 +35,305 @@ type StoreInfo = {
   name: string | null;
 };
 
+type CartItem = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+  storeName: string;
+};
+
 export default function DoorsWindowsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [cartCount, setCartCount] = useState(0);
+
+  const [quantities, setQuantities] = useState<
+    Record<string, number>
+  >({});
+
+  /* =========================
+     مقدار خرید
+  ========================= */
+
+  const getQuantity = (product: Product) => {
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    return quantities[product.id] ?? minOrder;
+  };
+
+  /* =========================
+     افزایش مقدار
+  ========================= */
+
+  const increaseQuantity = (
+    product: Product
+  ) => {
+    const current = getQuantity(product);
+
+    const stock = product.stock ?? 0;
+
+    if (stock > 0 && current >= stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current + 1,
+    }));
+  };
+
+  /* =========================
+     کاهش مقدار
+  ========================= */
+
+  const decreaseQuantity = (
+    product: Product
+  ) => {
+    const current = getQuantity(product);
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    if (current <= minOrder) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current - 1,
+    }));
+  };
+
+  /* =========================
+     تغییر مستقیم تعداد
+  ========================= */
+
+  const changeQuantity = (
+    product: Product,
+    value: string
+  ) => {
+    if (value === "") {
+      return;
+    }
+
+    const quantity = Number(value);
+
+    if (Number.isNaN(quantity)) {
+      return;
+    }
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    const stock = product.stock ?? 0;
+
+    if (quantity < minOrder) {
+      return;
+    }
+
+    if (stock > 0 && quantity > stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: quantity,
+    }));
+  };
+
+  /* =========================
+     افزودن به سبد خرید
+  ========================= */
+
+  const addToCart = (
+    product: Product
+  ) => {
+    const quantity = getQuantity(product);
+
+    const price =
+      product.customer_price ??
+      product.price ??
+      0;
+
+    const storeName =
+      product.seller_id
+        ? stores[product.seller_id] ||
+          "فروشگاه"
+        : "فروشگاه نامشخص";
+
+    const newItem: CartItem = {
+      productId: product.id,
+      name:
+        product.name ||
+        "محصول بدون نام",
+      price,
+      quantity,
+      unit:
+        product.unit ||
+        "عدد",
+      storeName,
+    };
+
+    const existingCart: CartItem[] =
+      JSON.parse(
+        localStorage.getItem(
+          "sercheno_cart"
+        ) || "[]"
+      );
+
+    const existingIndex =
+      existingCart.findIndex(
+        (item) =>
+          item.productId ===
+          product.id
+      );
+
+    if (existingIndex >= 0) {
+      existingCart[
+        existingIndex
+      ].quantity += quantity;
+    } else {
+      existingCart.push(
+        newItem
+      );
+    }
+
+    localStorage.setItem(
+      "sercheno_cart",
+      JSON.stringify(
+        existingCart
+      )
+    );
+
+    window.dispatchEvent(
+      new Event(
+        "sercheno-cart-updated"
+      )
+    );
+
+    alert(
+      "محصول با موفقیت به سبد خرید اضافه شد."
+    );
+  };
+
+  /* =========================
+     دریافت محصولات
+  ========================= */
 
   useEffect(() => {
     loadProducts();
   }, []);
 
+  /* =========================
+     بروزرسانی شمارنده سبد
+  ========================= */
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      try {
+        const cart: CartItem[] =
+          JSON.parse(
+            localStorage.getItem(
+              "sercheno_cart"
+            ) || "[]"
+          );
+
+        const count = cart.reduce(
+          (
+            total: number,
+            item: CartItem
+          ) =>
+            total +
+            Number(
+              item.quantity || 0
+            ),
+          0
+        );
+
+        setCartCount(count);
+      } catch (error) {
+        console.error(
+          "CART COUNT ERROR:",
+          error
+        );
+
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+
+    window.addEventListener(
+      "sercheno-cart-updated",
+      updateCartCount
+    );
+
+    window.addEventListener(
+      "storage",
+      updateCartCount
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sercheno-cart-updated",
+        updateCartCount
+      );
+
+      window.removeEventListener(
+        "storage",
+        updateCartCount
+      );
+    };
+  }, []);
+
+  /* =========================
+     بارگذاری محصولات
+  ========================= */
+
   const loadProducts = async () => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("products")
         .select(
           "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
         )
-        .eq("category", "doors-windows")
-        .eq("status", "active")
-        .order("created_at", {
-          ascending: false,
-        });
+        .eq(
+          "category",
+          "doors-windows"
+        )
+        .eq(
+          "status",
+          "active"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
       if (error) {
-        console.error("DOORS WINDOWS PRODUCTS ERROR:", error);
+        console.error(
+          "DOORS WINDOWS PRODUCTS ERROR:",
+          error
+        );
+
         return;
       }
 
@@ -71,69 +342,116 @@ export default function DoorsWindowsPage() {
       const sellerIds = [
         ...new Set(
           (data || [])
-            .map((product) => product.seller_id)
+            .map(
+              (product) =>
+                product.seller_id
+            )
             .filter(Boolean)
         ),
       ];
 
-      if (sellerIds.length > 0) {
-        const { data: storeData, error: storeError } =
-          await supabase
-            .from("stores")
-            .select("id,name")
-            .in("id", sellerIds);
+      if (
+        sellerIds.length > 0
+      ) {
+        const {
+          data: storeData,
+          error: storeError,
+        } = await supabase
+          .from("stores")
+          .select("id,name")
+          .in(
+            "id",
+            sellerIds
+          );
 
         if (storeError) {
-          console.error("DOORS WINDOWS STORE ERROR:", storeError);
+          console.error(
+            "STORE ERROR:",
+            storeError
+          );
         }
 
-        const storeMap: Record<string, string> = {};
+        const storeMap: Record<
+          string,
+          string
+        > = {};
 
-        (storeData || []).forEach(
-          (store: StoreInfo) => {
-            storeMap[store.id] =
-              store.name || "فروشگاه";
+        (
+          storeData || []
+        ).forEach(
+          (
+            store: StoreInfo
+          ) => {
+            storeMap[
+              store.id
+            ] =
+              store.name ||
+              "فروشگاه";
           }
         );
 
-        setStores(storeMap);
+        setStores(
+          storeMap
+        );
       }
     } catch (error) {
-      console.error("DOORS WINDOWS LOAD ERROR:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProducts = products.filter((product) => {
-    const searchText = search.trim().toLowerCase();
+  /* =========================
+     جستجوی محصولات
+  ========================= */
 
-    if (!searchText) return true;
+  const filteredProducts =
+    products.filter(
+      (product) => {
+        const searchText =
+          search
+            .trim()
+            .toLowerCase();
 
-    return (
-      product.name
-        ?.toLowerCase()
-        .includes(searchText) ||
-      product.brand
-        ?.toLowerCase()
-        .includes(searchText) ||
-      product.model
-        ?.toLowerCase()
-        .includes(searchText) ||
-      product.description
-        ?.toLowerCase()
-        .includes(searchText)
+        if (!searchText) {
+          return true;
+        }
+
+        return (
+          product.name
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.brand
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.model
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.description
+            ?.toLowerCase()
+            .includes(
+              searchText
+            )
+        );
+      }
     );
-  });
 
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+
+      {/* ================= HEADER ================= */}
+
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
 
           <Link
             href="/"
@@ -141,7 +459,7 @@ export default function DoorsWindowsPage() {
           >
             <img
               src="/logo.png"
-              alt="لوگوی سرچنو"
+              alt="سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
@@ -156,124 +474,111 @@ export default function DoorsWindowsPage() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
-
-            <Link
-              href="/"
-              className="hover:text-blue-700"
-            >
-              خانه
-            </Link>
-
-            <Link
-              href="/materials"
-              className="font-bold text-blue-700"
-            >
-              مصالح و تجهیزات
-            </Link>
-
-            <Link
-              href="/service"
-              className="hover:text-blue-700"
-            >
-              خدمات ساختمانی
-            </Link>
-
-            <Link
-              href="/about"
-              className="hover:text-blue-700"
-            >
-              درباره سرچنو
-            </Link>
-
-          </nav>
+          {/* Cart */}
 
           <Link
-            href="/register"
-            className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800"
+            href="/cart"
+            className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
+            title="سبد خرید"
           >
-            ثبت فروشگاه
+            🛒
+
+            {cartCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                {cartCount.toLocaleString(
+                  "fa-IR"
+                )}
+              </span>
+            )}
+          </Link>
+
+          <Link
+            href="/materials"
+            className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
+          >
+            <ArrowRight className="h-4 w-4" />
+
+            بازگشت به مصالح
           </Link>
 
         </div>
       </header>
 
-      {/* Breadcrumb */}
-      <div className="mx-auto max-w-7xl px-5 pt-6">
+      {/* ================= HERO ================= */}
 
-        <div className="flex items-center gap-2 text-sm text-slate-500">
+      <section className="relative overflow-hidden">
 
-          <Link
-            href="/"
-            className="hover:text-blue-700"
-          >
-            خانه
-          </Link>
-
-          <ArrowRight className="h-4 w-4" />
-
-          <Link
-            href="/materials"
-            className="hover:text-blue-700"
-          >
-            مصالح و تجهیزات
-          </Link>
-
-          <ArrowRight className="h-4 w-4" />
-
-          <span className="font-bold text-slate-800">
-            درب و پنجره
-          </span>
-
-        </div>
-
-      </div>
-
-      {/* Hero */}
-      <section className="mx-auto max-w-7xl px-5 py-6">
-
-        <div className="relative overflow-hidden rounded-[2rem] bg-slate-900">
+        <div className="relative h-[420px]">
 
           <img
             src="/materials/doors-windows.jpg"
             alt="درب و پنجره ساختمانی"
-            className="h-[360px] w-full object-cover opacity-70"
+            className="h-full w-full object-cover"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/65 to-slate-950/20" />
 
           <div className="absolute inset-0 flex items-center">
 
-            <div className="max-w-2xl px-7 sm:px-12">
+            <div className="mx-auto w-full max-w-7xl px-5 text-white">
 
-              <span className="rounded-full bg-blue-600/90 px-4 py-2 text-xs font-bold text-white">
-                مصالح و تجهیزات ساختمانی
-              </span>
+              <div className="max-w-3xl">
 
-              <h1 className="mt-5 text-3xl font-black text-white sm:text-5xl">
-                درب و پنجره
-              </h1>
+                <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
+                  درب، پنجره و سیستم‌های ساختمانی
+                </span>
 
-              <p className="mt-5 max-w-xl text-sm leading-8 text-slate-200 sm:text-base">
-                جست‌وجو و مقایسه انواع درب، پنجره UPVC،
-                پنجره آلومینیومی و محصولات مرتبط از فروشندگان
-                و تولیدکنندگان در سرچنو.
-              </p>
+                <h1 className="mt-5 text-4xl font-black sm:text-6xl">
+                  درب و پنجره
+                </h1>
+
+                <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
+                  انواع درب و پنجره ساختمانی، UPVC،
+                  آلومینیومی، آهنی، شیشه‌ای و یراق‌آلات
+                  مورد نیاز پروژه‌های ساختمانی را از
+                  فروشندگان معتبر در سرچنو پیدا کنید.
+                </p>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    پنجره UPVC
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    پنجره آلومینیومی
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    درب ضد سرقت
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    درب داخلی
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    شیشه و یراق‌آلات
+                  </span>
+
+                </div>
+
+              </div>
 
             </div>
 
           </div>
 
         </div>
-
       </section>
 
-      {/* Search */}
-      <section className="mx-auto max-w-7xl px-5 py-6">
+      {/* ================= SEARCH ================= */}
+
+      <section className="mx-auto max-w-7xl px-5 py-10">
 
         <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
 
-          <div className="flex flex-col gap-3 lg:flex-row">
+          <div className="flex flex-col gap-3 md:flex-row">
 
             <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
 
@@ -283,43 +588,19 @@ export default function DoorsWindowsPage() {
                 type="text"
                 value={search}
                 onChange={(e) =>
-                  setSearch(e.target.value)
+                  setSearch(
+                    e.target.value
+                  )
                 }
-                placeholder="جست‌وجو در درب و پنجره..."
-                className="w-full bg-transparent text-sm outline-none"
+                placeholder="مثلاً پنجره UPVC، درب ضد سرقت، پنجره آلومینیومی..."
+                className="w-full bg-transparent outline-none"
               />
-
-            </div>
-
-            <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-52">
-
-              <MapPin className="h-5 w-5 text-slate-400" />
-
-              <select className="w-full bg-transparent text-sm outline-none">
-
-                <option>
-                  همه شهرها
-                </option>
-
-                <option>
-                  تبریز
-                </option>
-
-                <option>
-                  تهران
-                </option>
-
-                <option>
-                  ارومیه
-                </option>
-
-              </select>
 
             </div>
 
             <button
               type="button"
-              className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white hover:bg-blue-800"
+              className="rounded-2xl bg-blue-700 px-8 py-4 font-black text-white hover:bg-blue-800"
             >
               جست‌وجو
             </button>
@@ -330,44 +611,74 @@ export default function DoorsWindowsPage() {
 
       </section>
 
-      {/* Categories */}
-      <section className="mx-auto max-w-7xl px-5 py-8">
+      {/* ================= SUB CATEGORIES ================= */}
 
-        <div>
+      <section className="mx-auto max-w-7xl px-5 pb-14">
+
+        <div className="mb-7">
+
           <span className="text-sm font-bold text-blue-700">
-            دسته‌بندی
+            دسته‌بندی تخصصی
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            دسته‌بندی درب و پنجره
+            چه نوع درب و پنجره‌ای نیاز دارید؟
           </h2>
+
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+            محصولات این گروه بر اساس جنس، کاربرد،
+            سیستم بازشو، محل استفاده و نوع ساختمان
+            دسته‌بندی شده‌اند.
+          </p>
+
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
           {[
             "پنجره UPVC",
             "پنجره آلومینیومی",
-            "درب ورودی",
-            "درب داخلی",
-          ].map((item) => (
-
-            <button
-              key={item}
-              type="button"
-              className="rounded-2xl border border-slate-200 bg-white p-5 text-sm font-black transition hover:border-blue-300 hover:bg-blue-50"
-            >
-              {item}
-            </button>
-
-          ))}
+            "پنجره ترمال بریک",
+            "پنجره دوجداره",
+            "پنجره تک‌جداره",
+            "پنجره کشویی",
+            "پنجره لولایی",
+            "پنجره ثابت",
+            "درب ضد سرقت",
+            "درب ورودی ساختمان",
+            "درب داخلی ساختمان",
+            "درب اتاق",
+            "درب سرویس بهداشتی",
+            "درب MDF",
+            "درب HDF",
+            "درب آلومینیومی",
+            "درب شیشه‌ای",
+            "درب پارکینگ",
+            "درب اتوماتیک",
+            "درب صنعتی",
+            "شیشه دوجداره",
+            "شیشه سکوریت",
+            "شیشه لمینت",
+            "یراق‌آلات درب و پنجره",
+          ].map(
+            (item) => (
+              <button
+                key={item}
+                type="button"
+                className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
+              >
+                {item}
+              </button>
+            )
+          )}
 
         </div>
 
       </section>
 
-      {/* Products */}
-      <section className="bg-white py-14">
+      {/* ================= PRODUCTS ================= */}
+
+      <section className="bg-white py-16">
 
         <div className="mx-auto max-w-7xl px-5">
 
@@ -382,12 +693,12 @@ export default function DoorsWindowsPage() {
             </h2>
 
             <p className="mt-3 text-sm text-slate-500">
-              محصولات تأییدشده فروشندگان سرچنو در این دسته نمایش داده می‌شوند.
+              محصولات تأییدشده توسط تیم سرچنو
+              در این بخش نمایش داده می‌شوند.
             </p>
 
           </div>
 
-          {/* Loading */}
           {loading ? (
 
             <div className="py-16 text-center">
@@ -402,11 +713,10 @@ export default function DoorsWindowsPage() {
 
           ) : filteredProducts.length === 0 ? (
 
-            /* Empty */
             <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
 
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
-                🪟
+                🚪
               </div>
 
               <h3 className="mt-5 text-xl font-black">
@@ -414,153 +724,306 @@ export default function DoorsWindowsPage() {
               </h3>
 
               <p className="mt-2 text-sm text-slate-500">
-                در حال حاضر محصول تأییدشده‌ای در دسته درب و پنجره وجود ندارد.
+                در حال حاضر محصول تأییدشده‌ای
+                در این دسته وجود ندارد.
               </p>
 
             </div>
 
           ) : (
 
-            /* Product Grid */
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
-              {filteredProducts.map((product) => (
+              {filteredProducts.map(
+                (product) => (
 
-                <div
-                  key={product.id}
-                  className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                >
+                  <div
+                    key={product.id}
+                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                  >
 
-                  {/* Product Image Placeholder */}
-                  <div className="flex h-52 items-center justify-center bg-slate-100">
+                    {/* Product Image/Icon */}
 
-                    <span className="text-7xl">
-                      🪟
-                    </span>
-
-                  </div>
-
-                  <div className="p-6">
-
-                    <div className="flex items-center justify-between gap-3">
-
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                        درب و پنجره
-                      </span>
-
-                      <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-
-                        <ShieldCheck className="h-3 w-3" />
-
-                        تأییدشده
-
-                      </span>
-
+                    <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
+                      🚪
                     </div>
 
-                    <h3 className="mt-4 text-lg font-black">
-                      {product.name || "محصول بدون نام"}
-                    </h3>
+                    <div className="p-6">
 
-                    {product.brand && (
+                      {/* Status */}
 
-                      <p className="mt-2 text-sm text-slate-500">
-                        برند: {product.brand}
-                      </p>
+                      <div className="flex items-center justify-between gap-3">
 
-                    )}
-
-                    {product.model && (
-
-                      <p className="mt-1 text-sm text-slate-500">
-                        مدل: {product.model}
-                      </p>
-
-                    )}
-
-                    {product.description && (
-
-                      <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                        {product.description}
-                      </p>
-
-                    )}
-
-                    {/* Price */}
-                    <div className="mt-5 rounded-xl bg-slate-50 p-3">
-
-                      <div className="flex items-center justify-between text-sm">
-
-                        <span className="font-bold text-slate-500">
-                          قیمت مشتری
+                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                          درب و پنجره
                         </span>
 
-                        <span className="font-black text-blue-700">
+                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
 
-                          {(
-                            product.customer_price ??
-                            product.price ??
-                            0
-                          ).toLocaleString("fa-IR")}{" "}
-                          تومان
+                          <ShieldCheck className="h-3 w-3" />
+
+                          تأییدشده
 
                         </span>
 
                       </div>
 
-                    </div>
+                      {/* Name */}
 
-                    {/* Stock */}
-                    <div className="mt-3 rounded-xl bg-slate-50 p-3">
+                      <h3 className="mt-4 text-lg font-black">
+                        {product.name ||
+                          "محصول بدون نام"}
+                      </h3>
 
-                      <div className="flex items-center justify-between text-sm">
+                      {/* Brand */}
 
-                        <span className="font-bold text-slate-500">
-                          موجودی
-                        </span>
+                      {product.brand && (
+                        <p className="mt-2 text-sm text-slate-500">
+                          برند:{" "}
+                          {product.brand}
+                        </p>
+                      )}
 
-                        <span className="font-black">
+                      {/* Model */}
 
-                          {(product.stock ?? 0).toLocaleString("fa-IR")}{" "}
-                          {product.unit || ""}
+                      {product.model && (
+                        <p className="mt-1 text-sm text-slate-500">
+                          مدل:{" "}
+                          {product.model}
+                        </p>
+                      )}
 
-                        </span>
+                      {/* Description */}
+
+                      {product.description && (
+                        <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                          {
+                            product.description
+                          }
+                        </p>
+                      )}
+
+                      {/* Price + Quantity */}
+
+                      <div className="mt-5 space-y-3">
+
+                        {/* Price */}
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                          <span className="font-bold text-slate-500">
+                            قیمت مشتری
+                          </span>
+
+                          <span className="font-black text-blue-700">
+
+                            {(
+                              product.customer_price ??
+                              product.price ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
+
+                          </span>
+
+                        </div>
+
+                        {/* Quantity */}
+
+                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+                          <div className="mb-3 flex items-center justify-between">
+
+                            <span className="text-sm font-black text-slate-800">
+                              مقدار خرید
+                            </span>
+
+                            <span className="text-xs font-bold text-slate-400">
+                              واحد فروش:{" "}
+                              {product.unit ||
+                                "عدد"}
+                            </span>
+
+                          </div>
+
+                          <div className="flex items-center gap-2">
+
+                            {/* Minus */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                decreaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+                            >
+                              −
+                            </button>
+
+                            {/* Number Input */}
+
+                            <input
+                              type="number"
+                              min={
+                                product.min_order ||
+                                1
+                              }
+                              max={
+                                product.stock ||
+                                undefined
+                              }
+                              value={
+                                quantities[
+                                  product.id
+                                ] ??
+                                product.min_order ??
+                                1
+                              }
+                              onChange={(e) =>
+                                changeQuantity(
+                                  product,
+                                  e.target.value
+                                )
+                              }
+                              className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                            />
+
+                            {/* Plus */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                increaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white transition hover:bg-blue-800"
+                            >
+                              +
+                            </button>
+
+                          </div>
+
+                          <p className="mt-3 text-center text-xs text-slate-400">
+                            حداقل خرید:{" "}
+                            {(
+                              product.min_order ??
+                              1
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              "واحد"}
+                          </p>
+
+                        </div>
+
+                        {/* Stock */}
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                          <span className="font-bold text-slate-500">
+                            موجودی
+                          </span>
+
+                          <span className="font-black">
+
+                            {(
+                              product.stock ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              ""}
+
+                          </span>
+
+                        </div>
 
                       </div>
 
+                      {/* Total Price */}
+
+                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+                        <div className="flex items-center justify-between gap-3">
+
+                          <span className="text-sm font-bold text-slate-600">
+                            مبلغ کل خرید
+                          </span>
+
+                          <span className="text-lg font-black text-blue-700">
+
+                            {(
+                              (
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ) *
+                              getQuantity(
+                                product
+                              )
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
+
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      {/* Store */}
+
+                      <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+
+                        <MapPin className="h-4 w-4" />
+
+                        {product.seller_id
+                          ? stores[
+                              product.seller_id
+                            ] ||
+                            "فروشگاه"
+                          : "فروشگاه نامشخص"}
+
+                      </div>
+
+                      {/* Seller */}
+
+                      <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
+
+                        <Star className="h-4 w-4 fill-current" />
+
+                        فروشنده تأییدشده
+
+                      </div>
+
+                      {/* Buy */}
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addToCart(
+                            product
+                          )
+                        }
+                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                      >
+                        خرید محصول
+                      </button>
+
                     </div>
-
-                    {/* Store */}
-                    <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
-
-                      <MapPin className="h-4 w-4" />
-
-                      {product.seller_id
-                        ? stores[product.seller_id] || "فروشگاه"
-                        : "فروشگاه نامشخص"}
-
-                    </div>
-
-                    <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
-
-                      <Star className="h-4 w-4 fill-current" />
-
-                      فروشنده تأییدشده
-
-                    </div>
-
-                    <button
-                      type="button"
-                      className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white hover:bg-blue-800"
-                    >
-                      مشاهده محصول
-                    </button>
 
                   </div>
 
-                </div>
-
-              ))}
+                )
+              )}
 
             </div>
 
@@ -570,46 +1033,25 @@ export default function DoorsWindowsPage() {
 
       </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-7xl px-5 py-14">
+      {/* ================= FOOTER ================= */}
 
-        <div className="rounded-[2rem] bg-gradient-to-l from-blue-700 to-blue-950 px-6 py-12 text-center text-white">
+      <footer className="bg-slate-950 py-10 text-center text-sm text-slate-400">
 
-          <h2 className="text-2xl font-black">
-            فروشنده درب و پنجره هستید؟
-          </h2>
+        <div className="mx-auto max-w-7xl px-5">
 
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-8 text-blue-100">
-            فروشگاه خود را در سرچنو ثبت کنید و محصولاتتان را
-            به مشتریان جدید معرفی کنید.
+          <div className="font-black text-white">
+            سرچنو
+          </div>
+
+          <p className="mt-2">
+            بازار هوشمند ساخت‌وساز
           </p>
 
-          <Link
-            href="/register"
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800 hover:bg-blue-50"
-          >
-            <Phone className="h-5 w-5" />
-            ثبت فروشگاه
-          </Link>
+          <p className="mt-5 text-xs">
+            © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
+          </p>
 
         </div>
-
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-slate-950 px-5 py-10 text-center text-sm text-slate-400">
-
-        <div className="font-black text-white">
-          سرچنو
-        </div>
-
-        <p className="mt-2">
-          بازار هوشمند ساخت‌وساز
-        </p>
-
-        <p className="mt-5 text-xs text-slate-600">
-          © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
-        </p>
 
       </footer>
 
