@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Search,
+  ArrowRight,
   MapPin,
-  ArrowLeft,
+  Search,
+  ShieldCheck,
   Star,
-  CheckCircle2,
-  Package,
-  Building2,
-  Phone,
-  Loader2,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
@@ -39,195 +35,415 @@ type StoreInfo = {
   name: string | null;
 };
 
-const categories = [
-  "همه",
-  "ایزوگام",
-  "قیر",
-  "عایق رطوبتی",
-  "عایق حرارتی",
-  "عایق صوتی",
-  "پشم سنگ",
-  "پشم شیشه",
-  "XPS",
-  "EPS و یونولیت",
-  "فوم",
-  "عایق الاستومری",
-  "ژئوممبران",
-  "مواد آب‌بندی",
-  "چسب آب‌بندی",
-];
-
-const cities = [
-  "همه شهرها",
-  "تبریز",
-  "تهران",
-  "ارومیه",
-  "زنجان",
-];
+type CartItem = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+  storeName: string;
+};
 
 export default function InsulationPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
-
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
   const [search, setSearch] = useState("");
-  const [city, setCity] = useState("همه شهرها");
-  const [category, setCategory] = useState("همه");
-  const [sort, setSort] = useState("جدیدترین");
+  const [cartCount, setCartCount] = useState(0);
+
+  const [quantities, setQuantities] = useState<
+    Record<string, number>
+  >({});
+
+  /* =========================
+     مقدار خرید
+  ========================= */
+
+  const getQuantity = (product: Product) => {
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    return quantities[product.id] ?? minOrder;
+  };
+
+  /* =========================
+     افزایش مقدار
+  ========================= */
+
+  const increaseQuantity = (
+    product: Product
+  ) => {
+    const current = getQuantity(product);
+    const stock = product.stock ?? 0;
+
+    if (stock > 0 && current >= stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current + 1,
+    }));
+  };
+
+  /* =========================
+     کاهش مقدار
+  ========================= */
+
+  const decreaseQuantity = (
+    product: Product
+  ) => {
+    const current = getQuantity(product);
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    if (current <= minOrder) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current - 1,
+    }));
+  };
+
+  /* =========================
+     تغییر مستقیم تعداد
+  ========================= */
+
+  const changeQuantity = (
+    product: Product,
+    value: string
+  ) => {
+    if (value === "") {
+      return;
+    }
+
+    const quantity = Number(value);
+
+    if (Number.isNaN(quantity)) {
+      return;
+    }
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    const stock = product.stock ?? 0;
+
+    if (quantity < minOrder) {
+      return;
+    }
+
+    if (stock > 0 && quantity > stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: quantity,
+    }));
+  };
+
+  /* =========================
+     افزودن به سبد خرید
+  ========================= */
+
+  const addToCart = (
+    product: Product
+  ) => {
+    const quantity = getQuantity(product);
+
+    const price =
+      product.customer_price ??
+      product.price ??
+      0;
+
+    const storeName =
+      product.seller_id
+        ? stores[product.seller_id] ||
+          "فروشگاه"
+        : "فروشگاه نامشخص";
+
+    const newItem: CartItem = {
+      productId: product.id,
+
+      name:
+        product.name ||
+        "محصول بدون نام",
+
+      price,
+
+      quantity,
+
+      unit:
+        product.unit ||
+        "عدد",
+
+      storeName,
+    };
+
+    const existingCart: CartItem[] =
+      JSON.parse(
+        localStorage.getItem(
+          "sercheno_cart"
+        ) || "[]"
+      );
+
+    const existingIndex =
+      existingCart.findIndex(
+        (item) =>
+          item.productId ===
+          product.id
+      );
+
+    if (existingIndex >= 0) {
+      existingCart[
+        existingIndex
+      ].quantity += quantity;
+    } else {
+      existingCart.push(newItem);
+    }
+
+    localStorage.setItem(
+      "sercheno_cart",
+      JSON.stringify(existingCart)
+    );
+
+    window.dispatchEvent(
+      new Event("sercheno-cart-updated")
+    );
+
+    alert(
+      "محصول با موفقیت به سبد خرید اضافه شد."
+    );
+  };
+
+  /* =========================
+     دریافت محصولات
+  ========================= */
 
   useEffect(() => {
     loadProducts();
   }, []);
 
+  /* =========================
+     بروزرسانی شمارنده سبد
+  ========================= */
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      try {
+        const cart: CartItem[] =
+          JSON.parse(
+            localStorage.getItem(
+              "sercheno_cart"
+            ) || "[]"
+          );
+
+        const count = cart.reduce(
+          (
+            total: number,
+            item: CartItem
+          ) =>
+            total +
+            Number(item.quantity || 0),
+          0
+        );
+
+        setCartCount(count);
+      } catch (error) {
+        console.error(
+          "CART COUNT ERROR:",
+          error
+        );
+
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+
+    window.addEventListener(
+      "sercheno-cart-updated",
+      updateCartCount
+    );
+
+    window.addEventListener(
+      "storage",
+      updateCartCount
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sercheno-cart-updated",
+        updateCartCount
+      );
+
+      window.removeEventListener(
+        "storage",
+        updateCartCount
+      );
+    };
+  }, []);
+
+  /* =========================
+     بارگذاری محصولات عایق
+  ========================= */
+
   const loadProducts = async () => {
     try {
       setLoading(true);
-      setError("");
 
-      const { data, error: productError } = await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("products")
         .select(
           "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
         )
-        .eq("category", "insulation")
-        .eq("status", "active")
-        .order("created_at", {
-          ascending: false,
-        });
+        .eq(
+          "category",
+          "insulation"
+        )
+        .eq(
+          "status",
+          "active"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
-      if (productError) {
-        console.error("INSULATION PRODUCTS ERROR:", productError);
-        setError("دریافت محصولات با خطا مواجه شد.");
+      if (error) {
+        console.error(
+          "INSULATION PRODUCTS ERROR:",
+          error
+        );
+
         return;
       }
 
-      const productList = data || [];
-
-      setProducts(productList);
+      setProducts(data || []);
 
       const sellerIds = [
         ...new Set(
-          productList
-            .map((product) => product.seller_id)
+          (data || [])
+            .map(
+              (product) =>
+                product.seller_id
+            )
             .filter(Boolean)
         ),
       ];
 
       if (sellerIds.length > 0) {
-        const { data: storeData, error: storeError } =
-          await supabase
-            .from("stores")
-            .select("id,name")
-            .in("id", sellerIds);
+        const {
+          data: storeData,
+          error: storeError,
+        } = await supabase
+          .from("stores")
+          .select("id,name")
+          .in(
+            "id",
+            sellerIds
+          );
 
         if (storeError) {
-          console.error("INSULATION STORE ERROR:", storeError);
+          console.error(
+            "STORE ERROR:",
+            storeError
+          );
         }
 
-        const storeMap: Record<string, string> = {};
+        const storeMap: Record<
+          string,
+          string
+        > = {};
 
-        (storeData || []).forEach((store: StoreInfo) => {
-          storeMap[store.id] = store.name || "فروشگاه";
-        });
+        (
+          storeData || []
+        ).forEach(
+          (
+            store: StoreInfo
+          ) => {
+            storeMap[
+              store.id
+            ] =
+              store.name ||
+              "فروشگاه";
+          }
+        );
 
         setStores(storeMap);
-      } else {
-        setStores({});
       }
-    } catch (err) {
-      console.error("INSULATION LOAD ERROR:", err);
-      setError("دریافت محصولات با خطا مواجه شد.");
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
+  /* =========================
+     جستجوی محصولات
+  ========================= */
 
-    if (category !== "همه") {
-      result = result.filter(
-        (product) =>
-          product.category?.trim() === category
-      );
-    }
+  const filteredProducts =
+    products.filter(
+      (product) => {
+        const searchText =
+          search
+            .trim()
+            .toLowerCase();
 
-    if (city !== "همه شهرها") {
-      result = result.filter(
-        (product) =>
+        if (!searchText) {
+          return true;
+        }
+
+        return (
+          product.name
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.brand
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.model
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
           product.description
             ?.toLowerCase()
-            .includes(city.toLowerCase()) ||
-          stores[product.seller_id || ""] === city
-      );
-    }
-
-    if (search.trim()) {
-      const query = search.trim().toLowerCase();
-
-      result = result.filter((product) => {
-        const sellerName =
-          stores[product.seller_id || ""] || "";
-
-        const text = [
-          product.name,
-          product.description,
-          product.category,
-          product.brand,
-          product.model,
-          sellerName,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return text.includes(query);
-      });
-    }
-
-    if (sort === "بیشترین امتیاز") {
-      // فعلاً امتیاز در جدول products وجود ندارد،
-      // بنابراین ترتیب ثبت محصولات حفظ می‌شود.
-      result = [...result];
-    }
-
-    if (sort === "ارزان‌ترین") {
-      result.sort(
-        (a, b) =>
-          Number(
-            a.customer_price ??
-              a.price ??
-              0
-          ) -
-          Number(
-            b.customer_price ??
-              b.price ??
-              0
-          )
-      );
-    }
-
-    return result;
-  }, [
-    products,
-    search,
-    city,
-    category,
-    sort,
-    stores,
-  ]);
+            .includes(
+              searchText
+            )
+        );
+      }
+    );
 
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* HEADER */}
 
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+      {/* ================= HEADER ================= */}
+
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
 
           <Link
             href="/"
@@ -235,7 +451,7 @@ export default function InsulationPage() {
           >
             <img
               src="/logo.png"
-              alt="لوگوی سرچنو"
+              alt="سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
@@ -250,813 +466,607 @@ export default function InsulationPage() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
-
-            <Link
-              href="/"
-              className="hover:text-blue-700"
-            >
-              خانه
-            </Link>
-
-            <Link
-              href="/materials"
-              className="font-bold text-blue-700"
-            >
-              مصالح و تجهیزات
-            </Link>
-
-            <Link
-              href="/service"
-              className="hover:text-blue-700"
-            >
-              خدمات ساختمانی
-            </Link>
-
-            <Link
-              href="/about"
-              className="hover:text-blue-700"
-            >
-              درباره سرچنو
-            </Link>
-
-          </nav>
-
-          <div className="flex items-center gap-2">
-
-            <Link
-              href="/login"
-              className="hidden rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100 sm:block"
-            >
-              ورود
-            </Link>
-
-            <Link
-              href="/register"
-              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
-            >
-              ثبت‌نام
-            </Link>
-
-          </div>
-        </div>
-      </header>
-
-      {/* HERO */}
-
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
-
-        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
-
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
-
-        <div className="relative mx-auto max-w-7xl px-5 py-10 lg:py-14">
-
-          <div className="mx-auto mb-8 max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
-
-            <img
-              src="/materials/insulation.jpg"
-              alt="عایق و ایزوگام ساختمانی"
-              className="h-64 w-full object-cover sm:h-80 lg:h-[420px]"
-            />
-
-          </div>
-
-          <div className="mx-auto max-w-4xl text-center text-white">
-
-            <Link
-              href="/materials"
-              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              بازگشت به مصالح و تجهیزات
-            </Link>
-
-            <h1 className="text-3xl font-black leading-tight sm:text-5xl">
-              عایق، ایزوگام و
-
-              <span className="mt-2 block text-cyan-300">
-                آب‌بندی ساختمان
-              </span>
-            </h1>
-
-            <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-              انواع ایزوگام، قیر، عایق‌های حرارتی و صوتی،
-              پشم سنگ، پشم شیشه، XPS، یونولیت، فوم،
-              ژئوممبران و محصولات آب‌بندی را از
-              تأمین‌کنندگان ساختمانی پیدا کنید.
-            </p>
-
-            {/* SEARCH */}
-
-            <div className="mx-auto mt-8 rounded-3xl bg-white p-3 shadow-2xl">
-
-              <div className="flex flex-col gap-3 lg:flex-row">
-
-                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
-
-                  <Search className="h-5 w-5 text-slate-400" />
-
-                  <input
-                    value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
-                    }
-                    type="text"
-                    placeholder="مثلاً ایزوگام، پشم سنگ، XPS، قیر..."
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
-                  />
-
-                </div>
-
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
-
-                  <MapPin className="h-5 w-5 text-slate-400" />
-
-                  <select
-                    value={city}
-                    onChange={(e) =>
-                      setCity(e.target.value)
-                    }
-                    className="w-full bg-transparent text-sm text-slate-700 outline-none"
-                  >
-                    {cities.map((item) => (
-                      <option key={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-
-                </div>
-
-                <button
-                  type="button"
-                  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
-                >
-                  جست‌وجو
-                </button>
-
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* CATEGORIES */}
-
-      <section className="mx-auto max-w-7xl px-5 py-10">
-
-        <div className="mb-6">
-
-          <span className="text-sm font-bold text-blue-700">
-            دسته‌بندی
-          </span>
-
-          <h2 className="mt-2 text-2xl font-black">
-            نوع عایق و مصالح مورد نیاز
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-500">
-            محصول مورد نظر خود را انتخاب کنید.
-          </p>
-
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-
-          {categories.map((item) => (
-
-            <button
-              key={item}
-              type="button"
-              onClick={() => setCategory(item)}
-              className={`rounded-full px-5 py-3 text-sm font-bold transition ${
-                category === item
-                  ? "bg-blue-700 text-white"
-                  : "border border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700"
-              }`}
-            >
-              {item}
-            </button>
-
-          ))}
-
-        </div>
-      </section>
-
-      {/* PRODUCTS */}
-
-      <section className="mx-auto max-w-7xl px-5 pb-16">
-
-        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
-
-          {/* FILTER */}
-
-          <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
-
-            <h3 className="font-black">
-              فیلتر محصولات
-            </h3>
-
-            <div className="mt-7 space-y-6">
-
-              <div>
-
-                <label className="text-sm font-bold">
-                  نوع محصول
-                </label>
-
-                <select
-                  value={category}
-                  onChange={(e) =>
-                    setCategory(e.target.value)
-                  }
-                  className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none"
-                >
-                  {categories.map((item) => (
-                    <option key={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-
-              </div>
-
-              <div>
-
-                <label className="text-sm font-bold">
-                  شهر
-                </label>
-
-                <select
-                  value={city}
-                  onChange={(e) =>
-                    setCity(e.target.value)
-                  }
-                  className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none"
-                >
-                  {cities.map((item) => (
-                    <option key={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-
-              </div>
-
-              <div>
-
-                <label className="text-sm font-bold">
-                  نحوه فروش
-                </label>
-
-                <div className="mt-3 space-y-3 text-sm">
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    عددی
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    متری
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    کیلویی
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    تنی
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    عمده
-                  </label>
-
-                </div>
-
-              </div>
-
-              <div className="border-t border-slate-100 pt-5">
-
-                <label className="flex items-center gap-3 text-sm">
-
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4"
-                  />
-
-                  فقط تأمین‌کنندگان تأییدشده
-
-                </label>
-
-              </div>
-
-            </div>
-          </aside>
-
-          {/* PRODUCT LIST */}
-
-          <div>
-
-            <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-
-              <div>
-
-                <h2 className="text-2xl font-black">
-                  محصولات عایق و ایزوگام
-                </h2>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  فقط محصولات تأییدشده توسط مدیریت سرچنو نمایش داده می‌شوند.
-                </p>
-
-              </div>
-
-              <select
-                value={sort}
-                onChange={(e) =>
-                  setSort(e.target.value)
-                }
-                className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none"
-              >
-                <option>جدیدترین</option>
-                <option>بیشترین امتیاز</option>
-                <option>ارزان‌ترین</option>
-              </select>
-
-            </div>
-
-            {/* LOADING */}
-
-            {loading && (
-
-              <div className="flex min-h-64 items-center justify-center rounded-3xl border border-slate-200 bg-white">
-
-                <div className="text-center">
-
-                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-700" />
-
-                  <p className="mt-4 text-sm text-slate-500">
-                    در حال دریافت محصولات تأییدشده...
-                  </p>
-
-                </div>
-
-              </div>
-
-            )}
-
-            {/* ERROR */}
-
-            {!loading && error && (
-
-              <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
-
-                <p className="font-bold text-red-700">
-                  {error}
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    window.location.reload()
-                  }
-                  className="mt-5 rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white"
-                >
-                  تلاش مجدد
-                </button>
-
-              </div>
-
-            )}
-
-            {/* EMPTY */}
-
-            {!loading &&
-              !error &&
-              filteredProducts.length === 0 && (
-
-                <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center">
-
-                  <Package className="mx-auto h-12 w-12 text-slate-300" />
-
-                  <h3 className="mt-5 text-xl font-black">
-                    هنوز محصول تأییدشده‌ای وجود ندارد
-                  </h3>
-
-                  <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500">
-                    پس از ثبت محصول توسط فروشنده و تأیید آن
-                    در پنل مدیریت سرچنو، محصول در این صفحه
-                    نمایش داده خواهد شد.
-                  </p>
-
-                </div>
-
-              )}
-
-            {/* PRODUCTS */}
-
-            {!loading &&
-              !error &&
-              filteredProducts.length > 0 && (
-
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-
-                  {filteredProducts.map((product) => {
-
-                    const storeName =
-                      product.seller_id
-                        ? stores[product.seller_id] ||
-                          "فروشگاه"
-                        : "فروشگاه نامشخص";
-
-                    const customerPrice =
-                      product.customer_price ??
-                      product.price ??
-                      0;
-
-                    return (
-                      <div
-                        key={product.id}
-                        className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                      >
-
-                        {/* IMAGE */}
-
-                        <div className="relative flex h-56 items-center justify-center overflow-hidden bg-slate-100">
-
-                          <Package className="h-16 w-16 text-slate-300" />
-
-                          <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
-                            {product.category || "عایق ساختمانی"}
-                          </div>
-
-                        </div>
-
-                        {/* CONTENT */}
-
-                        <div className="p-5">
-
-                          <div className="flex items-center justify-between">
-
-                            <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
-
-                              <Star className="h-4 w-4 fill-current" />
-
-                              ۵.۰
-
-                            </div>
-
-                            <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
-
-                              <CheckCircle2 className="h-4 w-4" />
-
-                              تأییدشده
-
-                            </span>
-
-                          </div>
-
-                          <h3 className="mt-4 font-black">
-                            {product.name ||
-                              "محصول بدون نام"}
-                          </h3>
-
-                          {product.brand && (
-                            <p className="mt-2 text-sm text-slate-500">
-                              برند: {product.brand}
-                            </p>
-                          )}
-
-                          {product.model && (
-                            <p className="mt-1 text-sm text-slate-500">
-                              مدل: {product.model}
-                            </p>
-                          )}
-
-                          {product.description && (
-                            <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                              {product.description}
-                            </p>
-                          )}
-
-                          {/* SELLER */}
-
-                          <div className="mt-4 flex items-center gap-2 text-sm font-bold text-slate-700">
-
-                            <Building2 className="h-4 w-4 text-blue-700" />
-
-                            {storeName}
-
-                          </div>
-
-                          {/* CITY */}
-
-                          <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-
-                            <MapPin className="h-4 w-4" />
-
-                            تبریز
-
-                          </div>
-
-                          {/* PRICE */}
-
-                          <div className="mt-5 flex items-center justify-between rounded-xl bg-slate-50 p-3">
-
-                            <span className="text-xs font-bold text-slate-500">
-                              قیمت مشتری
-                            </span>
-
-                            <span className="font-black text-blue-700">
-                              {customerPrice.toLocaleString(
-                                "fa-IR"
-                              )}{" "}
-                              تومان
-                            </span>
-
-                          </div>
-
-                          {/* STOCK */}
-
-                          <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
-
-                            <span className="text-xs font-bold text-slate-500">
-                              موجودی
-                            </span>
-
-                            <span className="font-black">
-                              {(product.stock ?? 0).toLocaleString(
-                                "fa-IR"
-                              )}{" "}
-                              {product.unit || ""}
-                            </span>
-
-                          </div>
-
-                          {/* DETAILS */}
-
-                          <Link
-                            href={`/materials/insulation/${product.id}`}
-                            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
-                          >
-                            مشاهده محصول
-
-                            <ArrowLeft className="h-4 w-4" />
-
-                          </Link>
-
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                </div>
-
-              )}
-
-          </div>
-        </div>
-      </section>
-
-      {/* BULK */}
-
-      <section className="mx-auto max-w-7xl px-5 pb-16">
-
-        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-l from-slate-900 to-blue-950 p-8 text-white lg:p-12">
-
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-
-            <div>
-
-              <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold">
-                تأمین عمده
-              </span>
-
-              <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-                خرید عمده عایق و ایزوگام
-              </h2>
-
-              <p className="mt-4 leading-8 text-slate-300">
-                برای پروژه‌های ساختمانی، عمرانی و صنعتی
-                می‌توانید تأمین‌کنندگان عمده ایزوگام،
-                قیر، عایق و محصولات آب‌بندی را پیدا کنید.
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش عمده
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش متری
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش کیلویی
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  فروش تنی
-                </span>
-
-              </div>
-
-            </div>
-
-            <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
-
-              <div className="flex items-center gap-4">
-
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
-
-                  <Package className="h-7 w-7" />
-
-                </div>
-
-                <div>
-
-                  <h3 className="font-black">
-                    نیاز به تأمین عمده دارید؟
-                  </h3>
-
-                  <p className="mt-1 text-sm text-slate-300">
-                    با فروشندگان و تأمین‌کنندگان ارتباط بگیرید.
-                  </p>
-
-                </div>
-
-              </div>
-
-              <Link
-                href="/register"
-                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-black text-blue-900"
-              >
-                ثبت فروشگاه و محصول
-
-                <ArrowLeft className="h-4 w-4" />
-
-              </Link>
-
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-
-      <section className="px-5 pb-16">
-
-        <div className="mx-auto max-w-7xl rounded-[2rem] bg-blue-700 px-6 py-14 text-center text-white">
-
-          <Building2 className="mx-auto h-10 w-10" />
-
-          <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-            فروشنده عایق و ایزوگام هستید؟
-          </h2>
-
-          <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه خود را در سرچنو ثبت کنید و
-            محصولات عایق و آب‌بندی خود را
-            در معرض دید خریداران قرار دهید.
-          </p>
+          {/* Cart */}
 
           <Link
-            href="/register"
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
+            href="/cart"
+            className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
+            title="سبد خرید"
           >
-            ثبت فروشگاه
+            🛒
 
-            <ArrowLeft className="h-4 w-4" />
+            {cartCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                {cartCount.toLocaleString(
+                  "fa-IR"
+                )}
+              </span>
+            )}
+          </Link>
 
+          <Link
+            href="/materials"
+            className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
+          >
+            <ArrowRight className="h-4 w-4" />
+
+            بازگشت به مصالح
           </Link>
 
         </div>
-      </section>
+      </header>
 
-      {/* FOOTER */}
+      {/* ================= HERO ================= */}
 
-      <footer className="bg-slate-950 text-slate-300">
+      <section className="relative overflow-hidden">
 
-        <div className="mx-auto max-w-7xl px-5 py-12">
+        <div className="relative h-[420px]">
 
-          <div className="grid gap-10 md:grid-cols-4">
+          <img
+            src="/materials/insulation.jpg"
+            alt="عایق و عایق‌کاری ساختمان"
+            className="h-full w-full object-cover"
+          />
 
-            <div className="md:col-span-2">
+          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/65 to-slate-950/20" />
 
-              <Link
-                href="/"
-                className="flex items-center gap-3"
-              >
+          <div className="absolute inset-0 flex items-center">
 
-                <img
-                  src="/logo.png"
-                  alt="سرچنو"
-                  className="h-12 w-12 rounded-xl object-contain"
-                />
+            <div className="mx-auto w-full max-w-7xl px-5 text-white">
 
-                <div>
+              <div className="max-w-3xl">
 
-                  <div className="text-xl font-black text-white">
-                    سرچنو
-                  </div>
+                <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
+                  عایق و عایق‌کاری ساختمان
+                </span>
 
-                  <div className="text-xs text-slate-500">
-                    بازار هوشمند ساخت‌وساز
-                  </div>
+                <h1 className="mt-5 text-4xl font-black sm:text-6xl">
+                  عایق‌کاری
+                </h1>
+
+                <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
+                  انواع عایق حرارتی، عایق صوتی،
+                  عایق رطوبتی، عایق‌های الاستومری،
+                  پشم سنگ، پشم شیشه، فوم و تجهیزات
+                  مورد نیاز برای عایق‌کاری پروژه‌های
+                  ساختمانی را از تأمین‌کنندگان معتبر
+                  در سرچنو پیدا کنید.
+                </p>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    عایق حرارتی
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    عایق صوتی
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    عایق رطوبتی
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    پشم سنگ
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    فوم و عایق‌های نوین
+                  </span>
 
                 </div>
 
-              </Link>
+              </div>
 
-              <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
-                پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان،
-                تأمین‌کنندگان و متخصصان صنعت ساختمان.
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ================= SEARCH ================= */}
+
+      <section className="mx-auto max-w-7xl px-5 py-10">
+
+        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+
+          <div className="flex flex-col gap-3 md:flex-row">
+
+            <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
+
+              <Search className="h-5 w-5 text-slate-400" />
+
+              <input
+                type="text"
+                value={search}
+                onChange={(e) =>
+                  setSearch(
+                    e.target.value
+                  )
+                }
+                placeholder="مثلاً پشم سنگ، عایق الاستومری، ایزوگام، فوم سقفی..."
+                className="w-full bg-transparent outline-none"
+              />
+
+            </div>
+
+            <button
+              type="button"
+              className="rounded-2xl bg-blue-700 px-8 py-4 font-black text-white hover:bg-blue-800"
+            >
+              جست‌وجو
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ================= SUB CATEGORIES ================= */}
+
+      <section className="mx-auto max-w-7xl px-5 pb-14">
+
+        <div className="mb-7">
+
+          <span className="text-sm font-bold text-blue-700">
+            دسته‌بندی تخصصی
+          </span>
+
+          <h2 className="mt-2 text-2xl font-black">
+            چه نوع عایقی نیاز دارید؟
+          </h2>
+
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+            محصولات عایق بر اساس نوع عملکرد،
+            محل استفاده، مقاومت حرارتی،
+            مقاومت رطوبتی، عایق صوتی و کاربرد
+            در بخش‌های مختلف ساختمان دسته‌بندی شده‌اند.
+          </p>
+
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+          {[
+            "عایق حرارتی",
+            "عایق صوتی",
+            "عایق رطوبتی",
+            "عایق حرارتی و صوتی",
+            "عایق کف ساختمان",
+            "عایق سقف",
+            "عایق دیوار",
+            "عایق نما",
+            "عایق پشت‌بام",
+            "عایق تأسیسات",
+            "عایق لوله",
+            "عایق کانال",
+            "عایق موتورخانه",
+            "عایق سیستم‌های تهویه",
+            "پشم سنگ",
+            "پشم سنگ تخته‌ای",
+            "پشم سنگ پتویی",
+            "پشم سنگ لوله‌ای",
+            "پشم شیشه",
+            "پشم شیشه رولی",
+            "پشم شیشه پانلی",
+            "عایق الاستومری",
+            "عایق الاستومری رولی",
+            "عایق الاستومری لوله‌ای",
+            "عایق الاستومری چسب‌دار",
+            "فوم پلی‌اتیلن",
+            "فوم پلی‌استایرن",
+            "فوم XPS",
+            "فوم EPS",
+            "فوم پلی‌یورتان",
+            "فوم اسپری",
+            "فوم سخت",
+            "عایق ایزوگام",
+            "ایزوگام پشت‌بام",
+            "ایزوگام سرویس بهداشتی",
+            "ایزوگام فونداسیون",
+            "عایق قیری",
+            "عایق نانو",
+            "عایق رطوبتی نانو",
+            "عایق صوتی دیوار",
+            "عایق صوتی کف",
+            "عایق صوتی سقف",
+            "عایق صوتی آکوستیک",
+            "ملات عایق",
+            "رنگ عایق",
+            "چسب عایق",
+            "متعلقات نصب عایق",
+          ].map(
+            (item) => (
+              <button
+                key={item}
+                type="button"
+                className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
+              >
+                {item}
+              </button>
+            )
+          )}
+
+        </div>
+
+      </section>
+
+      {/* ================= PRODUCTS ================= */}
+
+      <section className="bg-white py-16">
+
+        <div className="mx-auto max-w-7xl px-5">
+
+          <div className="mb-8">
+
+            <span className="text-sm font-bold text-emerald-600">
+              محصولات تأییدشده
+            </span>
+
+            <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+              محصولات عایق ساختمان
+            </h2>
+
+            <p className="mt-3 text-sm text-slate-500">
+              محصولات تأییدشده توسط تیم سرچنو
+              در این بخش نمایش داده می‌شوند.
+            </p>
+
+          </div>
+
+          {loading ? (
+
+            <div className="py-16 text-center">
+
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
+
+              <p className="mt-5 font-bold text-slate-500">
+                در حال دریافت محصولات...
               </p>
 
             </div>
 
-            <div>
+          ) : filteredProducts.length === 0 ? (
 
-              <h3 className="font-bold text-white">
-                خدمات سرچنو
+            <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
+                🧱
+              </div>
+
+              <h3 className="mt-5 text-xl font-black">
+                محصولی پیدا نشد
               </h3>
 
-              <div className="mt-5 space-y-3 text-sm">
-
-                <Link
-                  href="/materials"
-                  className="block hover:text-white"
-                >
-                  مصالح و تجهیزات
-                </Link>
-
-                <Link
-                  href="/service"
-                  className="block hover:text-white"
-                >
-                  خدمات ساختمانی
-                </Link>
-
-                <Link
-                  href="/register"
-                  className="block hover:text-white"
-                >
-                  ثبت فروشگاه
-                </Link>
-
-              </div>
+              <p className="mt-2 text-sm text-slate-500">
+                در حال حاضر محصول تأییدشده‌ای
+                در این دسته وجود ندارد.
+              </p>
 
             </div>
 
-            <div>
+          ) : (
 
-              <h3 className="font-bold text-white">
-                ارتباط با ما
-              </h3>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
-              <div className="mt-5 space-y-3 text-sm">
+              {filteredProducts.map(
+                (product) => (
 
-                <Link
-                  href="/about"
-                  className="block hover:text-white"
-                >
-                  درباره سرچنو
-                </Link>
+                  <div
+                    key={product.id}
+                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                  >
 
-                <p className="flex items-center gap-2">
+                    {/* Product Image/Icon */}
 
-                  <Phone className="h-4 w-4" />
+                    <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
+                      🧱
+                    </div>
 
-                  تماس با ما
+                    <div className="p-6">
 
-                </p>
+                      {/* Status */}
 
-                <p>
-                  قوانین و مقررات
-                </p>
+                      <div className="flex items-center justify-between gap-3">
 
-                <p>
-                  پشتیبانی
-                </p>
+                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                          عایق ساختمان
+                        </span>
 
-              </div>
+                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+
+                          <ShieldCheck className="h-3 w-3" />
+
+                          تأییدشده
+
+                        </span>
+
+                      </div>
+
+                      {/* Name */}
+
+                      <h3 className="mt-4 text-lg font-black">
+                        {product.name ||
+                          "محصول بدون نام"}
+                      </h3>
+
+                      {/* Brand */}
+
+                      {product.brand && (
+                        <p className="mt-2 text-sm text-slate-500">
+                          برند:{" "}
+                          {product.brand}
+                        </p>
+                      )}
+
+                      {/* Model */}
+
+                      {product.model && (
+                        <p className="mt-1 text-sm text-slate-500">
+                          مدل:{" "}
+                          {product.model}
+                        </p>
+                      )}
+
+                      {/* Description */}
+
+                      {product.description && (
+                        <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                          {
+                            product.description
+                          }
+                        </p>
+                      )}
+
+                      {/* Price + Quantity */}
+
+                      <div className="mt-5 space-y-3">
+
+                        {/* Price */}
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                          <span className="font-bold text-slate-500">
+                            قیمت مشتری
+                          </span>
+
+                          <span className="font-black text-blue-700">
+
+                            {(
+                              product.customer_price ??
+                              product.price ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
+
+                          </span>
+
+                        </div>
+
+                        {/* Quantity */}
+
+                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+                          <div className="mb-3 flex items-center justify-between">
+
+                            <span className="text-sm font-black text-slate-800">
+                              مقدار خرید
+                            </span>
+
+                            <span className="text-xs font-bold text-slate-400">
+                              واحد فروش:{" "}
+                              {product.unit ||
+                                "عدد"}
+                            </span>
+
+                          </div>
+
+                          <div className="flex items-center gap-2">
+
+                            {/* Minus */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                decreaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+                            >
+                              −
+                            </button>
+
+                            {/* Number Input */}
+
+                            <input
+                              type="number"
+                              min={
+                                product.min_order ||
+                                1
+                              }
+                              max={
+                                product.stock ||
+                                undefined
+                              }
+                              value={
+                                quantities[
+                                  product.id
+                                ] ??
+                                product.min_order ??
+                                1
+                              }
+                              onChange={(e) =>
+                                changeQuantity(
+                                  product,
+                                  e.target.value
+                                )
+                              }
+                              className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                            />
+
+                            {/* Plus */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                increaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white transition hover:bg-blue-800"
+                            >
+                              +
+                            </button>
+
+                          </div>
+
+                          <p className="mt-3 text-center text-xs text-slate-400">
+                            حداقل خرید:{" "}
+                            {(
+                              product.min_order ??
+                              1
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              "واحد"}
+                          </p>
+
+                        </div>
+
+                        {/* Stock */}
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                          <span className="font-bold text-slate-500">
+                            موجودی
+                          </span>
+
+                          <span className="font-black">
+
+                            {(
+                              product.stock ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              ""}
+
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      {/* Total Price */}
+
+                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+                        <div className="flex items-center justify-between gap-3">
+
+                          <span className="text-sm font-bold text-slate-600">
+                            مبلغ کل خرید
+                          </span>
+
+                          <span className="text-lg font-black text-blue-700">
+
+                            {(
+                              (
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ) *
+                              getQuantity(
+                                product
+                              )
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
+
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      {/* Store */}
+
+                      <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+
+                        <MapPin className="h-4 w-4" />
+
+                        {product.seller_id
+                          ? stores[
+                              product.seller_id
+                            ] ||
+                            "فروشگاه"
+                          : "فروشگاه نامشخص"}
+
+                      </div>
+
+                      {/* Seller */}
+
+                      <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
+
+                        <Star className="h-4 w-4 fill-current" />
+
+                        فروشنده تأییدشده
+
+                      </div>
+
+                      {/* Buy */}
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addToCart(
+                            product
+                          )
+                        }
+                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                      >
+                        خرید محصول
+                      </button>
+
+                    </div>
+
+                  </div>
+                )
+              )}
 
             </div>
 
+          )}
+
+        </div>
+
+      </section>
+
+      {/* ================= FOOTER ================= */}
+
+      <footer className="bg-slate-950 py-10 text-center text-sm text-slate-400">
+
+        <div className="mx-auto max-w-7xl px-5">
+
+          <div className="font-black text-white">
+            سرچنو
           </div>
 
-          <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
+          <p className="mt-2">
+            بازار هوشمند ساخت‌وساز
+          </p>
+
+          <p className="mt-5 text-xs">
             © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
-          </div>
+          </p>
 
         </div>
 
