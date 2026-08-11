@@ -3,15 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Search,
+  ArrowRight,
   MapPin,
-  ArrowLeft,
-  Star,
-  CheckCircle2,
+  Search,
   ShieldCheck,
-  Phone,
-  Zap,
-  Lightbulb,
+  Star,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
@@ -39,34 +35,310 @@ type StoreInfo = {
   name: string | null;
 };
 
+type CartItem = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+  storeName: string;
+};
+
 export default function ElectricalLightingPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [cartCount, setCartCount] = useState(0);
+
+  const [quantities, setQuantities] = useState<
+    Record<string, number>
+  >({});
+
+  /* =========================
+     مقدار خرید
+  ========================= */
+
+  const getQuantity = (product: Product) => {
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    return quantities[product.id] ?? minOrder;
+  };
+
+  /* =========================
+     افزایش مقدار
+  ========================= */
+
+  const increaseQuantity = (
+    product: Product
+  ) => {
+    const current = getQuantity(product);
+
+    const stock = product.stock ?? 0;
+
+    if (stock > 0 && current >= stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current + 1,
+    }));
+  };
+
+  /* =========================
+     کاهش مقدار
+  ========================= */
+
+  const decreaseQuantity = (
+    product: Product
+  ) => {
+    const current = getQuantity(product);
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    if (current <= minOrder) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: current - 1,
+    }));
+  };
+
+  /* =========================
+     تغییر مستقیم تعداد
+  ========================= */
+
+  const changeQuantity = (
+    product: Product,
+    value: string
+  ) => {
+    if (value === "") {
+      return;
+    }
+
+    const quantity = Number(value);
+
+    if (Number.isNaN(quantity)) {
+      return;
+    }
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    const stock = product.stock ?? 0;
+
+    if (quantity < minOrder) {
+      return;
+    }
+
+    if (stock > 0 && quantity > stock) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: quantity,
+    }));
+  };
+
+  /* =========================
+     افزودن به سبد خرید
+  ========================= */
+
+  const addToCart = (
+    product: Product
+  ) => {
+    const quantity = getQuantity(product);
+
+    const price =
+      product.customer_price ??
+      product.price ??
+      0;
+
+    const storeName =
+      product.seller_id
+        ? stores[product.seller_id] ||
+          "فروشگاه"
+        : "فروشگاه نامشخص";
+
+    const newItem: CartItem = {
+      productId: product.id,
+
+      name:
+        product.name ||
+        "محصول بدون نام",
+
+      price,
+
+      quantity,
+
+      unit:
+        product.unit ||
+        "عدد",
+
+      storeName,
+    };
+
+    const existingCart: CartItem[] =
+      JSON.parse(
+        localStorage.getItem(
+          "sercheno_cart"
+        ) || "[]"
+      );
+
+    const existingIndex =
+      existingCart.findIndex(
+        (item) =>
+          item.productId ===
+          product.id
+      );
+
+    if (existingIndex >= 0) {
+      existingCart[
+        existingIndex
+      ].quantity += quantity;
+    } else {
+      existingCart.push(
+        newItem
+      );
+    }
+
+    localStorage.setItem(
+      "sercheno_cart",
+      JSON.stringify(
+        existingCart
+      )
+    );
+
+    window.dispatchEvent(
+      new Event(
+        "sercheno-cart-updated"
+      )
+    );
+
+    alert(
+      "محصول با موفقیت به سبد خرید اضافه شد."
+    );
+  };
+
+  /* =========================
+     دریافت محصولات
+  ========================= */
 
   useEffect(() => {
     loadProducts();
   }, []);
 
+  /* =========================
+     بروزرسانی شمارنده سبد
+  ========================= */
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      try {
+        const cart: CartItem[] =
+          JSON.parse(
+            localStorage.getItem(
+              "sercheno_cart"
+            ) || "[]"
+          );
+
+        const count = cart.reduce(
+          (
+            total: number,
+            item: CartItem
+          ) =>
+            total +
+            Number(
+              item.quantity || 0
+            ),
+          0
+        );
+
+        setCartCount(count);
+      } catch (error) {
+        console.error(
+          "CART COUNT ERROR:",
+          error
+        );
+
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+
+    window.addEventListener(
+      "sercheno-cart-updated",
+      updateCartCount
+    );
+
+    window.addEventListener(
+      "storage",
+      updateCartCount
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sercheno-cart-updated",
+        updateCartCount
+      );
+
+      window.removeEventListener(
+        "storage",
+        updateCartCount
+      );
+    };
+  }, []);
+
+  /* =========================
+     بارگذاری محصولات برق و روشنایی
+  ========================= */
+
   const loadProducts = async () => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("products")
         .select(
           "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
         )
-        .eq("category", "electrical-lighting")
-        .eq("status", "active")
-        .order("created_at", {
-          ascending: false,
-        });
+        .eq(
+          "category",
+          "electrical-lighting"
+        )
+        .eq(
+          "status",
+          "active"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
       if (error) {
-        console.error("ELECTRICAL PRODUCTS ERROR:", error);
-        setProducts([]);
+        console.error(
+          "ELECTRICAL LIGHTING PRODUCTS ERROR:",
+          error
+        );
+
         return;
       }
 
@@ -75,64 +347,118 @@ export default function ElectricalLightingPage() {
       const sellerIds = [
         ...new Set(
           (data || [])
-            .map((product) => product.seller_id)
+            .map(
+              (product) =>
+                product.seller_id
+            )
             .filter(Boolean)
         ),
       ];
 
-      if (sellerIds.length > 0) {
-        const { data: storeData, error: storeError } =
-          await supabase
-            .from("stores")
-            .select("id,name")
-            .in("id", sellerIds);
+      if (
+        sellerIds.length > 0
+      ) {
+        const {
+          data: storeData,
+          error: storeError,
+        } = await supabase
+          .from("stores")
+          .select("id,name")
+          .in(
+            "id",
+            sellerIds
+          );
 
         if (storeError) {
-          console.error("ELECTRICAL STORE ERROR:", storeError);
+          console.error(
+            "STORE ERROR:",
+            storeError
+          );
         }
 
-        const storeMap: Record<string, string> = {};
+        const storeMap: Record<
+          string,
+          string
+        > = {};
 
-        (storeData || []).forEach(
-          (store: StoreInfo) => {
-            storeMap[store.id] =
-              store.name || "فروشگاه";
+        (
+          storeData || []
+        ).forEach(
+          (
+            store: StoreInfo
+          ) => {
+            storeMap[
+              store.id
+            ] =
+              store.name ||
+              "فروشگاه";
           }
         );
 
-        setStores(storeMap);
-      } else {
-        setStores({});
+        setStores(
+          storeMap
+        );
       }
     } catch (error) {
-      console.error("ELECTRICAL LOAD ERROR:", error);
-      setProducts([]);
+      console.error(
+        error
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProducts = products.filter((product) => {
-    const searchText = search.trim().toLowerCase();
+  /* =========================
+     جستجوی محصولات
+  ========================= */
 
-    if (!searchText) return true;
+  const filteredProducts =
+    products.filter(
+      (product) => {
+        const searchText =
+          search
+            .trim()
+            .toLowerCase();
 
-    return (
-      product.name?.toLowerCase().includes(searchText) ||
-      product.brand?.toLowerCase().includes(searchText) ||
-      product.model?.toLowerCase().includes(searchText) ||
-      product.description?.toLowerCase().includes(searchText)
+        if (!searchText) {
+          return true;
+        }
+
+        return (
+          product.name
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.brand
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.model
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.description
+            ?.toLowerCase()
+            .includes(
+              searchText
+            )
+        );
+      }
     );
-  });
 
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+
+      {/* ================= HEADER ================= */}
+
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
 
           <Link
             href="/"
@@ -140,7 +466,7 @@ export default function ElectricalLightingPage() {
           >
             <img
               src="/logo.png"
-              alt="لوگوی سرچنو"
+              alt="سرچنو"
               className="h-12 w-12 rounded-2xl object-contain"
             />
 
@@ -155,148 +481,95 @@ export default function ElectricalLightingPage() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
+          {/* Cart */}
 
-            <Link
-              href="/"
-              className="hover:text-blue-700"
-            >
-              خانه
-            </Link>
+          <Link
+            href="/cart"
+            className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
+            title="سبد خرید"
+          >
+            🛒
 
-            <Link
-              href="/materials"
-              className="font-bold text-blue-700"
-            >
-              مصالح و تجهیزات
-            </Link>
+            {cartCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                {cartCount.toLocaleString(
+                  "fa-IR"
+                )}
+              </span>
+            )}
+          </Link>
 
-            <Link
-              href="/service"
-              className="hover:text-blue-700"
-            >
-              خدمات ساختمانی
-            </Link>
+          <Link
+            href="/materials"
+            className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
+          >
+            <ArrowRight className="h-4 w-4" />
 
-            <Link
-              href="/about"
-              className="hover:text-blue-700"
-            >
-              درباره سرچنو
-            </Link>
-
-          </nav>
-
-          <div className="flex items-center gap-2">
-
-            <Link
-              href="/login"
-              className="hidden rounded-xl px-4 py-3 text-sm font-bold sm:block"
-            >
-              ورود
-            </Link>
-
-            <Link
-              href="/register"
-              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 hover:bg-blue-800"
-            >
-              ثبت‌نام
-            </Link>
-
-          </div>
+            بازگشت به مصالح
+          </Link>
 
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
+      {/* ================= HERO ================= */}
 
-        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
+      <section className="relative overflow-hidden">
 
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+        <div className="relative h-[420px]">
 
-        <div className="relative mx-auto max-w-7xl px-5 py-14 lg:py-20">
+          <img
+            src="/materials/electrical-lighting.jpg"
+            alt="تجهیزات برق و روشنایی ساختمان"
+            className="h-full w-full object-cover"
+          />
 
-          <div className="mx-auto max-w-5xl text-center text-white">
+          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/65 to-slate-950/20" />
 
-            {/* تصویر */}
-            <div className="mx-auto mb-8 max-w-4xl overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 shadow-2xl backdrop-blur">
+          <div className="absolute inset-0 flex items-center">
 
-              <img
-                src="/materials/electrical-lighting.jpg"
-                alt="برق و روشنایی ساختمان"
-                className="h-56 w-full object-cover sm:h-72 lg:h-80"
-              />
+            <div className="mx-auto w-full max-w-7xl px-5 text-white">
 
-            </div>
+              <div className="max-w-3xl">
 
-            <Link
-              href="/materials"
-              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur hover:bg-white/20"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              بازگشت به مصالح و تجهیزات
-            </Link>
+                <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
+                  تأسیسات برق و روشنایی ساختمان
+                </span>
 
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
-              <Zap className="h-8 w-8 text-yellow-300" />
-            </div>
+                <h1 className="mt-5 text-4xl font-black sm:text-6xl">
+                  برق و روشنایی
+                </h1>
 
-            <h1 className="text-3xl font-black leading-tight sm:text-5xl">
-              برق و روشنایی
-              <span className="mt-2 block text-cyan-300">
-                ساختمان
-              </span>
-            </h1>
+                <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
+                  انواع سیم و کابل، کلید و پریز،
+                  تجهیزات برق ساختمان، تابلو برق،
+                  چراغ‌ها، لامپ‌ها و تجهیزات روشنایی
+                  مورد نیاز پروژه‌های ساختمانی را از
+                  فروشندگان معتبر در سرچنو پیدا کنید.
+                </p>
 
-            <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-              انواع سیم و کابل، کلید و پریز، لامپ، چراغ،
-              پروژکتور، تابلو برق، فیوز، لوله برق و تجهیزات
-              برق و روشنایی ساختمان را از فروشندگان و
-              تأمین‌کنندگان پیدا کنید.
-            </p>
+                <div className="mt-7 flex flex-wrap gap-3">
 
-            {/* Search */}
-            <div className="mx-auto mt-8 rounded-3xl bg-white p-3 text-right shadow-2xl">
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    سیم و کابل
+                  </span>
 
-              <div className="flex flex-col gap-3 lg:flex-row">
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    کلید و پریز
+                  </span>
 
-                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    تابلو برق
+                  </span>
 
-                  <Search className="h-5 w-5 text-slate-400" />
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    لامپ و چراغ
+                  </span>
 
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
-                    }
-                    placeholder="مثلاً کابل، کلید و پریز، لامپ LED..."
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
-                  />
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    تجهیزات روشنایی
+                  </span>
 
                 </div>
-
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
-
-                  <MapPin className="h-5 w-5 text-slate-400" />
-
-                  <select className="w-full bg-transparent text-sm text-slate-700 outline-none">
-                    <option>تبریز</option>
-                    <option>تهران</option>
-                    <option>ارومیه</option>
-                    <option>زنجان</option>
-                    <option>همه شهرها</option>
-                  </select>
-
-                </div>
-
-                <button
-                  type="button"
-                  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
-                >
-                  جست‌وجو
-                </button>
 
               </div>
 
@@ -307,312 +580,266 @@ export default function ElectricalLightingPage() {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* ================= SEARCH ================= */}
+
       <section className="mx-auto max-w-7xl px-5 py-10">
 
-        <div className="mb-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
 
-          <span className="text-sm font-bold text-blue-700">
-            دسته‌بندی
-          </span>
+          <div className="flex flex-col gap-3 md:flex-row">
 
-          <h2 className="mt-2 text-2xl font-black">
-            تجهیزات برق و روشنایی مورد نیاز خود را انتخاب کنید
-          </h2>
+            <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
 
-          <p className="mt-3 text-sm text-slate-500">
-            از سیم و کابل تا روشنایی و تجهیزات حفاظتی ساختمان.
-          </p>
+              <Search className="h-5 w-5 text-slate-400" />
 
-        </div>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) =>
+                  setSearch(
+                    e.target.value
+                  )
+                }
+                placeholder="مثلاً کابل افشان، کلید و پریز، لامپ LED، چراغ سقفی..."
+                className="w-full bg-transparent outline-none"
+              />
 
-        <div className="flex flex-wrap gap-3">
-
-          {[
-            "همه",
-            "سیم و کابل",
-            "کلید و پریز",
-            "لامپ",
-            "چراغ سقفی",
-            "پروژکتور",
-            "تابلو برق",
-            "فیوز",
-            "لوله برق",
-            "جعبه تقسیم",
-            "روشنایی محوطه",
-            "روشنایی صنعتی",
-            "تجهیزات برق ساختمان",
-            "آیفون",
-          ].map((category, index) => (
+            </div>
 
             <button
-              key={category}
               type="button"
-              className={`rounded-full px-5 py-3 text-sm font-bold transition ${
-                index === 0
-                  ? "bg-blue-700 text-white"
-                  : "border border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700"
-              }`}
+              className="rounded-2xl bg-blue-700 px-8 py-4 font-black text-white hover:bg-blue-800"
             >
-              {category}
+              جست‌وجو
             </button>
 
-          ))}
+          </div>
 
         </div>
 
       </section>
 
-      {/* Main */}
-      <section className="mx-auto max-w-7xl px-5 pb-16">
+      {/* ================= SUB CATEGORIES ================= */}
 
-        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+      <section className="mx-auto max-w-7xl px-5 pb-14">
 
-          {/* Filters */}
-          <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
+        <div className="mb-7">
 
-            <h3 className="font-black">
-              فیلتر محصولات
-            </h3>
+          <span className="text-sm font-bold text-blue-700">
+            دسته‌بندی تخصصی
+          </span>
 
-            <div className="mt-7 space-y-6">
+          <h2 className="mt-2 text-2xl font-black">
+            چه تجهیزات برق و روشنایی نیاز دارید؟
+          </h2>
 
-              <div>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+            محصولات این گروه بر اساس نوع تجهیزات،
+            کاربرد، محل نصب، توان مصرفی، نوع سیستم
+            و کاربری پروژه دسته‌بندی شده‌اند.
+          </p>
 
-                <label className="text-sm font-bold">
-                  نوع محصول
-                </label>
+        </div>
 
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-                  <option>همه موارد</option>
-                  <option>سیم و کابل</option>
-                  <option>کلید و پریز</option>
-                  <option>لامپ</option>
-                  <option>چراغ</option>
-                  <option>پروژکتور</option>
-                  <option>تابلو برق</option>
-                  <option>فیوز</option>
-                  <option>لوله برق</option>
+          {[
+            "سیم برق",
+            "کابل برق",
+            "کابل افشان",
+            "کابل مفتولی",
+            "کابل شبکه",
+            "کابل کواکسیال",
+            "سیم و کابل مخابراتی",
+            "کلید برق",
+            "پریز برق",
+            "کلید و پریز دکوراتیو",
+            "کلید و پریز ضد آب",
+            "دیمر",
+            "تجهیزات تابلو برق",
+            "تابلو برق ساختمانی",
+            "جعبه تقسیم",
+            "فیوز مینیاتوری",
+            "فیوز محافظ جان",
+            "کنتاکتور",
+            "رله",
+            "ترمینال برق",
+            "لامپ LED",
+            "لامپ کم‌مصرف",
+            "لامپ هالوژن",
+            "چراغ سقفی",
+            "چراغ پنلی",
+            "چراغ توکار",
+            "چراغ روکار",
+            "چراغ دیواری",
+            "چراغ محوطه",
+            "پروژکتور",
+            "چراغ صنعتی",
+            "چراغ خیابانی",
+            "چراغ اضطراری",
+            "روشنایی هوشمند",
+            "سنسور حرکتی",
+            "تجهیزات برق هوشمند",
+            "لوله برق",
+            "اتصالات لوله برق",
+            "داکت برق",
+            "سینی کابل",
+            "متعلقات برق ساختمان",
+            "تجهیزات ارت",
+            "تجهیزات حفاظتی برق",
+            "تجهیزات روشنایی پروژه",
+          ].map(
+            (item) => (
+              <button
+                key={item}
+                type="button"
+                className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
+              >
+                {item}
+              </button>
+            )
+          )}
 
-                </select>
+        </div>
 
-              </div>
+      </section>
 
-              <div>
+      {/* ================= PRODUCTS ================= */}
 
-                <label className="text-sm font-bold">
-                  شهر
-                </label>
+      <section className="bg-white py-16">
 
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
+        <div className="mx-auto max-w-7xl px-5">
 
-                  <option>همه شهرها</option>
-                  <option>تبریز</option>
-                  <option>تهران</option>
-                  <option>ارومیه</option>
-                  <option>زنجان</option>
+          <div className="mb-8">
 
-                </select>
+            <span className="text-sm font-bold text-emerald-600">
+              محصولات تأییدشده
+            </span>
 
-              </div>
+            <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+              محصولات برق و روشنایی
+            </h2>
 
-              <div>
+            <p className="mt-3 text-sm text-slate-500">
+              محصولات تأییدشده توسط تیم سرچنو
+              در این بخش نمایش داده می‌شوند.
+            </p>
 
-                <label className="text-sm font-bold">
-                  نوع فروش
-                </label>
+          </div>
 
-                <div className="mt-3 space-y-3 text-sm">
+          {loading ? (
 
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    عددی
-                  </label>
+            <div className="py-16 text-center">
 
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    متری
-                  </label>
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
 
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    حلقه‌ای
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" />
-                    عمده
-                  </label>
-
-                </div>
-
-              </div>
-
-              <div className="border-t border-slate-100 pt-5">
-
-                <label className="flex items-center gap-3 text-sm">
-
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4"
-                  />
-
-                  فقط تأمین‌کنندگان تأییدشده
-
-                </label>
-
-              </div>
-
-            </div>
-
-          </aside>
-
-          {/* Products */}
-          <div>
-
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-              <div>
-
-                <h2 className="text-2xl font-black">
-                  محصولات برق و روشنایی
-                </h2>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  مشاهده محصولات تأییدشده ثبت‌شده توسط فروشندگان سرچنو
-                </p>
-
-              </div>
-
-              <select className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none">
-
-                <option>جدیدترین</option>
-                <option>بیشترین امتیاز</option>
-                <option>ارزان‌ترین</option>
-
-              </select>
+              <p className="mt-5 font-bold text-slate-500">
+                در حال دریافت محصولات...
+              </p>
 
             </div>
 
-            {/* Loading */}
-            {loading ? (
+          ) : filteredProducts.length === 0 ? (
 
-              <div className="py-16 text-center">
+            <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
 
-                <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
-
-                <p className="mt-5 font-bold text-slate-500">
-                  در حال دریافت محصولات...
-                </p>
-
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
+                💡
               </div>
 
-            ) : filteredProducts.length === 0 ? (
+              <h3 className="mt-5 text-xl font-black">
+                محصولی پیدا نشد
+              </h3>
 
-              /* Empty */
-              <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+              <p className="mt-2 text-sm text-slate-500">
+                در حال حاضر محصول تأییدشده‌ای
+                در این دسته وجود ندارد.
+              </p>
 
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
+            </div>
 
-                  <Zap className="h-8 w-8 text-blue-700" />
+          ) : (
 
-                </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
-                <h3 className="mt-5 text-xl font-black">
-                  محصولی پیدا نشد
-                </h3>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  در حال حاضر محصول تأییدشده‌ای در دسته برق و روشنایی وجود ندارد.
-                </p>
-
-                {search && (
-                  <button
-                    type="button"
-                    onClick={() => setSearch("")}
-                    className="mt-5 rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white"
-                  >
-                    پاک کردن جست‌وجو
-                  </button>
-                )}
-
-              </div>
-
-            ) : (
-
-              /* Product Grid */
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-
-                {filteredProducts.map((product) => (
+              {filteredProducts.map(
+                (product) => (
 
                   <div
                     key={product.id}
-                    className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                   >
 
-                    {/* Product Image / Icon */}
-                    <div className="relative flex h-56 items-center justify-center overflow-hidden bg-slate-100">
+                    {/* Product Image/Icon */}
 
-                      <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-blue-50">
-
-                        <Zap className="h-12 w-12 text-blue-700" />
-
-                      </div>
-
-                      <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 backdrop-blur">
-                        برق و روشنایی
-                      </div>
-
+                    <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
+                      💡
                     </div>
 
-                    {/* Product Info */}
-                    <div className="p-5">
+                    <div className="p-6">
 
-                      <div className="flex items-center justify-between gap-2">
+                      {/* Status */}
+
+                      <div className="flex items-center justify-between gap-3">
 
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                          {product.category || "برق و روشنایی"}
+                          برق و روشنایی
                         </span>
 
                         <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
 
-                          <CheckCircle2 className="h-3 w-3" />
+                          <ShieldCheck className="h-3 w-3" />
 
-                          موجود
+                          تأییدشده
 
                         </span>
 
                       </div>
 
+                      {/* Name */}
+
                       <h3 className="mt-4 text-lg font-black">
-                        {product.name || "محصول بدون نام"}
+                        {product.name ||
+                          "محصول بدون نام"}
                       </h3>
+
+                      {/* Brand */}
 
                       {product.brand && (
                         <p className="mt-2 text-sm text-slate-500">
-                          برند: {product.brand}
+                          برند:{" "}
+                          {product.brand}
                         </p>
                       )}
+
+                      {/* Model */}
 
                       {product.model && (
                         <p className="mt-1 text-sm text-slate-500">
-                          مدل: {product.model}
+                          مدل:{" "}
+                          {product.model}
                         </p>
                       )}
+
+                      {/* Description */}
 
                       {product.description && (
                         <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                          {product.description}
+                          {
+                            product.description
+                          }
                         </p>
                       )}
 
-                      {/* Price */}
-                      <div className="mt-5 rounded-xl bg-slate-50 p-3">
+                      {/* Price + Quantity */}
 
-                        <div className="flex items-center justify-between gap-3">
+                      <div className="mt-5 space-y-3">
 
-                          <span className="text-sm font-bold text-slate-500">
+                        {/* Price */}
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                          <span className="font-bold text-slate-500">
                             قیمت مشتری
                           </span>
 
@@ -622,7 +849,156 @@ export default function ElectricalLightingPage() {
                               product.customer_price ??
                               product.price ??
                               0
-                            ).toLocaleString("fa-IR")}{" "}
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
+
+                          </span>
+
+                        </div>
+
+                        {/* Quantity */}
+
+                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+                          <div className="mb-3 flex items-center justify-between">
+
+                            <span className="text-sm font-black text-slate-800">
+                              مقدار خرید
+                            </span>
+
+                            <span className="text-xs font-bold text-slate-400">
+                              واحد فروش:{" "}
+                              {product.unit ||
+                                "عدد"}
+                            </span>
+
+                          </div>
+
+                          <div className="flex items-center gap-2">
+
+                            {/* Minus */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                decreaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+                            >
+                              −
+                            </button>
+
+                            {/* Number Input */}
+
+                            <input
+                              type="number"
+                              min={
+                                product.min_order ||
+                                1
+                              }
+                              max={
+                                product.stock ||
+                                undefined
+                              }
+                              value={
+                                quantities[
+                                  product.id
+                                ] ??
+                                product.min_order ??
+                                1
+                              }
+                              onChange={(e) =>
+                                changeQuantity(
+                                  product,
+                                  e.target.value
+                                )
+                              }
+                              className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                            />
+
+                            {/* Plus */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                increaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white transition hover:bg-blue-800"
+                            >
+                              +
+                            </button>
+
+                          </div>
+
+                          <p className="mt-3 text-center text-xs text-slate-400">
+                            حداقل خرید:{" "}
+                            {(
+                              product.min_order ??
+                              1
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              "واحد"}
+                          </p>
+
+                        </div>
+
+                        {/* Stock */}
+
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                          <span className="font-bold text-slate-500">
+                            موجودی
+                          </span>
+
+                          <span className="font-black">
+
+                            {(
+                              product.stock ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              ""}
+
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      {/* Total Price */}
+
+                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+                        <div className="flex items-center justify-between gap-3">
+
+                          <span className="text-sm font-bold text-slate-600">
+                            مبلغ کل خرید
+                          </span>
+
+                          <span className="text-lg font-black text-blue-700">
+
+                            {(
+                              (
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ) *
+                              getQuantity(
+                                product
+                              )
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
                             تومان
 
                           </span>
@@ -631,301 +1007,76 @@ export default function ElectricalLightingPage() {
 
                       </div>
 
-                      {/* Stock */}
-                      <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+                      {/* Store */}
 
-                        <span className="font-bold text-slate-500">
-                          موجودی
-                        </span>
-
-                        <span className="font-black">
-
-                          {(product.stock ?? 0).toLocaleString("fa-IR")}{" "}
-                          {product.unit || ""}
-
-                        </span>
-
-                      </div>
-
-                      {/* Seller */}
                       <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
 
                         <MapPin className="h-4 w-4" />
 
                         {product.seller_id
-                          ? stores[product.seller_id] || "فروشگاه"
+                          ? stores[
+                              product.seller_id
+                            ] ||
+                            "فروشگاه"
                           : "فروشگاه نامشخص"}
 
                       </div>
 
-                      <div className="mt-3 flex items-center gap-1 text-xs text-emerald-600">
-
-                        <ShieldCheck className="h-4 w-4" />
-
-                        فروشنده تأییدشده
-
-                      </div>
+                      {/* Seller */}
 
                       <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
 
                         <Star className="h-4 w-4 fill-current" />
 
-                        تأمین‌کننده معتبر سرچنو
+                        فروشنده تأییدشده
 
                       </div>
 
+                      {/* Buy */}
+
                       <button
                         type="button"
-                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                        onClick={() =>
+                          addToCart(
+                            product
+                          )
+                        }
+                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
                       >
-                        مشاهده محصول
-                        <ArrowLeft className="h-4 w-4" />
+                        خرید محصول
                       </button>
 
                     </div>
 
                   </div>
+                )
+              )}
 
-                ))}
+            </div>
 
-              </div>
-
-            )}
-
-          </div>
+          )}
 
         </div>
 
       </section>
 
-      {/* Special Section */}
-      <section className="mx-auto max-w-7xl px-5 pb-16">
+      {/* ================= FOOTER ================= */}
 
-        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-l from-slate-900 to-blue-950 p-8 text-white lg:p-12">
+      <footer className="bg-slate-950 py-10 text-center text-sm text-slate-400">
 
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div className="mx-auto max-w-7xl px-5">
 
-            <div>
-
-              <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold">
-                تأمین تجهیزات پروژه
-              </span>
-
-              <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-                خرید عمده تجهیزات برق و روشنایی
-              </h2>
-
-              <p className="mt-4 leading-8 text-slate-300">
-                برای پروژه‌های ساختمانی، صنعتی و تجاری،
-                سیم و کابل، تابلو برق، تجهیزات حفاظتی و
-                انواع تجهیزات روشنایی را از تأمین‌کنندگان
-                معتبر پیدا کنید.
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  سیم و کابل
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  تابلو برق
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  روشنایی
-                </span>
-
-                <span className="rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  تجهیزات حفاظتی
-                </span>
-
-              </div>
-
-            </div>
-
-            <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
-
-              <div className="flex items-center gap-4">
-
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
-
-                  <Lightbulb className="h-7 w-7 text-yellow-300" />
-
-                </div>
-
-                <div>
-
-                  <h3 className="font-black">
-                    نیاز به تأمین تجهیزات دارید؟
-                  </h3>
-
-                  <p className="mt-1 text-sm text-slate-300">
-                    با فروشندگان و تأمین‌کنندگان ارتباط بگیرید.
-                  </p>
-
-                </div>
-
-              </div>
-
-              <Link
-                href="/register"
-                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-black text-blue-900"
-              >
-                ثبت فروشگاه و محصول
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-
-            </div>
-
+          <div className="font-black text-white">
+            سرچنو
           </div>
 
-        </div>
-
-      </section>
-
-      {/* CTA */}
-      <section className="px-5 pb-16">
-
-        <div className="mx-auto max-w-7xl rounded-[2rem] bg-blue-700 px-6 py-14 text-center text-white">
-
-          <Zap className="mx-auto h-10 w-10" />
-
-          <h2 className="mt-5 text-2xl font-black sm:text-3xl">
-            فروشنده تجهیزات برق و روشنایی هستید؟
-          </h2>
-
-          <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه خود را در سرچنو ثبت کنید و محصولات خود را
-            در معرض دید سازندگان، پیمانکاران و خریداران قرار دهید.
+          <p className="mt-2">
+            بازار هوشمند ساخت‌وساز
           </p>
 
-          <Link
-            href="/register"
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-black text-blue-800"
-          >
-            ثبت فروشگاه
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-
-        </div>
-
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-slate-950 text-slate-300">
-
-        <div className="mx-auto max-w-7xl px-5 py-12">
-
-          <div className="grid gap-10 md:grid-cols-4">
-
-            <div className="md:col-span-2">
-
-              <Link
-                href="/"
-                className="flex items-center gap-3"
-              >
-
-                <img
-                  src="/logo.png"
-                  alt="سرچنو"
-                  className="h-12 w-12 rounded-xl object-contain"
-                />
-
-                <div>
-
-                  <div className="text-xl font-black text-white">
-                    سرچنو
-                  </div>
-
-                  <div className="text-xs text-slate-500">
-                    بازار هوشمند ساخت‌وساز
-                  </div>
-
-                </div>
-
-              </Link>
-
-              <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
-                پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان،
-                تأمین‌کنندگان و متخصصان صنعت ساختمان.
-              </p>
-
-            </div>
-
-            <div>
-
-              <h3 className="font-bold text-white">
-                خدمات سرچنو
-              </h3>
-
-              <div className="mt-5 space-y-3 text-sm">
-
-                <Link
-                  href="/materials"
-                  className="block hover:text-white"
-                >
-                  مصالح و تجهیزات
-                </Link>
-
-                <Link
-                  href="/service"
-                  className="block hover:text-white"
-                >
-                  خدمات ساختمانی
-                </Link>
-
-                <Link
-                  href="/register"
-                  className="block hover:text-white"
-                >
-                  ثبت فروشگاه
-                </Link>
-
-              </div>
-
-            </div>
-
-            <div>
-
-              <h3 className="font-bold text-white">
-                ارتباط با ما
-              </h3>
-
-              <div className="mt-5 space-y-3 text-sm">
-
-                <Link
-                  href="/about"
-                  className="block hover:text-white"
-                >
-                  درباره سرچنو
-                </Link>
-
-                <p className="flex items-center gap-2">
-
-                  <Phone className="h-4 w-4" />
-
-                  تماس با ما
-
-                </p>
-
-                <p>
-                  قوانین و مقررات
-                </p>
-
-                <p>
-                  پشتیبانی
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
+          <p className="mt-5 text-xs">
             © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
-          </div>
+          </p>
 
         </div>
 
