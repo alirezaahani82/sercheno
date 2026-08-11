@@ -38,11 +38,62 @@ type StoreInfo = {
   name: string | null;
 };
 
+type CartItem = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+  storeName: string;
+};
+
 export default function BrickBlockPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const addToCart = (product: Product) => {
+  const quantity = product.min_order ?? 1;
+
+  const price =
+    product.customer_price ??
+    product.price ??
+    0;
+
+  const storeName = product.seller_id
+    ? stores[product.seller_id] || "فروشگاه"
+    : "فروشگاه نامشخص";
+
+  const newItem: CartItem = {
+    productId: product.id,
+    name: product.name || "محصول بدون نام",
+    price,
+    quantity,
+    unit: product.unit || "عدد",
+    storeName,
+  };
+
+  const existingCart: CartItem[] = JSON.parse(
+    localStorage.getItem("sercheno_cart") || "[]"
+  );
+
+  const existingIndex = existingCart.findIndex(
+    (item) => item.productId === product.id
+  );
+
+  if (existingIndex >= 0) {
+    existingCart[existingIndex].quantity += quantity;
+  } else {
+    existingCart.push(newItem);
+  }
+
+  localStorage.setItem(
+    "sercheno_cart",
+    JSON.stringify(existingCart)
+  );
+
+  alert("محصول با موفقیت به سبد خرید اضافه شد.");
+};
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -595,9 +646,9 @@ const decreaseQuantity = (product: Product) => {
 
                      <button
   type="button"
-  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+  onClick={() => addToCart(product)}
+  className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
 >
-  <ShoppingCart className="h-4 w-4" />
   خرید محصول
 </button>
 
