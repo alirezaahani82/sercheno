@@ -242,6 +242,20 @@ const decreaseQuantity = (product: Product) => {
           </Link>
 
           <Link
+  href="/cart"
+  className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
+  title="سبد خرید"
+>
+  🛒
+
+  {cartCount > 0 && (
+    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+      {cartCount}
+    </span>
+  )}
+</Link>
+
+          <Link
             href="/materials"
             className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
           >
