@@ -7,64 +7,22 @@ import {
   Store,
   User,
   MapPin,
-  Package,
-  ImagePlus,
-  Plus,
-  Trash2,
-  CheckCircle2,
   ArrowRight,
-  Upload,
+  CheckCircle2,
   Clock,
-  Truck,
   ShieldCheck,
+  Package,
 } from "lucide-react";
-
-type Product = {
-  name: string;
-  category: string;
-  brand: string;
-  model: string;
-  unit: string;
-  minOrder: string;
-  stock: string;
-  cooperationPrice: string;
-  customerPrice: string;
-  description: string;
-
-  images: File[];
-  samples: File[];
-
-  saleConditions: string[];
-  saleDescription: string;
-};
-
-const emptyProduct: Product = {
-  name: "",
-  category: "",
-  brand: "",
-  model: "",
-  unit: "",
-  minOrder: "",
-  stock: "",
-  cooperationPrice: "",
-  customerPrice: "",
-  description: "",
-
-  images: [],
-  samples: [],
-
-  saleConditions: [],
-  saleDescription: "",
-};
 
 type StoreForm = {
   ownerName: string;
   ownerLastName: string;
   nationalCode: string;
   phone: string;
+
   username: string;
   password: string;
-  
+
   name: string;
   category: string;
   landline: string;
@@ -79,16 +37,12 @@ type StoreForm = {
 };
 
 export default function StoreRegisterPage() {
-  const [products, setProducts] = useState<Product[]>([
-    { ...emptyProduct },
-  ]);
-
   const [storeForm, setStoreForm] = useState<StoreForm>({
     ownerName: "",
     ownerLastName: "",
     nationalCode: "",
     phone: "",
-    
+
     username: "",
     password: "",
 
@@ -107,9 +61,11 @@ export default function StoreRegisterPage() {
 
   const [submitting, setSubmitting] = useState(false);
 
-  /* --------------------------------
-     تغییر اطلاعات فروشگاه
-  -------------------------------- */
+  /*
+  --------------------------------
+  تغییر اطلاعات فروشگاه
+  --------------------------------
+  */
 
   const updateStoreForm = (
     field: keyof StoreForm,
@@ -121,106 +77,11 @@ export default function StoreRegisterPage() {
     }));
   };
 
-  /* --------------------------------
-     تصاویر محصول
-  -------------------------------- */
-
-  const handleProductImages = (
-    index: number,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!event.target.files) return;
-
-    const files = Array.from(event.target.files);
-
-    setProducts((prev) =>
-      prev.map((product, i) =>
-        i === index
-          ? {
-              ...product,
-              images: files,
-            }
-          : product
-      )
-    );
-  };
-
-  /* --------------------------------
-     تصاویر نمونه کار
-  -------------------------------- */
-
-  const handleSampleImages = (
-    index: number,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!event.target.files) return;
-
-    const files = Array.from(event.target.files);
-
-    setProducts((prev) =>
-      prev.map((product, i) =>
-        i === index
-          ? {
-              ...product,
-              samples: files,
-            }
-          : product
-      )
-    );
-  };
-
-  /* --------------------------------
-     افزودن محصول
-  -------------------------------- */
-
-  const addProduct = () => {
-    setProducts((prev) => [
-      ...prev,
-      {
-        ...emptyProduct,
-        images: [],
-        samples: [],
-        saleConditions: [],
-      },
-    ]);
-  };
-
-  /* --------------------------------
-     حذف محصول
-  -------------------------------- */
-
-  const removeProduct = (index: number) => {
-    if (products.length === 1) return;
-
-    setProducts((prev) =>
-      prev.filter((_, i) => i !== index)
-    );
-  };
-
-  /* --------------------------------
-     تغییر اطلاعات محصول
-  -------------------------------- */
-
-  const updateProduct = (
-    index: number,
-    field: keyof Product,
-    value: string
-  ) => {
-    setProducts((prev) =>
-      prev.map((product, i) =>
-        i === index
-          ? {
-              ...product,
-              [field]: value,
-            }
-          : product
-      )
-    );
-  };
-
-  /* =====================================================
-     ثبت کامل فروشگاه
-  ===================================================== */
+  /*
+  =====================================================
+  ثبت فروشگاه
+  =====================================================
+  */
 
   const handleSubmit = async () => {
     if (submitting) return;
@@ -228,9 +89,11 @@ export default function StoreRegisterPage() {
     setSubmitting(true);
 
     try {
-      /* --------------------------------
-         اعتبارسنجی اولیه
-      -------------------------------- */
+      /*
+      --------------------------------
+      اعتبارسنجی اولیه
+      --------------------------------
+      */
 
       if (!storeForm.name.trim()) {
         throw new Error(
@@ -256,14 +119,40 @@ export default function StoreRegisterPage() {
         );
       }
 
-      /* --------------------------------
-         1. ثبت فروشگاه
-      -------------------------------- */
+      if (!storeForm.username.trim()) {
+        throw new Error(
+          "لطفاً نام کاربری فروشگاه را وارد کنید."
+        );
+      }
+
+      if (!storeForm.password.trim()) {
+        throw new Error(
+          "لطفاً رمز عبور فروشگاه را وارد کنید."
+        );
+      }
+
+      if (storeForm.password.trim().length < 6) {
+        throw new Error(
+          "رمز عبور باید حداقل ۶ کاراکتر باشد."
+        );
+      }
+
+      /*
+      --------------------------------
+      ساخت Slug فروشگاه
+      --------------------------------
+      */
 
       const storeSlug =
         `store-${Date.now()}-${Math.random()
           .toString(36)
           .substring(2, 8)}`;
+
+      /*
+      =====================================================
+      1. ثبت فروشگاه
+      =====================================================
+      */
 
       const {
         data: store,
@@ -272,21 +161,34 @@ export default function StoreRegisterPage() {
         .from("stores")
         .insert({
           name: storeForm.name.trim(),
+
           slug: storeSlug,
+
           owner_name:
             storeForm.ownerName.trim(),
-          phone: storeForm.phone.trim(),
+
+          phone:
+            storeForm.phone.trim(),
+
           province:
             storeForm.province || null,
+
           city:
             storeForm.city.trim() || null,
+
           address:
             storeForm.address.trim() || null,
+
           description:
             storeForm.description.trim() || null,
+
           status: "pending",
-          username: storeForm.username.trim(),
-password_hash: storeForm.password,
+
+          username:
+            storeForm.username.trim(),
+
+          password_hash:
+            storeForm.password,
         })
         .select("id")
         .single();
@@ -314,9 +216,11 @@ password_hash: storeForm.password,
         store.id
       );
 
-      /* --------------------------------
-         2. ثبت اطلاعات مالک
-      -------------------------------- */
+      /*
+      =====================================================
+      2. ثبت اطلاعات خصوصی مالک
+      =====================================================
+      */
 
       const {
         error: privateError,
@@ -324,10 +228,13 @@ password_hash: storeForm.password,
         .from("store_private_info")
         .insert({
           store_id: store.id,
+
           owner_first_name:
             storeForm.ownerName.trim(),
+
           owner_last_name:
             storeForm.ownerLastName.trim(),
+
           national_code:
             storeForm.nationalCode.trim() ||
             null,
@@ -345,377 +252,26 @@ password_hash: storeForm.password,
         );
       }
 
-      /* --------------------------------
-         3. فقط محصولاتی که نام دارند
-      -------------------------------- */
-
-      const validProducts =
-        products.filter(
-          (product) =>
-            product.name.trim() !== ""
-        );
-
-      /* --------------------------------
-         4. ثبت محصولات یکی یکی
-      -------------------------------- */
-
-      for (
-        let productIndex = 0;
-        productIndex < validProducts.length;
-        productIndex++
-      ) {
-        const product =
-          validProducts[productIndex];
-
-        console.log(
-          "START PRODUCT:",
-          productIndex + 1,
-          product.name
-        );
-
-        /* --------------------------------
-           ساخت slug یکتا برای محصول
-        -------------------------------- */
-
-        const productSlug =
-          `product-${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2, 10)}`;
-
-        /* --------------------------------
-           تبدیل قیمت
-        -------------------------------- */
-
-        const cooperationPrice =
-          Number.parseFloat(
-            String(
-              product.cooperationPrice || "0"
-            ).replace(/,/g, "")
-          ) || 0;
-
-        const customerPrice =
-          Number.parseFloat(
-            String(
-              product.customerPrice || "0"
-            ).replace(/,/g, "")
-          ) || 0;
-
-        const stock =
-          Number.parseFloat(
-            String(
-              product.stock || "0"
-            ).replace(/,/g, "")
-          ) || 0;
-
-        /* --------------------------------
-           ثبت محصول
-        -------------------------------- */
-
-        const {
-          data: createdProduct,
-          error: productError,
-        } = await supabase
-          .from("products")
-          .insert({
-            name: product.name.trim(),
-
-            slug: productSlug,
-
-            category:
-              product.category || null,
-
-            description:
-              product.description.trim() ||
-              null,
-
-            price: customerPrice,
-
-            unit:
-              product.unit || null,
-
-            stock: stock,
-
-            seller_id: store.id,
-
-            status: "active",
-
-            brand:
-              product.brand.trim() || null,
-
-            model:
-              product.model.trim() || null,
-
-            min_order:
-              product.minOrder.trim() || null,
-
-            cooperation_price:
-              cooperationPrice,
-
-            customer_price:
-              customerPrice,
-          })
-          .select("id, slug")
-          .single();
-
-        if (productError) {
-          console.error(
-            "PRODUCT ERROR:",
-            productError
-          );
-
-          throw new Error(
-            `خطا در ثبت محصول «${product.name}»: ${productError.message}`
-          );
-        }
-
-        if (!createdProduct) {
-          throw new Error(
-            `محصول «${product.name}» ثبت شد اما شناسه آن دریافت نشد.`
-          );
-        }
-
-        console.log(
-          "PRODUCT CREATED:",
-          createdProduct
-        );
-
-        /* =================================================
-           5. آپلود تصاویر اختصاصی همین محصول
-           
-           نکته مهم:
-           createdProduct همین محصول است.
-           بنابراین هر عکس مستقیماً به همین product_id
-           متصل می‌شود.
-        ================================================= */
-
-        if (
-          product.images &&
-          product.images.length > 0
-        ) {
-          console.log(
-            `UPLOADING ${product.images.length} IMAGES FOR PRODUCT:`,
-            createdProduct.id
-          );
-
-          for (
-            let imageIndex = 0;
-            imageIndex <
-              product.images.length;
-            imageIndex++
-          ) {
-            const file =
-              product.images[imageIndex];
-
-            try {
-              /* --------------------------------
-                 پسوند فایل
-              -------------------------------- */
-
-              const extension =
-                file.name
-                  .split(".")
-                  .pop()
-                  ?.toLowerCase() ||
-                "jpg";
-
-              /* --------------------------------
-                 نام یکتا
-              -------------------------------- */
-
-              const fileName =
-                `${Date.now()}-${imageIndex}-${Math.random()
-                  .toString(36)
-                  .substring(2, 10)}.${extension}`;
-
-              /* --------------------------------
-                 مسیر اختصاصی محصول
-                 
-                 مثال:
-                 products/123/abc.jpg
-              -------------------------------- */
-
-              const filePath =
-                `products/${createdProduct.id}/${fileName}`;
-
-              console.log(
-                "START IMAGE UPLOAD:",
-                {
-                  productId:
-                    createdProduct.id,
-                  productName:
-                    product.name,
-                  fileName:
-                    file.name,
-                  filePath,
-                  type: file.type,
-                  size: file.size,
-                }
-              );
-
-              /* --------------------------------
-                 آپلود به Storage
-              -------------------------------- */
-
-              const {
-                data: uploadData,
-                error: uploadError,
-              } =
-                await supabase.storage
-                  .from(
-                    "product-image"
-                  )
-                  .upload(
-                    filePath,
-                    file,
-                    {
-                      cacheControl:
-                        "3600",
-                      upsert: false,
-                      contentType:
-                        file.type ||
-                        "image/jpeg",
-                    }
-                  );
-
-              console.log(
-                "UPLOAD RESULT:",
-                {
-                  uploadData,
-                  uploadError,
-                }
-              );
-
-              if (uploadError) {
-                console.error(
-                  "IMAGE UPLOAD ERROR:",
-                  uploadError
-                );
-
-                throw new Error(
-                  `خطا در آپلود تصویر «${file.name}»: ${uploadError.message}`
-                );
-              }
-
-              /* --------------------------------
-                 گرفتن URL عمومی تصویر
-              -------------------------------- */
-
-              const {
-                data:
-                  publicUrlData,
-              } =
-                supabase.storage
-                  .from(
-                    "product-image"
-                  )
-                  .getPublicUrl(
-                    filePath
-                  );
-
-              const imageUrl =
-                publicUrlData
-                  ?.publicUrl;
-
-              console.log(
-                "IMAGE URL:",
-                imageUrl
-              );
-
-              if (!imageUrl) {
-                throw new Error(
-                  `آدرس تصویر «${file.name}» ایجاد نشد.`
-                );
-              }
-
-              /* --------------------------------
-                 ثبت رابطه تصویر با محصول
-              -------------------------------- */
-
-              const {
-                error:
-                  imageRowError,
-              } = await supabase
-                .from(
-                  "product_images"
-                )
-                .insert({
-                  product_id:
-                    createdProduct.id,
-                  image_url:
-                    imageUrl,
-                });
-
-              if (imageRowError) {
-                console.error(
-                  "PRODUCT IMAGE ROW ERROR:",
-                  imageRowError
-                );
-
-                throw new Error(
-                  `تصویر «${file.name}» آپلود شد اما ثبت آن برای محصول انجام نشد: ${imageRowError.message}`
-                );
-              }
-
-              console.log(
-                "IMAGE COMPLETED:",
-                {
-                  productId:
-                    createdProduct.id,
-                  imageUrl,
-                }
-              );
-            } catch (imageError) {
-              console.error(
-                "IMAGE PROCESS ERROR:",
-                imageError
-              );
-
-              throw imageError;
-            }
-          }
-        }
-
-        /* --------------------------------
-           6. تصاویر نمونه‌کار
-           
-           فعلاً اگر انتخاب شده باشند در همان
-           Storage آپلود می‌شوند، ولی در
-           product_images ثبت نمی‌کنیم تا
-           ساختار فعلی دیتابیس شما خراب نشود.
-        -------------------------------- */
-
-        if (
-          product.samples &&
-          product.samples.length > 0
-        ) {
-          console.log(
-            `SAMPLE IMAGES SELECTED FOR PRODUCT ${createdProduct.id}:`,
-            product.samples.length
-          );
-        }
-
-        console.log(
-          "PRODUCT FINISHED:",
-          product.name
-        );
-      }
-
-      /* --------------------------------
-         7. موفقیت نهایی
-      -------------------------------- */
+      /*
+      =====================================================
+      3. ثبت موفق
+      =====================================================
+      */
 
       alert(
-        "فروشگاه، محصولات و تصاویر با موفقیت برای بررسی ثبت شدند."
+        "فروشگاه شما با موفقیت برای بررسی ثبت شد."
       );
 
-      /* --------------------------------
-         پاک کردن فرم
-      -------------------------------- */
+      /*
+      --------------------------------
+      پاک کردن فرم
+      --------------------------------
+      */
 
       setStoreForm({
         username: "",
         password: "",
-        
+
         ownerName: "",
         ownerLastName: "",
         nationalCode: "",
@@ -733,15 +289,6 @@ password_hash: storeForm.password,
 
         description: "",
       });
-
-      setProducts([
-        {
-          ...emptyProduct,
-          images: [],
-          samples: [],
-          saleConditions: [],
-        },
-      ]);
     } catch (err) {
       console.error(
         "REGISTER ERROR:",
@@ -765,84 +312,93 @@ password_hash: storeForm.password,
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* Header */}
+      {/* =====================================================
+          Header
+      ===================================================== */}
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
 
-  {/* لوگو */}
-  <Link
-    href="/"
-    className="flex shrink-0 items-center gap-3"
-  >
-    <img
-      src="/logo.png"
-      alt="لوگوی سرچنو"
-      className="h-12 w-12 rounded-2xl object-contain"
-    />
+          {/* لوگو */}
 
-    <div>
-      <div className="text-2xl font-black text-blue-700">
-        سرچنو
-      </div>
+          <Link
+            href="/"
+            className="flex shrink-0 items-center gap-3"
+          >
+            <img
+              src="/logo.png"
+              alt="لوگوی سرچنو"
+              className="h-12 w-12 rounded-2xl object-contain"
+            />
 
-      <div className="text-xs text-slate-500">
-        بازار هوشمند ساخت‌وساز
-      </div>
-    </div>
-  </Link>
+            <div>
+              <div className="text-2xl font-black text-blue-700">
+                سرچنو
+              </div>
 
-  {/* دکمه‌های سمت راست */}
-  <div className="flex items-center gap-2">
+              <div className="text-xs text-slate-500">
+                بازار هوشمند ساخت‌وساز
+              </div>
+            </div>
+          </Link>
 
-    {/* ثبت محصول */}
-    <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+          {/* دکمه‌های سمت راست */}
 
-  <Link
-    href="/store/product-register"
-    className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
-  >
-    <Package size={19} />
-    ثبت محصول
-  </Link>
+          <div className="flex items-center gap-2">
 
-  <div className="text-sm text-slate-500">
-    قبلاً حساب فروشگاه دارید؟
-    <span className="mx-1 font-bold text-slate-700">
-      از اینجا
-    </span>
-    <Link
-      href="/store/product-register"
-      className="font-black text-blue-700 transition hover:text-blue-900"
-    >
-      ثبت محصول کنید
-    </Link>
-  </div>
+            {/* ثبت محصول */}
 
-</div>
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
 
-    {/* بازگشت */}
-    <Link
-      href="/"
-      className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-100"
-    >
-      <span className="hidden sm:inline">
-        بازگشت به صفحه اصلی
-      </span>
-      <ArrowRight size={18} />
-    </Link>
+              <Link
+                href="/store/product-register"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+              >
+                <Package size={19} />
+                ثبت محصول
+              </Link>
 
-  </div>
+              <div className="text-sm text-slate-500">
+                قبلاً حساب فروشگاه دارید؟
 
-</div>
+                <span className="mx-1 font-bold text-slate-700">
+                  از اینجا
+                </span>
 
+                <Link
+                  href="/store/product-register"
+                  className="font-black text-blue-700 transition hover:text-blue-900"
+                >
+                  ثبت محصول کنید
+                </Link>
+              </div>
 
+            </div>
+
+            {/* بازگشت */}
+
+            <Link
+              href="/"
+              className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-100"
+            >
+              <span className="hidden sm:inline">
+                بازگشت به صفحه اصلی
+              </span>
+
+              <ArrowRight size={18} />
+            </Link>
+
+          </div>
+        </div>
       </header>
 
-      {/* Hero */}
+      {/* =====================================================
+          Hero
+      ===================================================== */}
 
       <section className="bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 px-5 py-14 text-white">
         <div className="mx-auto max-w-4xl text-center">
+
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-white/10 backdrop-blur">
             <Store size={40} />
           </div>
@@ -852,22 +408,37 @@ password_hash: storeForm.password,
           </h1>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-blue-100">
-            فروشگاه و محصولات خود را در سرچنو معرفی کنید و
+            فروشگاه خود را در سرچنو معرفی کنید و
             مشتریان بیشتری برای کسب‌وکار خود پیدا کنید.
           </p>
+
         </div>
       </section>
 
-      {/* Main */}
+      {/* =====================================================
+          Main
+      ===================================================== */}
 
       <div className="mx-auto max-w-5xl px-5 py-12">
-        <form className="space-y-8">
 
-          {/* Owner Information */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          className="space-y-8"
+        >
+
+          {/* =====================================================
+              Owner Information
+          ===================================================== */}
 
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+
             <div className="border-b border-slate-100 bg-slate-50 p-6">
+
               <div className="flex items-center gap-3">
+
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
                   <User size={24} />
                 </div>
@@ -881,16 +452,17 @@ password_hash: storeForm.password,
                     اطلاعات شخص مسئول فروشگاه را وارد کنید.
                   </p>
                 </div>
+
               </div>
+
             </div>
 
             <div className="grid gap-5 p-6 md:grid-cols-2">
+
               <Input
                 label="نام"
                 placeholder="مثلاً علیرضا"
-                value={
-                  storeForm.ownerName
-                }
+                value={storeForm.ownerName}
                 onChange={(e) =>
                   updateStoreForm(
                     "ownerName",
@@ -902,9 +474,7 @@ password_hash: storeForm.password,
               <Input
                 label="نام خانوادگی"
                 placeholder="مثلاً آهنی"
-                value={
-                  storeForm.ownerLastName
-                }
+                value={storeForm.ownerLastName}
                 onChange={(e) =>
                   updateStoreForm(
                     "ownerLastName",
@@ -917,9 +487,7 @@ password_hash: storeForm.password,
                 label="شماره تماس"
                 placeholder="09xxxxxxxxx"
                 type="tel"
-                value={
-                  storeForm.phone
-                }
+                value={storeForm.phone}
                 onChange={(e) =>
                   updateStoreForm(
                     "phone",
@@ -931,9 +499,7 @@ password_hash: storeForm.password,
               <Input
                 label="کد ملی"
                 placeholder="کد ملی ۱۰ رقمی"
-                value={
-                  storeForm.nationalCode
-                }
+                value={storeForm.nationalCode}
                 onChange={(e) =>
                   updateStoreForm(
                     "nationalCode",
@@ -941,78 +507,99 @@ password_hash: storeForm.password,
                   )
                 }
               />
+
             </div>
+
           </section>
 
-          {/* Account Information */}
+          {/* =====================================================
+              Account Information
+          ===================================================== */}
 
-<section className="overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-sm">
-  <div className="border-b border-blue-100 bg-blue-50 p-6">
-    <div className="flex items-center gap-3">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
-        <User size={24} />
-      </div>
+          <section className="overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-sm">
 
-      <div>
-        <h2 className="text-xl font-black text-slate-900">
-          اطلاعات ورود به پنل فروشگاه
-        </h2>
+            <div className="border-b border-blue-100 bg-blue-50 p-6">
 
-        <p className="mt-1 text-sm text-slate-500">
-          با این اطلاعات، بعداً می‌توانید بدون ثبت مجدد فروشگاه، محصولات خود را اضافه کنید.
-        </p>
-      </div>
-    </div>
-  </div>
+              <div className="flex items-center gap-3">
 
-  <div className="grid gap-5 p-6 md:grid-cols-2">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                  <User size={24} />
+                </div>
 
-    <Input
-      label="نام کاربری"
-      placeholder="مثلاً alireza_store"
-      value={storeForm.username}
-      onChange={(e) =>
-        updateStoreForm(
-          "username",
-          e.target.value
-        )
-      }
-    />
+                <div>
 
-    <Input
-      label="رمز عبور"
-      placeholder="حداقل ۶ کاراکتر"
-      type="password"
-      value={storeForm.password}
-      onChange={(e) =>
-        updateStoreForm(
-          "password",
-          e.target.value
-        )
-      }
-    />
+                  <h2 className="text-xl font-black text-slate-900">
+                    اطلاعات ورود به پنل فروشگاه
+                  </h2>
 
-  </div>
+                  <p className="mt-1 text-sm text-slate-500">
+                    با این اطلاعات، بعداً می‌توانید بدون
+                    ثبت مجدد فروشگاه، محصولات خود را اضافه کنید.
+                  </p>
 
-  <div className="mx-6 mb-6 rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-600">
-    <strong className="text-slate-800">
-      نکته:
-    </strong>{" "}
-    این اطلاعات برای شناسایی فروشگاه شما هنگام ثبت محصولات استفاده خواهد شد.
-  </div>
-</section>
+                </div>
 
+              </div>
 
-          {/* Store Information */}
+            </div>
+
+            <div className="grid gap-5 p-6 md:grid-cols-2">
+
+              <Input
+                label="نام کاربری"
+                placeholder="مثلاً alireza_store"
+                value={storeForm.username}
+                onChange={(e) =>
+                  updateStoreForm(
+                    "username",
+                    e.target.value
+                  )
+                }
+              />
+
+              <Input
+                label="رمز عبور"
+                placeholder="حداقل ۶ کاراکتر"
+                type="password"
+                value={storeForm.password}
+                onChange={(e) =>
+                  updateStoreForm(
+                    "password",
+                    e.target.value
+                  )
+                }
+              />
+
+            </div>
+
+            <div className="mx-6 mb-6 rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-600">
+
+              <strong className="text-slate-800">
+                نکته:
+              </strong>{" "}
+              این اطلاعات برای ورود فروشگاه به پنل اختصاصی
+              و ثبت محصولات بعدی استفاده خواهد شد.
+
+            </div>
+
+          </section>
+
+          {/* =====================================================
+              Store Information
+          ===================================================== */}
 
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+
             <div className="border-b border-slate-100 bg-slate-50 p-6">
+
               <div className="flex items-center gap-3">
+
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
                   <Store size={24} />
                 </div>
 
                 <div>
+
                   <h2 className="text-xl font-black">
                     اطلاعات فروشگاه
                   </h2>
@@ -1020,17 +607,19 @@ password_hash: storeForm.password,
                   <p className="mt-1 text-sm text-slate-500">
                     اطلاعات اصلی کسب‌وکار خود را وارد کنید.
                   </p>
+
                 </div>
+
               </div>
+
             </div>
 
             <div className="grid gap-5 p-6 md:grid-cols-2">
+
               <Input
                 label="نام فروشگاه یا مجموعه"
                 placeholder="نام فروشگاه"
-                value={
-                  storeForm.name
-                }
+                value={storeForm.name}
                 onChange={(e) =>
                   updateStoreForm(
                     "name",
@@ -1044,17 +633,19 @@ password_hash: storeForm.password,
                 options={[
                   "آجر و بلوک",
                   "سیمان و بتن",
-                  "کاشی و سرامیک",
-                  "سنگ ساختمانی",
-                  "آهن و مصالح فلزی",
                   "درب و پنجره",
+                  "برق و روشنایی",
+                  "آسانسور",
+                  "عایق و ایزولاسیون",
+                  "دکوراسیون داخلی",
+                  "آهن و فولاد",
+                  "تأسیسات مکانیکی",
                   "رنگ و پوشش",
-                  "تأسیسات و تجهیزات",
-                  "سایر",
+                  "لوله و اتصالات",
+                  "بهداشتی",
+                  "سنگ و کاشی",
                 ]}
-                value={
-                  storeForm.category
-                }
+                value={storeForm.category}
                 onChange={(e) =>
                   updateStoreForm(
                     "category",
@@ -1066,9 +657,7 @@ password_hash: storeForm.password,
               <Input
                 label="شماره تلفن ثابت"
                 placeholder="041xxxxxxxx"
-                value={
-                  storeForm.landline
-                }
+                value={storeForm.landline}
                 onChange={(e) =>
                   updateStoreForm(
                     "landline",
@@ -1081,9 +670,7 @@ password_hash: storeForm.password,
                 label="شماره موبایل فروشگاه"
                 placeholder="09xxxxxxxxx"
                 type="tel"
-                value={
-                  storeForm.storeMobile
-                }
+                value={storeForm.storeMobile}
                 onChange={(e) =>
                   updateStoreForm(
                     "storeMobile",
@@ -1093,12 +680,11 @@ password_hash: storeForm.password,
               />
 
               <div className="md:col-span-2">
+
                 <Textarea
                   label="معرفی فروشگاه"
                   placeholder="درباره فروشگاه، سابقه فعالیت و حوزه تخصصی خود توضیح دهید..."
-                  value={
-                    storeForm.description
-                  }
+                  value={storeForm.description}
                   onChange={(e) =>
                     updateStoreForm(
                       "description",
@@ -1106,20 +692,29 @@ password_hash: storeForm.password,
                     )
                   }
                 />
+
               </div>
+
             </div>
+
           </section>
 
-          {/* Address */}
+          {/* =====================================================
+              Address
+          ===================================================== */}
 
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+
             <div className="border-b border-slate-100 bg-slate-50 p-6">
+
               <div className="flex items-center gap-3">
+
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
                   <MapPin size={24} />
                 </div>
 
                 <div>
+
                   <h2 className="text-xl font-black">
                     آدرس و محدوده فعالیت
                   </h2>
@@ -1127,11 +722,15 @@ password_hash: storeForm.password,
                   <p className="mt-1 text-sm text-slate-500">
                     محل فعالیت فروشگاه و محدوده ارسال را مشخص کنید.
                   </p>
+
                 </div>
+
               </div>
+
             </div>
 
             <div className="grid gap-5 p-6 md:grid-cols-3">
+
               <Select
                 label="استان"
                 options={[
@@ -1143,9 +742,7 @@ password_hash: storeForm.password,
                   "البرز",
                   "سایر",
                 ]}
-                value={
-                  storeForm.province
-                }
+                value={storeForm.province}
                 onChange={(e) =>
                   updateStoreForm(
                     "province",
@@ -1157,9 +754,7 @@ password_hash: storeForm.password,
               <Input
                 label="شهر"
                 placeholder="مثلاً تبریز"
-                value={
-                  storeForm.city
-                }
+                value={storeForm.city}
                 onChange={(e) =>
                   updateStoreForm(
                     "city",
@@ -1171,9 +766,7 @@ password_hash: storeForm.password,
               <Input
                 label="منطقه یا محله"
                 placeholder="نام محله"
-                value={
-                  storeForm.district
-                }
+                value={storeForm.district}
                 onChange={(e) =>
                   updateStoreForm(
                     "district",
@@ -1183,12 +776,11 @@ password_hash: storeForm.password,
               />
 
               <div className="md:col-span-3">
+
                 <Textarea
                   label="آدرس کامل فروشگاه"
                   placeholder="آدرس دقیق فروشگاه را وارد کنید..."
-                  value={
-                    storeForm.address
-                  }
+                  value={storeForm.address}
                   onChange={(e) =>
                     updateStoreForm(
                       "address",
@@ -1196,19 +788,27 @@ password_hash: storeForm.password,
                     )
                   }
                 />
+
               </div>
+
             </div>
+
           </section>
 
-          {/* Working Hours */}
+          {/* =====================================================
+              Working Hours
+          ===================================================== */}
 
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+
             <div className="mb-6 flex items-center gap-3">
+
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
                 <Clock size={24} />
               </div>
 
               <div>
+
                 <h2 className="text-xl font-black">
                   ساعات کاری
                 </h2>
@@ -1216,10 +816,13 @@ password_hash: storeForm.password,
                 <p className="mt-1 text-sm text-slate-500">
                   زمان فعالیت فروشگاه را مشخص کنید.
                 </p>
+
               </div>
+
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
+
               <Input
                 label="ساعت شروع فعالیت"
                 placeholder="مثلاً ۸:۰۰"
@@ -1229,482 +832,46 @@ password_hash: storeForm.password,
                 label="ساعت پایان فعالیت"
                 placeholder="مثلاً ۲۰:۰۰"
               />
+
             </div>
+
           </section>
 
-          {/* Products */}
-
-          <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-100 bg-slate-50 p-6">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
-                    <Package size={24} />
-                  </div>
-
-                  <div>
-                    <h2 className="text-xl font-black">
-                      محصولات و مصالح قابل ارائه
-                    </h2>
-
-                    <p className="mt-1 text-sm text-slate-500">
-                      محصولات فروشگاه خود را همراه با قیمت ثبت کنید.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={addProduct}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
-                >
-                  <Plus size={18} />
-                  افزودن محصول
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-6 p-6">
-              {products.map(
-                (product, index) => (
-                  <div
-                    key={index}
-                    className="relative rounded-3xl border border-slate-200 bg-slate-50 p-5"
-                  >
-                    <div className="mb-5 flex items-center justify-between">
-                      <h3 className="font-black text-slate-800">
-                        محصول شماره{" "}
-                        {index + 1}
-                      </h3>
-
-                      {products.length >
-                        1 && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removeProduct(
-                              index
-                            )
-                          }
-                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2
-                            size={17}
-                          />
-                          حذف محصول
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="grid gap-5 md:grid-cols-2">
-
-                      <Input
-                        label="نام محصول"
-                        placeholder="مثلاً کاشی ۶۰×۱۲۰"
-                        value={
-                          product.name
-                        }
-                        onChange={(e) =>
-                          updateProduct(
-                            index,
-                            "name",
-                            e.target.value
-                          )
-                        }
-                      />
-
-                      <Select
-                        label="دسته‌بندی محصول"
-                        options={[
-                          "آجر و بلوک",
-                          "سیمان و بتن",
-                          "کاشی و سرامیک",
-                          "سنگ ساختمانی",
-                          "آهن و مصالح فلزی",
-                          "درب و پنجره",
-                          "رنگ و پوشش",
-                          "تأسیسات و تجهیزات",
-                        ]}
-                        value={
-                          product.category
-                        }
-                        onChange={(e) =>
-                          updateProduct(
-                            index,
-                            "category",
-                            e.target.value
-                          )
-                        }
-                      />
-
-                      <Input
-                        label="برند"
-                        placeholder="نام برند"
-                        value={
-                          product.brand
-                        }
-                        onChange={(e) =>
-                          updateProduct(
-                            index,
-                            "brand",
-                            e.target.value
-                          )
-                        }
-                      />
-
-                      <Input
-                        label="مدل یا مشخصات"
-                        placeholder="مدل، کد یا مشخصات محصول"
-                        value={
-                          product.model
-                        }
-                        onChange={(e) =>
-                          updateProduct(
-                            index,
-                            "model",
-                            e.target.value
-                          )
-                        }
-                      />
-
-                      <Select
-                        label="واحد فروش"
-                        options={[
-                          "عدد",
-                          "متر",
-                          "مترمربع",
-                          "مترمکعب",
-                          "کیلوگرم",
-                          "تن",
-                          "کیسه",
-                          "شاخه",
-                          "دستگاه",
-                        ]}
-                        value={
-                          product.unit
-                        }
-                        onChange={(e) =>
-                          updateProduct(
-                            index,
-                            "unit",
-                            e.target.value
-                          )
-                        }
-                      />
-
-                      <Input
-                        label="حداقل مقدار سفارش"
-                        placeholder="مثلاً ۱۰ متر"
-                        value={
-                          product.minOrder
-                        }
-                        onChange={(e) =>
-                          updateProduct(
-                            index,
-                            "minOrder",
-                            e.target.value
-                          )
-                        }
-                      />
-
-                      <Input
-                        label="موجودی تقریبی"
-                        placeholder="مثلاً ۵۰۰ عدد"
-                        value={
-                          product.stock
-                        }
-                        onChange={(e) =>
-                          updateProduct(
-                            index,
-                            "stock",
-                            e.target.value
-                          )
-                        }
-                      />
-
-                      {/* Cooperation Price */}
-
-                      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-                        <label className="mb-2 block text-sm font-bold text-blue-800">
-                          قیمت همکاری با سرچنو
-                        </label>
-
-                        <div className="relative">
-                          <input
-                            type="text"
-                            placeholder="مثلاً ۱,۵۰۰,۰۰۰"
-                            value={
-                              product.cooperationPrice
-                            }
-                            onChange={(e) =>
-                              updateProduct(
-                                index,
-                                "cooperationPrice",
-                                e.target.value
-                              )
-                            }
-                            className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-
-                          <span className="absolute left-4 top-3 text-xs text-slate-400">
-                            ریال
-                          </span>
-                        </div>
-
-                        <p className="mt-2 text-xs text-blue-600">
-                          قیمت ویژه همکاری و تأمین از طریق سرچنو
-                        </p>
-                      </div>
-
-                      {/* Customer Price */}
-
-                      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                        <label className="mb-2 block text-sm font-bold text-emerald-800">
-                          قیمت مشتریان سرچنو
-                        </label>
-
-                        <div className="relative">
-                          <input
-                            type="text"
-                            placeholder="مثلاً ۱,۷۰۰,۰۰۰"
-                            value={
-                              product.customerPrice
-                            }
-                            onChange={(e) =>
-                              updateProduct(
-                                index,
-                                "customerPrice",
-                                e.target.value
-                              )
-                            }
-                            className="w-full rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-                          />
-
-                          <span className="absolute left-4 top-3 text-xs text-slate-400">
-                            ریال
-                          </span>
-                        </div>
-
-                        <p className="mt-2 text-xs text-emerald-600">
-                          قیمتی که مشتریان سرچنو مشاهده می‌کنند
-                        </p>
-                      </div>
-
-                      {/* Description */}
-
-                      <div className="md:col-span-2">
-                        <Textarea
-                          label="توضیحات محصول"
-                          placeholder="توضیحات تکمیلی درباره محصول، کیفیت، مشخصات و شرایط فروش..."
-                          value={
-                            product.description
-                          }
-                          onChange={(e) =>
-                            updateProduct(
-                              index,
-                              "description",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-
-                      {/* Product Images */}
-
-                      <div className="md:col-span-2">
-                        <div className="rounded-3xl border border-pink-200 bg-pink-50 p-5">
-                          <div className="mb-4 flex items-center gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
-                              <ImagePlus
-                                size={22}
-                              />
-                            </div>
-
-                            <div>
-                              <h4 className="font-black text-slate-800">
-                                تصاویر محصول
-                              </h4>
-
-                              <p className="mt-1 text-xs text-slate-500">
-                                تصاویر مربوط به همین محصول را انتخاب کنید.
-                              </p>
-                            </div>
-                          </div>
-
-                          <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-pink-300 bg-white p-8 text-center transition hover:border-pink-500 hover:bg-pink-50">
-                            <Upload
-                              className="text-pink-600"
-                              size={32}
-                            />
-
-                            <span className="mt-3 font-bold">
-                              انتخاب تصاویر محصول
-                            </span>
-
-                            <span className="mt-2 text-xs text-slate-500">
-                              امکان انتخاب چند تصویر وجود دارد
-                            </span>
-
-                            <input
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              className="hidden"
-                              onChange={(e) =>
-                                handleProductImages(
-                                  index,
-                                  e
-                                )
-                              }
-                            />
-                          </label>
-
-                          {product.images
-                            .length > 0 && (
-                            <p className="mt-3 text-sm font-bold text-emerald-600">
-                              {
-                                product
-                                  .images
-                                  .length
-                              }{" "}
-                              تصویر انتخاب شده است.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Samples */}
-
-                      <div className="md:col-span-2">
-                        <div className="rounded-3xl border border-purple-200 bg-purple-50 p-5">
-                          <div className="mb-4 flex items-center gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
-                              <ImagePlus
-                                size={22}
-                              />
-                            </div>
-
-                            <div>
-                              <h4 className="font-black text-slate-800">
-                                نمونه‌کارهای محصول
-                              </h4>
-
-                              <p className="mt-1 text-xs text-slate-500">
-                                تصاویر نمونه‌کارها و پروژه‌های مرتبط با این محصول را اضافه کنید.
-                              </p>
-                            </div>
-                          </div>
-
-                          <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-purple-300 bg-white p-8 text-center transition hover:border-purple-500 hover:bg-purple-50">
-                            <ImagePlus
-                              className="text-purple-600"
-                              size={32}
-                            />
-
-                            <span className="mt-3 font-bold">
-                              انتخاب تصاویر نمونه‌کار
-                            </span>
-
-                            <span className="mt-2 text-xs text-slate-500">
-                              امکان انتخاب چند تصویر وجود دارد
-                            </span>
-
-                            <input
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              className="hidden"
-                              onChange={(e) =>
-                                handleSampleImages(
-                                  index,
-                                  e
-                                )
-                              }
-                            />
-                          </label>
-
-                          {product.samples
-                            .length > 0 && (
-                            <p className="mt-3 text-sm font-bold text-emerald-600">
-                              {
-                                product
-                                  .samples
-                                  .length
-                              }{" "}
-                              تصویر نمونه‌کار انتخاب شده است.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-          </section>
-
-          {/* Business Conditions */}
-
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-600">
-                <Truck size={24} />
-              </div>
-
-              <div>
-                <h2 className="text-xl font-black">
-                  شرایط فروش و خدمات
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  امکانات و شرایط فروشگاه خود را مشخص کنید.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <CheckBox label="فروش عمده" />
-              <CheckBox label="فروش جزئی" />
-              <CheckBox label="فروش نقدی" />
-              <CheckBox label="فروش اعتباری" />
-              <CheckBox label="فروش اقساطی" />
-              <CheckBox label="ارسال به شهرهای دیگر" />
-              <CheckBox label="امکان ارسال فوری" />
-            </div>
-
-            <div className="mt-6">
-              <Textarea
-                label="توضیحات شرایط فروش"
-                placeholder="شرایط پرداخت، ارسال، تخفیف و سایر توضیحات..."
-              />
-            </div>
-          </section>
-
-          {/* Confirmation */}
+          {/* =====================================================
+              Confirmation
+          ===================================================== */}
 
           <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6">
+
             <div className="flex items-start gap-4">
+
               <ShieldCheck
                 className="mt-1 shrink-0 text-blue-700"
                 size={28}
               />
 
               <div>
+
                 <h3 className="font-black text-blue-900">
                   بررسی و تأیید اطلاعات
                 </h3>
 
                 <p className="mt-2 text-sm leading-7 text-blue-800">
-                  اطلاعات ثبت‌شده توسط تیم سرچنو بررسی خواهد شد و
-                  پس از تأیید، فروشگاه و محصولات شما در پلتفرم نمایش داده
-                  می‌شود.
+                  اطلاعات ثبت‌شده توسط تیم سرچنو بررسی خواهد شد
+                  و پس از تأیید، فروشگاه شما در پلتفرم نمایش داده
+                  می‌شود. پس از تأیید فروشگاه، می‌توانید محصولات
+                  و مصالح خود را از طریق پنل فروشگاه ثبت کنید.
                 </p>
+
               </div>
+
             </div>
 
             <label className="mt-6 flex cursor-pointer items-start gap-3">
+
               <input
                 type="checkbox"
+                required
                 className="mt-1 h-5 w-5 accent-blue-700"
               />
 
@@ -1712,28 +879,69 @@ password_hash: storeForm.password,
                 صحت اطلاعات واردشده را تأیید می‌کنم و با قوانین و مقررات
                 استفاده از خدمات سرچنو موافقم.
               </span>
+
             </label>
+
           </section>
 
-          {/* Submit */}
+          {/* =====================================================
+              Submit Store
+          ===================================================== */}
 
           <button
-            type="button"
-            onClick={handleSubmit}
+            type="submit"
             disabled={submitting}
             className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-700 py-5 text-lg font-black text-white shadow-xl shadow-blue-700/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
+
             <CheckCircle2 size={24} />
 
             {submitting
               ? "در حال ثبت فروشگاه..."
               : "ثبت فروشگاه برای بررسی"}
+
           </button>
 
           <p className="text-center text-xs text-slate-400">
-            اطلاعات فروشگاه و محصولات پس از ثبت برای بررسی ذخیره می‌شوند.
+            اطلاعات فروشگاه پس از ثبت برای بررسی ذخیره می‌شوند.
           </p>
+
+          {/* =====================================================
+              ثبت محصول بعد از ثبت فروشگاه
+          ===================================================== */}
+
+          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
+
+            <div className="text-center">
+
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <Package size={28} />
+              </div>
+
+              <h3 className="mt-4 text-lg font-black text-emerald-900">
+                فروشگاه خود را ثبت کرده‌اید؟
+              </h3>
+
+              <p className="mx-auto mt-2 max-w-2xl text-sm leading-7 text-emerald-800">
+                پس از ثبت و تأیید فروشگاه، می‌توانید با ورود به
+                پنل فروشگاه، محصولات و مصالح قابل ارائه خود را
+                ثبت و مدیریت کنید.
+              </p>
+
+              <Link
+                href="/store/product-register"
+                className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-8 py-4 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+              >
+                <Package size={19} />
+                ثبت محصول
+              </Link>
+
+            </div>
+
+          </div>
+
         </form>
+
       </div>
     </main>
   );
@@ -1760,6 +968,7 @@ function Input({
 }) {
   return (
     <div>
+
       <label className="mb-2 block text-sm font-bold text-slate-700">
         {label}
       </label>
@@ -1771,6 +980,7 @@ function Input({
         onChange={onChange}
         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       />
+
     </div>
   );
 }
@@ -1794,6 +1004,7 @@ function Select({
 }) {
   return (
     <div>
+
       <label className="mb-2 block text-sm font-bold text-slate-700">
         {label}
       </label>
@@ -1803,6 +1014,7 @@ function Select({
         onChange={onChange}
         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       >
+
         <option value="">
           انتخاب کنید
         </option>
@@ -1815,7 +1027,9 @@ function Select({
             {option}
           </option>
         ))}
+
       </select>
+
     </div>
   );
 }
@@ -1839,6 +1053,7 @@ function Textarea({
 }) {
   return (
     <div>
+
       <label className="mb-2 block text-sm font-bold text-slate-700">
         {label}
       </label>
@@ -1850,29 +1065,7 @@ function Textarea({
         onChange={onChange}
         className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       />
+
     </div>
-  );
-}
-
-/* =====================================================
-   Checkbox
-===================================================== */
-
-function CheckBox({
-  label,
-}: {
-  label: string;
-}) {
-  return (
-    <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-300 hover:bg-blue-50">
-      <input
-        type="checkbox"
-        className="h-5 w-5 accent-blue-700"
-      />
-
-      <span className="text-sm font-bold text-slate-700">
-        {label}
-      </span>
-    </label>
   );
 }
