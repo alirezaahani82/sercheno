@@ -882,7 +882,7 @@ export default function InteriorDecorationPage() {
                               −
                             </button>
 
-                            <input
+                           <input
   type="number"
   min={product.min_order ?? 1}
   max={product.stock && product.stock > 0 ? product.stock : undefined}
@@ -938,7 +938,6 @@ export default function InteriorDecorationPage() {
   }}
   className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
 />
-
                             <button
                               type="button"
                               onClick={() =>
