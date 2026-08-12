@@ -289,11 +289,71 @@ export default function ProductRegisterPage() {
                 ? selectedConditions.join("، ")
                 : null,
 
-            sales_description:
-              product.salesDescription.trim() ||
-              null,
-          });
+          const {
+  data: createdProduct,
+  error: insertError,
+} = await supabase
+  .from("products")
+  .insert({
+    name: product.name.trim(),
 
+    slug:
+      product.name
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(
+          /[^\u0600-\u06FFa-zA-Z0-9-]/g,
+          ""
+        ) +
+      "-" +
+      Date.now(),
+
+    category: product.category,
+
+    subcategory: null,
+
+    brand:
+      product.brand.trim() || null,
+
+    model:
+      product.model.trim() || null,
+
+    description:
+      product.description.trim() || null,
+
+    price:
+      Number(product.customerPrice) || 0,
+
+    customer_price:
+      Number(product.customerPrice) || 0,
+
+    cooperation_price:
+      Number(product.cooperationPrice) || 0,
+
+    unit: product.unit,
+
+    stock:
+      Number(product.stock) || 0,
+
+    min_order:
+      Number(product.minOrder) || 1,
+
+    seller_id: storeId,
+
+    status: "pending",
+
+    sales_conditions:
+      selectedConditions.length > 0
+        ? selectedConditions.join("، ")
+        : null,
+
+    sales_description:
+      product.salesDescription.trim() ||
+      null,
+  })
+  .select("id, slug")
+  .single();
       console.log(
         "PRODUCT INSERT ERROR:",
         insertError
@@ -309,6 +369,105 @@ export default function ProductRegisterPage() {
 
         return;
       }
+      if (!createdProduct) {
+  setError(
+    "محصول ثبت شد اما شناسه محصول دریافت نشد."
+  );
+  return;
+}
+      if (images.length > 0) {
+  for (
+    let imageIndex = 0;
+    imageIndex < images.length;
+    imageIndex++
+  ) {
+    const file = images[imageIndex];
+
+    const extension =
+      file.name
+        .split(".")
+        .pop()
+        ?.toLowerCase() || "jpg";
+
+    const fileName =
+      `${Date.now()}-${imageIndex}-${Math.random()
+        .toString(36)
+        .substring(2, 10)}.${extension}`;
+
+    const filePath =
+      `products/${createdProduct.id}/${fileName}`;
+
+    const {
+      error: uploadError,
+    } = await supabase.storage
+      .from("product-image")
+      .upload(
+        filePath,
+        file,
+        {
+          cacheControl: "3600",
+          upsert: false,
+          contentType:
+            file.type || "image/jpeg",
+        }
+      );
+
+    if (uploadError) {
+      console.error(
+        "IMAGE UPLOAD ERROR:",
+        uploadError
+      );
+
+      setError(
+        `محصول ثبت شد اما تصویر «${file.name}» آپلود نشد: ${uploadError.message}`
+      );
+
+      return;
+    }
+
+    const {
+      data: publicUrlData,
+    } = supabase.storage
+      .from("product-image")
+      .getPublicUrl(filePath);
+
+    const imageUrl =
+      publicUrlData.publicUrl;
+
+    if (!imageUrl) {
+      setError(
+        `آدرس تصویر «${file.name}» ایجاد نشد.`
+      );
+
+      return;
+    }
+
+    const {
+      error: imageRowError,
+    } = await supabase
+      .from("product_images")
+      .insert({
+        product_id:
+          createdProduct.id,
+
+        image_url:
+          imageUrl,
+      });
+
+    if (imageRowError) {
+      console.error(
+        "PRODUCT IMAGE ERROR:",
+        imageRowError
+      );
+
+      setError(
+        `تصویر آپلود شد اما برای محصول ثبت نشد: ${imageRowError.message}`
+      );
+
+      return;
+    }
+  }
+}
 
       setSuccess(
         "محصول با موفقیت برای بررسی ارسال شد."
