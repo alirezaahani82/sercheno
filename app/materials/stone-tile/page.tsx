@@ -35,6 +35,11 @@ type StoreInfo = {
   name: string | null;
 };
 
+type ProductImage = {
+  product_id: string;
+  image_url: string;
+};
+
 type CartItem = {
   productId: string;
   name: string;
@@ -55,26 +60,45 @@ export default function StoneTilePage() {
     Record<string, number>
   >({});
 
+  /*
+   * تصاویر تمام محصولات
+   *
+   * مثال:
+   *
+   * {
+   *   "product-id-1": [
+   *     "image1.jpg",
+   *     "image2.jpg",
+   *     "image3.jpg"
+   *   ]
+   * }
+   */
+  const [productImages, setProductImages] = useState<
+    Record<string, string[]>
+  >({});
+
+  /*
+   * تصویر اصلی انتخاب‌شده برای هر محصول
+   */
+  const [selectedImages, setSelectedImages] = useState<
+    Record<string, string>
+  >({});
+
   /* =========================
-     مقدار خرید
+     دریافت مقدار انتخاب‌شده
   ========================= */
 
   const getQuantity = (product: Product) => {
-    const minOrder = Math.max(
-      product.min_order ?? 1,
-      1
-    );
+    const minOrder = Math.max(product.min_order ?? 1, 1);
 
     return quantities[product.id] ?? minOrder;
   };
 
   /* =========================
-     افزایش مقدار
+     افزایش مقدار خرید
   ========================= */
 
-  const increaseQuantity = (
-    product: Product
-  ) => {
+  const increaseQuantity = (product: Product) => {
     const current = getQuantity(product);
     const stock = product.stock ?? 0;
 
@@ -89,12 +113,10 @@ export default function StoneTilePage() {
   };
 
   /* =========================
-     کاهش مقدار
+     کاهش مقدار خرید
   ========================= */
 
-  const decreaseQuantity = (
-    product: Product
-  ) => {
+  const decreaseQuantity = (product: Product) => {
     const current = getQuantity(product);
 
     const minOrder = Math.max(
@@ -113,51 +135,10 @@ export default function StoneTilePage() {
   };
 
   /* =========================
-     تغییر مستقیم تعداد
+     افزودن محصول به سبد
   ========================= */
 
-  const changeQuantity = (
-    product: Product,
-    value: string
-  ) => {
-    if (value === "") {
-      return;
-    }
-
-    const quantity = Number(value);
-
-    if (Number.isNaN(quantity)) {
-      return;
-    }
-
-    const minOrder = Math.max(
-      product.min_order ?? 1,
-      1
-    );
-
-    const stock = product.stock ?? 0;
-
-    if (quantity < minOrder) {
-      return;
-    }
-
-    if (stock > 0 && quantity > stock) {
-      return;
-    }
-
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: quantity,
-    }));
-  };
-
-  /* =========================
-     افزودن به سبد خرید
-  ========================= */
-
-  const addToCart = (
-    product: Product
-  ) => {
+  const addToCart = (product: Product) => {
     const quantity = getQuantity(product);
 
     const price =
@@ -165,11 +146,9 @@ export default function StoneTilePage() {
       product.price ??
       0;
 
-    const storeName =
-      product.seller_id
-        ? stores[product.seller_id] ||
-          "فروشگاه"
-        : "فروشگاه نامشخص";
+    const storeName = product.seller_id
+      ? stores[product.seller_id] || "فروشگاه"
+      : "فروشگاه نامشخص";
 
     const newItem: CartItem = {
       productId: product.id,
@@ -217,7 +196,9 @@ export default function StoneTilePage() {
     );
 
     window.dispatchEvent(
-      new Event("sercheno-cart-updated")
+      new Event(
+        "sercheno-cart-updated"
+      )
     );
 
     alert(
@@ -234,7 +215,7 @@ export default function StoneTilePage() {
   }, []);
 
   /* =========================
-     بروزرسانی شمارنده سبد
+     بروزرسانی تعداد سبد
   ========================= */
 
   useEffect(() => {
@@ -253,7 +234,9 @@ export default function StoneTilePage() {
             item: CartItem
           ) =>
             total +
-            Number(item.quantity || 0),
+            Number(
+              item.quantity || 0
+            ),
           0
         );
 
@@ -333,11 +316,134 @@ export default function StoneTilePage() {
         return;
       }
 
-      setProducts(data || []);
+      const loadedProducts =
+        data || [];
+
+      setProducts(
+        loadedProducts
+      );
+
+      /* =========================
+         دریافت تمام تصاویر محصولات
+      ========================= */
+
+      const productIds =
+        loadedProducts.map(
+          (product) =>
+            product.id
+        );
+
+      if (
+        productIds.length > 0
+      ) {
+        const {
+          data: imageData,
+          error: imageError,
+        } =
+          await supabase
+            .from(
+              "product_images"
+            )
+            .select(
+              "product_id,image_url"
+            )
+            .in(
+              "product_id",
+              productIds
+            )
+            .order(
+              "id",
+              {
+                ascending: true,
+              }
+            );
+
+        if (imageError) {
+          console.error(
+            "PRODUCT IMAGES ERROR:",
+            imageError
+          );
+        } else {
+          /*
+           * ساخت نقشه تصاویر
+           *
+           * هر محصول می‌تواند
+           * هر تعداد تصویر داشته باشد.
+           */
+
+          const imageMap: Record<
+            string,
+            string[]
+          > = {};
+
+          (
+            imageData || []
+          ).forEach(
+            (
+              image: ProductImage
+            ) => {
+              if (
+                !imageMap[
+                  image.product_id
+                ]
+              ) {
+                imageMap[
+                  image.product_id
+                ] = [];
+              }
+
+              imageMap[
+                image.product_id
+              ].push(
+                image.image_url
+              );
+            }
+          );
+
+          setProductImages(
+            imageMap
+          );
+
+          /*
+           * اولین تصویر هر محصول
+           * به عنوان تصویر اصلی
+           */
+
+          const selectedMap: Record<
+            string,
+            string
+          > = {};
+
+          Object.entries(
+            imageMap
+          ).forEach(
+            ([
+              productId,
+              urls,
+            ]) => {
+              if (
+                urls.length > 0
+              ) {
+                selectedMap[
+                  productId
+                ] = urls[0];
+              }
+            }
+          );
+
+          setSelectedImages(
+            selectedMap
+          );
+        }
+      }
+
+      /* =========================
+         دریافت فروشگاه‌ها
+      ========================= */
 
       const sellerIds = [
         ...new Set(
-          (data || [])
+          loadedProducts
             .map(
               (product) =>
                 product.seller_id
@@ -346,17 +452,23 @@ export default function StoneTilePage() {
         ),
       ];
 
-      if (sellerIds.length > 0) {
+      if (
+        sellerIds.length > 0
+      ) {
         const {
           data: storeData,
-          error: storeError,
-        } = await supabase
-          .from("stores")
-          .select("id,name")
-          .in(
-            "id",
-            sellerIds
-          );
+          error:
+            storeError,
+        } =
+          await supabase
+            .from("stores")
+            .select(
+              "id,name"
+            )
+            .in(
+              "id",
+              sellerIds
+            );
 
         if (storeError) {
           console.error(
@@ -384,10 +496,15 @@ export default function StoneTilePage() {
           }
         );
 
-        setStores(storeMap);
+        setStores(
+          storeMap
+        );
       }
     } catch (error) {
-      console.error(error);
+      console.error(
+        "LOAD PRODUCTS ERROR:",
+        error
+      );
     } finally {
       setLoading(false);
     }
@@ -439,7 +556,6 @@ export default function StoneTilePage() {
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-
       {/* ================= HEADER ================= */}
 
       <header className="border-b border-slate-200 bg-white">
@@ -502,7 +618,7 @@ export default function StoneTilePage() {
 
           <img
             src="/materials/stone-tile.jpg"
-            alt="سنگ و کاشی ساختمان"
+            alt="سنگ و کاشی ساختمانی"
             className="h-full w-full object-cover"
           />
 
@@ -515,7 +631,7 @@ export default function StoneTilePage() {
               <div className="max-w-3xl">
 
                 <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
-                  سنگ، کاشی، سرامیک و محصولات پوشش سطوح ساختمان
+                  سنگ، کاشی و سرامیک ساختمانی
                 </span>
 
                 <h1 className="mt-5 text-4xl font-black sm:text-6xl">
@@ -525,13 +641,9 @@ export default function StoneTilePage() {
                 <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
                   انواع سنگ ساختمانی، سنگ نما،
                   سنگ کف، کاشی، سرامیک، پرسلان،
-                  موزاییک، سنگ اسلب، قرنیز،
-                  چسب کاشی و محصولات مورد نیاز
-                  برای اجرای کف، دیوار، نما،
-                  سرویس‌های بهداشتی و فضاهای
-                  داخلی و خارجی ساختمان را از
-                  تأمین‌کنندگان معتبر در سرچنو
-                  پیدا و خریداری کنید.
+                  موزاییک و محصولات مرتبط را از
+                  فروشندگان و تأمین‌کنندگان معتبر
+                  در سرچنو پیدا کنید.
                 </p>
 
                 <div className="mt-7 flex flex-wrap gap-3">
@@ -545,15 +657,19 @@ export default function StoneTilePage() {
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    کاشی و سرامیک
+                    سنگ کف
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    کاشی
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    سرامیک
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
                     پرسلان
-                  </span>
-
-                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    چسب و متعلقات نصب
                   </span>
 
                 </div>
@@ -587,7 +703,7 @@ export default function StoneTilePage() {
                     e.target.value
                   )
                 }
-                placeholder="مثلاً سنگ تراورتن، مرمریت، سرامیک، پرسلان، کاشی..."
+                placeholder="مثلاً سنگ تراورتن، سرامیک، کاشی، پرسلان..."
                 className="w-full bg-transparent outline-none"
               />
 
@@ -621,11 +737,9 @@ export default function StoneTilePage() {
           </h2>
 
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
-            محصولات سنگ و کاشی بر اساس نوع،
-            جنس، کاربرد، محل استفاده، ابعاد،
-            ضخامت، رنگ، طرح و ویژگی‌های فنی
-            برای پروژه‌های ساختمانی دسته‌بندی
-            شده‌اند.
+            محصولات این گروه بر اساس نوع
+            متریال، کاربرد، طرح، رنگ و محل
+            استفاده دسته‌بندی شده‌اند.
           </p>
 
         </div>
@@ -633,146 +747,24 @@ export default function StoneTilePage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
           {[
-            "سنگ ساختمانی",
+            "سنگ تراورتن",
+            "سنگ گرانیت",
+            "سنگ مرمر",
+            "سنگ مرمریت",
+            "سنگ چینی",
+            "سنگ لایم‌استون",
             "سنگ نما",
             "سنگ کف",
-            "سنگ دیوار",
             "سنگ پله",
-            "سنگ راه‌پله",
-            "سنگ پارکینگ",
-            "سنگ محوطه",
-            "سنگ حیاط",
-            "سنگ آنتیک",
-
-            "سنگ تراورتن",
-            "تراورتن عباس‌آباد",
-            "تراورتن حاجی‌آباد",
-            "تراورتن آتشکوه",
-            "تراورتن دره‌بخاری",
-            "تراورتن تکاب",
-            "تراورتن شکلاتی",
-            "تراورتن سفید",
-            "تراورتن کرم",
-
-            "سنگ مرمریت",
-            "مرمریت دهبید",
-            "مرمریت هرسین",
-            "مرمریت آباده",
-            "مرمریت صلصالی",
-            "مرمریت پرشین سیلک",
-            "مرمریت لاشتر",
-            "مرمریت مشکی",
-            "مرمریت سفید",
-
-            "سنگ گرانیت",
-            "گرانیت مشکی",
-            "گرانیت نطنز",
-            "گرانیت نهبندان",
-            "گرانیت زاهدان",
-            "گرانیت سفید",
-            "گرانیت طوسی",
-            "گرانیت قرمز",
-
-            "سنگ چینی",
-            "سنگ کریستال",
-            "چینی الیگودرز",
-            "چینی ازنا",
-            "چینی نی‌ریز",
-            "کریستال لایبید",
-            "سنگ چینی سفید",
-
-            "سنگ اسلب",
-            "اسلب تراورتن",
-            "اسلب مرمریت",
-            "اسلب گرانیت",
-            "اسلب چینی",
-            "اسلب بوک‌مچ",
-            "اسلب فورمچ",
-            "اسلب سنگ طبیعی",
-
-            "کاشی",
+            "سنگ دیوار",
             "کاشی دیوار",
-            "کاشی کف",
             "کاشی آشپزخانه",
-            "کاشی حمام",
             "کاشی سرویس بهداشتی",
-            "کاشی بین کابینتی",
-            "کاشی دکوراتیو",
-            "کاشی طرح سنگ",
-
-            "سرامیک",
             "سرامیک کف",
             "سرامیک دیوار",
-            "سرامیک مات",
-            "سرامیک براق",
-            "سرامیک ضدلغزش",
-            "سرامیک طرح چوب",
-            "سرامیک طرح سنگ",
-            "سرامیک طرح بتن",
-
             "پرسلان",
-            "سرامیک پرسلان",
-            "پرسلان کف",
-            "پرسلان نما",
-            "پرسلان پولیش",
-            "پرسلان مات",
-            "پرسلان فول‌بادی",
-            "پرسلان اسلب",
-
             "موزاییک",
-            "موزاییک حیاط",
-            "موزاییک پارکینگ",
-            "موزاییک سیمانی",
-            "موزاییک پلیمری",
-            "موزاییک واش بتن",
-            "موزاییک پرسی",
-            "موزاییک رنگی",
-
-            "قرنیز",
-            "قرنیز سنگی",
-            "قرنیز سرامیکی",
-            "قرنیز PVC",
-            "قرنیز MDF",
-            "قرنیز طرح سنگ",
-            "قرنیز ضدآب",
-
-            "چسب و ملات نصب",
-            "چسب کاشی",
-            "چسب سرامیک",
-            "چسب سنگ",
-            "چسب پرسلان",
-            "چسب پودری کاشی",
-            "چسب خمیری کاشی",
-            "ملات نصب سنگ",
-            "پودر بندکشی",
-
-            "متعلقات کاشی و سرامیک",
-            "اسپیسر کاشی",
-            "صلیب کاشی",
-            "گیره کاشی",
-            "همتراز کاشی",
-            "سیستم تراز کاشی",
-            "پروفیل کاشی",
-            "نبشی کاشی",
-            "ابزار برش کاشی",
-
-            "سنگ مصنوعی",
-            "سنگ مصنوعی نما",
-            "سنگ مصنوعی کف",
-            "سنگ مصنوعی دکوراتیو",
-            "سنگ آنتیک مصنوعی",
-            "کورین",
-            "کوارتز",
-            "سنگ مهندسی",
-
-            "محصولات تکمیلی سنگ",
-            "رزین سنگ",
-            "پولیش سنگ",
-            "واکس سنگ",
-            "ساب سنگ",
-            "مواد آب‌بندی سنگ",
-            "مواد محافظ سنگ",
-            "پاک‌کننده سنگ",
+            "سنگ و کاشی ویژه",
           ].map(
             (item) => (
               <button
@@ -806,8 +798,9 @@ export default function StoneTilePage() {
             </h2>
 
             <p className="mt-3 text-sm text-slate-500">
-              محصولات تأییدشده توسط تیم سرچنو
-              در این بخش نمایش داده می‌شوند.
+              محصولاتی که توسط تیم سرچنو
+              تأیید شده‌اند در این بخش نمایش
+              داده می‌شوند.
             </p>
 
           </div>
@@ -848,289 +841,481 @@ export default function StoneTilePage() {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
               {filteredProducts.map(
-                (product) => (
+                (product) => {
 
-                  <div
-                    key={product.id}
-                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                  >
+                  /*
+                   * تمام تصاویر این محصول
+                   */
+                  const images =
+                    productImages[
+                      product.id
+                    ] || [];
 
-                    <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
-                      🪨
-                    </div>
+                  /*
+                   * تصویر اصلی
+                   */
+                  const mainImage =
+                    selectedImages[
+                      product.id
+                    ] ||
+                    images[0] ||
+                    null;
 
-                    <div className="p-6">
+                  return (
 
-                      <div className="flex items-center justify-between gap-3">
+                    <div
+                      key={product.id}
+                      className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                    >
 
-                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                          سنگ و کاشی
-                        </span>
+                      {/* ================= تصاویر محصول ================= */}
 
-                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                      <div className="bg-slate-100">
 
-                          <ShieldCheck className="h-3 w-3" />
+                        {mainImage ? (
 
-                          تأییدشده
+                          <div className="relative flex h-64 w-full items-center justify-center bg-white">
 
-                        </span>
-
-                      </div>
-
-                      <h3 className="mt-4 text-lg font-black">
-                        {product.name ||
-                          "محصول بدون نام"}
-                      </h3>
-
-                      {product.brand && (
-                        <p className="mt-2 text-sm text-slate-500">
-                          برند:{" "}
-                          {product.brand}
-                        </p>
-                      )}
-
-                      {product.model && (
-                        <p className="mt-1 text-sm text-slate-500">
-                          مدل:{" "}
-                          {product.model}
-                        </p>
-                      )}
-
-                      {product.description && (
-                        <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                          {
-                            product.description
-                          }
-                        </p>
-                      )}
-
-                      <div className="mt-5 space-y-3">
-
-                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
-
-                          <span className="font-bold text-slate-500">
-                            قیمت مشتری
-                          </span>
-
-                          <span className="font-black text-blue-700">
-
-                            {(
-                              product.customer_price ??
-                              product.price ??
-                              0
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            تومان
-
-                          </span>
-
-                        </div>
-
-                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-
-                          <div className="mb-3 flex items-center justify-between">
-
-                            <span className="text-sm font-black text-slate-800">
-                              مقدار خرید
-                            </span>
-
-                            <span className="text-xs font-bold text-slate-400">
-                              واحد فروش:{" "}
-                              {product.unit ||
-                                "عدد"}
-                            </span>
+                            <img
+                              src={mainImage}
+                              alt={
+                                product.name ||
+                                "تصویر محصول"
+                              }
+                              className="h-full w-full object-contain"
+                            />
 
                           </div>
 
-                          <div className="flex items-center gap-2">
+                        ) : (
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                decreaseQuantity(
-                                  product
-                                )
-                              }
-                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
-                            >
-                              −
-                            </button>
+                          <div className="flex h-64 items-center justify-center text-6xl">
+                            🪨
+                          </div>
 
-                           <input
-  type="number"
-  min={product.min_order ?? 1}
-  max={product.stock && product.stock > 0 ? product.stock : undefined}
-  value={quantities[product.id] ?? getQuantity(product)}
-  onChange={(e) => {
-    const rawValue = e.target.value;
+                        )}
 
-    // اجازه بده کاربر موقتاً فیلد را خالی کند
-    if (rawValue === "") {
-      setQuantities((prev) => ({
-        ...prev,
-        [product.id]: 0,
-      }));
-      return;
-    }
+                        {/* ================= تمام تصاویر کوچک ================= */}
 
-    const value = Number(rawValue);
+                        {images.length > 0 && (
 
-    if (!Number.isFinite(value)) {
-      return;
-    }
+                          <div className="flex gap-2 overflow-x-auto border-t border-slate-200 bg-slate-50 p-3">
 
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: value,
-    }));
-  }}
-  onBlur={() => {
-    const minOrder = Math.max(
-      product.min_order ?? 1,
-      1
-    );
+                            {images.map(
+                              (
+                                imageUrl,
+                                imageIndex
+                              ) => (
 
-    const stock = product.stock ?? 0;
+                                <button
+                                  key={`${product.id}-${imageIndex}`}
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedImages(
+                                      (prev) => ({
+                                        ...prev,
+                                        [product.id]:
+                                          imageUrl,
+                                      })
+                                    )
+                                  }
+                                  className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition ${
+                                    mainImage ===
+                                    imageUrl
+                                      ? "border-blue-600 ring-2 ring-blue-100"
+                                      : "border-slate-200 hover:border-blue-400"
+                                  }`}
+                                >
 
-    let value =
-      quantities[product.id] ?? minOrder;
+                                  <img
+                                    src={
+                                      imageUrl
+                                    }
+                                    alt={`${product.name || "محصول"} - تصویر ${imageIndex + 1}`}
+                                    className="h-full w-full object-cover"
+                                  />
 
-    // کمتر از حداقل خرید
-    if (value < minOrder) {
-      value = minOrder;
-    }
+                                </button>
 
-    // بیشتر از موجودی
-    if (stock > 0 && value > stock) {
-      value = stock;
-    }
-
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: value,
-    }));
-  }}
-  className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-/>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                increaseQuantity(
-                                  product
-                                )
-                              }
-                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white transition hover:bg-blue-800"
-                            >
-                              +
-                            </button>
+                              )
+                            )}
 
                           </div>
 
-                          <p className="mt-3 text-center text-xs text-slate-400">
-                            حداقل خرید:{" "}
-                            {(
-                              product.min_order ??
-                              1
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            {product.unit ||
-                              "واحد"}
-                          </p>
-
-                        </div>
-
-                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
-
-                          <span className="font-bold text-slate-500">
-                            موجودی
-                          </span>
-
-                          <span className="font-black">
-
-                            {(
-                              product.stock ??
-                              0
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            {product.unit ||
-                              ""}
-
-                          </span>
-
-                        </div>
+                        )}
 
                       </div>
 
-                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+                      <div className="p-6">
+
+                        {/* Status */}
 
                         <div className="flex items-center justify-between gap-3">
 
-                          <span className="text-sm font-bold text-slate-600">
-                            مبلغ کل خرید
+                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                            سنگ و کاشی
                           </span>
 
-                          <span className="text-lg font-black text-blue-700">
+                          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
 
-                            {(
-                              (
-                                product.customer_price ??
-                                product.price ??
-                                0
-                              ) *
-                              getQuantity(
-                                product
-                              )
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            تومان
+                            <ShieldCheck className="h-3 w-3" />
+
+                            تأییدشده
 
                           </span>
 
                         </div>
 
+                        {/* Name */}
+
+                        <h3 className="mt-4 text-lg font-black">
+                          {product.name ||
+                            "محصول بدون نام"}
+                        </h3>
+
+                        {/* Brand */}
+
+                        {product.brand && (
+
+                          <p className="mt-2 text-sm text-slate-500">
+                            برند:{" "}
+                            {product.brand}
+                          </p>
+
+                        )}
+
+                        {/* Model */}
+
+                        {product.model && (
+
+                          <p className="mt-1 text-sm text-slate-500">
+                            مدل:{" "}
+                            {product.model}
+                          </p>
+
+                        )}
+
+                        {/* Description */}
+
+                        {product.description && (
+
+                          <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                            {
+                              product.description
+                            }
+                          </p>
+
+                        )}
+
+                        {/* Price */}
+
+                        <div className="mt-5 space-y-3">
+
+                          <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                            <span className="font-bold text-slate-500">
+                              قیمت مشتری
+                            </span>
+
+                            <span className="font-black text-blue-700">
+
+                              {(
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              تومان
+
+                            </span>
+
+                          </div>
+
+                          {/* مقدار خرید */}
+
+                          <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+                            <div className="mb-3 flex items-center justify-between">
+
+                              <span className="text-sm font-black text-slate-800">
+                                مقدار خرید
+                              </span>
+
+                              <span className="text-xs font-bold text-slate-400">
+                                واحد فروش:{" "}
+                                {product.unit ||
+                                  "عدد"}
+                              </span>
+
+                            </div>
+
+                            <div className="flex items-center gap-2">
+
+                              {/* Minus */}
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  decreaseQuantity(
+                                    product
+                                  )
+                                }
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm hover:bg-red-50 hover:text-red-600"
+                              >
+                                −
+                              </button>
+
+                              {/* Number */}
+
+                              <input
+                                type="number"
+                                min={
+                                  product.min_order ??
+                                  1
+                                }
+                                max={
+                                  product.stock &&
+                                  product.stock >
+                                    0
+                                    ? product.stock
+                                    : undefined
+                                }
+                                value={
+                                  quantities[
+                                    product.id
+                                  ] ??
+                                  getQuantity(
+                                    product
+                                  )
+                                }
+                                onChange={(e) => {
+
+                                  const rawValue =
+                                    e.target
+                                      .value;
+
+                                  if (
+                                    rawValue ===
+                                    ""
+                                  ) {
+
+                                    setQuantities(
+                                      (prev) => ({
+                                        ...prev,
+                                        [product.id]:
+                                          0,
+                                      })
+                                    );
+
+                                    return;
+                                  }
+
+                                  const value =
+                                    Number(
+                                      rawValue
+                                    );
+
+                                  if (
+                                    !Number.isFinite(
+                                      value
+                                    )
+                                  ) {
+                                    return;
+                                  }
+
+                                  setQuantities(
+                                    (prev) => ({
+                                      ...prev,
+                                      [product.id]:
+                                        value,
+                                    })
+                                  );
+
+                                }}
+                                onBlur={() => {
+
+                                  const minOrder =
+                                    Math.max(
+                                      product.min_order ??
+                                        1,
+                                      1
+                                    );
+
+                                  const stock =
+                                    product.stock ??
+                                    0;
+
+                                  let value =
+                                    quantities[
+                                      product.id
+                                    ] ??
+                                    minOrder;
+
+                                  if (
+                                    value <
+                                    minOrder
+                                  ) {
+                                    value =
+                                      minOrder;
+                                  }
+
+                                  if (
+                                    stock > 0 &&
+                                    value >
+                                      stock
+                                  ) {
+                                    value =
+                                      stock;
+                                  }
+
+                                  setQuantities(
+                                    (prev) => ({
+                                      ...prev,
+                                      [product.id]:
+                                        value,
+                                    })
+                                  );
+
+                                }}
+                                className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                              />
+
+                              {/* Plus */}
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  increaseQuantity(
+                                    product
+                                  )
+                                }
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white hover:bg-blue-800"
+                              >
+                                +
+                              </button>
+
+                            </div>
+
+                            <p className="mt-3 text-center text-xs text-slate-400">
+
+                              حداقل خرید:{" "}
+                              {(
+                                product.min_order ??
+                                1
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              {product.unit ||
+                                "واحد"}
+
+                            </p>
+
+                          </div>
+
+                          {/* Stock */}
+
+                          <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                            <span className="font-bold text-slate-500">
+                              موجودی
+                            </span>
+
+                            <span className="font-black">
+
+                              {(
+                                product.stock ??
+                                0
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              {product.unit ||
+                                ""}
+
+                            </span>
+
+                          </div>
+
+                        </div>
+
+                        {/* مبلغ کل */}
+
+                        <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+                          <div className="flex items-center justify-between gap-3">
+
+                            <span className="text-sm font-bold text-slate-600">
+                              مبلغ کل خرید
+                            </span>
+
+                            <span className="text-lg font-black text-blue-700">
+
+                              {(
+                                (
+                                  product.customer_price ??
+                                  product.price ??
+                                  0
+                                ) *
+                                getQuantity(
+                                  product
+                                )
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              تومان
+
+                            </span>
+
+                          </div>
+
+                        </div>
+
+                        {/* Store */}
+
+                        <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+
+                          <MapPin className="h-4 w-4" />
+
+                          {product.seller_id
+                            ? stores[
+                                product
+                                  .seller_id
+                              ] ||
+                              "فروشگاه"
+                            : "فروشگاه نامشخص"}
+
+                        </div>
+
+                        {/* Seller */}
+
+                        <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
+
+                          <Star className="h-4 w-4 fill-current" />
+
+                          فروشنده تأییدشده
+
+                        </div>
+
+                        {/* Buy */}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            addToCart(
+                              product
+                            )
+                          }
+                          className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                        >
+                          خرید محصول
+                        </button>
+
                       </div>
-
-                      <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
-
-                        <MapPin className="h-4 w-4" />
-
-                        {product.seller_id
-                          ? stores[
-                              product.seller_id
-                            ] ||
-                            "فروشگاه"
-                          : "فروشگاه نامشخص"}
-
-                      </div>
-
-                      <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
-
-                        <Star className="h-4 w-4 fill-current" />
-
-                        فروشنده تأییدشده
-
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          addToCart(
-                            product
-                          )
-                        }
-                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
-                      >
-                        خرید محصول
-                      </button>
 
                     </div>
 
-                  </div>
-                )
+                  );
+                }
               )}
 
             </div>
