@@ -19,6 +19,7 @@ type Product = {
   id: string;
   name: string | null;
   category: string | null;
+  image_url?: string | null;
   price: number | null;
   customer_price: number | null;
   cooperation_price: number | null;
@@ -151,23 +152,68 @@ export default function BrickBlockPage() {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from("products")
-        .select(
-          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
-        )
-        .eq("category", "brick-block")
-        .eq("status", "active")
-        .order("created_at", {
-          ascending: false,
-        });
+     const { data, error } = await supabase
+  .from("products")
+  .select(
+    "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+  )
+  .eq("category", "brick-block")
+  .eq("status", "active")
+  .order("created_at", {
+    ascending: false,
+  });
 
       if (error) {
         console.error("BRICK PRODUCTS ERROR:", error);
         return;
       }
 
-      setProducts(data || []);
+     const productList = data || [];
+
+if (productList.length === 0) {
+  setProducts([]);
+} else {
+  const productIds = productList.map(
+    (product) => product.id
+  );
+
+  const {
+    data: imageData,
+    error: imageError,
+  } = await supabase
+    .from("product_images")
+    .select("product_id,image_url")
+    .in("product_id", productIds);
+
+  if (imageError) {
+    console.error(
+      "PRODUCT IMAGES ERROR:",
+      imageError
+    );
+  }
+
+  const imageMap: Record<string, string> = {};
+
+  (imageData || []).forEach((image) => {
+    if (
+      image.product_id &&
+      image.image_url &&
+      !imageMap[image.product_id]
+    ) {
+      imageMap[image.product_id] =
+        image.image_url;
+    }
+  });
+
+  const productsWithImages =
+    productList.map((product) => ({
+      ...product,
+      image_url:
+        imageMap[product.id] || null,
+    }));
+
+  setProducts(productsWithImages);
+}
 
       const sellerIds = [
         ...new Set(
@@ -515,9 +561,19 @@ const decreaseQuantity = (product: Product) => {
                     className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                   >
 
-                    <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
-                      🧱
-                    </div>
+                    <div className="flex h-56 items-center justify-center overflow-hidden bg-slate-100">
+  {product.image_url ? (
+    <img
+      src={product.image_url}
+      alt={product.name || "تصویر محصول"}
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <div className="flex h-full w-full items-center justify-center text-6xl">
+      🧱
+    </div>
+  )}
+</div>
 
                     <div className="p-6">
 
