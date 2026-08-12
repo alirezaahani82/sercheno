@@ -35,6 +35,11 @@ type StoreInfo = {
   name: string | null;
 };
 
+type ProductImage = {
+  product_id: string;
+  image_url: string;
+};
+
 type CartItem = {
   productId: string;
   name: string;
@@ -55,6 +60,35 @@ export default function ElectricalLightingPage() {
     Record<string, number>
   >({});
 
+  /*
+   * تصاویر تمام محصولات
+   *
+   * مثال:
+   *
+   * {
+   *   "product-id-1": [
+   *     "image1.jpg",
+   *     "image2.jpg",
+   *     "image3.jpg"
+   *   ],
+   *
+   *   "product-id-2": [
+   *     "image1.jpg",
+   *     "image2.jpg"
+   *   ]
+   * }
+   */
+  const [productImages, setProductImages] = useState<
+    Record<string, string[]>
+  >({});
+
+  /*
+   * عکس اصلی انتخاب‌شده برای هر محصول
+   */
+  const [selectedImages, setSelectedImages] = useState<
+    Record<string, string>
+  >({});
+
   /* =========================
      مقدار خرید
   ========================= */
@@ -65,7 +99,10 @@ export default function ElectricalLightingPage() {
       1
     );
 
-    return quantities[product.id] ?? minOrder;
+    return (
+      quantities[product.id] ??
+      minOrder
+    );
   };
 
   /* =========================
@@ -75,17 +112,23 @@ export default function ElectricalLightingPage() {
   const increaseQuantity = (
     product: Product
   ) => {
-    const current = getQuantity(product);
+    const current =
+      getQuantity(product);
 
-    const stock = product.stock ?? 0;
+    const stock =
+      product.stock ?? 0;
 
-    if (stock > 0 && current >= stock) {
+    if (
+      stock > 0 &&
+      current >= stock
+    ) {
       return;
     }
 
     setQuantities((prev) => ({
       ...prev,
-      [product.id]: current + 1,
+      [product.id]:
+        current + 1,
     }));
   };
 
@@ -96,70 +139,36 @@ export default function ElectricalLightingPage() {
   const decreaseQuantity = (
     product: Product
   ) => {
-    const current = getQuantity(product);
+    const current =
+      getQuantity(product);
 
     const minOrder = Math.max(
       product.min_order ?? 1,
       1
     );
 
-    if (current <= minOrder) {
+    if (
+      current <= minOrder
+    ) {
       return;
     }
 
     setQuantities((prev) => ({
       ...prev,
-      [product.id]: current - 1,
+      [product.id]:
+        current - 1,
     }));
   };
 
   /* =========================
-     تغییر مستقیم تعداد
-  ========================= */
-
-  const changeQuantity = (
-    product: Product,
-    value: string
-  ) => {
-    if (value === "") {
-      return;
-    }
-
-    const quantity = Number(value);
-
-    if (Number.isNaN(quantity)) {
-      return;
-    }
-
-    const minOrder = Math.max(
-      product.min_order ?? 1,
-      1
-    );
-
-    const stock = product.stock ?? 0;
-
-    if (quantity < minOrder) {
-      return;
-    }
-
-    if (stock > 0 && quantity > stock) {
-      return;
-    }
-
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: quantity,
-    }));
-  };
-
-  /* =========================
-     افزودن به سبد خرید
+     افزودن به سبد
   ========================= */
 
   const addToCart = (
     product: Product
   ) => {
-    const quantity = getQuantity(product);
+    const quantity =
+      getQuantity(product);
 
     const price =
       product.customer_price ??
@@ -168,12 +177,14 @@ export default function ElectricalLightingPage() {
 
     const storeName =
       product.seller_id
-        ? stores[product.seller_id] ||
-          "فروشگاه"
+        ? stores[
+            product.seller_id
+          ] || "فروشگاه"
         : "فروشگاه نامشخص";
 
     const newItem: CartItem = {
-      productId: product.id,
+      productId:
+        product.id,
 
       name:
         product.name ||
@@ -204,7 +215,9 @@ export default function ElectricalLightingPage() {
           product.id
       );
 
-    if (existingIndex >= 0) {
+    if (
+      existingIndex >= 0
+    ) {
       existingCart[
         existingIndex
       ].quantity += quantity;
@@ -241,41 +254,46 @@ export default function ElectricalLightingPage() {
   }, []);
 
   /* =========================
-     بروزرسانی شمارنده سبد
+     تعداد سبد
   ========================= */
 
   useEffect(() => {
-    const updateCartCount = () => {
-      try {
-        const cart: CartItem[] =
-          JSON.parse(
-            localStorage.getItem(
-              "sercheno_cart"
-            ) || "[]"
+    const updateCartCount =
+      () => {
+        try {
+          const cart =
+            JSON.parse(
+              localStorage.getItem(
+                "sercheno_cart"
+              ) || "[]"
+            );
+
+          const count =
+            cart.reduce(
+              (
+                total: number,
+                item: CartItem
+              ) =>
+                total +
+                Number(
+                  item.quantity ||
+                    0
+                ),
+              0
+            );
+
+          setCartCount(
+            count
+          );
+        } catch (error) {
+          console.error(
+            "CART COUNT ERROR:",
+            error
           );
 
-        const count = cart.reduce(
-          (
-            total: number,
-            item: CartItem
-          ) =>
-            total +
-            Number(
-              item.quantity || 0
-            ),
-          0
-        );
-
-        setCartCount(count);
-      } catch (error) {
-        console.error(
-          "CART COUNT ERROR:",
-          error
-        );
-
-        setCartCount(0);
-      }
-    };
+          setCartCount(0);
+        }
+      };
 
     updateCartCount();
 
@@ -306,110 +324,242 @@ export default function ElectricalLightingPage() {
      بارگذاری محصولات برق و روشنایی
   ========================= */
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
+  const loadProducts =
+    async () => {
+      try {
+        setLoading(true);
 
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("products")
-        .select(
-          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
-        )
-        .eq(
-          "category",
-          "electrical-lighting"
-        )
-        .eq(
-          "status",
-          "active"
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        );
-
-      if (error) {
-        console.error(
-          "ELECTRICAL LIGHTING PRODUCTS ERROR:",
-          error
-        );
-
-        return;
-      }
-
-      setProducts(data || []);
-
-      const sellerIds = [
-        ...new Set(
-          (data || [])
-            .map(
-              (product) =>
-                product.seller_id
-            )
-            .filter(Boolean)
-        ),
-      ];
-
-      if (
-        sellerIds.length > 0
-      ) {
         const {
-          data: storeData,
-          error: storeError,
+          data,
+          error,
         } = await supabase
-          .from("stores")
-          .select("id,name")
-          .in(
-            "id",
-            sellerIds
+          .from("products")
+          .select(
+            "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+          )
+          .eq(
+            "category",
+            "electrical-lighting"
+          )
+          .eq(
+            "status",
+            "active"
+          )
+          .order(
+            "created_at",
+            {
+              ascending:
+                false,
+            }
           );
 
-        if (storeError) {
+        if (error) {
           console.error(
-            "STORE ERROR:",
-            storeError
+            "ELECTRICAL PRODUCTS ERROR:",
+            error
           );
+
+          return;
         }
 
-        const storeMap: Record<
-          string,
-          string
-        > = {};
+        const loadedProducts =
+          data || [];
 
-        (
-          storeData || []
-        ).forEach(
-          (
-            store: StoreInfo
-          ) => {
-            storeMap[
-              store.id
-            ] =
-              store.name ||
-              "فروشگاه";
+        setProducts(
+          loadedProducts
+        );
+
+        /* =========================
+           دریافت تمام تصاویر
+        ========================= */
+
+        const productIds =
+          loadedProducts.map(
+            (product) =>
+              product.id
+          );
+
+        if (
+          productIds.length >
+          0
+        ) {
+          const {
+            data: imageData,
+            error:
+              imageError,
+          } =
+            await supabase
+              .from(
+                "product_images"
+              )
+              .select(
+                "product_id,image_url"
+              )
+              .in(
+                "product_id",
+                productIds
+              )
+              .order(
+                "id",
+                {
+                  ascending:
+                    true,
+                }
+              );
+
+          if (imageError) {
+            console.error(
+              "PRODUCT IMAGES ERROR:",
+              imageError
+            );
+          } else {
+            /*
+             * تمام عکس‌های هر محصول
+             * داخل آرایه خودش قرار می‌گیرد.
+             */
+
+            const imageMap: Record<
+              string,
+              string[]
+            > = {};
+
+            (
+              imageData || []
+            ).forEach(
+              (
+                image: ProductImage
+              ) => {
+                if (
+                  !imageMap[
+                    image.product_id
+                  ]
+                ) {
+                  imageMap[
+                    image.product_id
+                  ] = [];
+                }
+
+                imageMap[
+                  image.product_id
+                ].push(
+                  image.image_url
+                );
+              }
+            );
+
+            setProductImages(
+              imageMap
+            );
+
+            /*
+             * اولین عکس هر محصول
+             * عکس اصلی اولیه است.
+             */
+
+            const selectedMap: Record<
+              string,
+              string
+            > = {};
+
+            Object.entries(
+              imageMap
+            ).forEach(
+              ([
+                productId,
+                urls,
+              ]) => {
+                if (
+                  urls.length >
+                  0
+                ) {
+                  selectedMap[
+                    productId
+                  ] = urls[0];
+                }
+              }
+            );
+
+            setSelectedImages(
+              selectedMap
+            );
           }
-        );
+        }
 
-        setStores(
-          storeMap
+        /* =========================
+           دریافت فروشگاه‌ها
+        ========================= */
+
+        const sellerIds = [
+          ...new Set(
+            loadedProducts
+              .map(
+                (product) =>
+                  product.seller_id
+              )
+              .filter(Boolean)
+          ),
+        ];
+
+        if (
+          sellerIds.length >
+          0
+        ) {
+          const {
+            data: storeData,
+            error:
+              storeError,
+          } =
+            await supabase
+              .from("stores")
+              .select(
+                "id,name"
+              )
+              .in(
+                "id",
+                sellerIds
+              );
+
+          if (storeError) {
+            console.error(
+              "STORE ERROR:",
+              storeError
+            );
+          }
+
+          const storeMap: Record<
+            string,
+            string
+          > = {};
+
+          (
+            storeData || []
+          ).forEach(
+            (
+              store: StoreInfo
+            ) => {
+              storeMap[
+                store.id
+              ] =
+                store.name ||
+                "فروشگاه";
+            }
+          );
+
+          setStores(
+            storeMap
+          );
+        }
+      } catch (error) {
+        console.error(
+          error
         );
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error(
-        error
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   /* =========================
-     جستجوی محصولات
+     جستجو
   ========================= */
 
   const filteredProducts =
@@ -420,7 +570,9 @@ export default function ElectricalLightingPage() {
             .trim()
             .toLowerCase();
 
-        if (!searchText) {
+        if (
+          !searchText
+        ) {
           return true;
         }
 
@@ -454,7 +606,6 @@ export default function ElectricalLightingPage() {
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-
       {/* ================= HEADER ================= */}
 
       <header className="border-b border-slate-200 bg-white">
@@ -481,8 +632,6 @@ export default function ElectricalLightingPage() {
             </div>
           </Link>
 
-          {/* Cart */}
-
           <Link
             href="/cart"
             className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
@@ -490,7 +639,8 @@ export default function ElectricalLightingPage() {
           >
             🛒
 
-            {cartCount > 0 && (
+            {cartCount >
+              0 && (
               <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
                 {cartCount.toLocaleString(
                   "fa-IR"
@@ -504,7 +654,6 @@ export default function ElectricalLightingPage() {
             className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
           >
             <ArrowRight className="h-4 w-4" />
-
             بازگشت به مصالح
           </Link>
 
@@ -519,7 +668,7 @@ export default function ElectricalLightingPage() {
 
           <img
             src="/materials/electrical-lighting.jpg"
-            alt="تجهیزات برق و روشنایی ساختمان"
+            alt="برق، تجهیزات الکتریکی و روشنایی"
             className="h-full w-full object-cover"
           />
 
@@ -532,7 +681,7 @@ export default function ElectricalLightingPage() {
               <div className="max-w-3xl">
 
                 <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
-                  تأسیسات برق و روشنایی ساختمان
+                  تجهیزات برق، الکتریکی و روشنایی
                 </span>
 
                 <h1 className="mt-5 text-4xl font-black sm:text-6xl">
@@ -540,11 +689,11 @@ export default function ElectricalLightingPage() {
                 </h1>
 
                 <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
-                  انواع سیم و کابل، کلید و پریز،
-                  تجهیزات برق ساختمان، تابلو برق،
-                  چراغ‌ها، لامپ‌ها و تجهیزات روشنایی
-                  مورد نیاز پروژه‌های ساختمانی را از
-                  فروشندگان معتبر در سرچنو پیدا کنید.
+                  انواع تجهیزات برق، سیم و کابل،
+                  کلید و پریز، روشنایی، تابلو برق،
+                  تجهیزات حفاظتی و لوازم الکتریکی
+                  ساختمانی را از فروشندگان معتبر
+                  در سرچنو پیدا کنید.
                 </p>
 
                 <div className="mt-7 flex flex-wrap gap-3">
@@ -558,15 +707,15 @@ export default function ElectricalLightingPage() {
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    چراغ و روشنایی
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
                     تابلو برق
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    لامپ و چراغ
-                  </span>
-
-                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    تجهیزات روشنایی
+                    تجهیزات حفاظتی
                   </span>
 
                 </div>
@@ -578,6 +727,7 @@ export default function ElectricalLightingPage() {
           </div>
 
         </div>
+
       </section>
 
       {/* ================= SEARCH ================= */}
@@ -600,7 +750,7 @@ export default function ElectricalLightingPage() {
                     e.target.value
                   )
                 }
-                placeholder="مثلاً کابل افشان، کلید و پریز، لامپ LED، چراغ سقفی..."
+                placeholder="مثلاً کابل، کلید و پریز، لامپ، پنل..."
                 className="w-full bg-transparent outline-none"
               />
 
@@ -630,13 +780,13 @@ export default function ElectricalLightingPage() {
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            چه تجهیزات برق و روشنایی نیاز دارید؟
+            چه نوع تجهیزات برق و روشنایی نیاز دارید؟
           </h2>
 
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
-            محصولات این گروه بر اساس نوع تجهیزات،
-            کاربرد، محل نصب، توان مصرفی، نوع سیستم
-            و کاربری پروژه دسته‌بندی شده‌اند.
+            محصولات این گروه بر اساس نوع مصرف،
+            کاربرد، توان، برند و نوع تجهیزات
+            دسته‌بندی شده‌اند.
           </p>
 
         </div>
@@ -644,50 +794,22 @@ export default function ElectricalLightingPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
           {[
-            "سیم برق",
+            "سیم و کابل ساختمانی",
             "کابل برق",
-            "کابل افشان",
-            "کابل مفتولی",
+            "سیم برق",
             "کابل شبکه",
-            "کابل کواکسیال",
-            "سیم و کابل مخابراتی",
-            "کلید برق",
-            "پریز برق",
-            "کلید و پریز دکوراتیو",
-            "کلید و پریز ضد آب",
-            "دیمر",
-            "تجهیزات تابلو برق",
-            "تابلو برق ساختمانی",
-            "جعبه تقسیم",
-            "فیوز مینیاتوری",
-            "فیوز محافظ جان",
-            "کنتاکتور",
-            "رله",
-            "ترمینال برق",
+            "کلید و پریز",
+            "کلید و پریز هوشمند",
             "لامپ LED",
-            "لامپ کم‌مصرف",
-            "لامپ هالوژن",
+            "پنل LED",
             "چراغ سقفی",
-            "چراغ پنلی",
-            "چراغ توکار",
-            "چراغ روکار",
             "چراغ دیواری",
             "چراغ محوطه",
             "پروژکتور",
-            "چراغ صنعتی",
-            "چراغ خیابانی",
-            "چراغ اضطراری",
-            "روشنایی هوشمند",
-            "سنسور حرکتی",
-            "تجهیزات برق هوشمند",
-            "لوله برق",
-            "اتصالات لوله برق",
-            "داکت برق",
-            "سینی کابل",
-            "متعلقات برق ساختمان",
-            "تجهیزات ارت",
-            "تجهیزات حفاظتی برق",
-            "تجهیزات روشنایی پروژه",
+            "تابلو برق",
+            "فیوز و کلید محافظ جان",
+            "تجهیزات حفاظتی",
+            "تجهیزات برق صنعتی",
           ].map(
             (item) => (
               <button
@@ -721,7 +843,7 @@ export default function ElectricalLightingPage() {
             </h2>
 
             <p className="mt-3 text-sm text-slate-500">
-              محصولات تأییدشده توسط تیم سرچنو
+              محصولاتی که توسط تیم سرچنو تأیید شده‌اند
               در این بخش نمایش داده می‌شوند.
             </p>
 
@@ -739,7 +861,8 @@ export default function ElectricalLightingPage() {
 
             </div>
 
-          ) : filteredProducts.length === 0 ? (
+          ) : filteredProducts.length ===
+            0 ? (
 
             <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
 
@@ -763,323 +886,481 @@ export default function ElectricalLightingPage() {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
               {filteredProducts.map(
-                (product) => (
+                (product) => {
 
-                  <div
-                    key={product.id}
-                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                  >
+                  /*
+                   * تمام تصاویر این محصول
+                   */
+                  const images =
+                    productImages[
+                      product.id
+                    ] || [];
 
-                    {/* Product Image/Icon */}
+                  /*
+                   * تصویر اصلی
+                   */
+                  const mainImage =
+                    selectedImages[
+                      product.id
+                    ] ||
+                    images[0] ||
+                    null;
 
-                    <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
-                      💡
-                    </div>
+                  return (
 
-                    <div className="p-6">
+                    <div
+                      key={
+                        product.id
+                      }
+                      className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                    >
 
-                      {/* Status */}
+                      {/* ================= تصاویر ================= */}
 
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="bg-slate-100">
 
-                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                          برق و روشنایی
-                        </span>
+                        {mainImage ? (
 
-                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                          <div className="relative flex h-64 w-full items-center justify-center bg-white">
 
-                          <ShieldCheck className="h-3 w-3" />
-
-                          تأییدشده
-
-                        </span>
-
-                      </div>
-
-                      {/* Name */}
-
-                      <h3 className="mt-4 text-lg font-black">
-                        {product.name ||
-                          "محصول بدون نام"}
-                      </h3>
-
-                      {/* Brand */}
-
-                      {product.brand && (
-                        <p className="mt-2 text-sm text-slate-500">
-                          برند:{" "}
-                          {product.brand}
-                        </p>
-                      )}
-
-                      {/* Model */}
-
-                      {product.model && (
-                        <p className="mt-1 text-sm text-slate-500">
-                          مدل:{" "}
-                          {product.model}
-                        </p>
-                      )}
-
-                      {/* Description */}
-
-                      {product.description && (
-                        <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                          {
-                            product.description
-                          }
-                        </p>
-                      )}
-
-                      {/* Price + Quantity */}
-
-                      <div className="mt-5 space-y-3">
-
-                        {/* Price */}
-
-                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
-
-                          <span className="font-bold text-slate-500">
-                            قیمت مشتری
-                          </span>
-
-                          <span className="font-black text-blue-700">
-
-                            {(
-                              product.customer_price ??
-                              product.price ??
-                              0
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            تومان
-
-                          </span>
-
-                        </div>
-
-                        {/* Quantity */}
-
-                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-
-                          <div className="mb-3 flex items-center justify-between">
-
-                            <span className="text-sm font-black text-slate-800">
-                              مقدار خرید
-                            </span>
-
-                            <span className="text-xs font-bold text-slate-400">
-                              واحد فروش:{" "}
-                              {product.unit ||
-                                "عدد"}
-                            </span>
+                            <img
+                              src={
+                                mainImage
+                              }
+                              alt={
+                                product.name ||
+                                "تصویر محصول"
+                              }
+                              className="h-full w-full object-contain"
+                            />
 
                           </div>
 
-                          <div className="flex items-center gap-2">
+                        ) : (
 
-                            {/* Minus */}
+                          <div className="flex h-64 items-center justify-center text-6xl">
+                            💡
+                          </div>
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                decreaseQuantity(
-                                  product
-                                )
-                              }
-                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
-                            >
-                              −
-                            </button>
+                        )}
 
-                            {/* Number Input */}
+                        {/* ================= تمام تصاویر کوچک ================= */}
 
-                            <input
-  type="number"
-  min={product.min_order ?? 1}
-  max={product.stock && product.stock > 0 ? product.stock : undefined}
-  value={quantities[product.id] ?? getQuantity(product)}
-  onChange={(e) => {
-    const rawValue = e.target.value;
+                        {images.length >
+                          0 && (
 
-    // اجازه بده کاربر موقتاً فیلد را خالی کند
-    if (rawValue === "") {
-      setQuantities((prev) => ({
-        ...prev,
-        [product.id]: 0,
-      }));
-      return;
-    }
+                          <div className="flex gap-2 overflow-x-auto border-t border-slate-200 bg-slate-50 p-3">
 
-    const value = Number(rawValue);
+                            {images.map(
+                              (
+                                imageUrl,
+                                imageIndex
+                              ) => (
 
-    if (!Number.isFinite(value)) {
-      return;
-    }
+                                <button
+                                  key={`${product.id}-${imageIndex}`}
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedImages(
+                                      (
+                                        prev
+                                      ) => ({
+                                        ...prev,
+                                        [product.id]:
+                                          imageUrl,
+                                      })
+                                    )
+                                  }
+                                  className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition ${
+                                    mainImage ===
+                                    imageUrl
+                                      ? "border-blue-600 ring-2 ring-blue-100"
+                                      : "border-slate-200 hover:border-blue-400"
+                                  }`}
+                                >
 
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: value,
-    }));
-  }}
-  onBlur={() => {
-    const minOrder = Math.max(
-      product.min_order ?? 1,
-      1
-    );
+                                  <img
+                                    src={
+                                      imageUrl
+                                    }
+                                    alt={`${product.name || "محصول"} - تصویر ${imageIndex + 1}`}
+                                    className="h-full w-full object-cover"
+                                  />
 
-    const stock = product.stock ?? 0;
+                                </button>
 
-    let value =
-      quantities[product.id] ?? minOrder;
-
-    // کمتر از حداقل خرید
-    if (value < minOrder) {
-      value = minOrder;
-    }
-
-    // بیشتر از موجودی
-    if (stock > 0 && value > stock) {
-      value = stock;
-    }
-
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: value,
-    }));
-  }}
-  className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-/>
-                            {/* Plus */}
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                increaseQuantity(
-                                  product
-                                )
-                              }
-                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white transition hover:bg-blue-800"
-                            >
-                              +
-                            </button>
+                              )
+                            )}
 
                           </div>
 
-                          <p className="mt-3 text-center text-xs text-slate-400">
-                            حداقل خرید:{" "}
-                            {(
-                              product.min_order ??
-                              1
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            {product.unit ||
-                              "واحد"}
-                          </p>
-
-                        </div>
-
-                        {/* Stock */}
-
-                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
-
-                          <span className="font-bold text-slate-500">
-                            موجودی
-                          </span>
-
-                          <span className="font-black">
-
-                            {(
-                              product.stock ??
-                              0
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            {product.unit ||
-                              ""}
-
-                          </span>
-
-                        </div>
+                        )}
 
                       </div>
 
-                      {/* Total Price */}
+                      <div className="p-6">
 
-                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+                        {/* Status */}
 
                         <div className="flex items-center justify-between gap-3">
 
-                          <span className="text-sm font-bold text-slate-600">
-                            مبلغ کل خرید
+                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                            برق و روشنایی
                           </span>
 
-                          <span className="text-lg font-black text-blue-700">
+                          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
 
-                            {(
-                              (
-                                product.customer_price ??
-                                product.price ??
-                                0
-                              ) *
-                              getQuantity(
-                                product
-                              )
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            تومان
+                            <ShieldCheck className="h-3 w-3" />
+
+                            تأییدشده
 
                           </span>
 
                         </div>
 
+                        {/* Name */}
+
+                        <h3 className="mt-4 text-lg font-black">
+                          {product.name ||
+                            "محصول بدون نام"}
+                        </h3>
+
+                        {/* Brand */}
+
+                        {product.brand && (
+                          <p className="mt-2 text-sm text-slate-500">
+                            برند:{" "}
+                            {product.brand}
+                          </p>
+                        )}
+
+                        {/* Model */}
+
+                        {product.model && (
+                          <p className="mt-1 text-sm text-slate-500">
+                            مدل:{" "}
+                            {product.model}
+                          </p>
+                        )}
+
+                        {/* Description */}
+
+                        {product.description && (
+                          <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                            {
+                              product.description
+                            }
+                          </p>
+                        )}
+
+                        {/* Price */}
+
+                        <div className="mt-5 space-y-3">
+
+                          <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                            <span className="font-bold text-slate-500">
+                              قیمت مشتری
+                            </span>
+
+                            <span className="font-black text-blue-700">
+
+                              {(
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              تومان
+
+                            </span>
+
+                          </div>
+
+                          {/* مقدار خرید */}
+
+                          <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+                            <div className="mb-3 flex items-center justify-between">
+
+                              <span className="text-sm font-black text-slate-800">
+                                مقدار خرید
+                              </span>
+
+                              <span className="text-xs font-bold text-slate-400">
+                                واحد فروش:{" "}
+                                {product.unit ||
+                                  "عدد"}
+                              </span>
+
+                            </div>
+
+                            <div className="flex items-center gap-2">
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  decreaseQuantity(
+                                    product
+                                  )
+                                }
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm hover:bg-red-50 hover:text-red-600"
+                              >
+                                −
+                              </button>
+
+                              <input
+                                type="number"
+                                min={
+                                  product.min_order ??
+                                  1
+                                }
+                                max={
+                                  product.stock &&
+                                  product.stock >
+                                    0
+                                    ? product.stock
+                                    : undefined
+                                }
+                                value={
+                                  quantities[
+                                    product.id
+                                  ] ??
+                                  getQuantity(
+                                    product
+                                  )
+                                }
+                                onChange={(
+                                  e
+                                ) => {
+
+                                  const rawValue =
+                                    e.target.value;
+
+                                  if (
+                                    rawValue ===
+                                    ""
+                                  ) {
+
+                                    setQuantities(
+                                      (
+                                        prev
+                                      ) => ({
+                                        ...prev,
+                                        [product.id]:
+                                          0,
+                                      })
+                                    );
+
+                                    return;
+                                  }
+
+                                  const value =
+                                    Number(
+                                      rawValue
+                                    );
+
+                                  if (
+                                    !Number.isFinite(
+                                      value
+                                    )
+                                  ) {
+                                    return;
+                                  }
+
+                                  setQuantities(
+                                    (
+                                      prev
+                                    ) => ({
+                                      ...prev,
+                                      [product.id]:
+                                        value,
+                                    })
+                                  );
+
+                                }}
+                                onBlur={() => {
+
+                                  const minOrder =
+                                    Math.max(
+                                      product.min_order ??
+                                        1,
+                                      1
+                                    );
+
+                                  const stock =
+                                    product.stock ??
+                                    0;
+
+                                  let value =
+                                    quantities[
+                                      product.id
+                                    ] ??
+                                    minOrder;
+
+                                  if (
+                                    value <
+                                    minOrder
+                                  ) {
+                                    value =
+                                      minOrder;
+                                  }
+
+                                  if (
+                                    stock >
+                                      0 &&
+                                    value >
+                                      stock
+                                  ) {
+                                    value =
+                                      stock;
+                                  }
+
+                                  setQuantities(
+                                    (
+                                      prev
+                                    ) => ({
+                                      ...prev,
+                                      [product.id]:
+                                        value,
+                                    })
+                                  );
+
+                                }}
+                                className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                              />
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  increaseQuantity(
+                                    product
+                                  )
+                                }
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white hover:bg-blue-800"
+                              >
+                                +
+                              </button>
+
+                            </div>
+
+                            <p className="mt-3 text-center text-xs text-slate-400">
+                              حداقل خرید:{" "}
+                              {(
+                                product.min_order ??
+                                1
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              {product.unit ||
+                                "واحد"}
+                            </p>
+
+                          </div>
+
+                          {/* موجودی */}
+
+                          <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                            <span className="font-bold text-slate-500">
+                              موجودی
+                            </span>
+
+                            <span className="font-black">
+
+                              {(
+                                product.stock ??
+                                0
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              {product.unit ||
+                                ""}
+
+                            </span>
+
+                          </div>
+
+                        </div>
+
+                        {/* مبلغ کل */}
+
+                        <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+                          <div className="flex items-center justify-between gap-3">
+
+                            <span className="text-sm font-bold text-slate-600">
+                              مبلغ کل خرید
+                            </span>
+
+                            <span className="text-lg font-black text-blue-700">
+
+                              {(
+                                (
+                                  product.customer_price ??
+                                  product.price ??
+                                  0
+                                ) *
+                                getQuantity(
+                                  product
+                                )
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              تومان
+
+                            </span>
+
+                          </div>
+
+                        </div>
+
+                        {/* Store */}
+
+                        <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+
+                          <MapPin className="h-4 w-4" />
+
+                          {product.seller_id
+                            ? stores[
+                                product.seller_id
+                              ] ||
+                              "فروشگاه"
+                            : "فروشگاه نامشخص"}
+
+                        </div>
+
+                        {/* Seller */}
+
+                        <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
+
+                          <Star className="h-4 w-4 fill-current" />
+
+                          فروشنده تأییدشده
+
+                        </div>
+
+                        {/* Buy */}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            addToCart(
+                              product
+                            )
+                          }
+                          className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                        >
+                          خرید محصول
+                        </button>
+
                       </div>
-
-                      {/* Store */}
-
-                      <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
-
-                        <MapPin className="h-4 w-4" />
-
-                        {product.seller_id
-                          ? stores[
-                              product.seller_id
-                            ] ||
-                            "فروشگاه"
-                          : "فروشگاه نامشخص"}
-
-                      </div>
-
-                      {/* Seller */}
-
-                      <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
-
-                        <Star className="h-4 w-4 fill-current" />
-
-                        فروشنده تأییدشده
-
-                      </div>
-
-                      {/* Buy */}
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          addToCart(
-                            product
-                          )
-                        }
-                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
-                      >
-                        خرید محصول
-                      </button>
 
                     </div>
 
-                  </div>
-                )
+                  );
+                }
               )}
 
             </div>
