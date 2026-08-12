@@ -8,9 +8,6 @@ import {
   Search,
   ShieldCheck,
   Star,
-  ShoppingCart,
-  Minus,
-  Plus,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
@@ -19,7 +16,6 @@ type Product = {
   id: string;
   name: string | null;
   category: string | null;
-  image_url?: string | null;
   price: number | null;
   customer_price: number | null;
   cooperation_price: number | null;
@@ -54,264 +50,409 @@ export default function BrickBlockPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [cartCount, setCartCount] = useState(0);
-  const addToCart = (product: Product) => {
-  const quantity = getQuantity(product);
 
-  const price =
-    product.customer_price ??
-    product.price ??
-    0;
+  const [quantities, setQuantities] = useState<
+    Record<string, number>
+  >({});
 
-  const storeName = product.seller_id
-    ? stores[product.seller_id] || "فروشگاه"
-    : "فروشگاه نامشخص";
+  /* =========================
+     دریافت مقدار انتخاب‌شده
+  ========================= */
 
-  const newItem: CartItem = {
-    productId: product.id,
-    name: product.name || "محصول بدون نام",
-    price,
-    quantity,
-    unit: product.unit || "عدد",
-    storeName,
+  const getQuantity = (product: Product) => {
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    return (
+      quantities[product.id] ??
+      minOrder
+    );
   };
 
-  const existingCart: CartItem[] = JSON.parse(
-    localStorage.getItem("sercheno_cart") || "[]"
-  );
+  /* =========================
+     افزایش مقدار خرید
+  ========================= */
 
-  const existingIndex = existingCart.findIndex(
-    (item) => item.productId === product.id
-  );
+  const increaseQuantity = (
+    product: Product
+  ) => {
+    const current =
+      getQuantity(product);
 
-  if (existingIndex >= 0) {
-    existingCart[existingIndex].quantity += quantity;
-  } else {
-    existingCart.push(newItem);
-  }
+    const stock =
+      product.stock ?? 0;
 
-  localStorage.setItem(
-    "sercheno_cart",
-    JSON.stringify(existingCart)
-  );
-    
-    window.dispatchEvent(new Event("sercheno-cart-updated"));
+    if (
+      stock > 0 &&
+      current >= stock
+    ) {
+      return;
+    }
 
-  alert("محصول با موفقیت به سبد خرید اضافه شد.");
-};
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]:
+        current + 1,
+    }));
+  };
+
+  /* =========================
+     کاهش مقدار خرید
+  ========================= */
+
+  const decreaseQuantity = (
+    product: Product
+  ) => {
+    const current =
+      getQuantity(product);
+
+    const minOrder = Math.max(
+      product.min_order ?? 1,
+      1
+    );
+
+    if (
+      current <= minOrder
+    ) {
+      return;
+    }
+
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]:
+        current - 1,
+    }));
+  };
+
+  /* =========================
+     افزودن محصول به سبد
+  ========================= */
+
+  const addToCart = (
+    product: Product
+  ) => {
+    const quantity =
+      getQuantity(product);
+
+    const price =
+      product.customer_price ??
+      product.price ??
+      0;
+
+    const storeName =
+      product.seller_id
+        ? stores[
+            product.seller_id
+          ] || "فروشگاه"
+        : "فروشگاه نامشخص";
+
+    const newItem: CartItem = {
+      productId:
+        product.id,
+
+      name:
+        product.name ||
+        "محصول بدون نام",
+
+      price,
+
+      quantity,
+
+      unit:
+        product.unit ||
+        "عدد",
+
+      storeName,
+    };
+
+    const existingCart: CartItem[] =
+      JSON.parse(
+        localStorage.getItem(
+          "sercheno_cart"
+        ) || "[]"
+      );
+
+    const existingIndex =
+      existingCart.findIndex(
+        (item) =>
+          item.productId ===
+          product.id
+      );
+
+    if (
+      existingIndex >= 0
+    ) {
+      existingCart[
+        existingIndex
+      ].quantity += quantity;
+    } else {
+      existingCart.push(
+        newItem
+      );
+    }
+
+    localStorage.setItem(
+      "sercheno_cart",
+      JSON.stringify(
+        existingCart
+      )
+    );
+
+    window.dispatchEvent(
+      new Event(
+        "sercheno-cart-updated"
+      )
+    );
+
+    alert(
+      "محصول با موفقیت به سبد خرید اضافه شد."
+    );
+  };
+
+  /* =========================
+     دریافت محصولات
+  ========================= */
 
   useEffect(() => {
     loadProducts();
   }, []);
+
+  /* =========================
+     بروزرسانی تعداد سبد
+  ========================= */
+
   useEffect(() => {
-  const updateCartCount = () => {
-    try {
-      const cart = JSON.parse(
-        localStorage.getItem("sercheno_cart") || "[]"
-      );
+    const updateCartCount =
+      () => {
+        try {
+          const cart =
+            JSON.parse(
+              localStorage.getItem(
+                "sercheno_cart"
+              ) || "[]"
+            );
 
-      const count = cart.reduce(
-        (total: number, item: CartItem) =>
-          total + Number(item.quantity || 0),
-        0
-      );
+          const count =
+            cart.reduce(
+              (
+                total: number,
+                item: CartItem
+              ) =>
+                total +
+                Number(
+                  item.quantity ||
+                    0
+                ),
+              0
+            );
 
-      setCartCount(count);
-    } catch (error) {
-      console.error("CART COUNT ERROR:", error);
-      setCartCount(0);
-    }
-  };
+          setCartCount(
+            count
+          );
+        } catch (error) {
+          console.error(
+            "CART COUNT ERROR:",
+            error
+          );
 
-  updateCartCount();
+          setCartCount(0);
+        }
+      };
 
-  window.addEventListener(
-    "sercheno-cart-updated",
-    updateCartCount
-  );
+    updateCartCount();
 
-  window.addEventListener(
-    "storage",
-    updateCartCount
-  );
-
-  return () => {
-    window.removeEventListener(
+    window.addEventListener(
       "sercheno-cart-updated",
       updateCartCount
     );
 
-    window.removeEventListener(
+    window.addEventListener(
       "storage",
       updateCartCount
     );
-  };
-}, []);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
+    return () => {
+      window.removeEventListener(
+        "sercheno-cart-updated",
+        updateCartCount
+      );
 
-     const { data, error } = await supabase
-  .from("products")
-  .select(
-    "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
-  )
-  .eq("category", "brick-block")
-  .eq("status", "active")
-  .order("created_at", {
-    ascending: false,
-  });
+      window.removeEventListener(
+        "storage",
+        updateCartCount
+      );
+    };
+  }, []);
 
-      if (error) {
-        console.error("BRICK PRODUCTS ERROR:", error);
-        return;
-      }
+  /* =========================
+     بارگذاری محصولات آجر، بلوک و سفال
+  ========================= */
 
-     const productList = data || [];
+  const loadProducts =
+    async () => {
+      try {
+        setLoading(true);
 
-if (productList.length === 0) {
-  setProducts([]);
-} else {
-  const productIds = productList.map(
-    (product) => product.id
-  );
+        const {
+          data,
+          error,
+        } = await supabase
+          .from("products")
+          .select(
+            "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+          )
+          .eq(
+            "category",
+            "brick-block"
+          )
+          .eq(
+            "status",
+            "active"
+          )
+          .order(
+            "created_at",
+            {
+              ascending:
+                false,
+            }
+          );
 
-  const {
-    data: imageData,
-    error: imageError,
-  } = await supabase
-    .from("product_images")
-    .select("product_id,image_url")
-    .in("product_id", productIds);
+        if (error) {
+          console.error(
+            "BRICK PRODUCTS ERROR:",
+            error
+          );
 
-  if (imageError) {
-    console.error(
-      "PRODUCT IMAGES ERROR:",
-      imageError
-    );
-  }
-
-  const imageMap: Record<string, string> = {};
-
-  (imageData || []).forEach((image) => {
-    if (
-      image.product_id &&
-      image.image_url &&
-      !imageMap[image.product_id]
-    ) {
-      imageMap[image.product_id] =
-        image.image_url;
-    }
-  });
-
-  const productsWithImages =
-    productList.map((product) => ({
-      ...product,
-      image_url:
-        imageMap[product.id] || null,
-    }));
-
-  setProducts(productsWithImages);
-}
-
-      const sellerIds = [
-        ...new Set(
-          (data || [])
-            .map((product) => product.seller_id)
-            .filter(Boolean)
-        ),
-      ];
-
-      if (sellerIds.length > 0) {
-        const { data: storeData, error: storeError } =
-          await supabase
-            .from("stores")
-            .select("id,name")
-            .in("id", sellerIds);
-
-        if (storeError) {
-          console.error("STORE ERROR:", storeError);
+          return;
         }
 
-        const storeMap: Record<string, string> = {};
-
-        (storeData || []).forEach(
-          (store: StoreInfo) => {
-            storeMap[store.id] =
-              store.name || "فروشگاه";
-          }
+        setProducts(
+          data || []
         );
 
-        setStores(storeMap);
+        const sellerIds = [
+          ...new Set(
+            (data || [])
+              .map(
+                (product) =>
+                  product.seller_id
+              )
+              .filter(Boolean)
+          ),
+        ];
+
+        if (
+          sellerIds.length >
+          0
+        ) {
+          const {
+            data: storeData,
+            error:
+              storeError,
+          } =
+            await supabase
+              .from("stores")
+              .select(
+                "id,name"
+              )
+              .in(
+                "id",
+                sellerIds
+              );
+
+          if (storeError) {
+            console.error(
+              "STORE ERROR:",
+              storeError
+            );
+          }
+
+          const storeMap: Record<
+            string,
+            string
+          > = {};
+
+          (
+            storeData || []
+          ).forEach(
+            (
+              store: StoreInfo
+            ) => {
+              storeMap[
+                store.id
+              ] =
+                store.name ||
+                "فروشگاه";
+            }
+          );
+
+          setStores(
+            storeMap
+          );
+        }
+      } catch (error) {
+        console.error(
+          error
+        );
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const filteredProducts = products.filter(
-    (product) => {
-      const searchText = search
-        .trim()
-        .toLowerCase();
+  /* =========================
+     جستجوی محصولات
+  ========================= */
 
-      if (!searchText) return true;
+  const filteredProducts =
+    products.filter(
+      (product) => {
+        const searchText =
+          search
+            .trim()
+            .toLowerCase();
 
-      return (
-        product.name
-          ?.toLowerCase()
-          .includes(searchText) ||
-        product.brand
-          ?.toLowerCase()
-          .includes(searchText) ||
-        product.model
-          ?.toLowerCase()
-          .includes(searchText) ||
-        product.description
-          ?.toLowerCase()
-          .includes(searchText)
-      );
-    }
-  );
+        if (
+          !searchText
+        ) {
+          return true;
+        }
 
-  const getQuantity = (product: Product) => {
-  const minOrder = Math.max(product.min_order ?? 1, 1);
-  return quantities[product.id] ?? minOrder;
-};
-
-const increaseQuantity = (product: Product) => {
-  const current = getQuantity(product);
-
-  setQuantities((prev) => ({
-    ...prev,
-    [product.id]: current + 1,
-  }));
-};
-
-const decreaseQuantity = (product: Product) => {
-  const current = getQuantity(product);
-  const minOrder = Math.max(product.min_order ?? 1, 1);
-
-  if (current <= minOrder) return;
-
-  setQuantities((prev) => ({
-    ...prev,
-    [product.id]: current - 1,
-  }));
-};
+        return (
+          product.name
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.brand
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.model
+            ?.toLowerCase()
+            .includes(
+              searchText
+            ) ||
+          product.description
+            ?.toLowerCase()
+            .includes(
+              searchText
+            )
+        );
+      }
+    );
 
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      {/* Header */}
+      {/* ================= HEADER ================= */}
 
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
 
           <Link
             href="/"
@@ -335,31 +476,35 @@ const decreaseQuantity = (product: Product) => {
           </Link>
 
           <Link
-  href="/cart"
-  className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
-  title="سبد خرید"
->
-  🛒
+            href="/cart"
+            className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
+            title="سبد خرید"
+          >
+            🛒
 
-  {cartCount > 0 && (
-    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
-      {cartCount}
-    </span>
-  )}
-</Link>
+            {cartCount >
+              0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                {cartCount.toLocaleString(
+                  "fa-IR"
+                )}
+              </span>
+            )}
+          </Link>
 
           <Link
             href="/materials"
             className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
           >
             <ArrowRight className="h-4 w-4" />
+
             بازگشت به مصالح
           </Link>
 
         </div>
       </header>
 
-      {/* Hero */}
+      {/* ================= HERO ================= */}
 
       <section className="relative overflow-hidden">
 
@@ -367,17 +512,17 @@ const decreaseQuantity = (product: Product) => {
 
           <img
             src="/materials/brick-block.jpg"
-            alt="آجر بلوک و سفال ساختمانی"
+            alt="آجر، بلوک و سفال ساختمانی"
             className="h-full w-full object-cover"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/60 to-slate-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/90 via-slate-950/65 to-slate-950/20" />
 
           <div className="absolute inset-0 flex items-center">
 
             <div className="mx-auto w-full max-w-7xl px-5 text-white">
 
-              <div className="max-w-2xl">
+              <div className="max-w-3xl">
 
                 <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
                   مصالح ساختمانی
@@ -388,14 +533,19 @@ const decreaseQuantity = (product: Product) => {
                 </h1>
 
                 <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
-                  انواع آجر، بلوک و سفال ساختمانی را از فروشندگان و
-                  تأمین‌کنندگان معتبر در سرچنو پیدا کنید.
+                  انواع آجر، بلوک و سفال ساختمانی را
+                  از فروشندگان و تأمین‌کنندگان معتبر
+                  در سرچنو پیدا کنید.
                 </p>
 
                 <div className="mt-7 flex flex-wrap gap-3">
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
                     آجر ساختمانی
+                  </span>
+
+                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
+                    آجر فشاری
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
@@ -421,7 +571,7 @@ const decreaseQuantity = (product: Product) => {
         </div>
       </section>
 
-      {/* Search */}
+      {/* ================= SEARCH ================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-10">
 
@@ -436,8 +586,12 @@ const decreaseQuantity = (product: Product) => {
               <input
                 type="text"
                 value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
+                onChange={(
+                  e
+                ) =>
+                  setSearch(
+                    e.target.value
+                  )
                 }
                 placeholder="مثلاً آجر فشاری، بلوک سبک، سفال ۱۵..."
                 className="w-full bg-transparent outline-none"
@@ -458,18 +612,26 @@ const decreaseQuantity = (product: Product) => {
 
       </section>
 
-      {/* Sub Categories */}
+      {/* ================= SUB CATEGORIES ================= */}
 
       <section className="mx-auto max-w-7xl px-5 pb-14">
 
         <div className="mb-7">
+
           <span className="text-sm font-bold text-blue-700">
-            دسته‌بندی
+            دسته‌بندی تخصصی
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            چه نوع مصالحی نیاز دارید؟
+            چه نوع آجر، بلوک یا سفالی نیاز دارید؟
           </h2>
+
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+            محصولات این گروه بر اساس نوع مصالح،
+            کاربرد، وزن، ابعاد و شکل عرضه دسته‌بندی
+            شده‌اند.
+          </p>
+
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -477,27 +639,37 @@ const decreaseQuantity = (product: Product) => {
           {[
             "آجر ساختمانی",
             "آجر فشاری",
+            "آجر ماشینی",
+            "آجر نما",
+            "آجر نسوز",
+            "آجر سفالی",
             "بلوک سیمانی",
             "بلوک سبک",
             "بلوک هبلکس",
+            "بلوک AAC",
+            "بلوک لیکا",
+            "بلوک دیواری",
             "سفال دیواری",
             "سفال سقفی",
-            "آجر نما",
-          ].map((item) => (
-            <button
-              key={item}
-              type="button"
-              className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
-            >
-              {item}
-            </button>
-          ))}
+            "سفال تیغه‌ای",
+            "بلوک و سفال ویژه",
+          ].map(
+            (item) => (
+              <button
+                key={item}
+                type="button"
+                className="rounded-2xl border border-slate-200 bg-white p-5 text-right font-bold transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
+              >
+                {item}
+              </button>
+            )
+          )}
 
         </div>
 
       </section>
 
-      {/* Products */}
+      {/* ================= PRODUCTS ================= */}
 
       <section className="bg-white py-16">
 
@@ -514,7 +686,8 @@ const decreaseQuantity = (product: Product) => {
             </h2>
 
             <p className="mt-3 text-sm text-slate-500">
-              محصولاتی که توسط تیم سرچنو تأیید شده‌اند در این بخش نمایش داده می‌شوند.
+              محصولاتی که توسط تیم سرچنو تأیید شده‌اند
+              در این بخش نمایش داده می‌شوند.
             </p>
 
           </div>
@@ -531,7 +704,8 @@ const decreaseQuantity = (product: Product) => {
 
             </div>
 
-          ) : filteredProducts.length === 0 ? (
+          ) : filteredProducts.length ===
+            0 ? (
 
             <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
 
@@ -554,28 +728,26 @@ const decreaseQuantity = (product: Product) => {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
               {filteredProducts.map(
-                (product) => (
+                (
+                  product
+                ) => (
 
                   <div
-                    key={product.id}
+                    key={
+                      product.id
+                    }
                     className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                   >
 
-                    <div className="flex h-56 items-center justify-center overflow-hidden bg-slate-100">
-  {product.image_url ? (
-    <img
-      src={product.image_url}
-      alt={product.name || "تصویر محصول"}
-      className="h-full w-full object-cover"
-    />
-  ) : (
-    <div className="flex h-full w-full items-center justify-center text-6xl">
-      🧱
-    </div>
-  )}
-</div>
+                    {/* Product Icon */}
+
+                    <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
+                      🧱
+                    </div>
 
                     <div className="p-6">
+
+                      {/* Status */}
 
                       <div className="flex items-center justify-between gap-3">
 
@@ -584,33 +756,51 @@ const decreaseQuantity = (product: Product) => {
                         </span>
 
                         <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+
                           <ShieldCheck className="h-3 w-3" />
+
                           تأییدشده
+
                         </span>
 
                       </div>
 
+                      {/* Name */}
+
                       <h3 className="mt-4 text-lg font-black">
-                        {product.name || "محصول بدون نام"}
+                        {product.name ||
+                          "محصول بدون نام"}
                       </h3>
+
+                      {/* Brand */}
 
                       {product.brand && (
                         <p className="mt-2 text-sm text-slate-500">
-                          برند: {product.brand}
+                          برند:{" "}
+                          {product.brand}
                         </p>
                       )}
+
+                      {/* Model */}
 
                       {product.model && (
                         <p className="mt-1 text-sm text-slate-500">
-                          مدل: {product.model}
+                          مدل:{" "}
+                          {product.model}
                         </p>
                       )}
 
+                      {/* Description */}
+
                       {product.description && (
                         <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                          {product.description}
+                          {
+                            product.description
+                          }
                         </p>
                       )}
+
+                      {/* Price */}
 
                       <div className="mt-5 space-y-3">
 
@@ -621,6 +811,7 @@ const decreaseQuantity = (product: Product) => {
                           </span>
 
                           <span className="font-black text-blue-700">
+
                             {(
                               product.customer_price ??
                               product.price ??
@@ -629,74 +820,196 @@ const decreaseQuantity = (product: Product) => {
                               "fa-IR"
                             )}{" "}
                             تومان
+
                           </span>
 
                         </div>
 
-                       {/* مقدار خرید */}
+                        {/* مقدار خرید */}
 
-<div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
 
-  <div className="mb-3 flex items-center justify-between">
+                          <div className="mb-3 flex items-center justify-between">
 
-    <span className="text-sm font-black text-slate-800">
-      مقدار خرید
-    </span>
+                            <span className="text-sm font-black text-slate-800">
+                              مقدار خرید
+                            </span>
 
-    <span className="text-xs font-bold text-slate-400">
-      واحد فروش: {product.unit || "عدد"}
-    </span>
+                            <span className="text-xs font-bold text-slate-400">
+                              واحد فروش:{" "}
+                              {product.unit ||
+                                "عدد"}
+                            </span>
 
-  </div>
+                          </div>
 
-  <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2">
 
-    {/* منفی */}
-    <button
-      type="button"
-      onClick={() => decreaseQuantity(product)}
-      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm hover:bg-red-50 hover:text-red-600"
-    >
-      −
-    </button>
+                            {/* Minus */}
 
-    {/* ورود مستقیم عدد */}
-    <input
-      type="number"
-      min={product.min_order || 1}
-      max={product.stock || undefined}
-      value={quantities[product.id] ?? product.min_order ?? 1}
-      onChange={(e) => {
-        const value = Number(e.target.value);
+                            <button
+                              type="button"
+                              onClick={() =>
+                                decreaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm hover:bg-red-50 hover:text-red-600"
+                            >
+                              −
+                            </button>
 
-        if (value < 1) return;
+                            {/* Number */}
 
-        setQuantities((prev) => ({
-          ...prev,
-          [product.id]: value,
-        }));
-      }}
-      className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-    />
+                            <input
+                              type="number"
+                              min={
+                                product.min_order ??
+                                1
+                              }
+                              max={
+                                product.stock &&
+                                product.stock >
+                                  0
+                                  ? product.stock
+                                  : undefined
+                              }
+                              value={
+                                quantities[
+                                  product.id
+                                ] ??
+                                getQuantity(
+                                  product
+                                )
+                              }
+                              onChange={(
+                                e
+                              ) => {
+                                const rawValue =
+                                  e.target.value;
 
-    {/* مثبت */}
-    <button
-      type="button"
-      onClick={() => increaseQuantity(product)}
-      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white hover:bg-blue-800"
-    >
-      +
-    </button>
+                                if (
+                                  rawValue ===
+                                  ""
+                                ) {
+                                  setQuantities(
+                                    (
+                                      prev
+                                    ) => ({
+                                      ...prev,
+                                      [product.id]:
+                                        0,
+                                    })
+                                  );
 
-  </div>
+                                  return;
+                                }
 
-  <p className="mt-3 text-center text-xs text-slate-400">
-    حداقل خرید:{" "}
-    {(product.min_order ?? 1).toLocaleString("fa-IR")}{" "}
-    {product.unit || "واحد"}
-  </p>
+                                const value =
+                                  Number(
+                                    rawValue
+                                  );
 
-</div>
+                                if (
+                                  !Number.isFinite(
+                                    value
+                                  )
+                                ) {
+                                  return;
+                                }
+
+                                setQuantities(
+                                  (
+                                    prev
+                                  ) => ({
+                                    ...prev,
+                                    [product.id]:
+                                      value,
+                                  })
+                                );
+                              }}
+                              onBlur={() => {
+                                const minOrder =
+                                  Math.max(
+                                    product.min_order ??
+                                      1,
+                                    1
+                                  );
+
+                                const stock =
+                                  product.stock ??
+                                  0;
+
+                                let value =
+                                  quantities[
+                                    product.id
+                                  ] ??
+                                  minOrder;
+
+                                if (
+                                  value <
+                                  minOrder
+                                ) {
+                                  value =
+                                    minOrder;
+                                }
+
+                                if (
+                                  stock >
+                                    0 &&
+                                  value >
+                                    stock
+                                ) {
+                                  value =
+                                    stock;
+                                }
+
+                                setQuantities(
+                                  (
+                                    prev
+                                  ) => ({
+                                    ...prev,
+                                    [product.id]:
+                                      value,
+                                  })
+                                );
+                              }}
+                              className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                            />
+
+                            {/* Plus */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                increaseQuantity(
+                                  product
+                                )
+                              }
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white hover:bg-blue-800"
+                            >
+                              +
+                            </button>
+
+                          </div>
+
+                          <p className="mt-3 text-center text-xs text-slate-400">
+
+                            حداقل خرید:{" "}
+                            {(
+                              product.min_order ??
+                              1
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              "واحد"}
+
+                          </p>
+
+                        </div>
+
+                        {/* Stock */}
 
                         <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
 
@@ -705,10 +1018,16 @@ const decreaseQuantity = (product: Product) => {
                           </span>
 
                           <span className="font-black">
-                            {(product.stock ?? 0).toLocaleString(
+
+                            {(
+                              product.stock ??
+                              0
+                            ).toLocaleString(
                               "fa-IR"
                             )}{" "}
-                            {product.unit || ""}
+                            {product.unit ||
+                              ""}
+
                           </span>
 
                         </div>
@@ -717,29 +1036,37 @@ const decreaseQuantity = (product: Product) => {
 
                       {/* مبلغ کل خرید */}
 
-<div className="mt-3 rounded-2xl bg-blue-50 p-4">
+                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
 
-  <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center justify-between gap-3">
 
-    <span className="text-sm font-bold text-slate-600">
-      مبلغ کل خرید
-    </span>
+                          <span className="text-sm font-bold text-slate-600">
+                            مبلغ کل خرید
+                          </span>
 
-    <span className="text-lg font-black text-blue-700">
-      {(
-        (product.customer_price ??
-          product.price ??
-          0) *
-        (quantities[product.id] ??
-          product.min_order ??
-          1)
-      ).toLocaleString("fa-IR")}{" "}
-      تومان
-    </span>
+                          <span className="text-lg font-black text-blue-700">
 
-  </div>
+                            {(
+                              (
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ) *
+                              getQuantity(
+                                product
+                              )
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            تومان
 
-</div>
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      {/* Store */}
 
                       <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
 
@@ -747,11 +1074,15 @@ const decreaseQuantity = (product: Product) => {
 
                         {product.seller_id
                           ? stores[
-                              product.seller_id
-                            ] || "فروشگاه"
+                              product
+                                .seller_id
+                            ] ||
+                            "فروشگاه"
                           : "فروشگاه نامشخص"}
 
                       </div>
+
+                      {/* Seller */}
 
                       <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
 
@@ -761,18 +1092,22 @@ const decreaseQuantity = (product: Product) => {
 
                       </div>
 
-                     <button
-  type="button"
-  onClick={() => addToCart(product)}
-  className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
->
-  خرید محصول
-</button>
+                      {/* Buy */}
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addToCart(
+                            product
+                          )
+                        }
+                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                      >
+                        خرید محصول
+                      </button>
 
                     </div>
-
                   </div>
-
                 )
               )}
 
@@ -781,10 +1116,9 @@ const decreaseQuantity = (product: Product) => {
           )}
 
         </div>
-
       </section>
 
-      {/* Footer */}
+      {/* ================= FOOTER ================= */}
 
       <footer className="bg-slate-950 py-10 text-center text-sm text-slate-400">
 
