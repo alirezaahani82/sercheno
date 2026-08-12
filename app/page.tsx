@@ -53,7 +53,7 @@ const materialCategories = [
     image: "/materials/mechanical-installations.jpg",
   },
   {
-    slug: "pnt-coatings",
+    slug: "paint-coatings",
     title: "رنگ و پوشش",
     count: "۶۳ فروشنده",
     image: "/materials/paint-coatings.jpg",
