@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   PackagePlus,
-  Store,
   Upload,
   X,
   CheckCircle2,
@@ -139,6 +138,10 @@ export default function ProductRegisterPage() {
     }));
   };
 
+  /* ================================
+     انتخاب تصاویر
+  ================================= */
+
   const handleImages = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -146,11 +149,19 @@ export default function ProductRegisterPage() {
       event.target.files || []
     );
 
+    if (files.length === 0) return;
+
     setImages((prev) => [
       ...prev,
       ...files,
     ]);
+
+    event.target.value = "";
   };
+
+  /* ================================
+     حذف تصویر انتخاب شده
+  ================================= */
 
   const removeImage = (index: number) => {
     setImages((prev) =>
@@ -158,14 +169,24 @@ export default function ProductRegisterPage() {
     );
   };
 
+  /* =====================================================
+     ثبت محصول + آپلود تصاویر
+  ===================================================== */
+
   const handleSubmit = async () => {
     if (submitting) return;
 
     setError("");
     setSuccess("");
 
+    /* ================================
+       اعتبارسنجی
+    ================================= */
+
     if (!product.name.trim()) {
-      setError("لطفاً نام محصول را وارد کنید.");
+      setError(
+        "لطفاً نام محصول را وارد کنید."
+      );
       return;
     }
 
@@ -197,6 +218,10 @@ export default function ProductRegisterPage() {
       return;
     }
 
+    /* ================================
+       پیدا کردن فروشگاه
+    ================================= */
+
     const storeId =
       sessionStorage.getItem(
         "sercheno_store_id"
@@ -213,9 +238,9 @@ export default function ProductRegisterPage() {
     setSubmitting(true);
 
     try {
-      /*
-       * تبدیل شرایط فروش به متن قابل ذخیره
-       */
+      /* ================================
+         شرایط فروش
+      ================================= */
 
       const selectedConditions =
         salesConditions
@@ -228,139 +253,107 @@ export default function ProductRegisterPage() {
               condition.label
           );
 
-      /*
-       * ثبت محصول
-       *
-       * تغییر اصلی:
-       * select().single() حذف شده است.
-       * فقط INSERT انجام می‌شود.
-       */
+      /* ================================
+         ساخت slug
+      ================================= */
 
-      const { error: insertError } =
-        await supabase
-          .from("products")
-          .insert({
-            name: product.name.trim(),
-            slug:
-  product.name
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^\u0600-\u06FFa-zA-Z0-9-]/g, "")
-    + "-" +
-  Date.now(),
+      const productSlug =
+        product.name
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(
+            /[^\u0600-\u06FFa-zA-Z0-9-]/g,
+            ""
+          ) +
+        "-" +
+        Date.now();
 
-            category: product.category,
+      /* =================================================
+         1. ثبت محصول
+         
+         مهم:
+         اینجا ID محصول را دریافت می‌کنیم
+         تا بتوانیم تصاویر را دقیقاً به همین محصول
+         متصل کنیم.
+      ================================================= */
 
-            subcategory: null,
+      const {
+        data: createdProduct,
+        error: insertError,
+      } = await supabase
+        .from("products")
+        .insert({
+          name: product.name.trim(),
 
-            brand:
-              product.brand.trim() || null,
+          slug: productSlug,
 
-            model:
-              product.model.trim() || null,
+          category: product.category,
 
-            description:
-              product.description.trim() || null,
+          subcategory: null,
 
-            price:
-              Number(product.customerPrice) || 0,
+          brand:
+            product.brand.trim() || null,
 
-            customer_price:
-              Number(product.customerPrice) || 0,
+          model:
+            product.model.trim() || null,
 
-            cooperation_price:
-              Number(product.cooperationPrice) || 0,
+          description:
+            product.description.trim() ||
+            null,
 
-            unit: product.unit,
+          price:
+            Number(product.customerPrice) || 0,
 
-            stock:
-              Number(product.stock) || 0,
+          customer_price:
+            Number(product.customerPrice) || 0,
 
-            min_order:
-              Number(product.minOrder) || 1,
+          cooperation_price:
+            Number(
+              product.cooperationPrice
+            ) || 0,
 
-            seller_id: storeId,
+          unit: product.unit,
 
-            status: "pending",
+          stock:
+            Number(product.stock) || 0,
 
-            sales_conditions:
-              selectedConditions.length > 0
-                ? selectedConditions.join("، ")
-                : null,
+          min_order:
+            Number(product.minOrder) || 1,
 
-          const {
-  data: createdProduct,
-  error: insertError,
-} = await supabase
-  .from("products")
-  .insert({
-    name: product.name.trim(),
+          seller_id: storeId,
 
-    slug:
-      product.name
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(
-          /[^\u0600-\u06FFa-zA-Z0-9-]/g,
-          ""
-        ) +
-      "-" +
-      Date.now(),
+          status: "pending",
 
-    category: product.category,
+          sales_conditions:
+            selectedConditions.length > 0
+              ? selectedConditions.join("، ")
+              : null,
 
-    subcategory: null,
+          sales_description:
+            product.salesDescription.trim() ||
+            null,
+        })
+        .select("id, slug")
+        .single();
 
-    brand:
-      product.brand.trim() || null,
-
-    model:
-      product.model.trim() || null,
-
-    description:
-      product.description.trim() || null,
-
-    price:
-      Number(product.customerPrice) || 0,
-
-    customer_price:
-      Number(product.customerPrice) || 0,
-
-    cooperation_price:
-      Number(product.cooperationPrice) || 0,
-
-    unit: product.unit,
-
-    stock:
-      Number(product.stock) || 0,
-
-    min_order:
-      Number(product.minOrder) || 1,
-
-    seller_id: storeId,
-
-    status: "pending",
-
-    sales_conditions:
-      selectedConditions.length > 0
-        ? selectedConditions.join("، ")
-        : null,
-
-    sales_description:
-      product.salesDescription.trim() ||
-      null,
-  })
-  .select("id, slug")
-  .single();
       console.log(
-        "PRODUCT INSERT ERROR:",
-        insertError
+        "PRODUCT INSERT RESULT:",
+        {
+          createdProduct,
+          insertError,
+        }
       );
 
+      /* ================================
+         بررسی خطای ثبت محصول
+      ================================= */
+
       if (insertError) {
-        console.error(insertError);
+        console.error(
+          "PRODUCT INSERT ERROR:",
+          insertError
+        );
 
         setError(
           "خطا در ثبت محصول: " +
@@ -369,109 +362,237 @@ export default function ProductRegisterPage() {
 
         return;
       }
+
+      /* ================================
+         بررسی دریافت ID
+      ================================= */
+
       if (!createdProduct) {
-  setError(
-    "محصول ثبت شد اما شناسه محصول دریافت نشد."
-  );
-  return;
-}
+        setError(
+          "محصول ثبت شد اما شناسه محصول دریافت نشد."
+        );
+
+        return;
+      }
+
+      console.log(
+        "PRODUCT CREATED:",
+        createdProduct
+      );
+
+      /* =================================================
+         2. آپلود تصاویر محصول
+         
+         Bucket:
+         product-image
+
+         مسیر:
+         products/{product_id}/{filename}
+      ================================================= */
+
       if (images.length > 0) {
-  for (
-    let imageIndex = 0;
-    imageIndex < images.length;
-    imageIndex++
-  ) {
-    const file = images[imageIndex];
+        console.log(
+          "START IMAGE UPLOAD:",
+          {
+            productId:
+              createdProduct.id,
+            count: images.length,
+          }
+        );
 
-    const extension =
-      file.name
-        .split(".")
-        .pop()
-        ?.toLowerCase() || "jpg";
+        for (
+          let imageIndex = 0;
+          imageIndex < images.length;
+          imageIndex++
+        ) {
+          const file =
+            images[imageIndex];
 
-    const fileName =
-      `${Date.now()}-${imageIndex}-${Math.random()
-        .toString(36)
-        .substring(2, 10)}.${extension}`;
+          try {
+            /* ================================
+               پسوند فایل
+            ================================= */
 
-    const filePath =
-      `products/${createdProduct.id}/${fileName}`;
+            const extension =
+              file.name
+                .split(".")
+                .pop()
+                ?.toLowerCase() ||
+              "jpg";
 
-    const {
-      error: uploadError,
-    } = await supabase.storage
-      .from("product-image")
-      .upload(
-        filePath,
-        file,
-        {
-          cacheControl: "3600",
-          upsert: false,
-          contentType:
-            file.type || "image/jpeg",
+            /* ================================
+               نام یکتا
+            ================================= */
+
+            const fileName =
+              `${Date.now()}-${imageIndex}-${Math.random()
+                .toString(36)
+                .substring(2, 10)}.${extension}`;
+
+            /* ================================
+               مسیر اختصاصی محصول
+            ================================= */
+
+            const filePath =
+              `products/${createdProduct.id}/${fileName}`;
+
+            console.log(
+              "UPLOADING IMAGE:",
+              {
+                productId:
+                  createdProduct.id,
+                fileName:
+                  file.name,
+                filePath,
+              }
+            );
+
+            /* ================================
+               آپلود به Storage
+            ================================= */
+
+            const {
+              error: uploadError,
+            } =
+              await supabase.storage
+                .from(
+                  "product-image"
+                )
+                .upload(
+                  filePath,
+                  file,
+                  {
+                    cacheControl:
+                      "3600",
+                    upsert: false,
+                    contentType:
+                      file.type ||
+                      "image/jpeg",
+                  }
+                );
+
+            /* ================================
+               خطای آپلود
+            ================================= */
+
+            if (uploadError) {
+              console.error(
+                "IMAGE UPLOAD ERROR:",
+                uploadError
+              );
+
+              setError(
+                `محصول ثبت شد اما تصویر «${file.name}» آپلود نشد: ${uploadError.message}`
+              );
+
+              return;
+            }
+
+            /* ================================
+               گرفتن URL عمومی
+            ================================= */
+
+            const {
+              data:
+                publicUrlData,
+            } =
+              supabase.storage
+                .from(
+                  "product-image"
+                )
+                .getPublicUrl(
+                  filePath
+                );
+
+            const imageUrl =
+              publicUrlData
+                ?.publicUrl;
+
+            console.log(
+              "IMAGE URL:",
+              imageUrl
+            );
+
+            /* ================================
+               بررسی URL
+            ================================= */
+
+            if (!imageUrl) {
+              setError(
+                `آدرس تصویر «${file.name}» ایجاد نشد.`
+              );
+
+              return;
+            }
+
+            /* =================================================
+               3. ثبت رابطه تصویر با محصول
+               
+               product_id = همان محصولی که همین الان ساختیم
+            ================================================= */
+
+            const {
+              error:
+                imageRowError,
+            } = await supabase
+              .from(
+                "product_images"
+              )
+              .insert({
+                product_id:
+                  createdProduct.id,
+
+                image_url:
+                  imageUrl,
+              });
+
+            if (imageRowError) {
+              console.error(
+                "PRODUCT IMAGE ROW ERROR:",
+                imageRowError
+              );
+
+              setError(
+                `تصویر «${file.name}» آپلود شد اما برای محصول ثبت نشد: ${imageRowError.message}`
+              );
+
+              return;
+            }
+
+            console.log(
+              "IMAGE COMPLETED:",
+              {
+                productId:
+                  createdProduct.id,
+                imageUrl,
+              }
+            );
+          } catch (imageError) {
+            console.error(
+              "IMAGE PROCESS ERROR:",
+              imageError
+            );
+
+            setError(
+              `خطا در پردازش تصویر «${file.name}».`
+            );
+
+            return;
+          }
         }
-      );
+      }
 
-    if (uploadError) {
-      console.error(
-        "IMAGE UPLOAD ERROR:",
-        uploadError
-      );
-
-      setError(
-        `محصول ثبت شد اما تصویر «${file.name}» آپلود نشد: ${uploadError.message}`
-      );
-
-      return;
-    }
-
-    const {
-      data: publicUrlData,
-    } = supabase.storage
-      .from("product-image")
-      .getPublicUrl(filePath);
-
-    const imageUrl =
-      publicUrlData.publicUrl;
-
-    if (!imageUrl) {
-      setError(
-        `آدرس تصویر «${file.name}» ایجاد نشد.`
-      );
-
-      return;
-    }
-
-    const {
-      error: imageRowError,
-    } = await supabase
-      .from("product_images")
-      .insert({
-        product_id:
-          createdProduct.id,
-
-        image_url:
-          imageUrl,
-      });
-
-    if (imageRowError) {
-      console.error(
-        "PRODUCT IMAGE ERROR:",
-        imageRowError
-      );
-
-      setError(
-        `تصویر آپلود شد اما برای محصول ثبت نشد: ${imageRowError.message}`
-      );
-
-      return;
-    }
-  }
-}
+      /* ================================
+         موفقیت نهایی
+      ================================= */
 
       setSuccess(
-        "محصول با موفقیت برای بررسی ارسال شد."
+        "محصول و تصاویر آن با موفقیت برای بررسی ارسال شدند."
       );
+
+      /* ================================
+         انتقال به پنل فروشگاه
+      ================================= */
 
       setTimeout(() => {
         router.push(
@@ -479,7 +600,10 @@ export default function ProductRegisterPage() {
         );
       }, 1500);
     } catch (err) {
-      console.error(err);
+      console.error(
+        "PRODUCT REGISTER ERROR:",
+        err
+      );
 
       setError(
         "خطای غیرمنتظره‌ای هنگام ثبت اطلاعات رخ داد."
@@ -1013,10 +1137,10 @@ export default function ProductRegisterPage() {
               </div>
             )}
 
-            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-800">
+            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">
 
-              در این مرحله تصاویر برای انتخاب در فرم آماده می‌شوند.
-              اتصال دائمی تصاویر به فضای ذخیره‌سازی را در مرحله بعد تکمیل می‌کنیم.
+              تصاویر انتخاب‌شده پس از ثبت محصول در فضای ذخیره‌سازی سرچنو
+              ذخیره شده و به همین محصول متصل می‌شوند.
 
             </div>
 
