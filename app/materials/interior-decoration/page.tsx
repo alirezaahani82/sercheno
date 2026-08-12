@@ -35,6 +35,11 @@ type StoreInfo = {
   name: string | null;
 };
 
+type ProductImage = {
+  product_id: string;
+  image_url: string;
+};
+
 type CartItem = {
   productId: string;
   name: string;
@@ -55,8 +60,35 @@ export default function InteriorDecorationPage() {
     Record<string, number>
   >({});
 
+  /*
+    تصاویر محصولات
+
+    هر محصول می‌تواند هر تعداد تصویر داشته باشد:
+
+    {
+      "product-id-1": [
+        "image1.jpg",
+        "image2.jpg",
+        "image3.jpg"
+      ],
+      "product-id-2": [
+        "image1.jpg"
+      ]
+    }
+  */
+  const [productImages, setProductImages] = useState<
+    Record<string, string[]>
+  >({});
+
+  /*
+    تصویر انتخاب‌شده برای نمایش بزرگ
+  */
+  const [selectedImages, setSelectedImages] = useState<
+    Record<string, string>
+  >({});
+
   /* =========================
-     مقدار خرید
+     دریافت مقدار انتخاب‌شده
   ========================= */
 
   const getQuantity = (product: Product) => {
@@ -69,13 +101,12 @@ export default function InteriorDecorationPage() {
   };
 
   /* =========================
-     افزایش مقدار
+     افزایش مقدار خرید
   ========================= */
 
-  const increaseQuantity = (
-    product: Product
-  ) => {
+  const increaseQuantity = (product: Product) => {
     const current = getQuantity(product);
+
     const stock = product.stock ?? 0;
 
     if (stock > 0 && current >= stock) {
@@ -89,12 +120,10 @@ export default function InteriorDecorationPage() {
   };
 
   /* =========================
-     کاهش مقدار
+     کاهش مقدار خرید
   ========================= */
 
-  const decreaseQuantity = (
-    product: Product
-  ) => {
+  const decreaseQuantity = (product: Product) => {
     const current = getQuantity(product);
 
     const minOrder = Math.max(
@@ -113,51 +142,10 @@ export default function InteriorDecorationPage() {
   };
 
   /* =========================
-     تغییر مستقیم تعداد
+     افزودن محصول به سبد
   ========================= */
 
-  const changeQuantity = (
-    product: Product,
-    value: string
-  ) => {
-    if (value === "") {
-      return;
-    }
-
-    const quantity = Number(value);
-
-    if (Number.isNaN(quantity)) {
-      return;
-    }
-
-    const minOrder = Math.max(
-      product.min_order ?? 1,
-      1
-    );
-
-    const stock = product.stock ?? 0;
-
-    if (quantity < minOrder) {
-      return;
-    }
-
-    if (stock > 0 && quantity > stock) {
-      return;
-    }
-
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: quantity,
-    }));
-  };
-
-  /* =========================
-     افزودن به سبد خرید
-  ========================= */
-
-  const addToCart = (
-    product: Product
-  ) => {
+  const addToCart = (product: Product) => {
     const quantity = getQuantity(product);
 
     const price =
@@ -165,27 +153,20 @@ export default function InteriorDecorationPage() {
       product.price ??
       0;
 
-    const storeName =
-      product.seller_id
-        ? stores[product.seller_id] ||
-          "فروشگاه"
-        : "فروشگاه نامشخص";
+    const storeName = product.seller_id
+      ? stores[product.seller_id] || "فروشگاه"
+      : "فروشگاه نامشخص";
 
     const newItem: CartItem = {
       productId: product.id,
-
       name:
         product.name ||
         "محصول بدون نام",
-
       price,
-
       quantity,
-
       unit:
         product.unit ||
-        "عدد",
-
+        "واحد",
       storeName,
     };
 
@@ -217,7 +198,9 @@ export default function InteriorDecorationPage() {
     );
 
     window.dispatchEvent(
-      new Event("sercheno-cart-updated")
+      new Event(
+        "sercheno-cart-updated"
+      )
     );
 
     alert(
@@ -234,7 +217,7 @@ export default function InteriorDecorationPage() {
   }, []);
 
   /* =========================
-     بروزرسانی شمارنده سبد
+     بروزرسانی تعداد سبد
   ========================= */
 
   useEffect(() => {
@@ -253,7 +236,9 @@ export default function InteriorDecorationPage() {
             item: CartItem
           ) =>
             total +
-            Number(item.quantity || 0),
+            Number(
+              item.quantity || 0
+            ),
           0
         );
 
@@ -301,28 +286,26 @@ export default function InteriorDecorationPage() {
     try {
       setLoading(true);
 
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("products")
-        .select(
-          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
-        )
-        .eq(
-          "category",
-          "interior-decoration"
-        )
-        .eq(
-          "status",
-          "active"
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        );
+      const { data, error } =
+        await supabase
+          .from("products")
+          .select(
+            "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+          )
+          .eq(
+            "category",
+            "interior-decoration"
+          )
+          .eq(
+            "status",
+            "active"
+          )
+          .order(
+            "created_at",
+            {
+              ascending: false,
+            }
+          );
 
       if (error) {
         console.error(
@@ -333,11 +316,134 @@ export default function InteriorDecorationPage() {
         return;
       }
 
-      setProducts(data || []);
+      const loadedProducts =
+        data || [];
+
+      setProducts(
+        loadedProducts
+      );
+
+      /* =========================
+         دریافت تمام تصاویر محصولات
+      ========================= */
+
+      const productIds =
+        loadedProducts.map(
+          (product) =>
+            product.id
+        );
+
+      if (
+        productIds.length > 0
+      ) {
+        const {
+          data: imageData,
+          error: imageError,
+        } =
+          await supabase
+            .from(
+              "product_images"
+            )
+            .select(
+              "product_id,image_url"
+            )
+            .in(
+              "product_id",
+              productIds
+            )
+            .order(
+              "id",
+              {
+                ascending: true,
+              }
+            );
+
+        if (imageError) {
+          console.error(
+            "PRODUCT IMAGES ERROR:",
+            imageError
+          );
+        } else {
+          const imageMap: Record<
+            string,
+            string[]
+          > = {};
+
+          (
+            imageData || []
+          ).forEach(
+            (
+              image: ProductImage
+            ) => {
+              if (
+                !imageMap[
+                  image.product_id
+                ]
+              ) {
+                imageMap[
+                  image.product_id
+                ] = [];
+              }
+
+              imageMap[
+                image.product_id
+              ].push(
+                image.image_url
+              );
+            }
+          );
+
+          /*
+            اینجا هر تعداد عکس
+            که برای محصول در
+            product_images وجود داشته باشد
+            ذخیره می‌شود.
+          */
+
+          setProductImages(
+            imageMap
+          );
+
+          /*
+            اولین عکس هر محصول
+            عکس اصلی خواهد بود.
+          */
+
+          const selectedMap: Record<
+            string,
+            string
+          > = {};
+
+          Object.entries(
+            imageMap
+          ).forEach(
+            ([
+              productId,
+              urls,
+            ]) => {
+              if (
+                urls.length > 0
+              ) {
+                selectedMap[
+                  productId
+                ] = urls[0];
+              }
+            }
+          );
+
+          setSelectedImages(
+            selectedMap
+          );
+        }
+      }
+
+      /* =========================
+         دریافت فروشگاه‌ها
+      ========================= */
 
       const sellerIds = [
         ...new Set(
-          (data || [])
+          loadedProducts
             .map(
               (product) =>
                 product.seller_id
@@ -346,17 +452,22 @@ export default function InteriorDecorationPage() {
         ),
       ];
 
-      if (sellerIds.length > 0) {
+      if (
+        sellerIds.length > 0
+      ) {
         const {
           data: storeData,
           error: storeError,
-        } = await supabase
-          .from("stores")
-          .select("id,name")
-          .in(
-            "id",
-            sellerIds
-          );
+        } =
+          await supabase
+            .from("stores")
+            .select(
+              "id,name"
+            )
+            .in(
+              "id",
+              sellerIds
+            );
 
         if (storeError) {
           console.error(
@@ -384,7 +495,9 @@ export default function InteriorDecorationPage() {
           }
         );
 
-        setStores(storeMap);
+        setStores(
+          storeMap
+        );
       }
     } catch (error) {
       console.error(error);
@@ -439,7 +552,6 @@ export default function InteriorDecorationPage() {
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-
       {/* ================= HEADER ================= */}
 
       <header className="border-b border-slate-200 bg-white">
@@ -465,8 +577,6 @@ export default function InteriorDecorationPage() {
               </div>
             </div>
           </Link>
-
-          {/* Cart */}
 
           <Link
             href="/cart"
@@ -504,7 +614,7 @@ export default function InteriorDecorationPage() {
 
           <img
             src="/materials/interior-decoration.jpg"
-            alt="دکوراسیون داخلی ساختمان"
+            alt="دکوراسیون داخلی"
             className="h-full w-full object-cover"
           />
 
@@ -517,7 +627,7 @@ export default function InteriorDecorationPage() {
               <div className="max-w-3xl">
 
                 <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
-                  دکوراسیون و طراحی داخلی ساختمان
+                  مصالح و تجهیزات دکوراسیون داخلی
                 </span>
 
                 <h1 className="mt-5 text-4xl font-black sm:text-6xl">
@@ -526,33 +636,34 @@ export default function InteriorDecorationPage() {
 
                 <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
                   انواع مصالح، تجهیزات و محصولات
-                  مورد نیاز برای طراحی و اجرای
                   دکوراسیون داخلی ساختمان را از
-                  تأمین‌کنندگان معتبر در سرچنو پیدا
-                  و خریداری کنید.
+                  فروشندگان و تأمین‌کنندگان معتبر
+                  در سرچنو پیدا کنید.
                 </p>
 
                 <div className="mt-7 flex flex-wrap gap-3">
 
-                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    کاغذ دیواری
-                  </span>
-
-                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    کفپوش
-                  </span>
-
-                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    دیوارپوش
-                  </span>
-
-                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    سقف کاذب
-                  </span>
-
-                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    تجهیزات دکوراسیون
-                  </span>
+                  {[
+                    "کاغذ دیواری",
+                    "دیوارپوش",
+                    "کف‌پوش",
+                    "پارکت",
+                    "لمینت",
+                    "قرنیز",
+                    "سقف کاذب",
+                    "پنل دکوراتیو",
+                    "سنگ دکوراتیو",
+                    "تجهیزات دکوراسیون",
+                  ].map(
+                    (item) => (
+                      <span
+                        key={item}
+                        className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur"
+                      >
+                        {item}
+                      </span>
+                    )
+                  )}
 
                 </div>
 
@@ -563,6 +674,7 @@ export default function InteriorDecorationPage() {
           </div>
 
         </div>
+
       </section>
 
       {/* ================= SEARCH ================= */}
@@ -585,7 +697,7 @@ export default function InteriorDecorationPage() {
                     e.target.value
                   )
                 }
-                placeholder="مثلاً کاغذ دیواری، کفپوش، دیوارپوش، سقف کاذب..."
+                placeholder="مثلاً کاغذ دیواری، پارکت، لمینت، دیوارپوش..."
                 className="w-full bg-transparent outline-none"
               />
 
@@ -615,13 +727,13 @@ export default function InteriorDecorationPage() {
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            برای دکوراسیون داخلی چه محصولی نیاز دارید؟
+            چه نوع محصول دکوراسیون داخلی نیاز دارید؟
           </h2>
 
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
-            محصولات دکوراسیون داخلی بر اساس
-            نوع فضا، نوع پوشش، متریال، کاربرد و
-            سبک طراحی دسته‌بندی شده‌اند.
+            محصولات دکوراسیون داخلی بر اساس نوع
+            متریال، کاربرد، محل استفاده و سبک طراحی
+            دسته‌بندی شده‌اند.
           </p>
 
         </div>
@@ -630,56 +742,21 @@ export default function InteriorDecorationPage() {
 
           {[
             "کاغذ دیواری",
-            "کاغذ دیواری مسکونی",
-            "کاغذ دیواری اداری",
-            "کاغذ دیواری تجاری",
-            "کاغذ دیواری سه‌بعدی",
-            "کاغذ دیواری قابل شست‌وشو",
-            "پوستر دیواری",
             "دیوارپوش",
-            "دیوارپوش PVC",
-            "دیوارپوش MDF",
-            "دیوارپوش چوبی",
-            "دیوارپوش سنگی",
-            "دیوارپوش سه‌بعدی",
-            "پنل دکوراتیو",
-            "پنل سه‌بعدی",
-            "ترمووال",
-            "ماربل شیت",
-            "پروفیل دکوراتیو",
-            "قرنیز",
-            "قرنیز PVC",
-            "قرنیز MDF",
-            "قرنیز چوبی",
-            "کفپوش",
-            "کفپوش PVC",
-            "کفپوش SPC",
-            "کفپوش لمینت",
-            "کفپوش چوبی",
-            "کفپوش اپوکسی",
+            "کف‌پوش",
             "پارکت",
-            "پارکت چوبی",
             "لمینت",
             "موکت",
-            "موکت تایل",
-            "موکت رولی",
-            "کفپوش ورزشی",
+            "قرنیز",
             "سقف کاذب",
-            "سقف کاذب PVC",
-            "سقف کاذب گچی",
-            "سقف کاذب کناف",
-            "سقف کاذب آلومینیومی",
-            "سقف کشسان",
-            "سقف دکوراتیو",
-            "کناف",
-            "پنل گچی",
+            "پنل دکوراتیو",
+            "سنگ دکوراتیو",
+            "آجر دکوراتیو",
+            "چوب دکوراتیو",
+            "پروفیل دکوراتیو",
             "نورپردازی داخلی",
-            "چراغ دکوراتیو",
-            "چراغ خطی",
-            "چراغ سقفی",
-            "نور مخفی",
-            "تجهیزات دکوراسیون داخلی",
-            "متعلقات نصب دکوراسیون",
+            "تجهیزات دکوراسیون",
+            "مصالح دکوراتیو ویژه",
           ].map(
             (item) => (
               <button
@@ -713,8 +790,8 @@ export default function InteriorDecorationPage() {
             </h2>
 
             <p className="mt-3 text-sm text-slate-500">
-              محصولات تأییدشده توسط تیم سرچنو
-              در این بخش نمایش داده می‌شوند.
+              تمام محصولات فعال و تأییدشده این
+              دسته در این بخش نمایش داده می‌شوند.
             </p>
 
           </div>
@@ -755,325 +832,459 @@ export default function InteriorDecorationPage() {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
               {filteredProducts.map(
-                (product) => (
+                (product) => {
 
-                  <div
-                    key={product.id}
-                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                  >
+                  /*
+                    تمام عکس‌های این محصول
+                    از product_images خوانده می‌شوند.
+                  */
 
-                    {/* Product Image/Icon */}
+                  const images =
+                    productImages[
+                      product.id
+                    ] || [];
 
-                    <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
-                      🏠
-                    </div>
+                  const mainImage =
+                    selectedImages[
+                      product.id
+                    ] ||
+                    images[0] ||
+                    null;
 
-                    <div className="p-6">
+                  return (
 
-                      {/* Status */}
+                    <div
+                      key={product.id}
+                      className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                    >
 
-                      <div className="flex items-center justify-between gap-3">
+                      {/* ================= تصاویر محصول ================= */}
 
-                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                          دکوراسیون داخلی
-                        </span>
+                      <div className="bg-slate-100">
 
-                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                        {mainImage ? (
 
-                          <ShieldCheck className="h-3 w-3" />
+                          <div className="relative flex h-64 w-full items-center justify-center bg-white">
 
-                          تأییدشده
-
-                        </span>
-
-                      </div>
-
-                      {/* Name */}
-
-                      <h3 className="mt-4 text-lg font-black">
-                        {product.name ||
-                          "محصول بدون نام"}
-                      </h3>
-
-                      {/* Brand */}
-
-                      {product.brand && (
-                        <p className="mt-2 text-sm text-slate-500">
-                          برند:{" "}
-                          {product.brand}
-                        </p>
-                      )}
-
-                      {/* Model */}
-
-                      {product.model && (
-                        <p className="mt-1 text-sm text-slate-500">
-                          مدل:{" "}
-                          {product.model}
-                        </p>
-                      )}
-
-                      {/* Description */}
-
-                      {product.description && (
-                        <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                          {
-                            product.description
-                          }
-                        </p>
-                      )}
-
-                      {/* Price + Quantity */}
-
-                      <div className="mt-5 space-y-3">
-
-                        {/* Price */}
-
-                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
-
-                          <span className="font-bold text-slate-500">
-                            قیمت مشتری
-                          </span>
-
-                          <span className="font-black text-blue-700">
-
-                            {(
-                              product.customer_price ??
-                              product.price ??
-                              0
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            تومان
-
-                          </span>
-
-                        </div>
-
-                        {/* Quantity */}
-
-                        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-
-                          <div className="mb-3 flex items-center justify-between">
-
-                            <span className="text-sm font-black text-slate-800">
-                              مقدار خرید
-                            </span>
-
-                            <span className="text-xs font-bold text-slate-400">
-                              واحد فروش:{" "}
-                              {product.unit ||
-                                "عدد"}
-                            </span>
+                            <img
+                              src={mainImage}
+                              alt={
+                                product.name ||
+                                "تصویر محصول"
+                              }
+                              className="h-full w-full object-contain"
+                            />
 
                           </div>
 
-                          <div className="flex items-center gap-2">
+                        ) : (
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                decreaseQuantity(
-                                  product
-                                )
-                              }
-                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
-                            >
-                              −
-                            </button>
+                          <div className="flex h-64 items-center justify-center text-6xl">
+                            🏠
+                          </div>
 
-                           <input
-  type="number"
-  min={product.min_order ?? 1}
-  max={product.stock && product.stock > 0 ? product.stock : undefined}
-  value={quantities[product.id] ?? getQuantity(product)}
-  onChange={(e) => {
-    const rawValue = e.target.value;
+                        )}
 
-    // اجازه بده کاربر موقتاً فیلد را خالی کند
-    if (rawValue === "") {
-      setQuantities((prev) => ({
-        ...prev,
-        [product.id]: 0,
-      }));
-      return;
-    }
+                        {/* تمام تصاویر کوچک */}
 
-    const value = Number(rawValue);
+                        {images.length > 0 && (
 
-    if (!Number.isFinite(value)) {
-      return;
-    }
+                          <div className="flex gap-2 overflow-x-auto border-t border-slate-200 bg-slate-50 p-3">
 
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: value,
-    }));
-  }}
-  onBlur={() => {
-    const minOrder = Math.max(
-      product.min_order ?? 1,
-      1
-    );
+                            {images.map(
+                              (
+                                imageUrl,
+                                imageIndex
+                              ) => (
 
-    const stock = product.stock ?? 0;
+                                <button
+                                  key={`${product.id}-${imageIndex}`}
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedImages(
+                                      (prev) => ({
+                                        ...prev,
+                                        [product.id]:
+                                          imageUrl,
+                                      })
+                                    )
+                                  }
+                                  className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition ${
+                                    mainImage ===
+                                    imageUrl
+                                      ? "border-blue-600 ring-2 ring-blue-100"
+                                      : "border-slate-200 hover:border-blue-400"
+                                  }`}
+                                >
 
-    let value =
-      quantities[product.id] ?? minOrder;
+                                  <img
+                                    src={
+                                      imageUrl
+                                    }
+                                    alt={`${product.name || "محصول"} - تصویر ${imageIndex + 1}`}
+                                    className="h-full w-full object-cover"
+                                  />
 
-    // کمتر از حداقل خرید
-    if (value < minOrder) {
-      value = minOrder;
-    }
+                                </button>
 
-    // بیشتر از موجودی
-    if (stock > 0 && value > stock) {
-      value = stock;
-    }
-
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: value,
-    }));
-  }}
-  className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-/>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                increaseQuantity(
-                                  product
-                                )
-                              }
-                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white transition hover:bg-blue-800"
-                            >
-                              +
-                            </button>
+                              )
+                            )}
 
                           </div>
 
-                          <p className="mt-3 text-center text-xs text-slate-400">
-                            حداقل خرید:{" "}
-                            {(
-                              product.min_order ??
-                              1
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            {product.unit ||
-                              "واحد"}
-                          </p>
-
-                        </div>
-
-                        {/* Stock */}
-
-                        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
-
-                          <span className="font-bold text-slate-500">
-                            موجودی
-                          </span>
-
-                          <span className="font-black">
-
-                            {(
-                              product.stock ??
-                              0
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            {product.unit ||
-                              ""}
-
-                          </span>
-
-                        </div>
+                        )}
 
                       </div>
 
-                      {/* Total Price */}
+                      {/* ================= اطلاعات محصول ================= */}
 
-                      <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+                      <div className="p-6">
 
                         <div className="flex items-center justify-between gap-3">
 
-                          <span className="text-sm font-bold text-slate-600">
-                            مبلغ کل خرید
+                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                            دکوراسیون داخلی
                           </span>
 
-                          <span className="text-lg font-black text-blue-700">
+                          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
 
-                            {(
-                              (
-                                product.customer_price ??
-                                product.price ??
-                                0
-                              ) *
-                              getQuantity(
-                                product
-                              )
-                            ).toLocaleString(
-                              "fa-IR"
-                            )}{" "}
-                            تومان
+                            <ShieldCheck className="h-3 w-3" />
+
+                            تأییدشده
 
                           </span>
 
                         </div>
 
+                        <h3 className="mt-4 text-lg font-black">
+                          {product.name ||
+                            "محصول بدون نام"}
+                        </h3>
+
+                        {product.brand && (
+                          <p className="mt-2 text-sm text-slate-500">
+                            برند:{" "}
+                            {product.brand}
+                          </p>
+                        )}
+
+                        {product.model && (
+                          <p className="mt-1 text-sm text-slate-500">
+                            مدل:{" "}
+                            {product.model}
+                          </p>
+                        )}
+
+                        {product.description && (
+                          <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                            {
+                              product.description
+                            }
+                          </p>
+                        )}
+
+                        {/* قیمت */}
+
+                        <div className="mt-5 space-y-3">
+
+                          <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                            <span className="font-bold text-slate-500">
+                              قیمت مشتری
+                            </span>
+
+                            <span className="font-black text-blue-700">
+
+                              {(
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              تومان
+
+                            </span>
+
+                          </div>
+
+                          {/* مقدار خرید */}
+
+                          <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+                            <div className="mb-3 flex items-center justify-between">
+
+                              <span className="text-sm font-black text-slate-800">
+                                مقدار خرید
+                              </span>
+
+                              <span className="text-xs font-bold text-slate-400">
+                                واحد فروش:{" "}
+                                {product.unit ||
+                                  "واحد"}
+                              </span>
+
+                            </div>
+
+                            <div className="flex items-center gap-2">
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  decreaseQuantity(
+                                    product
+                                  )
+                                }
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm hover:bg-red-50 hover:text-red-600"
+                              >
+                                −
+                              </button>
+
+                              <input
+                                type="number"
+                                min={
+                                  product.min_order ??
+                                  1
+                                }
+                                max={
+                                  product.stock &&
+                                  product.stock >
+                                    0
+                                    ? product.stock
+                                    : undefined
+                                }
+                                value={
+                                  quantities[
+                                    product.id
+                                  ] ??
+                                  getQuantity(
+                                    product
+                                  )
+                                }
+                                onChange={(e) => {
+
+                                  const rawValue =
+                                    e.target.value;
+
+                                  if (
+                                    rawValue ===
+                                    ""
+                                  ) {
+
+                                    setQuantities(
+                                      (prev) => ({
+                                        ...prev,
+                                        [product.id]:
+                                          0,
+                                      })
+                                    );
+
+                                    return;
+                                  }
+
+                                  const value =
+                                    Number(
+                                      rawValue
+                                    );
+
+                                  if (
+                                    !Number.isFinite(
+                                      value
+                                    )
+                                  ) {
+                                    return;
+                                  }
+
+                                  setQuantities(
+                                    (prev) => ({
+                                      ...prev,
+                                      [product.id]:
+                                        value,
+                                    })
+                                  );
+                                }}
+                                onBlur={() => {
+
+                                  const minOrder =
+                                    Math.max(
+                                      product.min_order ??
+                                        1,
+                                      1
+                                    );
+
+                                  const stock =
+                                    product.stock ??
+                                    0;
+
+                                  let value =
+                                    quantities[
+                                      product.id
+                                    ] ??
+                                    minOrder;
+
+                                  if (
+                                    value <
+                                    minOrder
+                                  ) {
+                                    value =
+                                      minOrder;
+                                  }
+
+                                  if (
+                                    stock >
+                                      0 &&
+                                    value >
+                                      stock
+                                  ) {
+                                    value =
+                                      stock;
+                                  }
+
+                                  setQuantities(
+                                    (prev) => ({
+                                      ...prev,
+                                      [product.id]:
+                                        value,
+                                    })
+                                  );
+                                }}
+                                className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                              />
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  increaseQuantity(
+                                    product
+                                  )
+                                }
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white hover:bg-blue-800"
+                              >
+                                +
+                              </button>
+
+                            </div>
+
+                            <p className="mt-3 text-center text-xs text-slate-400">
+                              حداقل خرید:{" "}
+                              {(
+                                product.min_order ??
+                                1
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              {product.unit ||
+                                "واحد"}
+                            </p>
+
+                          </div>
+
+                          {/* موجودی */}
+
+                          <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+
+                            <span className="font-bold text-slate-500">
+                              موجودی
+                            </span>
+
+                            <span className="font-black">
+
+                              {(
+                                product.stock ??
+                                0
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              {product.unit ||
+                                ""}
+                            </span>
+
+                          </div>
+
+                        </div>
+
+                        {/* مبلغ کل */}
+
+                        <div className="mt-3 rounded-2xl bg-blue-50 p-4">
+
+                          <div className="flex items-center justify-between gap-3">
+
+                            <span className="text-sm font-bold text-slate-600">
+                              مبلغ کل خرید
+                            </span>
+
+                            <span className="text-lg font-black text-blue-700">
+
+                              {(
+                                (
+                                  product.customer_price ??
+                                  product.price ??
+                                  0
+                                ) *
+                                getQuantity(
+                                  product
+                                )
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              تومان
+
+                            </span>
+
+                          </div>
+
+                        </div>
+
+                        {/* فروشگاه */}
+
+                        <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+
+                          <MapPin className="h-4 w-4" />
+
+                          {product.seller_id
+                            ? stores[
+                                product.seller_id
+                              ] ||
+                              "فروشگاه"
+                            : "فروشگاه نامشخص"}
+
+                        </div>
+
+                        {/* فروشنده */}
+
+                        <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
+
+                          <Star className="h-4 w-4 fill-current" />
+
+                          فروشنده تأییدشده
+
+                        </div>
+
+                        {/* خرید */}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            addToCart(
+                              product
+                            )
+                          }
+                          className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                        >
+                          خرید محصول
+                        </button>
+
                       </div>
-
-                      {/* Store */}
-
-                      <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
-
-                        <MapPin className="h-4 w-4" />
-
-                        {product.seller_id
-                          ? stores[
-                              product.seller_id
-                            ] ||
-                            "فروشگاه"
-                          : "فروشگاه نامشخص"}
-
-                      </div>
-
-                      {/* Seller */}
-
-                      <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
-
-                        <Star className="h-4 w-4 fill-current" />
-
-                        فروشنده تأییدشده
-
-                      </div>
-
-                      {/* Buy */}
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          addToCart(
-                            product
-                          )
-                        }
-                        className="mt-5 w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
-                      >
-                        خرید محصول
-                      </button>
 
                     </div>
-
-                  </div>
-                )
+                  );
+                }
               )}
 
             </div>
-
           )}
 
         </div>
-
       </section>
 
       {/* ================= FOOTER ================= */}
