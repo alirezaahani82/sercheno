@@ -44,7 +44,7 @@ type CartItem = {
   storeName: string;
 };
 
-export default function PaintCoatingsPage() {
+export default function PlumbingPipesPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -56,7 +56,7 @@ export default function PaintCoatingsPage() {
   >({});
 
   /* =========================
-     مقدار خرید
+     دریافت مقدار انتخاب‌شده
   ========================= */
 
   const getQuantity = (product: Product) => {
@@ -65,100 +65,76 @@ export default function PaintCoatingsPage() {
       1
     );
 
-    return quantities[product.id] ?? minOrder;
+    return (
+      quantities[product.id] ??
+      minOrder
+    );
   };
 
   /* =========================
-     افزایش مقدار
+     افزایش مقدار خرید
   ========================= */
 
   const increaseQuantity = (
     product: Product
   ) => {
-    const current = getQuantity(product);
-    const stock = product.stock ?? 0;
+    const current =
+      getQuantity(product);
 
-    if (stock > 0 && current >= stock) {
+    const stock =
+      product.stock ?? 0;
+
+    if (
+      stock > 0 &&
+      current >= stock
+    ) {
       return;
     }
 
     setQuantities((prev) => ({
       ...prev,
-      [product.id]: current + 1,
+      [product.id]:
+        current + 1,
     }));
   };
 
   /* =========================
-     کاهش مقدار
+     کاهش مقدار خرید
   ========================= */
 
   const decreaseQuantity = (
     product: Product
   ) => {
-    const current = getQuantity(product);
+    const current =
+      getQuantity(product);
 
     const minOrder = Math.max(
       product.min_order ?? 1,
       1
     );
 
-    if (current <= minOrder) {
+    if (
+      current <= minOrder
+    ) {
       return;
     }
 
     setQuantities((prev) => ({
       ...prev,
-      [product.id]: current - 1,
+      [product.id]:
+        current - 1,
     }));
   };
 
   /* =========================
-     تغییر مستقیم تعداد
-  ========================= */
-
-  const changeQuantity = (
-    product: Product,
-    value: string
-  ) => {
-    if (value === "") {
-      return;
-    }
-
-    const quantity = Number(value);
-
-    if (Number.isNaN(quantity)) {
-      return;
-    }
-
-    const minOrder = Math.max(
-      product.min_order ?? 1,
-      1
-    );
-
-    const stock = product.stock ?? 0;
-
-    if (quantity < minOrder) {
-      return;
-    }
-
-    if (stock > 0 && quantity > stock) {
-      return;
-    }
-
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: quantity,
-    }));
-  };
-
-  /* =========================
-     افزودن به سبد خرید
+     افزودن محصول به سبد
   ========================= */
 
   const addToCart = (
     product: Product
   ) => {
-    const quantity = getQuantity(product);
+    const quantity =
+      getQuantity(product);
 
     const price =
       product.customer_price ??
@@ -167,12 +143,14 @@ export default function PaintCoatingsPage() {
 
     const storeName =
       product.seller_id
-        ? stores[product.seller_id] ||
-          "فروشگاه"
+        ? stores[
+            product.seller_id
+          ] || "فروشگاه"
         : "فروشگاه نامشخص";
 
     const newItem: CartItem = {
-      productId: product.id,
+      productId:
+        product.id,
 
       name:
         product.name ||
@@ -203,21 +181,29 @@ export default function PaintCoatingsPage() {
           product.id
       );
 
-    if (existingIndex >= 0) {
+    if (
+      existingIndex >= 0
+    ) {
       existingCart[
         existingIndex
       ].quantity += quantity;
     } else {
-      existingCart.push(newItem);
+      existingCart.push(
+        newItem
+      );
     }
 
     localStorage.setItem(
       "sercheno_cart",
-      JSON.stringify(existingCart)
+      JSON.stringify(
+        existingCart
+      )
     );
 
     window.dispatchEvent(
-      new Event("sercheno-cart-updated")
+      new Event(
+        "sercheno-cart-updated"
+      )
     );
 
     alert(
@@ -234,39 +220,46 @@ export default function PaintCoatingsPage() {
   }, []);
 
   /* =========================
-     بروزرسانی شمارنده سبد
+     بروزرسانی تعداد سبد
   ========================= */
 
   useEffect(() => {
-    const updateCartCount = () => {
-      try {
-        const cart: CartItem[] =
-          JSON.parse(
-            localStorage.getItem(
-              "sercheno_cart"
-            ) || "[]"
+    const updateCartCount =
+      () => {
+        try {
+          const cart =
+            JSON.parse(
+              localStorage.getItem(
+                "sercheno_cart"
+              ) || "[]"
+            );
+
+          const count =
+            cart.reduce(
+              (
+                total: number,
+                item: CartItem
+              ) =>
+                total +
+                Number(
+                  item.quantity ||
+                    0
+                ),
+              0
+            );
+
+          setCartCount(
+            count
+          );
+        } catch (error) {
+          console.error(
+            "CART COUNT ERROR:",
+            error
           );
 
-        const count = cart.reduce(
-          (
-            total: number,
-            item: CartItem
-          ) =>
-            total +
-            Number(item.quantity || 0),
-          0
-        );
-
-        setCartCount(count);
-      } catch (error) {
-        console.error(
-          "CART COUNT ERROR:",
-          error
-        );
-
-        setCartCount(0);
-      }
-    };
+          setCartCount(0);
+        }
+      };
 
     updateCartCount();
 
@@ -294,104 +287,119 @@ export default function PaintCoatingsPage() {
   }, []);
 
   /* =========================
-     بارگذاری محصولات رنگ و پوشش
+     بارگذاری محصولات لوله و اتصالات
   ========================= */
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
+  const loadProducts =
+    async () => {
+      try {
+        setLoading(true);
 
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("products")
-        .select(
-          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
-        )
-        .eq(
-          "category",
-          "paint-coatings"
-        )
-        .eq(
-          "status",
-          "active"
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        );
-
-      if (error) {
-        console.error(
-          "PAINT COATINGS PRODUCTS ERROR:",
-          error
-        );
-
-        return;
-      }
-
-      setProducts(data || []);
-
-      const sellerIds = [
-        ...new Set(
-          (data || [])
-            .map(
-              (product) =>
-                product.seller_id
-            )
-            .filter(Boolean)
-        ),
-      ];
-
-      if (sellerIds.length > 0) {
         const {
-          data: storeData,
-          error: storeError,
+          data,
+          error,
         } = await supabase
-          .from("stores")
-          .select("id,name")
-          .in(
-            "id",
-            sellerIds
+          .from("products")
+          .select(
+            "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+          )
+          .eq(
+            "category",
+            "plumbing-pipes"
+          )
+          .eq(
+            "status",
+            "active"
+          )
+          .order(
+            "created_at",
+            {
+              ascending:
+                false,
+            }
           );
 
-        if (storeError) {
+        if (error) {
           console.error(
-            "STORE ERROR:",
-            storeError
+            "PLUMBING PRODUCTS ERROR:",
+            error
           );
+
+          return;
         }
 
-        const storeMap: Record<
-          string,
-          string
-        > = {};
-
-        (
-          storeData || []
-        ).forEach(
-          (
-            store: StoreInfo
-          ) => {
-            storeMap[
-              store.id
-            ] =
-              store.name ||
-              "فروشگاه";
-          }
+        setProducts(
+          data || []
         );
 
-        setStores(storeMap);
+        const sellerIds = [
+          ...new Set(
+            (data || [])
+              .map(
+                (product) =>
+                  product.seller_id
+              )
+              .filter(Boolean)
+          ),
+        ];
+
+        if (
+          sellerIds.length >
+          0
+        ) {
+          const {
+            data: storeData,
+            error:
+              storeError,
+          } =
+            await supabase
+              .from("stores")
+              .select(
+                "id,name"
+              )
+              .in(
+                "id",
+                sellerIds
+              );
+
+          if (storeError) {
+            console.error(
+              "STORE ERROR:",
+              storeError
+            );
+          }
+
+          const storeMap: Record<
+            string,
+            string
+          > = {};
+
+          (
+            storeData || []
+          ).forEach(
+            (
+              store: StoreInfo
+            ) => {
+              storeMap[
+                store.id
+              ] =
+                store.name ||
+                "فروشگاه";
+            }
+          );
+
+          setStores(
+            storeMap
+          );
+        }
+      } catch (error) {
+        console.error(
+          error
+        );
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   /* =========================
      جستجوی محصولات
@@ -405,7 +413,9 @@ export default function PaintCoatingsPage() {
             .trim()
             .toLowerCase();
 
-        if (!searchText) {
+        if (
+          !searchText
+        ) {
           return true;
         }
 
@@ -439,7 +449,6 @@ export default function PaintCoatingsPage() {
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-
       {/* ================= HEADER ================= */}
 
       <header className="border-b border-slate-200 bg-white">
@@ -473,7 +482,8 @@ export default function PaintCoatingsPage() {
           >
             🛒
 
-            {cartCount > 0 && (
+            {cartCount >
+              0 && (
               <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
                 {cartCount.toLocaleString(
                   "fa-IR"
@@ -501,8 +511,8 @@ export default function PaintCoatingsPage() {
         <div className="relative h-[420px]">
 
           <img
-            src="/materials/paint-coatings.jpg"
-            alt="رنگ و پوشش ساختمان"
+            src="/materials/plumbing-pipes.jpg"
+            alt="لوله و اتصالات ساختمانی"
             className="h-full w-full object-cover"
           />
 
@@ -515,44 +525,40 @@ export default function PaintCoatingsPage() {
               <div className="max-w-3xl">
 
                 <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
-                  رنگ، پوشش و محصولات نهایی ساختمان
+                  تأسیسات مکانیکی و لوله‌کشی
                 </span>
 
                 <h1 className="mt-5 text-4xl font-black sm:text-6xl">
-                  رنگ و پوشش
+                  لوله، اتصالات و تجهیزات لوله‌کشی
                 </h1>
 
                 <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
-                  انواع رنگ ساختمانی، رنگ صنعتی،
-                  پوشش‌های محافظتی، پرایمر، ضدزنگ،
-                  عایق‌های رطوبتی، پوشش‌های نما،
-                  چسب‌ها، بتونه، درزگیر و سایر
-                  محصولات مورد نیاز برای اجرای
-                  نهایی و محافظت از ساختمان را از
-                  تأمین‌کنندگان معتبر در سرچنو
-                  پیدا و خریداری کنید.
+                  انواع لوله و اتصالات ساختمانی، آبرسانی،
+                  فاضلاب، گاز و تجهیزات لوله‌کشی را از
+                  فروشندگان و تأمین‌کنندگان معتبر در سرچنو
+                  پیدا کنید.
                 </p>
 
                 <div className="mt-7 flex flex-wrap gap-3">
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    رنگ ساختمانی
+                    لوله آب
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    رنگ صنعتی
+                    لوله فاضلاب
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    پرایمر و ضدزنگ
+                    لوله پنج‌لایه
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    عایق و پوشش رطوبتی
+                    لوله پلیکا
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    چسب و درزگیر
+                    اتصالات
                   </span>
 
                 </div>
@@ -581,12 +587,14 @@ export default function PaintCoatingsPage() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) =>
+                onChange={(
+                  e
+                ) =>
                   setSearch(
                     e.target.value
                   )
                 }
-                placeholder="مثلاً رنگ اکریلیک، رنگ روغنی، ضدزنگ، پرایمر، عایق..."
+                placeholder="مثلاً لوله پنج‌لایه، پلیکا، اتصالات فاضلاب..."
                 className="w-full bg-transparent outline-none"
               />
 
@@ -616,15 +624,12 @@ export default function PaintCoatingsPage() {
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            چه نوع رنگ و پوششی نیاز دارید؟
+            چه نوع لوله و اتصالاتی نیاز دارید؟
           </h2>
 
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
-            محصولات رنگ و پوشش بر اساس نوع
-            کاربرد، سطح زیرکار، جنس، مقاومت،
-            رنگ، روش اجرا و شرایط محیطی در
-            پروژه‌های ساختمانی و صنعتی
-            دسته‌بندی شده‌اند.
+            محصولات این گروه بر اساس جنس، کاربرد،
+            سیستم تأسیسات و نوع اتصال دسته‌بندی شده‌اند.
           </p>
 
         </div>
@@ -632,124 +637,22 @@ export default function PaintCoatingsPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
           {[
-            "رنگ ساختمانی",
-            "رنگ اکریلیک",
-            "رنگ پلاستیک",
-            "رنگ روغنی",
-            "رنگ نیمه‌براق",
-            "رنگ مات",
-            "رنگ براق",
-            "رنگ قابل شستشو",
-            "رنگ دکوراتیو",
-            "رنگ نما",
-
-            "رنگ صنعتی",
-            "رنگ اپوکسی",
-            "رنگ پلی‌یورتان",
-            "رنگ صنعتی فلز",
-            "رنگ صنعتی چوب",
-            "رنگ کف صنعتی",
-            "رنگ سوله",
-            "رنگ مخازن",
-            "رنگ مقاوم حرارت",
-            "رنگ مقاوم مواد شیمیایی",
-
-            "پرایمر و زیرسازی",
-            "پرایمر ساختمانی",
-            "پرایمر اکریلیک",
-            "پرایمر اپوکسی",
-            "پرایمر فلز",
-            "پرایمر چوب",
-            "آستر رنگ",
-            "بتونه ساختمانی",
-            "بتونه چوب",
-            "بتونه فلز",
-
-            "ضدزنگ و پوشش فلز",
-            "ضدزنگ قرمز",
-            "ضدزنگ طوسی",
-            "ضدزنگ اپوکسی",
-            "پوشش ضدخوردگی",
-            "پوشش محافظ فلز",
-            "رنگ ضدخوردگی",
-            "پوشش ضدزنگ",
-
-            "عایق و پوشش رطوبتی",
-            "عایق رطوبتی",
-            "عایق نانو",
-            "عایق الاستومری",
-            "پوشش آب‌بندی",
-            "پوشش ضدآب",
-            "پوشش پشت‌بام",
-            "ایزوگام",
-            "عایق مایع",
-            "پوشش نانو نما",
-
-            "چسب و درزگیر",
-            "چسب ساختمانی",
-            "چسب کاشی",
-            "چسب سنگ",
-            "چسب بتن",
-            "چسب چوب",
-            "چسب فلز",
-            "چسب پلی‌یورتان",
-            "چسب اپوکسی",
-            "سیلیکون",
-            "چسب و درزگیر سیلیکونی",
-            "درزگیر ساختمانی",
-
-            "پوشش نما",
-            "رنگ نمای ساختمان",
-            "پوشش اکریلیک نما",
-            "پوشش نانو نما",
-            "پوشش ضدآب نما",
-            "پوشش محافظ نما",
-            "پوشش بافت‌دار نما",
-            "رنگ نما سیمانی",
-
-            "پوشش کف",
-            "رنگ کف پارکینگ",
-            "رنگ کف اپوکسی",
-            "رنگ کف پلی‌یورتان",
-            "پوشش کف صنعتی",
-            "پوشش کف کارگاه",
-            "پوشش ضدسایش کف",
-
-            "رنگ چوب",
-            "رنگ چوب ساختمانی",
-            "رنگ چوب فضای داخلی",
-            "رنگ چوب فضای خارجی",
-            "لاک چوب",
-            "سیلر چوب",
-            "کیلر چوب",
-            "روغن چوب",
-
-            "رنگ فلز",
-            "رنگ آهن",
-            "رنگ آلومینیوم",
-            "رنگ گالوانیزه",
-            "رنگ استیل",
-            "رنگ سازه فلزی",
-            "رنگ درب و پنجره",
-
-            "محصولات آماده‌سازی سطح",
-            "پاک‌کننده سطح",
-            "چربی‌گیر",
-            "زنگ‌بر",
-            "تینر",
-            "حلال رنگ",
-            "تینر فوری",
-            "تینر روغنی",
-
-            "متعلقات رنگ‌آمیزی",
-            "غلتک رنگ",
-            "قلم‌مو",
-            "سینی رنگ",
-            "پیستوله",
-            "نازل پیستوله",
-            "کاردک",
-            "لیسه",
-            "ابزار اجرای رنگ",
+            "لوله آب سرد و گرم",
+            "لوله پنج‌لایه",
+            "لوله تک‌لایه",
+            "لوله پلی‌پروپیلن",
+            "لوله پلیکا PVC",
+            "لوله پوش‌فیت",
+            "لوله پلی‌اتیلن",
+            "لوله فاضلاب",
+            "لوله گاز",
+            "لوله فلزی",
+            "لوله مسی",
+            "اتصالات آب",
+            "اتصالات فاضلاب",
+            "اتصالات پنج‌لایه",
+            "شیرآلات و شیرهای تأسیساتی",
+            "تجهیزات لوله‌کشی",
           ].map(
             (item) => (
               <button
@@ -779,11 +682,11 @@ export default function PaintCoatingsPage() {
             </span>
 
             <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-              محصولات رنگ و پوشش
+              محصولات لوله و اتصالات
             </h2>
 
             <p className="mt-3 text-sm text-slate-500">
-              محصولات تأییدشده توسط تیم سرچنو
+              محصولاتی که توسط تیم سرچنو تأیید شده‌اند
               در این بخش نمایش داده می‌شوند.
             </p>
 
@@ -801,12 +704,13 @@ export default function PaintCoatingsPage() {
 
             </div>
 
-          ) : filteredProducts.length === 0 ? (
+          ) : filteredProducts.length ===
+            0 ? (
 
             <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
 
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
-                🎨
+                🔧
               </div>
 
               <h3 className="mt-5 text-xl font-black">
@@ -814,8 +718,7 @@ export default function PaintCoatingsPage() {
               </h3>
 
               <p className="mt-2 text-sm text-slate-500">
-                در حال حاضر محصول تأییدشده‌ای
-                در این دسته وجود ندارد.
+                در حال حاضر محصول تأییدشده‌ای در این دسته وجود ندارد.
               </p>
 
             </div>
@@ -825,23 +728,31 @@ export default function PaintCoatingsPage() {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
               {filteredProducts.map(
-                (product) => (
+                (
+                  product
+                ) => (
 
                   <div
-                    key={product.id}
+                    key={
+                      product.id
+                    }
                     className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                   >
 
+                    {/* Product Icon */}
+
                     <div className="flex items-center justify-center bg-slate-100 py-10 text-6xl">
-                      🎨
+                      🔧
                     </div>
 
                     <div className="p-6">
 
+                      {/* Status */}
+
                       <div className="flex items-center justify-between gap-3">
 
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                          رنگ و پوشش
+                          لوله و اتصالات
                         </span>
 
                         <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
@@ -854,10 +765,14 @@ export default function PaintCoatingsPage() {
 
                       </div>
 
+                      {/* Name */}
+
                       <h3 className="mt-4 text-lg font-black">
                         {product.name ||
                           "محصول بدون نام"}
                       </h3>
+
+                      {/* Brand */}
 
                       {product.brand && (
                         <p className="mt-2 text-sm text-slate-500">
@@ -866,12 +781,16 @@ export default function PaintCoatingsPage() {
                         </p>
                       )}
 
+                      {/* Model */}
+
                       {product.model && (
                         <p className="mt-1 text-sm text-slate-500">
                           مدل:{" "}
                           {product.model}
                         </p>
                       )}
+
+                      {/* Description */}
 
                       {product.description && (
                         <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
@@ -880,6 +799,8 @@ export default function PaintCoatingsPage() {
                           }
                         </p>
                       )}
+
+                      {/* Price */}
 
                       <div className="mt-5 space-y-3">
 
@@ -904,6 +825,8 @@ export default function PaintCoatingsPage() {
 
                         </div>
 
+                        {/* ================= مقدار خرید ================= */}
+
                         <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
 
                           <div className="mb-3 flex items-center justify-between">
@@ -922,6 +845,8 @@ export default function PaintCoatingsPage() {
 
                           <div className="flex items-center gap-2">
 
+                            {/* Minus */}
+
                             <button
                               type="button"
                               onClick={() =>
@@ -929,67 +854,88 @@ export default function PaintCoatingsPage() {
                                   product
                                 )
                               }
-                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl font-black text-slate-700 shadow-sm hover:bg-red-50 hover:text-red-600"
                             >
                               −
                             </button>
 
+                            {/* ورود مستقیم عدد */}
+
                             <input
-  type="number"
-  min={product.min_order ?? 1}
-  max={product.stock && product.stock > 0 ? product.stock : undefined}
-  value={quantities[product.id] ?? getQuantity(product)}
-  onChange={(e) => {
-    const rawValue = e.target.value;
+                              type="number"
+                              min={
+                                product.min_order ||
+                                1
+                              }
+                              max={
+                                product.stock ||
+                                undefined
+                              }
+                              value={
+                                quantities[
+                                  product.id
+                                ] ??
+                                product.min_order ??
+                                1
+                              }
+                              onChange={(
+                                e
+                              ) => {
+                                const value =
+                                  Number(
+                                    e.target
+                                      .value
+                                  );
 
-    // اجازه بده کاربر موقتاً فیلد را خالی کند
-    if (rawValue === "") {
-      setQuantities((prev) => ({
-        ...prev,
-        [product.id]: 0,
-      }));
-      return;
-    }
+                                const minOrder =
+                                  Math.max(
+                                    product.min_order ??
+                                      1,
+                                    1
+                                  );
 
-    const value = Number(rawValue);
+                                const stock =
+                                  product.stock ??
+                                  0;
 
-    if (!Number.isFinite(value)) {
-      return;
-    }
+                                if (
+                                  Number.isNaN(
+                                    value
+                                  )
+                                ) {
+                                  return;
+                                }
 
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: value,
-    }));
-  }}
-  onBlur={() => {
-    const minOrder = Math.max(
-      product.min_order ?? 1,
-      1
-    );
+                                if (
+                                  value <
+                                  minOrder
+                                ) {
+                                  return;
+                                }
 
-    const stock = product.stock ?? 0;
+                                if (
+                                  stock >
+                                    0 &&
+                                  value >
+                                    stock
+                                ) {
+                                  return;
+                                }
 
-    let value =
-      quantities[product.id] ?? minOrder;
+                                setQuantities(
+                                  (
+                                    prev
+                                  ) => ({
+                                    ...prev,
+                                    [product.id]:
+                                      value,
+                                  })
+                                );
+                              }}
+                              className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                            />
 
-    // کمتر از حداقل خرید
-    if (value < minOrder) {
-      value = minOrder;
-    }
-
-    // بیشتر از موجودی
-    if (stock > 0 && value > stock) {
-      value = stock;
-    }
-
-    setQuantities((prev) => ({
-      ...prev,
-      [product.id]: value,
-    }));
-  }}
-  className="h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-center text-lg font-black text-blue-700 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-/>
+                            {/* Plus */}
 
                             <button
                               type="button"
@@ -998,7 +944,7 @@ export default function PaintCoatingsPage() {
                                   product
                                 )
                               }
-                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white transition hover:bg-blue-800"
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-2xl font-black text-white hover:bg-blue-800"
                             >
                               +
                             </button>
@@ -1006,6 +952,7 @@ export default function PaintCoatingsPage() {
                           </div>
 
                           <p className="mt-3 text-center text-xs text-slate-400">
+
                             حداقل خرید:{" "}
                             {(
                               product.min_order ??
@@ -1015,9 +962,12 @@ export default function PaintCoatingsPage() {
                             )}{" "}
                             {product.unit ||
                               "واحد"}
+
                           </p>
 
                         </div>
+
+                        {/* Stock */}
 
                         <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
 
@@ -1041,6 +991,8 @@ export default function PaintCoatingsPage() {
                         </div>
 
                       </div>
+
+                      {/* ================= مبلغ کل خرید ================= */}
 
                       <div className="mt-3 rounded-2xl bg-blue-50 p-4">
 
@@ -1072,18 +1024,23 @@ export default function PaintCoatingsPage() {
 
                       </div>
 
+                      {/* Store */}
+
                       <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
 
                         <MapPin className="h-4 w-4" />
 
                         {product.seller_id
                           ? stores[
-                              product.seller_id
+                              product
+                                .seller_id
                             ] ||
                             "فروشگاه"
                           : "فروشگاه نامشخص"}
 
                       </div>
+
+                      {/* Seller */}
 
                       <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
 
@@ -1092,6 +1049,8 @@ export default function PaintCoatingsPage() {
                         فروشنده تأییدشده
 
                       </div>
+
+                      {/* Buy */}
 
                       <button
                         type="button"
@@ -1106,7 +1065,6 @@ export default function PaintCoatingsPage() {
                       </button>
 
                     </div>
-
                   </div>
                 )
               )}
@@ -1116,7 +1074,6 @@ export default function PaintCoatingsPage() {
           )}
 
         </div>
-
       </section>
 
       {/* ================= FOOTER ================= */}
