@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   Package,
 } from "lucide-react";
-
 import { supabase } from "@/lib/supabase";
 
 type Product = {
@@ -34,6 +33,7 @@ type Product = {
   seller_id: string | null;
   status: string | null;
   slug: string | null;
+  image_url: string | null;
   created_at: string | null;
 };
 
@@ -168,6 +168,7 @@ export default function MaterialsPage() {
           seller_id,
           status,
           slug,
+          image_url,
           created_at
         `)
         .eq("status", "active")
@@ -182,7 +183,7 @@ export default function MaterialsPage() {
 
       setProducts(data || []);
     } catch (error) {
-      console.error("MATERIALS PRODUCTS ERROR:", error);
+      console.error("LOAD PRODUCTS ERROR:", error);
     } finally {
       setLoadingProducts(false);
     }
@@ -203,20 +204,6 @@ export default function MaterialsPage() {
 
     return matchesSearch && matchesCity;
   });
-
-  const getCategoryImage = (category: string | null) => {
-    const foundCategory = categories.find(
-      (item) =>
-        item.title === category ||
-        item.title.includes(category || "") ||
-        (category || "").includes(item.title)
-    );
-
-    return (
-      foundCategory?.image ||
-      "/materials/materials-hero.jpg"
-    );
-  };
 
   return (
     <main
@@ -342,9 +329,7 @@ export default function MaterialsPage() {
                   <input
                     type="text"
                     value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
-                    }
+                    onChange={(e) => setSearch(e.target.value)}
                     placeholder="نام محصول یا مصالح را جست‌وجو کنید..."
                     className="w-full bg-transparent text-sm text-slate-800 outline-none"
                   />
@@ -355,9 +340,7 @@ export default function MaterialsPage() {
 
                   <select
                     value={city}
-                    onChange={(e) =>
-                      setCity(e.target.value)
-                    }
+                    onChange={(e) => setCity(e.target.value)}
                     className="w-full bg-transparent text-sm text-slate-700 outline-none"
                   >
                     <option>تبریز</option>
@@ -370,9 +353,7 @@ export default function MaterialsPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setSearch(search.trim())
-                  }
+                  onClick={() => setSearch(search.trim())}
                   className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
                 >
                   جست‌وجو
@@ -389,9 +370,7 @@ export default function MaterialsPage() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setSearch("کاشی ۶۰×۱۲۰")
-                }
+                onClick={() => setSearch("کاشی ۶۰×۱۲۰")}
                 className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
               >
                 کاشی ۶۰×۱۲۰
@@ -415,9 +394,7 @@ export default function MaterialsPage() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setSearch("پنجره UPVC")
-                }
+                onClick={() => setSearch("پنجره UPVC")}
                 className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
               >
                 پنجره UPVC
@@ -486,17 +463,19 @@ export default function MaterialsPage() {
           <div className="mb-8 flex items-end justify-between">
             <div>
               <span className="text-sm font-bold text-emerald-600">
-                محصولات موجود
+                محصولات
               </span>
 
               <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-                محصولات بازار سرچنو
+                {search.trim()
+                  ? `نتایج جست‌وجوی «${search.trim()}»`
+                  : "تمام محصولات سرچنو"}
               </h2>
 
               <p className="mt-3 text-sm text-slate-500">
-                {search.trim()
-                  ? `نتایج جست‌وجو برای «${search}»`
-                  : "تمام محصولات تأیید شده و فعال"}
+                {loadingProducts
+                  ? "در حال دریافت محصولات..."
+                  : `${filteredProducts.length} محصول موجود است`}
               </p>
             </div>
 
@@ -509,26 +488,19 @@ export default function MaterialsPage() {
           </div>
 
           {loadingProducts ? (
-            <div className="py-16 text-center">
-              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
-
-              <p className="mt-5 font-bold text-slate-500">
-                در حال دریافت محصولات...
-              </p>
+            <div className="py-16 text-center text-sm text-slate-500">
+              در حال دریافت محصولات...
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
-              <Package
-                size={50}
-                className="mx-auto text-slate-300"
-              />
+            <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 py-16 text-center">
+              <Package className="mx-auto h-12 w-12 text-slate-300" />
 
-              <h3 className="mt-5 text-xl font-black">
+              <h3 className="mt-4 font-black">
                 محصولی پیدا نشد
               </h3>
 
               <p className="mt-2 text-sm text-slate-500">
-                نام محصول، برند یا مدل دیگری را جست‌وجو کنید.
+                عبارت جست‌وجوی دیگری را امتحان کنید.
               </p>
             </div>
           ) : (
@@ -538,33 +510,55 @@ export default function MaterialsPage() {
                   key={product.id}
                   className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                 >
-                  <div className="h-48 overflow-hidden bg-slate-100">
-                    <img
-                      src={getCategoryImage(
-                        product.category
+                  {/* ================= PRODUCT IMAGE ================= */}
+
+                  <Link
+                    href={
+                      product.slug
+                        ? `/products/${product.slug}`
+                        : "/materials"
+                    }
+                    className="block"
+                  >
+                    <div className="h-48 overflow-hidden bg-slate-100">
+                      {product.image_url ? (
+                        <img
+                          src={product.image_url}
+                          alt={product.name || "محصول سرچنو"}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-slate-100">
+                          <Package className="h-16 w-16 text-slate-300" />
+                        </div>
                       )}
-                      alt={product.name || "محصول سرچنو"}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  </div>
+                    </div>
+                  </Link>
 
                   <div className="p-5">
                     <div className="flex items-center justify-between gap-2">
                       <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                        {product.category ||
-                          "مصالح ساختمانی"}
+                        {product.category || "مصالح ساختمانی"}
                       </span>
 
                       <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
                         <Star className="h-4 w-4 fill-current" />
-                        تأییدشده
+                        —
                       </div>
                     </div>
 
-                    <h3 className="mt-4 font-black">
-                      {product.name || "محصول بدون نام"}
-                    </h3>
+                    <Link
+                      href={
+                        product.slug
+                          ? `/products/${product.slug}`
+                          : "/materials"
+                      }
+                    >
+                      <h3 className="mt-4 font-black transition hover:text-blue-700">
+                        {product.name || "محصول بدون نام"}
+                      </h3>
+                    </Link>
 
                     {product.brand && (
                       <p className="mt-2 text-sm text-slate-500">
@@ -578,28 +572,24 @@ export default function MaterialsPage() {
                       </p>
                     )}
 
-                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-                      <Package className="h-4 w-4" />
-
-                      موجودی:{" "}
-                      {product.stock ?? 0}{" "}
-                      {product.unit || ""}
-                    </div>
-
-                    <div className="mt-3 text-sm font-black text-blue-700">
-                      قیمت:{" "}
-                      {(
-                        product.customer_price ??
-                        product.price ??
-                        0
-                      ).toLocaleString("fa-IR")}{" "}
-                      تومان
-                    </div>
-
-                    {product.description && (
-                      <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                        {product.description}
+                    {product.price !== null && (
+                      <p className="mt-3 text-sm font-black text-blue-700">
+                        {product.price.toLocaleString("fa-IR")} تومان
                       </p>
+                    )}
+
+                    {product.stock !== null && (
+                      <div className="mt-3 text-xs text-slate-400">
+                        موجودی: {product.stock.toLocaleString("fa-IR")}{" "}
+                        {product.unit || ""}
+                      </div>
+                    )}
+
+                    {product.status === "active" && (
+                      <div className="mt-3 flex items-center gap-2 text-xs font-bold text-emerald-600">
+                        <CheckCircle2 className="h-4 w-4" />
+                        محصول تأییدشده
+                      </div>
                     )}
 
                     <Link
@@ -611,7 +601,6 @@ export default function MaterialsPage() {
                       className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-700 transition hover:bg-blue-700 hover:text-white"
                     >
                       مشاهده جزئیات
-
                       <ArrowLeft className="h-4 w-4" />
                     </Link>
                   </div>
@@ -626,7 +615,6 @@ export default function MaterialsPage() {
 
       <section className="mx-auto max-w-7xl px-5 py-16">
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-
           {/* FILTERS */}
 
           <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
@@ -662,7 +650,11 @@ export default function MaterialsPage() {
                   شهر
                 </label>
 
-                <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none"
+                >
                   <option>همه شهرها</option>
                   <option>تبریز</option>
                   <option>تهران</option>
@@ -677,7 +669,6 @@ export default function MaterialsPage() {
                     type="checkbox"
                     className="h-4 w-4 rounded"
                   />
-
                   فقط تأمین‌کنندگان تأییدشده
                 </label>
               </div>
@@ -703,7 +694,6 @@ export default function MaterialsPage() {
                 className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold"
               >
                 مرتب‌سازی
-
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>
@@ -897,4 +887,4 @@ export default function MaterialsPage() {
       </footer>
     </main>
   );
-}
+} 
