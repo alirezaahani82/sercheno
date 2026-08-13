@@ -370,12 +370,13 @@ const loadProducts = async () => {
 
                 </div>
 
-                <button
-                  type="button"
-                  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
-                >
-                  جست‌وجو
-                </button>
+               <button
+  type="button"
+  onClick={() => setSearch(search.trim())}
+  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
+>
+  جست‌وجو
+</button>
 
               </div>
 
