@@ -483,12 +483,12 @@ function handleSearch() {
   const query = search.trim();
 
   if (!query) {
-    window.location.href = "/materials";
+    window.location.href = "/materials#products";
     return;
   }
 
   window.location.href =
-    `/materials?search=${encodeURIComponent(query)}&city=${encodeURIComponent(city)}`;
+    `/materials?search=${encodeURIComponent(query)}&city=${encodeURIComponent(city)}#products`;
 }
   return (
     <main
