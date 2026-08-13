@@ -10,6 +10,7 @@ import {
   Store,
   Package,
   ArrowRight,
+  Trash2,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
@@ -28,9 +29,9 @@ type Product = {
   status: string | null;
   created_at: string | null;
   brand: string | null;
-model: string | null;
-subcategory: string | null;
-min_order: number | null;
+  model: string | null;
+  subcategory: string | null;
+  min_order: number | null;
 };
 
 type StoreInfo = {
@@ -39,13 +40,11 @@ type StoreInfo = {
 };
 
 export default function AdminProductsPage() {
-const [selectedProduct, setSelectedProduct] =
-  useState<Product | null>(null);
-
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [filter, setFilter] = useState("pending");
   const [error, setError] = useState("");
 
@@ -53,89 +52,124 @@ const [selectedProduct, setSelectedProduct] =
     loadProducts();
   }, []);
 
+  /* =========================
+     دریافت محصولات
+  ========================= */
+
   const loadProducts = async () => {
     try {
       setLoading(true);
       setError("");
 
-    const { data, error } = await supabase
-  .from("products")
-  .select(
-    "id,name,category,subcategory,brand,model,price,customer_price,cooperation_price,stock,unit,min_order,description,seller_id,status,created_at"
-  )
-  .order("created_at", {
-    ascending: false,
-  });
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          "id,name,category,subcategory,brand,model,price,customer_price,cooperation_price,stock,unit,min_order,description,seller_id,status,created_at"
+        )
+        .order("created_at", {
+          ascending: false,
+        });
 
-console.log("PRODUCTS DATA:", data);
-console.log("PRODUCTS ERROR:", error);
-     if (error) {
-  console.error("PRODUCTS ERROR:", error);
+      console.log("PRODUCTS DATA:", data);
+      console.log("PRODUCTS ERROR:", error);
 
-  setError(
-    `خطا در دریافت محصولات: ${error.message}`
-  );
+      if (error) {
+        console.error("PRODUCTS ERROR:", error);
 
-  return;
-}
-      setProducts(data || []);
+        setError(
+          `خطا در دریافت محصولات: ${error.message}`
+        );
+
+        return;
+      }
+
+      const loadedProducts = data || [];
+
+      setProducts(loadedProducts);
+
+      /* =========================
+         دریافت فروشگاه‌ها
+      ========================= */
 
       const sellerIds = [
         ...new Set(
-          (data || [])
+          loadedProducts
             .map((product) => product.seller_id)
             .filter(Boolean)
         ),
       ];
 
       if (sellerIds.length > 0) {
-        const { data: storeData, error: storeError } =
-          await supabase
-            .from("stores")
-            .select("id,name")
-            .in("id", sellerIds);
+        const {
+          data: storeData,
+          error: storeError,
+        } = await supabase
+          .from("stores")
+          .select("id,name")
+          .in("id", sellerIds);
 
         if (storeError) {
-          console.error(storeError);
+          console.error(
+            "STORE ERROR:",
+            storeError
+          );
         }
 
         const storeMap: Record<string, string> = {};
 
-        (storeData || []).forEach((store: StoreInfo) => {
-          storeMap[store.id] = store.name || "فروشگاه";
-        });
+        (storeData || []).forEach(
+          (store: StoreInfo) => {
+            storeMap[store.id] =
+              store.name || "فروشگاه";
+          }
+        );
 
         setStores(storeMap);
       }
     } catch (err) {
       console.error(err);
-      setError("خطای غیرمنتظره‌ای رخ داد.");
+      setError(
+        "خطای غیرمنتظره‌ای رخ داد."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  /* =========================
+     تغییر وضعیت محصول
+  ========================= */
+
   const updateStatus = async (
     productId: string,
     status: "active" | "rejected"
   ) => {
-    if (updating) return;
+    if (updating || deleting) return;
 
     try {
       setUpdating(productId);
       setError("");
 
-      const { error: updateError } = await supabase
+      const {
+        error: updateError,
+      } = await supabase
         .from("products")
         .update({
           status,
-          updated_at: new Date().toISOString(),
+          updated_at:
+            new Date().toISOString(),
         })
         .eq("id", productId);
 
       if (updateError) {
-        console.error(updateError);
-        setError("تغییر وضعیت محصول انجام نشد.");
+        console.error(
+          updateError
+        );
+
+        setError(
+          `تغییر وضعیت محصول انجام نشد: ${updateError.message}`
+        );
+
         return;
       }
 
@@ -151,36 +185,150 @@ console.log("PRODUCTS ERROR:", error);
       );
     } catch (err) {
       console.error(err);
-      setError("خطایی هنگام تغییر وضعیت محصول رخ داد.");
+
+      setError(
+        "خطایی هنگام تغییر وضعیت محصول رخ داد."
+      );
     } finally {
       setUpdating(null);
     }
   };
 
-  const filteredProducts = products.filter((product) => {
-    if (filter === "all") return true;
+  /* =========================
+     حذف محصول تأییدشده
+  ========================= */
 
-    return product.status === filter;
-  });
+  const deleteProduct = async (
+    product: Product
+  ) => {
+    if (
+      deleting ||
+      updating
+    ) {
+      return;
+    }
 
-  const pendingCount = products.filter(
-    (product) => product.status === "pending"
-  ).length;
+    /* فقط محصولات تأییدشده قابل حذف هستند */
 
-  const activeCount = products.filter(
-    (product) => product.status === "active"
-  ).length;
+    if (
+      product.status !== "active"
+    ) {
+      return;
+    }
 
-  const rejectedCount = products.filter(
-    (product) => product.status === "rejected"
-  ).length;
+    const productName =
+      product.name ||
+      "این محصول";
+
+    const confirmed =
+      window.confirm(
+        `آیا مطمئن هستید که می‌خواهید محصول «${productName}» را حذف کنید؟\n\nاین عملیات محصول را از محصولات تأییدشده حذف می‌کند.`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeleting(product.id);
+      setError("");
+
+      const {
+        error: deleteError,
+      } = await supabase
+        .from("products")
+        .delete()
+        .eq(
+          "id",
+          product.id
+        );
+
+      if (deleteError) {
+        console.error(
+          "DELETE PRODUCT ERROR:",
+          deleteError
+        );
+
+        setError(
+          `حذف محصول انجام نشد: ${deleteError.message}`
+        );
+
+        return;
+      }
+
+      /* حذف محصول از لیست پنل بدون Refresh */
+
+      setProducts((current) =>
+        current.filter(
+          (item) =>
+            item.id !== product.id
+        )
+      );
+    } catch (err) {
+      console.error(
+        "DELETE PRODUCT ERROR:",
+        err
+      );
+
+      setError(
+        "خطایی هنگام حذف محصول رخ داد."
+      );
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  /* =========================
+     فیلتر محصولات
+  ========================= */
+
+  const filteredProducts =
+    products.filter(
+      (product) => {
+        if (filter === "all") {
+          return true;
+        }
+
+        return (
+          product.status ===
+          filter
+        );
+      }
+    );
+
+  /* =========================
+     آمار
+  ========================= */
+
+  const pendingCount =
+    products.filter(
+      (product) =>
+        product.status ===
+        "pending"
+    ).length;
+
+  const activeCount =
+    products.filter(
+      (product) =>
+        product.status ===
+        "active"
+    ).length;
+
+  const rejectedCount =
+    products.filter(
+      (product) =>
+        product.status ===
+        "rejected"
+    ).length;
 
   return (
     <main
       dir="rtl"
       className="min-h-screen bg-slate-100 text-slate-900"
     >
-      {/* Header */}
+      {/* =========================
+          Header
+      ========================= */}
 
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
@@ -207,74 +355,102 @@ console.log("PRODUCTS ERROR:", error);
             className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
           >
             <ArrowRight size={18} />
+
             داشبورد مدیریت
           </Link>
         </div>
       </header>
 
       <div className="mx-auto max-w-7xl px-5 py-8">
-
-        {/* Statistics */}
+        {/* =========================
+            Statistics
+        ========================= */}
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
-            icon={<Package size={22} />}
+            icon={
+              <Package size={22} />
+            }
             title="کل محصولات"
             value={products.length.toString()}
           />
 
           <StatCard
-            icon={<Clock size={22} />}
+            icon={
+              <Clock size={22} />
+            }
             title="در انتظار بررسی"
             value={pendingCount.toString()}
           />
 
           <StatCard
-            icon={<CheckCircle2 size={22} />}
+            icon={
+              <CheckCircle2 size={22} />
+            }
             title="تأیید شده"
             value={activeCount.toString()}
           />
 
           <StatCard
-            icon={<XCircle size={22} />}
+            icon={
+              <XCircle size={22} />
+            }
             title="رد شده"
             value={rejectedCount.toString()}
           />
         </section>
 
-        {/* Filters */}
+        {/* =========================
+            Filters
+        ========================= */}
 
         <section className="mt-6 rounded-3xl bg-white p-5 shadow-sm">
           <div className="flex flex-wrap gap-3">
-
             <FilterButton
-              active={filter === "pending"}
-              onClick={() => setFilter("pending")}
+              active={
+                filter === "pending"
+              }
+              onClick={() =>
+                setFilter("pending")
+              }
               label={`در انتظار بررسی (${pendingCount})`}
             />
 
             <FilterButton
-              active={filter === "active"}
-              onClick={() => setFilter("active")}
+              active={
+                filter === "active"
+              }
+              onClick={() =>
+                setFilter("active")
+              }
               label={`تأیید شده (${activeCount})`}
             />
 
             <FilterButton
-              active={filter === "rejected"}
-              onClick={() => setFilter("rejected")}
+              active={
+                filter === "rejected"
+              }
+              onClick={() =>
+                setFilter("rejected")
+              }
               label={`رد شده (${rejectedCount})`}
             />
 
             <FilterButton
-              active={filter === "all"}
-              onClick={() => setFilter("all")}
+              active={
+                filter === "all"
+              }
+              onClick={() =>
+                setFilter("all")
+              }
               label={`همه (${products.length})`}
             />
-
           </div>
         </section>
 
-        {/* Error */}
+        {/* =========================
+            Error
+        ========================= */}
 
         {error && (
           <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 font-bold text-red-700">
@@ -282,10 +458,11 @@ console.log("PRODUCTS ERROR:", error);
           </div>
         )}
 
-        {/* Products */}
+        {/* =========================
+            Products
+        ========================= */}
 
         <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-
           <div className="mb-6">
             <h2 className="text-xl font-black">
               محصولات ثبت‌شده
@@ -304,9 +481,9 @@ console.log("PRODUCTS ERROR:", error);
                 در حال دریافت محصولات...
               </p>
             </div>
-          ) : filteredProducts.length === 0 ? (
+          ) : filteredProducts.length ===
+            0 ? (
             <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
-
               <Package
                 size={50}
                 className="mx-auto text-slate-300"
@@ -319,155 +496,235 @@ console.log("PRODUCTS ERROR:", error);
               <p className="mt-2 text-sm text-slate-500">
                 در این وضعیت هنوز محصولی ثبت نشده است.
               </p>
-
             </div>
           ) : (
             <div className="space-y-4">
+              {filteredProducts.map(
+                (product) => (
+                  <div
+                    key={product.id}
+                    className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
+                  >
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                      {/* =========================
+                          Product Info
+                      ========================= */}
 
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
-                >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <h3 className="text-lg font-black">
+                            {product.name ||
+                              "بدون نام"}
+                          </h3>
 
-                  <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                          <StatusBadge
+                            status={
+                              product.status
+                            }
+                          />
+                        </div>
 
-                    {/* Product Info */}
+                        <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                          <div>
+                            <span className="font-bold">
+                              دسته‌بندی:
+                            </span>{" "}
+                            {product.category ||
+                              "ثبت نشده"}
+                          </div>
 
-                    <div className="min-w-0">
+                          <div className="flex items-center gap-1">
+                            <Store
+                              size={16}
+                            />
 
-                      <div className="flex flex-wrap items-center gap-3">
+                            <span className="font-bold">
+                              فروشگاه:
+                            </span>{" "}
+                            {product.seller_id
+                              ? stores[
+                                  product
+                                    .seller_id
+                                ] ||
+                                "فروشگاه ثبت‌شده"
+                              : "نامشخص"}
+                          </div>
 
-                        <h3 className="text-lg font-black">
-                          {product.name || "بدون نام"}
-                        </h3>
+                          <div>
+                            <span className="font-bold">
+                              قیمت مشتریان سرچنو:
+                            </span>{" "}
+                            {(
+                              product.customer_price ??
+                              product.price ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}
+                          </div>
 
-                        <StatusBadge
-                          status={product.status}
-                        />
+                          <div>
+                            <span className="font-bold">
+                              قیمت همکاری با سرچنو:
+                            </span>{" "}
+                            {(
+                              product.cooperation_price ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}
+                          </div>
 
+                          <div>
+                            <span className="font-bold">
+                              موجودی:
+                            </span>{" "}
+                            {(
+                              product.stock ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              ""}
+                          </div>
+                        </div>
+
+                        {product.description && (
+                          <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                            {
+                              product.description
+                            }
+                          </p>
+                        )}
                       </div>
 
-                      <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                      {/* =========================
+                          Actions
+                      ========================= */}
 
-                        <div>
-                          <span className="font-bold">
-                            دسته‌بندی:
-                          </span>{" "}
-                          {product.category || "ثبت نشده"}
-                        </div>
+                      <div className="flex flex-wrap gap-2">
+                        {/* مشاهده */}
 
-                        <div className="flex items-center gap-1">
-                          <Store size={16} />
-                          <span className="font-bold">
-                            فروشگاه:
-                          </span>{" "}
-                          {product.seller_id
-                            ? stores[product.seller_id] ||
-                              "فروشگاه ثبت‌شده"
-                            : "نامشخص"}
-                        </div>
+                        <button
+                          type="button"
+                          className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100"
+                        >
+                          <Eye
+                            size={17}
+                          />
 
-                        <div>
-                          <span className="font-bold">
-                            قیمت مشتریان سرچنو:
-                          </span>{" "}
-                          {product.customer_price ??
-                            product.price ??
-                            0}
-                        </div>
+                          مشاهده
+                        </button>
 
-                        <div>
-                          <span className="font-bold">
-                            قیمت همکاری با سرچنو:
-                          </span>{" "}
-                          {product.cooperation_price ?? 0}
-                        </div>
+                        {/* =========================
+                            Pending Actions
+                        ========================= */}
 
-                        <div>
-                          <span className="font-bold">
-                            موجودی:
-                          </span>{" "}
-                          {product.stock ?? 0}{" "}
-                          {product.unit || ""}
-                        </div>
+                        {product.status ===
+                          "pending" && (
+                          <>
+                            <button
+                              type="button"
+                              disabled={
+                                updating ===
+                                  product.id ||
+                                deleting !==
+                                  null
+                              }
+                              onClick={() =>
+                                updateStatus(
+                                  product.id,
+                                  "active"
+                                )
+                              }
+                              className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                            >
+                              <CheckCircle2
+                                size={17}
+                              />
 
+                              {updating ===
+                              product.id
+                                ? "در حال تأیید..."
+                                : "تأیید"}
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={
+                                updating ===
+                                  product.id ||
+                                deleting !==
+                                  null
+                              }
+                              onClick={() =>
+                                updateStatus(
+                                  product.id,
+                                  "rejected"
+                                )
+                              }
+                              className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-black text-white transition hover:bg-red-700 disabled:opacity-50"
+                            >
+                              <XCircle
+                                size={17}
+                              />
+
+                              {updating ===
+                              product.id
+                                ? "در حال رد..."
+                                : "رد"}
+                            </button>
+                          </>
+                        )}
+
+                        {/* =========================
+                            Active / Delete
+                        ========================= */}
+
+                        {product.status ===
+                          "active" && (
+                          <button
+                            type="button"
+                            disabled={
+                              deleting ===
+                                product.id ||
+                              updating !==
+                                null
+                            }
+                            onClick={() =>
+                              deleteProduct(
+                                product
+                              )
+                            }
+                            className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-black text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Trash2
+                              size={17}
+                            />
+
+                            {deleting ===
+                            product.id
+                              ? "در حال حذف..."
+                              : "حذف محصول"}
+                          </button>
+                        )}
                       </div>
-
-                      {product.description && (
-                        <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                          {product.description}
-                        </p>
-                      )}
-
                     </div>
-
-                    {/* Actions */}
-
-                    <div className="flex flex-wrap gap-2">
-
-                      <button
-                        type="button"
-                        className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100"
-                      >
-                        <Eye size={17} />
-                        مشاهده
-                      </button>
-
-                      {product.status === "pending" && (
-                        <>
-                          <button
-                            type="button"
-                            disabled={updating === product.id}
-                            onClick={() =>
-                              updateStatus(
-                                product.id,
-                                "active"
-                              )
-                            }
-                            className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-50"
-                          >
-                            <CheckCircle2 size={17} />
-                            تأیید
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={updating === product.id}
-                            onClick={() =>
-                              updateStatus(
-                                product.id,
-                                "rejected"
-                              )
-                            }
-                            className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-black text-white transition hover:bg-red-700 disabled:opacity-50"
-                          >
-                            <XCircle size={17} />
-                            رد
-                          </button>
-                        </>
-                      )}
-
-                    </div>
-
                   </div>
-
-                </div>
-              ))}
-
+                )
+              )}
             </div>
           )}
-
         </section>
-
       </div>
     </main>
   );
 }
 
-/* --------------------------------
-   Components
--------------------------------- */
+/* =========================
+   Stat Card
+========================= */
 
 function StatCard({
   icon,
@@ -480,9 +737,7 @@ function StatCard({
 }) {
   return (
     <div className="rounded-3xl bg-white p-5 shadow-sm">
-
       <div className="flex items-center gap-3">
-
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
           {icon}
         </div>
@@ -496,12 +751,14 @@ function StatCard({
             {value}
           </div>
         </div>
-
       </div>
-
     </div>
   );
 }
+
+/* =========================
+   Filter Button
+========================= */
 
 function FilterButton({
   active,
@@ -526,6 +783,10 @@ function FilterButton({
     </button>
   );
 }
+
+/* =========================
+   Status Badge
+========================= */
 
 function StatusBadge({
   status,
