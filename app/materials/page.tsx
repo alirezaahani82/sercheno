@@ -1,8 +1,8 @@
-"use client";
+ "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { 
+import {
   Search,
   MapPin,
   ChevronDown,
@@ -15,7 +15,9 @@ import {
   ShieldCheck,
   Package,
 } from "lucide-react";
+
 import { supabase } from "@/lib/supabase";
+
 type Product = {
   id: string;
   name: string | null;
@@ -34,7 +36,6 @@ type Product = {
   slug: string | null;
   created_at: string | null;
 };
-
 
 const categories = [
   {
@@ -111,7 +112,6 @@ const categories = [
   },
 ];
 
- 
 const sellers = [
   {
     name: "مصالح ساختمانی سهند",
@@ -138,70 +138,86 @@ const sellers = [
 
 export default function MaterialsPage() {
   const [products, setProducts] = useState<Product[]>([]);
-const [search, setSearch] = useState("");
-const [city, setCity] = useState("همه شهرها");
-const [loadingProducts, setLoadingProducts] = useState(true);
+  const [search, setSearch] = useState("");
+  const [city, setCity] = useState("همه شهرها");
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
   useEffect(() => {
-  loadProducts();
-}, []);
+    loadProducts();
+  }, []);
 
-const loadProducts = async () => {
-  try {
-    setLoadingProducts(true);
+  const loadProducts = async () => {
+    try {
+      setLoadingProducts(true);
 
-    const { data, error } = await supabase
-      .from("products")
-      .select(`
-        id,
-        name,
-        category,
-        subcategory,
-        brand,
-        model,
-        price,
-        customer_price,
-        cooperation_price,
-        stock,
-        unit,
-        description,
-        seller_id,
-        status,
-        slug,
-        created_at
-      `)
-      .eq("status", "active")
-      .order("created_at", {
-        ascending: false,
-      });
+      const { data, error } = await supabase
+        .from("products")
+        .select(`
+          id,
+          name,
+          category,
+          subcategory,
+          brand,
+          model,
+          price,
+          customer_price,
+          cooperation_price,
+          stock,
+          unit,
+          description,
+          seller_id,
+          status,
+          slug,
+          created_at
+        `)
+        .eq("status", "active")
+        .order("created_at", {
+          ascending: false,
+        });
 
-    if (error) {
+      if (error) {
+        console.error("MATERIALS PRODUCTS ERROR:", error);
+        return;
+      }
+
+      setProducts(data || []);
+    } catch (error) {
       console.error("MATERIALS PRODUCTS ERROR:", error);
-      return;
+    } finally {
+      setLoadingProducts(false);
     }
+  };
 
-    setProducts(data || []);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLoadingProducts(false);
-  }
-};
   const filteredProducts = products.filter((product) => {
-  const query = search.trim().toLowerCase();
+    const query = search.trim().toLowerCase();
 
-  const matchesSearch =
-    query === "" ||
-    (product.name || "").toLowerCase().includes(query) ||
-    (product.category || "").toLowerCase().includes(query) ||
-    (product.subcategory || "").toLowerCase().includes(query) ||
-    (product.brand || "").toLowerCase().includes(query) ||
-    (product.model || "").toLowerCase().includes(query);
+    const matchesSearch =
+      query === "" ||
+      (product.name || "").toLowerCase().includes(query) ||
+      (product.category || "").toLowerCase().includes(query) ||
+      (product.subcategory || "").toLowerCase().includes(query) ||
+      (product.brand || "").toLowerCase().includes(query) ||
+      (product.model || "").toLowerCase().includes(query);
 
-  const matchesCity =
-    city === "همه شهرها";
+    const matchesCity = city === "همه شهرها";
 
-  return matchesSearch && matchesCity;
-});
+    return matchesSearch && matchesCity;
+  });
+
+  const getCategoryImage = (category: string | null) => {
+    const foundCategory = categories.find(
+      (item) =>
+        item.title === category ||
+        item.title.includes(category || "") ||
+        (category || "").includes(item.title)
+    );
+
+    return (
+      foundCategory?.image ||
+      "/materials/materials-hero.jpg"
+    );
+  };
+
   return (
     <main
       dir="rtl"
@@ -211,7 +227,6 @@ const loadProducts = async () => {
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-
           <Link
             href="/"
             className="flex items-center gap-3"
@@ -234,7 +249,6 @@ const loadProducts = async () => {
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-medium lg:flex">
-
             <Link
               href="/"
               className="transition hover:text-blue-700"
@@ -262,11 +276,9 @@ const loadProducts = async () => {
             >
               درباره سرچنو
             </Link>
-
           </nav>
 
           <div className="flex items-center gap-2">
-
             <Link
               href="/login"
               className="hidden rounded-xl px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-100 sm:block"
@@ -280,18 +292,13 @@ const loadProducts = async () => {
             >
               ثبت‌نام
             </Link>
-
           </div>
-
         </div>
       </header>
 
       {/* ================= HERO ================= */}
 
       <section className="relative overflow-hidden bg-blue-950">
-
-        {/* تصویر اختصاصی بالای صفحه */}
-
         <img
           src="/materials/materials-hero.jpg"
           alt="مصالح و تجهیزات ساختمانی سرچنو"
@@ -305,93 +312,86 @@ const loadProducts = async () => {
         <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-5 py-16 lg:py-24">
-
           <div className="mx-auto max-w-4xl text-center text-white">
-
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur">
-
               <ShoppingBag className="h-4 w-4" />
-
               بازار مصالح و تجهیزات ساختمانی
-
             </div>
 
             <h1 className="text-3xl font-black leading-tight sm:text-5xl">
-
               تمام مصالح مورد نیاز پروژه‌تان را
 
               <span className="mt-2 block text-cyan-300">
                 در سرچنو پیدا کنید
               </span>
-
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-blue-100 sm:text-base">
-
               بین فروشندگان و تأمین‌کنندگان مصالح ساختمانی
               جست‌وجو کنید، محصولات را مقایسه کنید و
               مستقیماً با فروشنده ارتباط بگیرید.
-
             </p>
 
             {/* SEARCH */}
 
             <div className="mx-auto mt-9 rounded-3xl bg-white p-3 text-right shadow-2xl">
-
               <div className="flex flex-col gap-3 lg:flex-row">
-
                 <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4">
-
                   <Search className="h-5 w-5 text-slate-400" />
 
-                 <input
-  type="text"
-  value={search}
-  onChange={(e) => setSearch(e.target.value)}
-  placeholder="نام محصول یا مصالح را جست‌وجو کنید..."
-  className="w-full bg-transparent text-sm text-slate-800 outline-none"
-/>
-
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) =>
+                      setSearch(e.target.value)
+                    }
+                    placeholder="نام محصول یا مصالح را جست‌وجو کنید..."
+                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
+                  />
                 </div>
 
                 <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-5 py-4 lg:w-48">
-
                   <MapPin className="h-5 w-5 text-slate-400" />
 
-                  <select className="w-full bg-transparent text-sm text-slate-700 outline-none">
-
+                  <select
+                    value={city}
+                    onChange={(e) =>
+                      setCity(e.target.value)
+                    }
+                    className="w-full bg-transparent text-sm text-slate-700 outline-none"
+                  >
                     <option>تبریز</option>
                     <option>تهران</option>
                     <option>ارومیه</option>
                     <option>زنجان</option>
                     <option>همه شهرها</option>
-
                   </select>
-
                 </div>
 
-               <button
-  type="button"
-  onClick={() => setSearch(search.trim())}
-  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
->
-  جست‌وجو
-</button>
-
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSearch(search.trim())
+                  }
+                  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
+                >
+                  جست‌وجو
+                </button>
               </div>
-
             </div>
 
             {/* محبوب */}
 
             <div className="mt-5 flex flex-wrap justify-center gap-2 text-xs text-blue-100">
-
               <span>
                 جست‌وجوهای محبوب:
               </span>
 
               <button
                 type="button"
+                onClick={() =>
+                  setSearch("کاشی ۶۰×۱۲۰")
+                }
                 className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
               >
                 کاشی ۶۰×۱۲۰
@@ -399,6 +399,7 @@ const loadProducts = async () => {
 
               <button
                 type="button"
+                onClick={() => setSearch("سیمان")}
                 className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
               >
                 سیمان
@@ -406,6 +407,7 @@ const loadProducts = async () => {
 
               <button
                 type="button"
+                onClick={() => setSearch("میلگرد")}
                 className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
               >
                 میلگرد
@@ -413,27 +415,23 @@ const loadProducts = async () => {
 
               <button
                 type="button"
+                onClick={() =>
+                  setSearch("پنجره UPVC")
+                }
                 className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
               >
                 پنجره UPVC
               </button>
-
             </div>
-
           </div>
-
         </div>
-
       </section>
 
       {/* ================= CATEGORIES ================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-16">
-
         <div className="mb-8 flex items-end justify-between">
-
           <div>
-
             <span className="text-sm font-bold text-blue-700">
               دسته‌بندی مصالح
             </span>
@@ -445,32 +443,23 @@ const loadProducts = async () => {
             <p className="mt-3 text-sm text-slate-500">
               دسته‌بندی مورد نظر خود را انتخاب کنید.
             </p>
-
           </div>
-
         </div>
 
-        {/* ۱۲ دسته‌بندی واقعی */}
-
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-
           {categories.map((category) => (
-
             <Link
               key={category.href}
               href={category.href}
               className="group rounded-3xl border border-slate-200 bg-white p-4 text-center transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
             >
-
               <div className="mx-auto h-24 w-full overflow-hidden rounded-2xl bg-slate-100">
-
                 <img
                   src={category.image}
                   alt={category.title}
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                   loading="lazy"
                 />
-
               </div>
 
               <h3 className="mt-4 text-sm font-black leading-6">
@@ -482,43 +471,33 @@ const loadProducts = async () => {
               </p>
 
               <div className="mt-3 flex items-center justify-center gap-1 text-xs font-bold text-blue-700 opacity-0 transition group-hover:opacity-100">
-
                 مشاهده دسته
-
                 <ArrowLeft className="h-3 w-3" />
-
               </div>
-
             </Link>
-
           ))}
-
         </div>
-
       </section>
 
       {/* ================= PRODUCTS ================= */}
 
       <section className="bg-white py-16">
-
         <div className="mx-auto max-w-7xl px-5">
-
           <div className="mb-8 flex items-end justify-between">
-
             <div>
-
               <span className="text-sm font-bold text-emerald-600">
-                محصولات پیشنهادی
+                محصولات موجود
               </span>
 
               <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-                مصالح پرطرفدار
+                محصولات بازار سرچنو
               </h2>
 
               <p className="mt-3 text-sm text-slate-500">
-                نمونه‌ای از محصولات موجود در بازار سرچنو
+                {search.trim()
+                  ? `نتایج جست‌وجو برای «${search}»`
+                  : "تمام محصولات تأیید شده و فعال"}
               </p>
-
             </div>
 
             <Link
@@ -527,127 +506,145 @@ const loadProducts = async () => {
             >
               مشاهده همه ←
             </Link>
-
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {loadingProducts ? (
+            <div className="py-16 text-center">
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
 
-            {products.map((product) => (
+              <p className="mt-5 font-bold text-slate-500">
+                در حال دریافت محصولات...
+              </p>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+              <Package
+                size={50}
+                className="mx-auto text-slate-300"
+              />
 
-              <div
-                key={product.title}
-                className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-              >
+              <h3 className="mt-5 text-xl font-black">
+                محصولی پیدا نشد
+              </h3>
 
-                <div className="h-48 overflow-hidden bg-slate-100">
-
-                  <img
-                    src={product.image}
-                    alt={product.title}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-
-                </div>
-
-                <div className="p-5">
-
-                  <div className="flex items-center justify-between gap-2">
-
-                    <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                      {product.category}
-                    </span>
-
-                    <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
-
-                      <Star className="h-4 w-4 fill-current" />
-
-                      {product.rating}
-
-                    </div>
-
+              <p className="mt-2 text-sm text-slate-500">
+                نام محصول، برند یا مدل دیگری را جست‌وجو کنید.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {filteredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="h-48 overflow-hidden bg-slate-100">
+                    <img
+                      src={getCategoryImage(
+                        product.category
+                      )}
+                      alt={product.name || "محصول سرچنو"}
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
                   </div>
 
-                  <h3 className="mt-4 font-black">
-                    {product.title}
-                  </h3>
+                  <div className="p-5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                        {product.category ||
+                          "مصالح ساختمانی"}
+                      </span>
 
-                  <p className="mt-2 text-sm text-slate-500">
-                    {product.seller}
-                  </p>
-
-                  <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-
-                    <MapPin className="h-4 w-4" />
-
-                    {product.city}
-
-                  </div>
-
-                  {product.verified && (
-
-                    <div className="mt-3 flex items-center gap-2 text-xs font-bold text-emerald-600">
-
-                      <CheckCircle2 className="h-4 w-4" />
-
-                      تأمین‌کننده تأییدشده
-
+                      <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
+                        <Star className="h-4 w-4 fill-current" />
+                        تأییدشده
+                      </div>
                     </div>
 
-                  )}
+                    <h3 className="mt-4 font-black">
+                      {product.name || "محصول بدون نام"}
+                    </h3>
 
-                  <Link
-                    href="/materials"
-                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-700 transition hover:bg-blue-700 hover:text-white"
-                  >
-                    مشاهده جزئیات
+                    {product.brand && (
+                      <p className="mt-2 text-sm text-slate-500">
+                        برند: {product.brand}
+                      </p>
+                    )}
 
-                    <ArrowLeft className="h-4 w-4" />
+                    {product.model && (
+                      <p className="mt-1 text-sm text-slate-500">
+                        مدل: {product.model}
+                      </p>
+                    )}
 
-                  </Link>
+                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
+                      <Package className="h-4 w-4" />
 
+                      موجودی:{" "}
+                      {product.stock ?? 0}{" "}
+                      {product.unit || ""}
+                    </div>
+
+                    <div className="mt-3 text-sm font-black text-blue-700">
+                      قیمت:{" "}
+                      {(
+                        product.customer_price ??
+                        product.price ??
+                        0
+                      ).toLocaleString("fa-IR")}{" "}
+                      تومان
+                    </div>
+
+                    {product.description && (
+                      <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                        {product.description}
+                      </p>
+                    )}
+
+                    <Link
+                      href={
+                        product.slug
+                          ? `/products/${product.slug}`
+                          : "/materials"
+                      }
+                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-700 transition hover:bg-blue-700 hover:text-white"
+                    >
+                      مشاهده جزئیات
+
+                      <ArrowLeft className="h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
+              ))}
+            </div>
+          )}
         </div>
-
       </section>
 
       {/* ================= MARKETPLACE ================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-16">
-
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
 
           {/* FILTERS */}
 
           <aside className="hidden rounded-3xl border border-slate-200 bg-white p-6 lg:block">
-
             <div className="flex items-center justify-between">
-
               <h3 className="font-black">
                 فیلتر نتایج
               </h3>
 
               <SlidersHorizontal className="h-5 w-5 text-blue-700" />
-
             </div>
 
             <div className="mt-7 space-y-6">
-
               <div>
-
                 <label className="text-sm font-bold">
                   دسته‌بندی
                 </label>
 
                 <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-
                   <option>
                     همه دسته‌بندی‌ها
                   </option>
@@ -657,56 +654,41 @@ const loadProducts = async () => {
                       {category.title}
                     </option>
                   ))}
-
                 </select>
-
               </div>
 
               <div>
-
                 <label className="text-sm font-bold">
                   شهر
                 </label>
 
                 <select className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none">
-
                   <option>همه شهرها</option>
                   <option>تبریز</option>
                   <option>تهران</option>
                   <option>ارومیه</option>
                   <option>زنجان</option>
-
                 </select>
-
               </div>
 
               <div className="border-t border-slate-100 pt-5">
-
                 <label className="flex cursor-pointer items-center gap-3 text-sm">
-
                   <input
                     type="checkbox"
                     className="h-4 w-4 rounded"
                   />
 
                   فقط تأمین‌کنندگان تأییدشده
-
                 </label>
-
               </div>
-
             </div>
-
           </aside>
 
           {/* SELLERS */}
 
           <div>
-
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-
               <div>
-
                 <h2 className="text-2xl font-black">
                   تأمین‌کنندگان برتر
                 </h2>
@@ -714,7 +696,6 @@ const loadProducts = async () => {
                 <p className="mt-2 text-sm text-slate-500">
                   بهترین فروشندگان و تأمین‌کنندگان مصالح در سرچنو
                 </p>
-
               </div>
 
               <button
@@ -724,44 +705,30 @@ const loadProducts = async () => {
                 مرتب‌سازی
 
                 <ChevronDown className="h-4 w-4" />
-
               </button>
-
             </div>
 
             <div className="space-y-4">
-
               {sellers.map((seller) => (
-
                 <div
                   key={seller.name}
                   className="rounded-3xl border border-slate-200 bg-white p-6 transition hover:border-blue-200 hover:shadow-lg"
                 >
-
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-
                     <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50">
-
                       <Building2 className="h-8 w-8 text-blue-700" />
-
                     </div>
 
                     <div className="flex-1">
-
                       <div className="flex flex-wrap items-center gap-2">
-
                         <h3 className="font-black">
                           {seller.name}
                         </h3>
 
                         <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-
                           <ShieldCheck className="h-3 w-3" />
-
                           تأییدشده
-
                         </span>
-
                       </div>
 
                       <p className="mt-2 text-sm text-slate-500">
@@ -769,33 +736,21 @@ const loadProducts = async () => {
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-400">
-
                         <span className="flex items-center gap-1">
-
                           <MapPin className="h-4 w-4" />
-
                           {seller.city}
-
                         </span>
 
                         <span className="flex items-center gap-1 text-amber-500">
-
                           <Star className="h-4 w-4 fill-current" />
-
                           {seller.rating}
-
                         </span>
 
                         <span className="flex items-center gap-1">
-
                           <Package className="h-4 w-4" />
-
                           {seller.products}
-
                         </span>
-
                       </div>
-
                     </div>
 
                     <button
@@ -804,42 +759,29 @@ const loadProducts = async () => {
                     >
                       مشاهده فروشگاه
                     </button>
-
                   </div>
-
                 </div>
-
               ))}
-
             </div>
-
           </div>
-
         </div>
-
       </section>
 
       {/* ================= CTA ================= */}
 
       <section className="px-5 pb-16">
-
         <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-gradient-to-l from-blue-700 to-blue-950 px-6 py-14 text-center text-white">
-
           <div className="mx-auto max-w-3xl">
-
             <h2 className="text-2xl font-black sm:text-3xl">
               فروشنده یا تأمین‌کننده مصالح هستید؟
             </h2>
 
             <p className="mt-4 leading-8 text-blue-100">
-
               فروشگاه خود را در سرچنو ثبت کنید و محصولات
               خود را به خریداران و سازندگان معرفی کنید.
-
             </p>
 
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-
               <Link
                 href="/register"
                 className="rounded-xl bg-white px-8 py-4 font-black text-blue-800 transition hover:bg-blue-50"
@@ -853,30 +795,21 @@ const loadProducts = async () => {
               >
                 درباره سرچنو
               </Link>
-
             </div>
-
           </div>
-
         </div>
-
       </section>
 
       {/* ================= FOOTER ================= */}
 
       <footer className="bg-slate-950 text-slate-300">
-
         <div className="mx-auto max-w-7xl px-5 py-12">
-
           <div className="grid gap-10 md:grid-cols-4">
-
             <div className="md:col-span-2">
-
               <Link
                 href="/"
                 className="flex items-center gap-3"
               >
-
                 <img
                   src="/logo.png"
                   alt="سرچنو"
@@ -884,7 +817,6 @@ const loadProducts = async () => {
                 />
 
                 <div>
-
                   <div className="text-xl font-black text-white">
                     سرچنو
                   </div>
@@ -892,28 +824,21 @@ const loadProducts = async () => {
                   <div className="text-xs text-slate-500">
                     بازار هوشمند ساخت‌وساز
                   </div>
-
                 </div>
-
               </Link>
 
               <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
-
                 پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان،
                 تأمین‌کنندگان و متخصصان صنعت ساختمان.
-
               </p>
-
             </div>
 
             <div>
-
               <h3 className="font-bold text-white">
                 خدمات سرچنو
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
-
                 <Link
                   href="/materials"
                   className="block transition hover:text-white"
@@ -934,19 +859,15 @@ const loadProducts = async () => {
                 >
                   ثبت فروشگاه
                 </Link>
-
               </div>
-
             </div>
 
             <div>
-
               <h3 className="font-bold text-white">
                 ارتباط با ما
               </h3>
 
               <div className="mt-5 space-y-3 text-sm">
-
                 <Link
                   href="/about"
                   className="block transition hover:text-white"
@@ -965,23 +886,15 @@ const loadProducts = async () => {
                 <p>
                   پشتیبانی
                 </p>
-
               </div>
-
             </div>
-
           </div>
 
           <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
-
             © ۱۴۰۵ سرچنو — تمامی حقوق محفوظ است.
-
           </div>
-
         </div>
-
       </footer>
-
     </main>
   );
 }
