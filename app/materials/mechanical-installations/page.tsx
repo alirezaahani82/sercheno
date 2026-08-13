@@ -49,7 +49,7 @@ type CartItem = {
   storeName: string;
 };
 
-export default function IronSteelPage() {
+export default function MechanicalInstallationsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -61,25 +61,25 @@ export default function IronSteelPage() {
   >({});
 
   /*
-   * تصاویر تمام محصولات
-   *
-   * مثال:
-   *
-   * {
-   *   "product-id-1": [
-   *     "image1.jpg",
-   *     "image2.jpg",
-   *     "image3.jpg"
-   *   ]
-   * }
-   */
+    تصاویر محصولات
+
+    هر محصول می‌تواند هر تعداد تصویر داشته باشد:
+
+    {
+      "product-id-1": [
+        "image1.jpg",
+        "image2.jpg",
+        "image3.jpg"
+      ]
+    }
+  */
   const [productImages, setProductImages] = useState<
     Record<string, string[]>
   >({});
 
   /*
-   * تصویر انتخاب‌شده برای نمایش بزرگ
-   */
+    تصویر انتخاب‌شده برای نمایش بزرگ
+  */
   const [selectedImages, setSelectedImages] = useState<
     Record<string, string>
   >({});
@@ -105,6 +105,7 @@ export default function IronSteelPage() {
     product: Product
   ) => {
     const current = getQuantity(product);
+
     const stock = product.stock ?? 0;
 
     if (
@@ -134,9 +135,7 @@ export default function IronSteelPage() {
       1
     );
 
-    if (
-      current <= minOrder
-    ) {
+    if (current <= minOrder) {
       return;
     }
 
@@ -153,8 +152,7 @@ export default function IronSteelPage() {
   const addToCart = (
     product: Product
   ) => {
-    const quantity =
-      getQuantity(product);
+    const quantity = getQuantity(product);
 
     const price =
       product.customer_price ??
@@ -163,14 +161,12 @@ export default function IronSteelPage() {
 
     const storeName =
       product.seller_id
-        ? stores[
-            product.seller_id
-          ] || "فروشگاه"
+        ? stores[product.seller_id] ||
+          "فروشگاه"
         : "فروشگاه نامشخص";
 
     const newItem: CartItem = {
-      productId:
-        product.id,
+      productId: product.id,
 
       name:
         product.name ||
@@ -182,7 +178,7 @@ export default function IronSteelPage() {
 
       unit:
         product.unit ||
-        "کیلوگرم",
+        "عدد",
 
       storeName,
     };
@@ -201,23 +197,17 @@ export default function IronSteelPage() {
           product.id
       );
 
-    if (
-      existingIndex >= 0
-    ) {
+    if (existingIndex >= 0) {
       existingCart[
         existingIndex
       ].quantity += quantity;
     } else {
-      existingCart.push(
-        newItem
-      );
+      existingCart.push(newItem);
     }
 
     localStorage.setItem(
       "sercheno_cart",
-      JSON.stringify(
-        existingCart
-      )
+      JSON.stringify(existingCart)
     );
 
     window.dispatchEvent(
@@ -244,42 +234,37 @@ export default function IronSteelPage() {
   ========================= */
 
   useEffect(() => {
-    const updateCartCount =
-      () => {
-        try {
-          const cart =
-            JSON.parse(
-              localStorage.getItem(
-                "sercheno_cart"
-              ) || "[]"
-            );
-
-          const count =
-            cart.reduce(
-              (
-                total: number,
-                item: CartItem
-              ) =>
-                total +
-                Number(
-                  item.quantity ||
-                    0
-                ),
-              0
-            );
-
-          setCartCount(
-            count
-          );
-        } catch (error) {
-          console.error(
-            "CART COUNT ERROR:",
-            error
+    const updateCartCount = () => {
+      try {
+        const cart: CartItem[] =
+          JSON.parse(
+            localStorage.getItem(
+              "sercheno_cart"
+            ) || "[]"
           );
 
-          setCartCount(0);
-        }
-      };
+        const count = cart.reduce(
+          (
+            total: number,
+            item: CartItem
+          ) =>
+            total +
+            Number(
+              item.quantity || 0
+            ),
+          0
+        );
+
+        setCartCount(count);
+      } catch (error) {
+        console.error(
+          "CART COUNT ERROR:",
+          error
+        );
+
+        setCartCount(0);
+      }
+    };
 
     updateCartCount();
 
@@ -307,241 +292,237 @@ export default function IronSteelPage() {
   }, []);
 
   /* =========================
-     بارگذاری محصولات آهن و فولاد
+     بارگذاری محصولات تأسیسات مکانیکی
   ========================= */
 
-  const loadProducts =
-    async () => {
-      try {
-        setLoading(true);
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
 
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("products")
+        .select(
+          "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
+        )
+        .eq(
+          "category",
+          "mechanical-installations"
+        )
+        .eq(
+          "status",
+          "active"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
+
+      if (error) {
+        console.error(
+          "MECHANICAL INSTALLATIONS PRODUCTS ERROR:",
+          error
+        );
+
+        return;
+      }
+
+      const loadedProducts =
+        data || [];
+
+      setProducts(
+        loadedProducts
+      );
+
+      /* =========================
+         دریافت تمام تصاویر محصولات
+      ========================= */
+
+      const productIds =
+        loadedProducts.map(
+          (product) =>
+            product.id
+        );
+
+      if (
+        productIds.length > 0
+      ) {
         const {
-          data,
-          error,
-        } = await supabase
-          .from("products")
-          .select(
-            "id,name,category,price,customer_price,cooperation_price,stock,unit,description,seller_id,status,created_at,brand,model,min_order"
-          )
-          .eq(
-            "category",
-            "iron-steel"
-          )
-          .eq(
-            "status",
-            "active"
-          )
-          .order(
-            "created_at",
-            {
-              ascending:
-                false,
+          data: imageData,
+          error: imageError,
+        } =
+          await supabase
+            .from(
+              "product_images"
+            )
+            .select(
+              "product_id,image_url"
+            )
+            .in(
+              "product_id",
+              productIds
+            )
+            .order(
+              "id",
+              {
+                ascending: true,
+              }
+            );
+
+        if (imageError) {
+          console.error(
+            "PRODUCT IMAGES ERROR:",
+            imageError
+          );
+        } else {
+          /*
+            ساخت نقشه تصاویر
+
+            هر تعداد عکس که در
+            product_images ثبت شده باشد
+            اینجا وارد می‌شود.
+          */
+
+          const imageMap: Record<
+            string,
+            string[]
+          > = {};
+
+          (
+            imageData || []
+          ).forEach(
+            (
+              image: ProductImage
+            ) => {
+              if (
+                !imageMap[
+                  image.product_id
+                ]
+              ) {
+                imageMap[
+                  image.product_id
+                ] = [];
+              }
+
+              imageMap[
+                image.product_id
+              ].push(
+                image.image_url
+              );
             }
           );
 
-        if (error) {
-          console.error(
-            "IRON STEEL PRODUCTS ERROR:",
-            error
+          setProductImages(
+            imageMap
           );
 
-          return;
-        }
+          /*
+            اولین عکس هر محصول
+            به عنوان تصویر اصلی
+          */
 
-        const loadedProducts =
-          data || [];
-
-        setProducts(
-          loadedProducts
-        );
-
-        /* =========================
-           دریافت تمام تصاویر محصولات
-        ========================= */
-
-        const productIds =
-          loadedProducts.map(
-            (product) =>
-              product.id
-          );
-
-        if (
-          productIds.length >
-          0
-        ) {
-          const {
-            data: imageData,
-            error:
-              imageError,
-          } =
-            await supabase
-              .from(
-                "product_images"
-              )
-              .select(
-                "product_id,image_url"
-              )
-              .in(
-                "product_id",
-                productIds
-              )
-              .order(
-                "id",
-                {
-                  ascending:
-                    true,
-                }
-              );
-
-          if (
-            imageError
-          ) {
-            console.error(
-              "PRODUCT IMAGES ERROR:",
-              imageError
-            );
-          } else {
-            const imageMap: Record<
-              string,
-              string[]
-            > = {};
-
-            (
-              imageData || []
-            ).forEach(
-              (
-                image: ProductImage
-              ) => {
-                if (
-                  !imageMap[
-                    image.product_id
-                  ]
-                ) {
-                  imageMap[
-                    image.product_id
-                  ] = [];
-                }
-
-                imageMap[
-                  image.product_id
-                ].push(
-                  image.image_url
-                );
-              }
-            );
-
-            setProductImages(
-              imageMap
-            );
-
-            /*
-             * اولین عکس هر محصول
-             * به عنوان عکس اصلی
-             */
-            const selectedMap: Record<
-              string,
-              string
-            > = {};
-
-            Object.entries(
-              imageMap
-            ).forEach(
-              ([
-                productId,
-                urls,
-              ]) => {
-                if (
-                  urls.length >
-                  0
-                ) {
-                  selectedMap[
-                    productId
-                  ] =
-                    urls[0];
-                }
-              }
-            );
-
-            setSelectedImages(
-              selectedMap
-            );
-          }
-        }
-
-        /* =========================
-           دریافت فروشگاه‌ها
-        ========================= */
-
-        const sellerIds = [
-          ...new Set(
-            loadedProducts
-              .map(
-                (product) =>
-                  product.seller_id
-              )
-              .filter(Boolean)
-          ),
-        ];
-
-        if (
-          sellerIds.length >
-          0
-        ) {
-          const {
-            data: storeData,
-            error:
-              storeError,
-          } =
-            await supabase
-              .from("stores")
-              .select(
-                "id,name"
-              )
-              .in(
-                "id",
-                sellerIds
-              );
-
-          if (
-            storeError
-          ) {
-            console.error(
-              "STORE ERROR:",
-              storeError
-            );
-          }
-
-          const storeMap: Record<
+          const selectedMap: Record<
             string,
             string
           > = {};
 
-          (
-            storeData || []
+          Object.entries(
+            imageMap
           ).forEach(
-            (
-              store: StoreInfo
-            ) => {
-              storeMap[
-                store.id
-              ] =
-                store.name ||
-                "فروشگاه";
+            ([
+              productId,
+              urls,
+            ]) => {
+              if (
+                urls.length > 0
+              ) {
+                selectedMap[
+                  productId
+                ] = urls[0];
+              }
             }
           );
 
-          setStores(
-            storeMap
+          setSelectedImages(
+            selectedMap
           );
         }
-      } catch (error) {
-        console.error(
-          error
-        );
-      } finally {
-        setLoading(false);
       }
-    };
+
+      /* =========================
+         دریافت فروشگاه‌ها
+      ========================= */
+
+      const sellerIds = [
+        ...new Set(
+          loadedProducts
+            .map(
+              (product) =>
+                product.seller_id
+            )
+            .filter(Boolean)
+        ),
+      ];
+
+      if (
+        sellerIds.length > 0
+      ) {
+        const {
+          data: storeData,
+          error: storeError,
+        } =
+          await supabase
+            .from("stores")
+            .select(
+              "id,name"
+            )
+            .in(
+              "id",
+              sellerIds
+            );
+
+        if (storeError) {
+          console.error(
+            "STORE ERROR:",
+            storeError
+          );
+        }
+
+        const storeMap: Record<
+          string,
+          string
+        > = {};
+
+        (
+          storeData || []
+        ).forEach(
+          (
+            store: StoreInfo
+          ) => {
+            storeMap[
+              store.id
+            ] =
+              store.name ||
+              "فروشگاه";
+          }
+        );
+
+        setStores(
+          storeMap
+        );
+      }
+    } catch (error) {
+      console.error(
+        error
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* =========================
      جستجوی محصولات
@@ -555,9 +536,7 @@ export default function IronSteelPage() {
             .trim()
             .toLowerCase();
 
-        if (
-          !searchText
-        ) {
+        if (!searchText) {
           return true;
         }
 
@@ -591,6 +570,7 @@ export default function IronSteelPage() {
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
+
       {/* ================= HEADER ================= */}
 
       <header className="border-b border-slate-200 bg-white">
@@ -652,8 +632,8 @@ export default function IronSteelPage() {
         <div className="relative h-[420px]">
 
           <img
-            src="/materials/iron-steel.jpg"
-            alt="آهن و فولاد ساختمانی"
+            src="/materials/mechanical-installations.jpg"
+            alt="تأسیسات مکانیکی ساختمان"
             className="h-full w-full object-cover"
           />
 
@@ -666,16 +646,18 @@ export default function IronSteelPage() {
               <div className="max-w-3xl">
 
                 <span className="inline-block rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur">
-                  آهن، فولاد و مقاطع ساختمانی
+                  تأسیسات مکانیکی ساختمان
                 </span>
 
                 <h1 className="mt-5 text-4xl font-black sm:text-6xl">
-                  آهن و فولاد
+                  تأسیسات مکانیکی
                 </h1>
 
                 <p className="mt-5 text-base leading-8 text-slate-200 sm:text-lg">
-                  انواع میلگرد، تیرآهن، نبشی، ناودانی،
-                  قوطی، پروفیل، ورق و مقاطع فولادی
+                  انواع تجهیزات و مصالح تأسیسات
+                  مکانیکی ساختمان شامل لوله‌ها،
+                  اتصالات، شیرآلات، پمپ‌ها، تجهیزات
+                  گرمایشی و سرمایشی و تجهیزات موتورخانه
                   را از فروشندگان و تأمین‌کنندگان معتبر
                   در سرچنو پیدا کنید.
                 </p>
@@ -683,27 +665,23 @@ export default function IronSteelPage() {
                 <div className="mt-7 flex flex-wrap gap-3">
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    میلگرد
+                    لوله و اتصالات
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    تیرآهن
+                    شیرآلات
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    نبشی
+                    پمپ و بوسترپمپ
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    ناودانی
+                    تجهیزات موتورخانه
                   </span>
 
                   <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    قوطی و پروفیل
-                  </span>
-
-                  <span className="rounded-xl bg-white/10 px-4 py-3 text-sm backdrop-blur">
-                    ورق فولادی
+                    تجهیزات گرمایشی و سرمایشی
                   </span>
 
                 </div>
@@ -737,7 +715,7 @@ export default function IronSteelPage() {
                     e.target.value
                   )
                 }
-                placeholder="مثلاً میلگرد، تیرآهن، نبشی، قوطی، ورق..."
+                placeholder="مثلاً لوله پنج‌لایه، پمپ، شیرآلات، رادیاتور..."
                 className="w-full bg-transparent outline-none"
               />
 
@@ -767,13 +745,13 @@ export default function IronSteelPage() {
           </span>
 
           <h2 className="mt-2 text-2xl font-black">
-            چه نوع آهن و فولادی نیاز دارید؟
+            چه نوع تجهیزات تأسیسات مکانیکی نیاز دارید؟
           </h2>
 
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
-            محصولات این گروه بر اساس نوع مقطع،
-            کاربرد، ابعاد، استاندارد و شکل عرضه
-            دسته‌بندی شده‌اند.
+            محصولات تأسیسات مکانیکی بر اساس
+            نوع تجهیز، کاربرد، سیستم مورد استفاده
+            و محل نصب دسته‌بندی شده‌اند.
           </p>
 
         </div>
@@ -781,22 +759,30 @@ export default function IronSteelPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
           {[
-            "میلگرد آجدار",
-            "میلگرد ساده",
-            "تیرآهن IPE",
-            "تیرآهن INP",
-            "تیرآهن هاش",
-            "نبشی",
-            "ناودانی",
-            "قوطی آهنی",
-            "پروفیل ساختمانی",
-            "پروفیل صنعتی",
-            "ورق سیاه",
-            "ورق روغنی",
-            "ورق گالوانیزه",
-            "ورق رنگی",
-            "شمش فولادی",
-            "مقاطع فولادی ویژه",
+            "لوله و اتصالات",
+            "لوله پنج‌لایه",
+            "لوله پلی‌پروپیلن",
+            "لوله PVC",
+            "لوله فولادی",
+            "اتصالات فولادی",
+            "اتصالات پنج‌لایه",
+            "شیرآلات ساختمانی",
+            "شیرآلات صنعتی",
+            "پمپ آب",
+            "پمپ سیرکولاتور",
+            "بوستر پمپ",
+            "رادیاتور",
+            "پکیج",
+            "دیگ و مشعل",
+            "منبع انبساط",
+            "منبع کویل‌دار",
+            "فن کویل",
+            "هواساز",
+            "چیلر",
+            "کولینگ‌تاور",
+            "تجهیزات موتورخانه",
+            "تجهیزات سرمایشی",
+            "تجهیزات گرمایشی",
           ].map(
             (item) => (
               <button
@@ -826,12 +812,12 @@ export default function IronSteelPage() {
             </span>
 
             <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-              محصولات آهن و فولاد
+              محصولات تأسیسات مکانیکی
             </h2>
 
             <p className="mt-3 text-sm text-slate-500">
-              محصولاتی که توسط تیم سرچنو تأیید شده‌اند
-              در این بخش نمایش داده می‌شوند.
+              محصولاتی که توسط تیم سرچنو تأیید
+              شده‌اند در این بخش نمایش داده می‌شوند.
             </p>
 
           </div>
@@ -853,7 +839,7 @@ export default function IronSteelPage() {
             <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
 
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
-                🏗️
+                ⚙️
               </div>
 
               <h3 className="mt-5 text-xl font-black">
@@ -861,7 +847,8 @@ export default function IronSteelPage() {
               </h3>
 
               <p className="mt-2 text-sm text-slate-500">
-                در حال حاضر محصول تأییدشده‌ای در این دسته وجود ندارد.
+                در حال حاضر محصول تأییدشده‌ای
+                در این دسته وجود ندارد.
               </p>
 
             </div>
@@ -874,16 +861,15 @@ export default function IronSteelPage() {
                 (product) => {
 
                   /*
-                   * تمام عکس‌های این محصول
-                   */
+                    تمام تصاویر محصول
+                    از Supabase دریافت می‌شوند.
+                  */
+
                   const images =
                     productImages[
                       product.id
                     ] || [];
 
-                  /*
-                   * عکس اصلی
-                   */
                   const mainImage =
                     selectedImages[
                       product.id
@@ -894,9 +880,7 @@ export default function IronSteelPage() {
                   return (
 
                     <div
-                      key={
-                        product.id
-                      }
+                      key={product.id}
                       className="overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
                     >
 
@@ -909,9 +893,7 @@ export default function IronSteelPage() {
                           <div className="relative flex h-64 w-full items-center justify-center bg-white">
 
                             <img
-                              src={
-                                mainImage
-                              }
+                              src={mainImage}
                               alt={
                                 product.name ||
                                 "تصویر محصول"
@@ -924,12 +906,12 @@ export default function IronSteelPage() {
                         ) : (
 
                           <div className="flex h-64 items-center justify-center text-6xl">
-                            🔩
+                            ⚙️
                           </div>
 
                         )}
 
-                        {/* ================= تمام تصاویر آپلود شده ================= */}
+                        {/* ================= تمام تصاویر کوچک ================= */}
 
                         {images.length > 0 && (
 
@@ -946,9 +928,7 @@ export default function IronSteelPage() {
                                   type="button"
                                   onClick={() =>
                                     setSelectedImages(
-                                      (
-                                        prev
-                                      ) => ({
+                                      (prev) => ({
                                         ...prev,
                                         [product.id]:
                                           imageUrl,
@@ -964,9 +944,7 @@ export default function IronSteelPage() {
                                 >
 
                                   <img
-                                    src={
-                                      imageUrl
-                                    }
+                                    src={imageUrl}
                                     alt={`${product.name || "محصول"} - تصویر ${imageIndex + 1}`}
                                     className="h-full w-full object-cover"
                                   />
@@ -989,7 +967,7 @@ export default function IronSteelPage() {
                         <div className="flex items-center justify-between gap-3">
 
                           <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                            آهن و فولاد
+                            تأسیسات مکانیکی
                           </span>
 
                           <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
@@ -1012,35 +990,27 @@ export default function IronSteelPage() {
                         {/* Brand */}
 
                         {product.brand && (
-
                           <p className="mt-2 text-sm text-slate-500">
                             برند:{" "}
                             {product.brand}
                           </p>
-
                         )}
 
                         {/* Model */}
 
                         {product.model && (
-
                           <p className="mt-1 text-sm text-slate-500">
                             مدل:{" "}
                             {product.model}
                           </p>
-
                         )}
 
                         {/* Description */}
 
                         {product.description && (
-
                           <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                            {
-                              product.description
-                            }
+                            {product.description}
                           </p>
-
                         )}
 
                         {/* Price */}
@@ -1068,7 +1038,7 @@ export default function IronSteelPage() {
 
                           </div>
 
-                          {/* ================= مقدار خرید ================= */}
+                          {/* مقدار خرید */}
 
                           <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
 
@@ -1081,7 +1051,7 @@ export default function IronSteelPage() {
                               <span className="text-xs font-bold text-slate-400">
                                 واحد فروش:{" "}
                                 {product.unit ||
-                                  "کیلوگرم"}
+                                  "عدد"}
                               </span>
 
                             </div>
@@ -1137,9 +1107,7 @@ export default function IronSteelPage() {
                                   ) {
 
                                     setQuantities(
-                                      (
-                                        prev
-                                      ) => ({
+                                      (prev) => ({
                                         ...prev,
                                         [product.id]:
                                           0,
@@ -1163,9 +1131,7 @@ export default function IronSteelPage() {
                                   }
 
                                   setQuantities(
-                                    (
-                                      prev
-                                    ) => ({
+                                    (prev) => ({
                                       ...prev,
                                       [product.id]:
                                         value,
@@ -1211,9 +1177,7 @@ export default function IronSteelPage() {
                                   }
 
                                   setQuantities(
-                                    (
-                                      prev
-                                    ) => ({
+                                    (prev) => ({
                                       ...prev,
                                       [product.id]:
                                         value,
@@ -1281,7 +1245,7 @@ export default function IronSteelPage() {
 
                         </div>
 
-                        {/* ================= مبلغ کل خرید ================= */}
+                        {/* مبلغ کل */}
 
                         <div className="mt-3 rounded-2xl bg-blue-50 p-4">
 
@@ -1321,7 +1285,8 @@ export default function IronSteelPage() {
 
                           {product.seller_id
                             ? stores[
-                                product.seller_id
+                                product
+                                  .seller_id
                               ] ||
                               "فروشگاه"
                             : "فروشگاه نامشخص"}
@@ -1355,13 +1320,11 @@ export default function IronSteelPage() {
                       </div>
 
                     </div>
-
                   );
                 }
               )}
 
             </div>
-
           )}
 
         </div>
