@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -15,7 +15,12 @@ import {
   ShieldCheck,
   Package,
 } from "lucide-react";
+
 import { supabase } from "@/lib/supabase";
+
+/* =========================
+   PRODUCT
+========================= */
 
 type Product = {
   id: string;
@@ -24,18 +29,45 @@ type Product = {
   subcategory: string | null;
   brand: string | null;
   model: string | null;
+
   price: number | null;
   customer_price: number | null;
   cooperation_price: number | null;
+
   stock: number | null;
   unit: string | null;
   description: string | null;
+
   seller_id: string | null;
   status: string | null;
   slug: string | null;
+
   image_url: string | null;
+
   created_at: string | null;
 };
+
+/* =========================
+   PRODUCT IMAGE
+========================= */
+
+type ProductImage = {
+  product_id: string;
+  image_url: string;
+};
+
+/* =========================
+   STORE
+========================= */
+
+type StoreInfo = {
+  id: string;
+  name: string | null;
+};
+
+/* =========================
+   CATEGORIES
+========================= */
 
 const categories = [
   {
@@ -112,6 +144,10 @@ const categories = [
   },
 ];
 
+/* =========================
+   SELLERS
+========================= */
+
 const sellers = [
   {
     name: "مصالح ساختمانی سهند",
@@ -136,11 +172,33 @@ const sellers = [
   },
 ];
 
+/* =========================
+   PAGE
+========================= */
+
 export default function MaterialsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+
+  const [productImages, setProductImages] = useState<
+    Record<string, string[]>
+  >({});
+
+  const [selectedImages, setSelectedImages] = useState<
+    Record<string, string>
+  >({});
+
+  const [stores, setStores] = useState<Record<string, string>>({});
+
   const [search, setSearch] = useState("");
+
   const [city, setCity] = useState("همه شهرها");
-  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  const [loadingProducts, setLoadingProducts] =
+    useState(true);
+
+  /* =========================
+     LOAD PRODUCTS
+  ========================= */
 
   useEffect(() => {
     loadProducts();
@@ -150,7 +208,14 @@ export default function MaterialsPage() {
     try {
       setLoadingProducts(true);
 
-      const { data, error } = await supabase
+      /* =========================
+         1. PRODUCTS
+      ========================= */
+
+      const {
+        data,
+        error,
+      } = await supabase
         .from("products")
         .select(`
           id,
@@ -177,33 +242,339 @@ export default function MaterialsPage() {
         });
 
       if (error) {
-        console.error("MATERIALS PRODUCTS ERROR:", error);
+        console.error(
+          "MATERIALS PRODUCTS ERROR:",
+          error
+        );
+
         return;
       }
 
-      setProducts(data || []);
+      const loadedProducts: Product[] =
+        data || [];
+
+      setProducts(loadedProducts);
+
+      /* =========================
+         2. PRODUCT IMAGES
+         
+         جدول:
+         product_images
+
+         ستون‌ها:
+         product_id
+         image_url
+      ========================= */
+
+      const productIds =
+        loadedProducts.map(
+          (product) => product.id
+        );
+
+      if (productIds.length > 0) {
+        const {
+          data: imageData,
+          error: imageError,
+        } = await supabase
+          .from("product_images")
+          .select(
+            "product_id,image_url"
+          )
+          .in(
+            "product_id",
+            productIds
+          )
+          .order("id", {
+            ascending: true,
+          });
+
+        if (imageError) {
+          console.error(
+            "MATERIALS PRODUCT IMAGES ERROR:",
+            imageError
+          );
+        } else {
+          const imageMap: Record<
+            string,
+            string[]
+          > = {};
+
+          (
+            imageData || []
+          ).forEach(
+            (
+              image: ProductImage
+            ) => {
+              if (
+                !image.product_id ||
+                !image.image_url
+              ) {
+                return;
+              }
+
+              if (
+                !imageMap[
+                  image.product_id
+                ]
+              ) {
+                imageMap[
+                  image.product_id
+                ] = [];
+              }
+
+              imageMap[
+                image.product_id
+              ].push(
+                image.image_url
+              );
+            }
+          );
+
+          setProductImages(
+            imageMap
+          );
+
+          /* =========================
+             اولین عکس هر محصول
+          ========================= */
+
+          const selectedMap: Record<
+            string,
+            string
+          > = {};
+
+          loadedProducts.forEach(
+            (product) => {
+              const images =
+                imageMap[
+                  product.id
+                ] || [];
+
+              /*
+               * اولویت:
+               *
+               * 1. product_images
+               * 2. products.image_url
+               */
+
+              if (
+                images.length > 0
+              ) {
+                selectedMap[
+                  product.id
+                ] = images[0];
+              } else if (
+                product.image_url
+              ) {
+                selectedMap[
+                  product.id
+                ] =
+                  product.image_url;
+              }
+            }
+          );
+
+          setSelectedImages(
+            selectedMap
+          );
+        }
+      } else {
+        /*
+         * اگر هیچ product_images وجود نداشت
+         * از image_url جدول products استفاده می‌کنیم.
+         */
+
+        const selectedMap: Record<
+          string,
+          string
+        > = {};
+
+        loadedProducts.forEach(
+          (product) => {
+            if (
+              product.image_url
+            ) {
+              selectedMap[
+                product.id
+              ] =
+                product.image_url;
+            }
+          }
+        );
+
+        setSelectedImages(
+          selectedMap
+        );
+      }
+
+      /* =========================
+         3. STORES
+      ========================= */
+
+      const sellerIds = [
+        ...new Set(
+          loadedProducts
+            .map(
+              (product) =>
+                product.seller_id
+            )
+            .filter(Boolean)
+        ),
+      ];
+
+      if (
+        sellerIds.length > 0
+      ) {
+        const {
+          data: storeData,
+          error: storeError,
+        } =
+          await supabase
+            .from("stores")
+            .select(
+              "id,name"
+            )
+            .in(
+              "id",
+              sellerIds
+            );
+
+        if (storeError) {
+          console.error(
+            "MATERIALS STORE ERROR:",
+            storeError
+          );
+        }
+
+        const storeMap: Record<
+          string,
+          string
+        > = {};
+
+        (
+          storeData || []
+        ).forEach(
+          (
+            store: StoreInfo
+          ) => {
+            storeMap[
+              store.id
+            ] =
+              store.name ||
+              "فروشگاه";
+          }
+        );
+
+        setStores(
+          storeMap
+        );
+      }
     } catch (error) {
-      console.error("LOAD PRODUCTS ERROR:", error);
+      console.error(
+        "MATERIALS LOAD ERROR:",
+        error
+      );
     } finally {
       setLoadingProducts(false);
     }
   };
 
-  const filteredProducts = products.filter((product) => {
-    const query = search.trim().toLowerCase();
+  /* =========================
+     FILTER PRODUCTS
+  ========================= */
 
-    const matchesSearch =
-      query === "" ||
-      (product.name || "").toLowerCase().includes(query) ||
-      (product.category || "").toLowerCase().includes(query) ||
-      (product.subcategory || "").toLowerCase().includes(query) ||
-      (product.brand || "").toLowerCase().includes(query) ||
-      (product.model || "").toLowerCase().includes(query);
+  const filteredProducts =
+    products.filter(
+      (product) => {
+        const query =
+          search
+            .trim()
+            .toLowerCase();
 
-    const matchesCity = city === "همه شهرها";
+        const matchesSearch =
+          query === "" ||
+          (product.name ||
+            "")
+            .toLowerCase()
+            .includes(query) ||
+          (product.category ||
+            "")
+            .toLowerCase()
+            .includes(query) ||
+          (product.subcategory ||
+            "")
+            .toLowerCase()
+            .includes(query) ||
+          (product.brand ||
+            "")
+            .toLowerCase()
+            .includes(query) ||
+          (product.model ||
+            "")
+            .toLowerCase()
+            .includes(query) ||
+          (product.description ||
+            "")
+            .toLowerCase()
+            .includes(query);
 
-    return matchesSearch && matchesCity;
-  });
+        /*
+         * فعلاً چون جدول products
+         * فیلد city ندارد، فیلتر شهر
+         * فقط حالت همه شهرها را قبول می‌کند.
+         *
+         * ساختار قبلی دست‌نخورده باقی می‌ماند.
+         */
+
+        const matchesCity =
+          city ===
+          "همه شهرها";
+
+        return (
+          matchesSearch &&
+          matchesCity
+        );
+      }
+    );
+
+  /* =========================
+     PRODUCT MAIN IMAGE
+  ========================= */
+
+  const getProductImages = (
+    product: Product
+  ) => {
+    const images =
+      productImages[
+        product.id
+      ] || [];
+
+    /*
+     * اگر product_images تصویر داشت
+     * فقط همان‌ها.
+     */
+
+    if (
+      images.length > 0
+    ) {
+      return images;
+    }
+
+    /*
+     * اگر product_images تصویر نداشت
+     * image_url خود products.
+     */
+
+    if (
+      product.image_url
+    ) {
+      return [
+        product.image_url,
+      ];
+    }
+
+    return [];
+  };
 
   return (
     <main
@@ -329,7 +700,11 @@ export default function MaterialsPage() {
                   <input
                     type="text"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) =>
+                      setSearch(
+                        e.target.value
+                      )
+                    }
                     placeholder="نام محصول یا مصالح را جست‌وجو کنید..."
                     className="w-full bg-transparent text-sm text-slate-800 outline-none"
                   />
@@ -340,20 +715,38 @@ export default function MaterialsPage() {
 
                   <select
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    onChange={(e) =>
+                      setCity(
+                        e.target.value
+                      )
+                    }
                     className="w-full bg-transparent text-sm text-slate-700 outline-none"
                   >
-                    <option>تبریز</option>
-                    <option>تهران</option>
-                    <option>ارومیه</option>
-                    <option>زنجان</option>
-                    <option>همه شهرها</option>
+                    <option>
+                      همه شهرها
+                    </option>
+                    <option>
+                      تبریز
+                    </option>
+                    <option>
+                      تهران
+                    </option>
+                    <option>
+                      ارومیه
+                    </option>
+                    <option>
+                      زنجان
+                    </option>
                   </select>
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => setSearch(search.trim())}
+                  onClick={() =>
+                    setSearch(
+                      search.trim()
+                    )
+                  }
                   className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
                 >
                   جست‌وجو
@@ -361,44 +754,32 @@ export default function MaterialsPage() {
               </div>
             </div>
 
-            {/* محبوب */}
-
             <div className="mt-5 flex flex-wrap justify-center gap-2 text-xs text-blue-100">
               <span>
                 جست‌وجوهای محبوب:
               </span>
 
-              <button
-                type="button"
-                onClick={() => setSearch("کاشی ۶۰×۱۲۰")}
-                className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
-              >
-                کاشی ۶۰×۱۲۰
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSearch("سیمان")}
-                className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
-              >
-                سیمان
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSearch("میلگرد")}
-                className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
-              >
-                میلگرد
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSearch("پنجره UPVC")}
-                className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
-              >
-                پنجره UPVC
-              </button>
+              {[
+                "کاشی ۶۰×۱۲۰",
+                "سیمان",
+                "میلگرد",
+                "پنجره UPVC",
+              ].map(
+                (item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() =>
+                      setSearch(
+                        item
+                      )
+                    }
+                    className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-white/20"
+                  >
+                    {item}
+                  </button>
+                )
+              )}
             </div>
           </div>
         </div>
@@ -407,211 +788,317 @@ export default function MaterialsPage() {
       {/* ================= CATEGORIES ================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-16">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <span className="text-sm font-bold text-blue-700">
-              دسته‌بندی مصالح
-            </span>
+        <div className="mb-8">
+          <span className="text-sm font-bold text-blue-700">
+            دسته‌بندی مصالح
+          </span>
 
-            <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-              چه چیزی نیاز دارید؟
-            </h2>
+          <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+            چه چیزی نیاز دارید؟
+          </h2>
 
-            <p className="mt-3 text-sm text-slate-500">
-              دسته‌بندی مورد نظر خود را انتخاب کنید.
-            </p>
-          </div>
+          <p className="mt-3 text-sm text-slate-500">
+            دسته‌بندی مورد نظر خود را انتخاب کنید.
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {categories.map((category) => (
-            <Link
-              key={category.href}
-              href={category.href}
-              className="group rounded-3xl border border-slate-200 bg-white p-4 text-center transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
-            >
-              <div className="mx-auto h-24 w-full overflow-hidden rounded-2xl bg-slate-100">
-                <img
-                  src={category.image}
-                  alt={category.title}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
-                  loading="lazy"
-                />
-              </div>
+          {categories.map(
+            (category) => (
+              <Link
+                key={category.href}
+                href={
+                  category.href
+                }
+                className="group rounded-3xl border border-slate-200 bg-white p-4 text-center transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+              >
+                <div className="mx-auto h-24 w-full overflow-hidden rounded-2xl bg-slate-100">
+                  <img
+                    src={
+                      category.image
+                    }
+                    alt={
+                      category.title
+                    }
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                </div>
 
-              <h3 className="mt-4 text-sm font-black leading-6">
-                {category.title}
-              </h3>
+                <h3 className="mt-4 text-sm font-black leading-6">
+                  {category.title}
+                </h3>
 
-              <p className="mt-2 text-xs text-slate-400">
-                {category.count}
-              </p>
+                <p className="mt-2 text-xs text-slate-400">
+                  {category.count}
+                </p>
 
-              <div className="mt-3 flex items-center justify-center gap-1 text-xs font-bold text-blue-700 opacity-0 transition group-hover:opacity-100">
-                مشاهده دسته
-                <ArrowLeft className="h-3 w-3" />
-              </div>
-            </Link>
-          ))}
+                <div className="mt-3 flex items-center justify-center gap-1 text-xs font-bold text-blue-700 opacity-0 transition group-hover:opacity-100">
+                  مشاهده دسته
+                  <ArrowLeft className="h-3 w-3" />
+                </div>
+              </Link>
+            )
+          )}
         </div>
       </section>
 
-      {/* ================= PRODUCTS ================= */}
+      {/* ================= ALL PRODUCTS ================= */}
 
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-5">
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <span className="text-sm font-bold text-emerald-600">
-                محصولات
-              </span>
+          <div className="mb-8">
+            <span className="text-sm font-bold text-emerald-600">
+              محصولات سرچنو
+            </span>
 
-              <h2 className="mt-2 text-2xl font-black sm:text-3xl">
-                {search.trim()
-                  ? `نتایج جست‌وجوی «${search.trim()}»`
-                  : "تمام محصولات سرچنو"}
-              </h2>
+            <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+              تمام محصولات مصالح و تجهیزات
+            </h2>
 
-              <p className="mt-3 text-sm text-slate-500">
-                {loadingProducts
-                  ? "در حال دریافت محصولات..."
-                  : `${filteredProducts.length} محصول موجود است`}
-              </p>
-            </div>
-
-            <Link
-              href="/materials"
-              className="hidden text-sm font-bold text-blue-700 sm:block"
-            >
-              مشاهده همه ←
-            </Link>
+            <p className="mt-3 text-sm text-slate-500">
+              تمام محصولات تأییدشده موجود در بازار سرچنو
+              در این بخش نمایش داده می‌شوند.
+            </p>
           </div>
 
           {loadingProducts ? (
-            <div className="py-16 text-center text-sm text-slate-500">
-              در حال دریافت محصولات...
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 py-16 text-center">
-              <Package className="mx-auto h-12 w-12 text-slate-300" />
+            <div className="py-16 text-center">
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
 
-              <h3 className="mt-4 font-black">
+              <p className="mt-5 font-bold text-slate-500">
+                در حال دریافت محصولات...
+              </p>
+            </div>
+          ) : filteredProducts.length ===
+            0 ? (
+            <div className="rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
+                📦
+              </div>
+
+              <h3 className="mt-5 text-xl font-black">
                 محصولی پیدا نشد
               </h3>
 
               <p className="mt-2 text-sm text-slate-500">
-                عبارت جست‌وجوی دیگری را امتحان کنید.
+                در حال حاضر محصول تأییدشده‌ای مطابق جست‌وجوی شما وجود ندارد.
               </p>
             </div>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
-                >
-                  {/* ================= PRODUCT IMAGE ================= */}
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredProducts.map(
+                (product) => {
+                  const images =
+                    getProductImages(
+                      product
+                    );
 
-                  <Link
-                    href={
-                      product.slug
-                        ? `/products/${product.slug}`
-                        : "/materials"
-                    }
-                    className="block"
-                  >
-                    <div className="h-48 overflow-hidden bg-slate-100">
-                      {product.image_url ? (
-                        <img
-                          src={product.image_url}
-                          alt={product.name || "محصول سرچنو"}
-                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-slate-100">
-                          <Package className="h-16 w-16 text-slate-300" />
+                  const mainImage =
+                    selectedImages[
+                      product.id
+                    ] ||
+                    images[0] ||
+                    null;
+
+                  return (
+                    <div
+                      key={
+                        product.id
+                      }
+                      className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                    >
+                      {/* ================= IMAGE ================= */}
+
+                      <div className="bg-slate-100">
+                        {mainImage ? (
+                          <div className="relative flex h-64 w-full items-center justify-center bg-white">
+                            <img
+                              src={
+                                mainImage
+                              }
+                              alt={
+                                product.name ||
+                                "تصویر محصول"
+                              }
+                              className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex h-64 items-center justify-center bg-slate-100 text-6xl">
+                            📦
+                          </div>
+                        )}
+
+                        {/* ================= THUMBNAILS ================= */}
+
+                        {images.length >
+                          1 && (
+                          <div className="flex gap-2 overflow-x-auto border-t border-slate-200 bg-slate-50 p-3">
+                            {images.map(
+                              (
+                                imageUrl,
+                                imageIndex
+                              ) => (
+                                <button
+                                  key={`${product.id}-${imageIndex}`}
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedImages(
+                                      (
+                                        prev
+                                      ) => ({
+                                        ...prev,
+                                        [product.id]:
+                                          imageUrl,
+                                      })
+                                    )
+                                  }
+                                  className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition ${
+                                    mainImage ===
+                                    imageUrl
+                                      ? "border-blue-600 ring-2 ring-blue-100"
+                                      : "border-slate-200 hover:border-blue-400"
+                                  }`}
+                                >
+                                  <img
+                                    src={
+                                      imageUrl
+                                    }
+                                    alt={`${product.name || "محصول"} - تصویر ${imageIndex + 1}`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                </button>
+                              )
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ================= PRODUCT INFO ================= */}
+
+                      <div className="p-6">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                            {product.category ||
+                              "مصالح و تجهیزات"}
+                          </span>
+
+                          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                            <ShieldCheck className="h-3 w-3" />
+                            تأییدشده
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  </Link>
 
-                  <div className="p-5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                        {product.category || "مصالح ساختمانی"}
-                      </span>
+                        <h3 className="mt-4 text-lg font-black">
+                          {product.name ||
+                            "محصول بدون نام"}
+                        </h3>
 
-                      <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
-                        <Star className="h-4 w-4 fill-current" />
-                        —
+                        {product.brand && (
+                          <p className="mt-2 text-sm text-slate-500">
+                            برند:{" "}
+                            {product.brand}
+                          </p>
+                        )}
+
+                        {product.model && (
+                          <p className="mt-1 text-sm text-slate-500">
+                            مدل:{" "}
+                            {product.model}
+                          </p>
+                        )}
+
+                        {product.description && (
+                          <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
+                            {
+                              product.description
+                            }
+                          </p>
+                        )}
+
+                        {/* PRICE */}
+
+                        <div className="mt-5 rounded-2xl bg-slate-50 p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-bold text-slate-500">
+                              قیمت مشتری
+                            </span>
+
+                            <span className="font-black text-blue-700">
+                              {(
+                                product.customer_price ??
+                                product.price ??
+                                0
+                              ).toLocaleString(
+                                "fa-IR"
+                              )}{" "}
+                              تومان
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* STOCK */}
+
+                        <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm">
+                          <span className="font-bold text-slate-500">
+                            موجودی
+                          </span>
+
+                          <span className="font-black">
+                            {(
+                              product.stock ??
+                              0
+                            ).toLocaleString(
+                              "fa-IR"
+                            )}{" "}
+                            {product.unit ||
+                              ""}
+                          </span>
+                        </div>
+
+                        {/* STORE */}
+
+                        <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+                          <Building2 className="h-4 w-4" />
+
+                          {product.seller_id
+                            ? stores[
+                                product.seller_id
+                              ] ||
+                              "فروشگاه"
+                            : "فروشگاه نامشخص"}
+                        </div>
+
+                        <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
+                          <Star className="h-4 w-4 fill-current" />
+                          فروشنده تأییدشده
+                        </div>
+
+                        {/* DETAIL */}
+
+                        <Link
+                          href={
+                            product.slug
+                              ? `/materials/${product.category}/${product.slug}`
+                              : `/materials/${product.category || ""}`
+                          }
+                          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-700 transition hover:bg-blue-700 hover:text-white"
+                        >
+                          مشاهده جزئیات
+                          <ArrowLeft className="h-4 w-4" />
+                        </Link>
                       </div>
                     </div>
-
-                    <Link
-                      href={
-                        product.slug
-                          ? `/products/${product.slug}`
-                          : "/materials"
-                      }
-                    >
-                      <h3 className="mt-4 font-black transition hover:text-blue-700">
-                        {product.name || "محصول بدون نام"}
-                      </h3>
-                    </Link>
-
-                    {product.brand && (
-                      <p className="mt-2 text-sm text-slate-500">
-                        برند: {product.brand}
-                      </p>
-                    )}
-
-                    {product.model && (
-                      <p className="mt-1 text-sm text-slate-500">
-                        مدل: {product.model}
-                      </p>
-                    )}
-
-                    {product.price !== null && (
-                      <p className="mt-3 text-sm font-black text-blue-700">
-                        {product.price.toLocaleString("fa-IR")} تومان
-                      </p>
-                    )}
-
-                    {product.stock !== null && (
-                      <div className="mt-3 text-xs text-slate-400">
-                        موجودی: {product.stock.toLocaleString("fa-IR")}{" "}
-                        {product.unit || ""}
-                      </div>
-                    )}
-
-                    {product.status === "active" && (
-                      <div className="mt-3 flex items-center gap-2 text-xs font-bold text-emerald-600">
-                        <CheckCircle2 className="h-4 w-4" />
-                        محصول تأییدشده
-                      </div>
-                    )}
-
-                    <Link
-                      href={
-                        product.slug
-                          ? `/products/${product.slug}`
-                          : "/materials"
-                      }
-                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-700 transition hover:bg-blue-700 hover:text-white"
-                    >
-                      مشاهده جزئیات
-                      <ArrowLeft className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                  );
+                }
+              )}
             </div>
           )}
         </div>
       </section>
 
-      {/* ================= MARKETPLACE ================= */}
+      {/* ================= MARKETPLACE / SELLERS ================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-16">
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
@@ -637,11 +1124,19 @@ export default function MaterialsPage() {
                     همه دسته‌بندی‌ها
                   </option>
 
-                  {categories.map((category) => (
-                    <option key={category.href}>
-                      {category.title}
-                    </option>
-                  ))}
+                  {categories.map(
+                    (category) => (
+                      <option
+                        key={
+                          category.href
+                        }
+                      >
+                        {
+                          category.title
+                        }
+                      </option>
+                    )
+                  )}
                 </select>
               </div>
 
@@ -652,14 +1147,28 @@ export default function MaterialsPage() {
 
                 <select
                   value={city}
-                  onChange={(e) => setCity(e.target.value)}
+                  onChange={(e) =>
+                    setCity(
+                      e.target.value
+                    )
+                  }
                   className="mt-3 w-full rounded-xl bg-slate-50 px-4 py-3 text-sm outline-none"
                 >
-                  <option>همه شهرها</option>
-                  <option>تبریز</option>
-                  <option>تهران</option>
-                  <option>ارومیه</option>
-                  <option>زنجان</option>
+                  <option>
+                    همه شهرها
+                  </option>
+                  <option>
+                    تبریز
+                  </option>
+                  <option>
+                    تهران
+                  </option>
+                  <option>
+                    ارومیه
+                  </option>
+                  <option>
+                    زنجان
+                  </option>
                 </select>
               </div>
 
@@ -694,64 +1203,79 @@ export default function MaterialsPage() {
                 className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold"
               >
                 مرتب‌سازی
+
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>
 
             <div className="space-y-4">
-              {sellers.map((seller) => (
-                <div
-                  key={seller.name}
-                  className="rounded-3xl border border-slate-200 bg-white p-6 transition hover:border-blue-200 hover:shadow-lg"
-                >
-                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50">
-                      <Building2 className="h-8 w-8 text-blue-700" />
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-black">
-                          {seller.name}
-                        </h3>
-
-                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-                          <ShieldCheck className="h-3 w-3" />
-                          تأییدشده
-                        </span>
+              {sellers.map(
+                (seller) => (
+                  <div
+                    key={
+                      seller.name
+                    }
+                    className="rounded-3xl border border-slate-200 bg-white p-6 transition hover:border-blue-200 hover:shadow-lg"
+                  >
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50">
+                        <Building2 className="h-8 w-8 text-blue-700" />
                       </div>
 
-                      <p className="mt-2 text-sm text-slate-500">
-                        {seller.type}
-                      </p>
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-black">
+                            {
+                              seller.name
+                            }
+                          </h3>
 
-                      <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-400">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {seller.city}
-                        </span>
+                          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                            <ShieldCheck className="h-3 w-3" />
+                            تأییدشده
+                          </span>
+                        </div>
 
-                        <span className="flex items-center gap-1 text-amber-500">
-                          <Star className="h-4 w-4 fill-current" />
-                          {seller.rating}
-                        </span>
+                        <p className="mt-2 text-sm text-slate-500">
+                          {
+                            seller.type
+                          }
+                        </p>
 
-                        <span className="flex items-center gap-1">
-                          <Package className="h-4 w-4" />
-                          {seller.products}
-                        </span>
+                        <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-400">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            {
+                              seller.city
+                            }
+                          </span>
+
+                          <span className="flex items-center gap-1 text-amber-500">
+                            <Star className="h-4 w-4 fill-current" />
+                            {
+                              seller.rating
+                            }
+                          </span>
+
+                          <span className="flex items-center gap-1">
+                            <Package className="h-4 w-4" />
+                            {
+                              seller.products
+                            }
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    <button
-                      type="button"
-                      className="rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
-                    >
-                      مشاهده فروشگاه
-                    </button>
+                      <button
+                        type="button"
+                        className="rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+                      >
+                        مشاهده فروشگاه
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           </div>
         </div>
@@ -887,4 +1411,4 @@ export default function MaterialsPage() {
       </footer>
     </main>
   );
-} 
+}
