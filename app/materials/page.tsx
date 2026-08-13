@@ -195,6 +195,7 @@ export default function MaterialsPage() {
 
   const [loadingProducts, setLoadingProducts] =
     useState(true);
+ const [searchSubmitted, setSearchSubmitted] = useState(false);
 
   /* =========================
      LOAD PRODUCTS
@@ -741,16 +742,26 @@ export default function MaterialsPage() {
                 </div>
 
                 <button
-                  type="button"
-                  onClick={() =>
-                    setSearch(
-                      search.trim()
-                    )
-                  }
-                  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
-                >
-                  جست‌وجو
-                </button>
+  type="button"
+  onClick={() => {
+    const trimmedSearch = search.trim();
+
+    setSearch(trimmedSearch);
+    setSearchSubmitted(true);
+
+    setTimeout(() => {
+      document
+        .getElementById("products-section")
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+    }, 50);
+  }}
+  className="rounded-2xl bg-blue-700 px-10 py-4 text-sm font-black text-white transition hover:bg-blue-800"
+>
+  جست‌وجو
+</button>
               </div>
             </div>
 
@@ -845,7 +856,10 @@ export default function MaterialsPage() {
 
       {/* ================= ALL PRODUCTS ================= */}
 
-      <section className="bg-white py-16">
+     <section
+  id="products-section"
+  className="bg-white py-16"
+>
         <div className="mx-auto max-w-7xl px-5">
           <div className="mb-8">
             <span className="text-sm font-bold text-emerald-600">
