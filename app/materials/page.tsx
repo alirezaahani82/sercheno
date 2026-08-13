@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";\
 import Link from "next/link";
 import {
   Search,
@@ -12,6 +15,26 @@ import {
   ShieldCheck,
   Package,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+type Product = {
+  id: string;
+  name: string | null;
+  category: string | null;
+  subcategory: string | null;
+  brand: string | null;
+  model: string | null;
+  price: number | null;
+  customer_price: number | null;
+  cooperation_price: number | null;
+  stock: number | null;
+  unit: string | null;
+  description: string | null;
+  seller_id: string | null;
+  status: string | null;
+  slug: string | null;
+  created_at: string | null;
+};
+
 
 const categories = [
   {
@@ -88,45 +111,7 @@ const categories = [
   },
 ];
 
-const products = [
-  {
-    title: "کاشی پرسلان ۶۰×۱۲۰",
-    category: "سنگ، کاشی و سرامیک",
-    seller: "فروشگاه کاشی آذران",
-    city: "تبریز",
-    rating: "۴.۸",
-    verified: true,
-    image: "/materials/stone-tile.jpg",
-  },
-  {
-    title: "پنجره دوجداره UPVC",
-    category: "درب و پنجره",
-    seller: "پنجره‌سازی نوین",
-    city: "تبریز",
-    rating: "۴.۹",
-    verified: true,
-    image: "/materials/doors-windows.jpg",
-  },
-  {
-    title: "سیمان تیپ ۲",
-    category: "سیمان و بتن",
-    seller: "مصالح ساختمانی سهند",
-    city: "تبریز",
-    rating: "۴.۷",
-    verified: true,
-    image: "/materials/cement-concrete.jpg",
-  },
-  {
-    title: "میلگرد ساختمانی",
-    category: "آهن‌آلات و فولاد",
-    seller: "بازرگانی آهن آذربایجان",
-    city: "تبریز",
-    rating: "۴.۸",
-    verified: true,
-    image: "/materials/iron-steel.jpg",
-  },
-];
-
+\
 const sellers = [
   {
     name: "مصالح ساختمانی سهند",
@@ -152,6 +137,71 @@ const sellers = [
 ];
 
 export default function MaterialsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+const [search, setSearch] = useState("");
+const [city, setCity] = useState("همه شهرها");
+const [loadingProducts, setLoadingProducts] = useState(true);
+  useEffect(() => {
+  loadProducts();
+}, []);
+
+const loadProducts = async () => {
+  try {
+    setLoadingProducts(true);
+
+    const { data, error } = await supabase
+      .from("products")
+      .select(`
+        id,
+        name,
+        category,
+        subcategory,
+        brand,
+        model,
+        price,
+        customer_price,
+        cooperation_price,
+        stock,
+        unit,
+        description,
+        seller_id,
+        status,
+        slug,
+        created_at
+      `)
+      .eq("status", "active")
+      .order("created_at", {
+        ascending: false,
+      });
+
+    if (error) {
+      console.error("MATERIALS PRODUCTS ERROR:", error);
+      return;
+    }
+
+    setProducts(data || []);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoadingProducts(false);
+  }
+};
+  const filteredProducts = products.filter((product) => {
+  const query = search.trim().toLowerCase();
+
+  const matchesSearch =
+    query === "" ||
+    (product.name || "").toLowerCase().includes(query) ||
+    (product.category || "").toLowerCase().includes(query) ||
+    (product.subcategory || "").toLowerCase().includes(query) ||
+    (product.brand || "").toLowerCase().includes(query) ||
+    (product.model || "").toLowerCase().includes(query);
+
+  const matchesCity =
+    city === "همه شهرها";
+
+  return matchesSearch && matchesCity;
+});
   return (
     <main
       dir="rtl"
@@ -294,11 +344,13 @@ export default function MaterialsPage() {
 
                   <Search className="h-5 w-5 text-slate-400" />
 
-                  <input
-                    type="text"
-                    placeholder="نام محصول یا مصالح را جست‌وجو کنید..."
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
-                  />
+                 <input
+  type="text"
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  placeholder="نام محصول یا مصالح را جست‌وجو کنید..."
+  className="w-full bg-transparent text-sm text-slate-800 outline-none"
+/>
 
                 </div>
 
