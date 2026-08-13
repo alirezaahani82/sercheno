@@ -111,7 +111,7 @@ const categories = [
   },
 ];
 
-\
+ 
 const sellers = [
   {
     name: "مصالح ساختمانی سهند",
