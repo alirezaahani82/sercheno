@@ -476,6 +476,20 @@ function SupportNotification() {
 }
 
 export default function Home() {
+ const [search, setSearch] = useState("");
+const [city, setCity] = useState("تبریز");
+
+function handleSearch() {
+  const query = search.trim();
+
+  if (!query) {
+    window.location.href = "/materials";
+    return;
+  }
+
+  window.location.href =
+    `/materials?search=${encodeURIComponent(query)}&city=${encodeURIComponent(city)}`;
+}
   return (
     <main
       dir="rtl" 
@@ -614,17 +628,25 @@ export default function Home() {
                 <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4">
                   <span className="text-xl">🔍</span>
 
-                  <input
-                    type="text"
-                    placeholder="مثلاً سیمان، میلگرد، آسانسور، کاشی یا نصاب..."
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
-                  />
+                 <input
+  type="text"
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  }}
+  placeholder="مثلاً سیمان، میلگرد، آسانسور یا کاشی..."
+  className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+/>
                 </div>
 
-                <select
-                  className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none sm:w-44"
-                  defaultValue="تبریز"
-                >
+               <select
+  value={city}
+  onChange={(e) => setCity(e.target.value)}
+  className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none sm:w-44"
+>
                   <option value="تبریز">📍 تبریز</option>
                   <option value="تهران">تهران</option>
                   <option value="ارومیه">ارومیه</option>
@@ -633,11 +655,12 @@ export default function Home() {
                 </select>
 
                 <button
-                  type="button"
-                  className="rounded-2xl bg-blue-700 px-10 py-4 font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
-                >
-                  جست‌وجو
-                </button>
+  type="button"
+  onClick={handleSearch}
+  className="rounded-2xl bg-blue-700 px-10 py-4 font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
+>
+  جست‌وجو
+</button>
               </div>
             </div>
 
