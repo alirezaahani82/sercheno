@@ -198,6 +198,7 @@ const [stores, setStores] = useState<
 >({});
   const [search, setSearch] = useState("");
  useEffect(() => {
+  const [city, setCity] = useState("همه شهرها");
   const params = new URLSearchParams(window.location.search);
   const q = params.get("q");
 
@@ -214,13 +215,6 @@ const [stores, setStores] = useState<
     }, 300);
   }
 }, []);
-
-  {product.seller_id
-  ? stores[
-      product.seller_id
-    ]?.name ||
-    "فروشگاه"
-  : "فروشگاه نامشخص"}
 
   const [loadingProducts, setLoadingProducts] =
     useState(true);
