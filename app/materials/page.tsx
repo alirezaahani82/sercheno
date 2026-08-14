@@ -190,6 +190,23 @@ export default function MaterialsPage() {
   const [stores, setStores] = useState<Record<string, string>>({});
 
   const [search, setSearch] = useState("");
+ useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get("q");
+
+  if (q) {
+    setSearch(q);
+
+    setTimeout(() => {
+      document
+        .getElementById("products-section")
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+    }, 300);
+  }
+}, []);
 
   const [city, setCity] = useState("همه شهرها");
 
