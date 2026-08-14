@@ -196,12 +196,13 @@ export default function MaterialsPage() {
 const [stores, setStores] = useState<
   Record<string, StoreData>
 >({});
-  const [search, setSearch] = useState("");
- useEffect(() => {
-  const [city, setCity] = useState("همه شهرها");
+
+const [search, setSearch] = useState("");
+const [city, setCity] = useState("همه شهرها");
+
+useEffect(() => {
   const params = new URLSearchParams(window.location.search);
   const q = params.get("q");
-
   if (q) {
     setSearch(q);
 
