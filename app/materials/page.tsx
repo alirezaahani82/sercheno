@@ -188,8 +188,14 @@ export default function MaterialsPage() {
     Record<string, string>
   >({});
 
-  const [stores, setStores] = useState<Record<string, string>>({});
+ type StoreData = {
+  name: string;
+  city: string;
+};
 
+const [stores, setStores] = useState<
+  Record<string, StoreData>
+>({});
   const [search, setSearch] = useState("");
  useEffect(() => {
   const params = new URLSearchParams(window.location.search);
@@ -465,28 +471,30 @@ export default function MaterialsPage() {
           );
         }
 
-        const storeMap: Record<
-          string,
-          string
-        > = {};
+       const storeMap: Record<
+  string,
+  StoreData
+> = {};
 
-        (
-          storeData || []
-        ).forEach(
-          (
-            store: StoreInfo
-          ) => {
-            storeMap[
-              store.id
-            ] =
-              store.name ||
-              "فروشگاه";
-          }
-        );
+(
+  storeData || []
+).forEach(
+  (
+    store: StoreInfo
+  ) => {
+    storeMap[store.id] = {
+      name:
+        store.name ||
+        "فروشگاه",
 
-        setStores(
-          storeMap
-        );
+      city:
+        store.city ||
+        "",
+    };
+  }
+);
+
+setStores(storeMap);
       }
     } catch (error) {
       console.error(
@@ -1095,11 +1103,11 @@ export default function MaterialsPage() {
                           <Building2 className="h-4 w-4" />
 
                           {product.seller_id
-                            ? stores[
-                                product.seller_id
-                              ] ||
-                              "فروشگاه"
-                            : "فروشگاه نامشخص"}
+  ? stores[
+      product.seller_id
+    ]?.name ||
+    "فروشگاه"
+  : "فروشگاه نامشخص"}
                         </div>
 
                         <div className="mt-3 flex items-center gap-1 text-xs text-amber-500">
