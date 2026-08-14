@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
+ 
 type Product = {
   id: string;
   name: string | null;
