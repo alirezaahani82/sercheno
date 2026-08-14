@@ -215,7 +215,12 @@ const [stores, setStores] = useState<
   }
 }, []);
 
-  const [city, setCity] = useState("همه شهرها");
+  {product.seller_id
+  ? stores[
+      product.seller_id
+    ]?.name ||
+    "فروشگاه"
+  : "فروشگاه نامشخص"}
 
   const [loadingProducts, setLoadingProducts] =
     useState(true);
