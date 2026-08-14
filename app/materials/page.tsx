@@ -554,9 +554,10 @@ setStores(storeMap);
          */
 
         const matchesCity =
-          city ===
-          "همه شهرها";
-
+  city === "همه شهرها" ||
+  (product.seller_id
+    ? stores[product.seller_id]?.city === city
+    : false);
         return (
           matchesSearch &&
           matchesCity
