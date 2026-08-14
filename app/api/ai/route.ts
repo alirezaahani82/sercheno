@@ -29,6 +29,7 @@ export async function GET() {
   });
 }
 export async function POST(request: Request) {
+  console.log("AI POST REACHED");
   try {
     const body = await request.json();
 
