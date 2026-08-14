@@ -63,6 +63,7 @@ type ProductImage = {
 type StoreInfo = {
   id: string;
   name: string | null;
+  city: string | null;
 };
 
 /* =========================
@@ -450,7 +451,7 @@ export default function MaterialsPage() {
           await supabase
             .from("stores")
             .select(
-              "id,name"
+              "id,name,city"
             )
             .in(
               "id",
