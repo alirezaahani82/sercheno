@@ -191,7 +191,7 @@ function SupportChat() {
   const [repliedAt, setRepliedAt] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+    e.entDefault();
 
     if (
       !userName.trim() ||
@@ -476,8 +476,54 @@ function SupportNotification() {
 }
 
 export default function Home() {
- const [search, setSearch] = useState("");
-const [city, setCity] = useState("تبریز");
+  const [search, setSearch] = useState("");
+  const [city, setCity] = useState("تبریز");
+
+  const [aiQuestion, setAiQuestion] = useState("");
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+   async function askSerchenoAI() {
+    const question = aiQuestion.trim();
+
+    if (!question) {
+      return;
+    }
+
+    setAiLoading(true);
+    setAiError("");
+    setAiAnswer("");
+
+    try {
+      const response = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: question,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "خطا در دریافت پاسخ"
+        );
+      }
+
+      setAiAnswer(data.answer || "");
+    } catch (error) {
+      console.error("SERCHENO AI FRONTEND ERROR:", error);
+
+      setAiError(
+        "در ارتباط با هوش مصنوعی سرچنو خطایی رخ داد. لطفاً دوباره تلاش کنید."
+      );
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
 function handleSearch() {
   const query = search.trim();
@@ -973,44 +1019,66 @@ function handleSearch() {
         </div>
 
         <form
-          className="mt-5"
-          onSubmit={(e) => {
-            e.preventDefault();
+  className="mt-5"
+  onSubmit={(e) => {
+    e.preventDefault();
+    askSerchenoAI();
+  }}
+>
+  <textarea
+    name="ai-question"
+    value={aiQuestion}
+    onChange={(e) => setAiQuestion(e.target.value)}
+    rows={5}
+    placeholder="مثلاً برای ساخت یک ساختمان ۴ طبقه با ۸ واحد چه مصالحی نیاز دارم؟"
+    className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 text-slate-800 outline-none transition focus:ring-2 focus:ring-blue-600"
+    disabled={aiLoading}
+  />
 
-            const form = e.currentTarget;
+  <button
+    type="submit"
+    disabled={aiLoading || !aiQuestion.trim()}
+    className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 py-4 text-sm font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    {aiLoading ? (
+      <>
+        ⏳
+        در حال بررسی سؤال شما...
+      </>
+    ) : (
+      <>
+        🤖 پرسیدن از AI SERCHENO
+        <span>←</span>
+      </>
+    )}
+  </button>
+</form>
+       {aiError && (
+  <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-7 text-red-700">
+    {aiError}
+  </div>
+)}
 
-            const input =
-              form.elements.namedItem("ai-question") as HTMLTextAreaElement;
+{aiAnswer && (
+  <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+    <div className="mb-3 flex items-center gap-2 text-sm font-black text-blue-800">
+      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-700 text-white">
+        🤖
+      </span>
 
-            if (!input.value.trim()) return;
+      پاسخ هوش مصنوعی سرچنو
+    </div>
 
-            alert(
-              "سؤال شما ثبت شد. موتور هوش مصنوعی سرچنو به‌زودی فعال می‌شود."
-            );
+    <div className="whitespace-pre-wrap text-sm leading-8 text-slate-700">
+      {aiAnswer}
+    </div>
+  </div>
+)}
 
-            input.value = "";
-          }}
-        >
-          <textarea
-            name="ai-question"
-            rows={5}
-            placeholder="مثلاً برای ساخت یک ساختمان ۴ طبقه با ۸ واحد چه مصالحی نیاز دارم؟"
-            className="w-full resize-none rounded-2xl bg-slate-100 p-4 text-sm leading-7 text-slate-800 outline-none transition focus:ring-2 focus:ring-blue-600"
-          />
-
-          <button
-            type="submit"
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 py-4 text-sm font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
-          >
-            🤖 پرسیدن از AI SERCHENO
-            <span>←</span>
-          </button>
-        </form>
-
-        <p className="mt-4 text-center text-[11px] leading-5 text-slate-400">
-          هوش مصنوعی سرچنو در حال توسعه است و در نسخه آینده به داده‌های
-          واقعی محصولات، قیمت‌ها و متخصصان سرچنو متصل خواهد شد.
-        </p>
+       <p className="mt-4 text-center text-[11px] leading-5 text-slate-400">
+  پاسخ‌های مربوط به قیمت محصولات بر اساس اطلاعات به‌روز محصولات
+  فعال سرچنو ارائه می‌شوند. قیمت همکاری برای کاربران عمومی قابل نمایش نیست.
+</p>
       </div>
 
     </div>
