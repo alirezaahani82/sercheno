@@ -191,7 +191,7 @@ function SupportChat() {
   const [repliedAt, setRepliedAt] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.entDefault();
+    e.preventDefault();
 
     if (
       !userName.trim() ||
