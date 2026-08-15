@@ -1461,7 +1461,7 @@ function handleSearch() {
             </p>
 
             <p className="mt-1">
-              مؤسس: علیرضا آهنی
+              مؤسس: نیما آهنی
             </p>
           </div>
         </div>
