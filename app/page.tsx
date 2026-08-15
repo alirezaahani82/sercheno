@@ -558,7 +558,7 @@ function handleSearch() {
               </div>
 
               <div className="text-xs text-slate-500">
-                بازار هوشمند ساخت‌وساز
+                 بازار هوشمند ساخت‌وساز سرچنو
               </div>
             </div>
           </Link>
