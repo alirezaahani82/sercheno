@@ -582,6 +582,24 @@ function handleSearch() {
           </nav>
 
           <div className="flex items-center gap-2">
+           {/* دانلود اپلیکیشن اندروید سرچنو */}
+<a
+  href="https://drive.google.com/uc?export=download&id=1CuC1wRW-3b5tFxBP9ccIj4B9CAZ8wWcT"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-emerald-700"
+  title="دانلود اپلیکیشن سرچنو برای اندروید"
+>
+  <span className="text-xl">📱</span>
+
+  <span className="hidden md:inline">
+    دانلود اپلیکیشن سرچنو برای اندروید
+  </span>
+
+  <span className="md:hidden">
+    اپ سرچنو
+  </span>
+</a>
             <Link
               href="/cart"
               className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
