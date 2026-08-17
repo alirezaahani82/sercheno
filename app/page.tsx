@@ -773,7 +773,7 @@ function handleSearch() {
 
       {/* Quick Actions */}
       
-      <section className="relative z-10 mx-auto -mt-8 max-w-6xl px-5">
+      <section className="relative z-10 mx-auto mt-10 max-w-6xl px-5">
         <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl sm:grid-cols-2">
           {/* Store */}
           <Link
