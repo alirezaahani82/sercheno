@@ -544,16 +544,16 @@ function handleSearch() {
      <SupportNotification />
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 sm:px-5 sm:py-3">
           <Link href="/" className="flex items-center gap-3">
             <img
               src="/logo.png"
               alt="لوگوی سرچنو"
-              className="h-12 w-12 rounded-2xl object-contain"
+              className="h-10 w-10 rounded-xl object-contain sm:h-11 sm:w-11"
             />
 
             <div>
-              <div className="text-2xl font-black tracking-tight text-blue-700">
+              <div className="text-xl font-black tracking-tight text-blue-700 sm:text-2xl">
                 سرچنو
               </div>
 
@@ -581,44 +581,38 @@ function handleSearch() {
             </Link>
           </nav>
 
-         <div className="flex flex-col items-end gap-2">
-            <Link
-              href="/cart"
-              className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-xl transition hover:bg-blue-50 hover:text-blue-700"
-              title="سبد خرید"
-            >
-              🛒
+        <div className="flex items-center gap-2 sm:gap-3">
 
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-[10px] font-black text-white">
-                0
-              </span>
-            </Link>
+  {/* سبد خرید */}
+  <Link
+    href="/cart"
+    className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-lg transition hover:bg-blue-50 hover:text-blue-700 sm:h-11 sm:w-11 sm:text-xl"
+    title="سبد خرید"
+  >
+    🛒
 
-            <Link
-              href="/login"
-              className="hidden rounded-xl px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 sm:block"
-            >
-              ورود
-            </Link>
+    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-[10px] font-black text-white">
+      0
+    </span>
+  </Link>
 
-            <Link
-              href="/register"
-              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
-            >
-              ثبت‌نام
-            </Link>
-          {/* دانلود اپلیکیشن سرچنو */}
-<a
-  href="https://drive.google.com/uc?export=download&id=1CuC1wRW-3b5tFxBP9ccIj4B9CAZ8wWcT"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:bg-emerald-700"
-  title="دانلود اپلیکیشن سرچنو برای اندروید"
->
-  <span className="text-lg">📱</span>
-  <span>دانلود اپلیکیشن سرچنو برای اندروید</span>
-</a>
-          </div>
+  {/* ورود */}
+  <Link
+    href="/login"
+    className="rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 sm:px-4 sm:text-sm"
+  >
+    ورود
+  </Link>
+
+  {/* ثبت نام */}
+  <Link
+    href="/register"
+    className="rounded-xl bg-blue-700 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 sm:px-5 sm:py-3 sm:text-sm"
+  >
+    ثبت‌نام
+  </Link>
+
+</div>
         </div>
       </header>
 
@@ -644,11 +638,31 @@ function handleSearch() {
         <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-5 py-24 lg:py-32">
-          <div className="mx-auto max-w-5xl text-center text-white">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur-md">
-              <span>🚀</span>
-              <span>همه چیز برای ساخت‌وساز، در یکجا</span>
-            </div>
+         <div className="mx-auto max-w-5xl text-center text-white">
+
+  {/* دانلود اپلیکیشن */}
+  <a
+    href="https://drive.google.com/uc?export=download&id=1CuC1wRW-3b5tFxBP9ccIj4B9CAZ8wWcT"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="mx-auto mb-5 flex w-fit items-center justify-center gap-3 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-black text-white shadow-xl shadow-emerald-950/30 transition hover:-translate-y-1 hover:bg-emerald-500"
+    title="دانلود اپلیکیشن سرچنو برای اندروید"
+  >
+    <span className="text-xl">📱</span>
+
+    <span>
+      دانلود اپلیکیشن سرچنو برای اندروید
+    </span>
+  </a>
+
+  {/* شعار */}
+  <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm backdrop-blur-md">
+    <span>🚀</span>
+
+    <span>
+      همه چیز برای ساخت‌وساز، در یکجا
+    </span>
+  </div>
 
             <h1 className="text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
               هر چیزی برای ساختن،
