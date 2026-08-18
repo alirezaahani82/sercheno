@@ -34,7 +34,7 @@ type IconName =
   | "plus"
   | "message";
 
-function Icon({
+Icon({
   name,
   size = 22,
   strokeWidth = 1.8,
@@ -446,7 +446,7 @@ const popularServices = [
    SUPPORT CHAT
 ========================================================= */
 
-function SupportChat() {
+SupportChat() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -666,87 +666,19 @@ useEffect(() => {
    SUPPORT NOTIFICATION
 ========================================================= */
 
-function SupportNotification() {
-  const [hasNewMessage, setHasNewMessage] = useState(false);
-  const [phone, setPhone] = useState("");
-
- useEffect(() => {
-  async function loadReply() {
-    try {
-      const savedPhone =
-        localStorage.getItem("sercheno_support_phone");
-
-      if (savedPhone === null || savedPhone.trim() === "") {
-        return;
-      }
-
-      const response = await fetch(
-        `/api/support?phone=${encodeURIComponent(savedPhone)}`
-      );
-
-      if (!response.ok) return;
-
-      const data = await response.json();
-
-      if (data.data) {
-        setAdminReply(data.data.admin_reply || "");
-        setRepliedAt(data.data.replied_at || "");
-      }
-    } catch (error) {
-      console.error("LOAD SUPPORT REPLY ERROR:", error);
-    }
-  }
-
-  loadReply();
-
-  const interval = setInterval(loadReply, 15000);
-
-  return () => clearInterval(interval);
-}, []);
-
-    checkMessage();
-
-    const interval = setInterval(checkMessage, 15000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  if (!hasNewMessage || !phone) {
-    return null;
-  }
-
-  function openSupport() {
-    window.dispatchEvent(
-      new Event("open-sercheno-support")
-    );
-
-    setHasNewMessage(false);
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={openSupport}
-      className="fixed right-4 top-24 z-[999] flex items-center gap-3 rounded-2xl border border-blue-100 bg-white px-4 py-3 text-right shadow-2xl sm:right-5"
-    >
-      <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-        <Icon name="bell" size={21} />
-
-        <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white" />
-      </div>
-
-      <div>
-        <div className="text-sm font-black text-slate-900">
-          پیام جدید دارید
-        </div>
-
-        <div className="mt-1 text-xs text-slate-500">
-          پاسخ پشتیبانی سرچنو
-        </div>
-      </div>
-    </button>
-  );
-}
+Error: Turbopack build failed with 1 errors:
+./app/page.tsx:712:4
+Expression expected
+  710 |
+  711 |     return () => clearInterval(interval);
+> 712 |   }, []);
+      |    ^
+  713 |
+  714 |   if (!hasNewMessage || !phone) {
+  715 |     return null;
+Parsing ecmascript source code failed
+    at <unknown> (./app/page.tsx:712:4)
+Error: Command "npm run build" exited with 1
 
 /* =========================================================
    HOME
