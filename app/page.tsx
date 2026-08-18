@@ -663,32 +663,39 @@ function SupportNotification() {
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [phone, setPhone] = useState("");
 
-  useEffect(() => {
-    const savedPhone = localStorage.getItem(
-      "sercheno_support_phone"
-    );
+ useEffect(() => {
+  async function loadReply() {
+    try {
+      const savedPhone =
+        localStorage.getItem("sercheno_support_phone");
 
-    if (!savedPhone) return;
-
-    setPhone(savedPhone);
-
-    async function checkMessage() {
-      try {
-        const response = await fetch(
-          `/api/support?phone=${encodeURIComponent(savedPhone)}`
-        );
-
-        if (!response.ok) return;
-
-        const data = await response.json();
-
-        if (data.hasNewMessage) {
-          setHasNewMessage(true);
-        }
-      } catch (error) {
-        console.error("SUPPORT NOTIFICATION ERROR:", error);
+      if (savedPhone === null || savedPhone.trim() === "") {
+        return;
       }
+
+      const response = await fetch(
+        `/api/support?phone=${encodeURIComponent(savedPhone)}`
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (data.data) {
+        setAdminReply(data.data.admin_reply || "");
+        setRepliedAt(data.data.replied_at || "");
+      }
+    } catch (error) {
+      console.error("LOAD SUPPORT REPLY ERROR:", error);
     }
+  }
+
+  loadReply();
+
+  const interval = setInterval(loadReply, 15000);
+
+  return () => clearInterval(interval);
+}, []);
 
     checkMessage();
 
