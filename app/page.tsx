@@ -516,39 +516,46 @@ function SupportChat() {
     };
   }, []);
 
-  useEffect(() => {
-    async function loadReply() {
-      try {
-        const savedPhone = localStorage.getItem(
-          "sercheno_support_phone"
-        );
+useEffect(() => {
+  const savedPhone =
+    localStorage.getItem("sercheno_support_phone");
 
-        if (!savedPhone) return;
+  if (typeof savedPhone !== "string" || !savedPhone.trim()) {
+    return;
+  }
 
-        const response = await fetch(
-          `/api/support?phone=${encodeURIComponent(savedPhone)}`
-        );
+  setPhone(savedPhone);
 
-        if (!response.ok) return;
+  async function checkMessage() {
+    try {
+      const response = await fetch(
+        `/api/support?phone=${encodeURIComponent(savedPhone)}`
+      );
 
-        const data = await response.json();
+      if (!response.ok) return;
 
-        if (data.data) {
-          setAdminReply(data.data.admin_reply || "");
-          setRepliedAt(data.data.replied_at || "");
-        }
-      } catch (error) {
-        console.error("LOAD SUPPORT REPLY ERROR:", error);
+      const data = await response.json();
+
+      if (data.hasNewMessage) {
+        setHasNewMessage(true);
       }
+    } catch (error) {
+      console.error(
+        "SUPPORT NOTIFICATION ERROR:",
+        error
+      );
     }
+  }
 
-    loadReply();
+  checkMessage();
 
-    const interval = setInterval(loadReply, 15000);
+  const interval = setInterval(
+    checkMessage,
+    15000
+  );
 
-    return () => clearInterval(interval);
-  }, []);
-
+  return () => clearInterval(interval);
+}, []);
   return (
     <>
       <button
