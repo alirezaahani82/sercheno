@@ -470,7 +470,7 @@ const [hasNewMessage, setHasNewMessage] = useState(false);
     try {
       const res = await fetch("/api/support", {
         method: "POST",
-        s: {
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
