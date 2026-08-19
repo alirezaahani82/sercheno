@@ -855,14 +855,34 @@ export default function Home() {
           <div className="border-t border-slate-100 bg-white px-4 py-4 lg:hidden">
             <nav className="space-y-1">
               {[
-                ["خانه", "/"],
-                ["مصالح و تجهیزات", "/materials"],
-                ["خدمات ساختمانی", "/service"],
-                ["مناقصات", "/tenders"],
-                ["درباره سرچنو", "/about"],
-                ["ورود", "/login"],
-                ["ثبت‌نام", "/register"],
-              ].map(([title, href]) => (
+  ["خانه", "/"],
+  ["مصالح و تجهیزات", "/materials"],
+  ["خدمات ساختمانی", "/service"],
+  ["مناقصات", "/tenders"],
+  ["درباره سرچنو", "/about"],
+  ["ورود", "/login"],
+  ["ثبت‌نام", "/register"],
+  ["دانلود اپلیکیشن سرچنو", "DOWNLOAD_APP"],
+].map(([title, href]) => (
+  href === "DOWNLOAD_APP" ? (
+    <a
+      key={href}
+      href="https://drive.google.com/uc?export=download&id=1CuC1wRW-3b5tFxBP9ccIj4B9CAZ8wWcT"
+      className="block rounded-xl px-4 py-3 text-sm font-bold transition hover:bg-blue-50 hover:text-blue-700"
+    >
+      دانلود اپلیکیشن سرچنو
+    </a>
+  ) : (
+    <Link
+      key={href}
+      href={href}
+      onClick={() => setMobileMenu(false)}
+      className="block rounded-xl px-4 py-3 text-sm font-bold transition hover:bg-slate-50 hover:text-blue-700"
+    >
+      {title}
+    </Link>
+  )
+))
                 <Link
                   key={href}
                   href={href}
