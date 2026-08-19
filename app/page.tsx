@@ -668,20 +668,6 @@ useEffect(() => {
    SUPPORT NOTIFICATION
 ========================================================= */
 
-Error: Turbopack build failed with 1 errors:
-./app/page.tsx:712:4
-Expression expected
-  710 |
-  711 |     return () => clearInterval(interval);
-> 712 |   }, []);
-      |    ^
-  713 |
-  714 |   if (!hasNewMessage || !phone) {
-  715 |     return null;
-Parsing ecmascript source code failed
-    at <unknown> (./app/page.tsx:712:4)
-Error: Command "npm run build" exited with 1
-
 /* =========================================================
    HOME
 ========================================================= */
@@ -754,7 +740,6 @@ export default function Home() {
       dir="rtl"
       className="min-h-screen bg-slate-50 text-slate-900"
     >
-      <SupportNotification />
 
       {/* =====================================================
           HEADER
