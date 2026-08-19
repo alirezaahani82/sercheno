@@ -21,6 +21,7 @@ type IconName =
   | "robot"
   | "bell"
   | "building"
+  | "store"
   | "shield"
   | "truck"
   | "check"
