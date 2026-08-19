@@ -470,7 +470,7 @@ const [hasNewMessage, setHasNewMessage] = useState(false);
     try {
       const res = await fetch("/api/support", {
         method: "POST",
-        headers: {
+        s: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -697,7 +697,7 @@ export default function Home() {
     try {
       const response = await fetch("/api/ai", {
         method: "POST",
-        headers: {
+        s: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -744,10 +744,10 @@ export default function Home() {
     >
 
       {/* =====================================================
-          HEADER
+          
       ===================================================== */}
 
-      <<header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
   <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6">
 
     {/* Logo */}
