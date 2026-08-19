@@ -13,7 +13,7 @@ type IconName =
   | "location"
   | "cart"
   | "user"
-  | "store"
+  | "tore"
   | "worker"
   | "arrow"
   | "chevron"
@@ -697,7 +697,7 @@ export default function Home() {
     try {
       const response = await fetch("/api/ai", {
         method: "POST",
-        s: {
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
