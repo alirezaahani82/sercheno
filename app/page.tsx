@@ -34,7 +34,7 @@ type IconName =
   | "plus"
   | "message";
 
-Icon({
+function Icon({
   name,
   size = 22,
   strokeWidth = 1.8,
@@ -446,7 +446,7 @@ const popularServices = [
    SUPPORT CHAT
 ========================================================= */
 
-SupportChat() {
+function SupportChat() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -454,6 +454,8 @@ SupportChat() {
   const [userPhone, setUserPhone] = useState("");
   const [adminReply, setAdminReply] = useState("");
   const [repliedAt, setRepliedAt] = useState("");
+   const [phone, setPhone] = useState<string | null>(null);
+const [hasNewMessage, setHasNewMessage] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
