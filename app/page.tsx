@@ -747,142 +747,148 @@ export default function Home() {
           HEADER
       ===================================================== */}
 
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-3"
-          >
-            <img
-              src="/logo.png"
-              alt="لوگوی سرچنو"
-              className="h-10 w-10 object-contain sm:h-11 sm:w-11"
-            />
+      <<header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
+  <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6">
 
-            <div>
-              <div className="text-xl font-black tracking-tight text-blue-700 sm:text-2xl">
-                سرچنو
-              </div>
+    {/* Logo */}
+    <Link
+      href="/"
+      className="flex items-center gap-3"
+    >
+      <img
+        src="/logo.png"
+        alt="لوگوی سرچنو"
+        className="h-10 w-10 object-contain sm:h-11 sm:w-11"
+      />
 
-              <div className="hidden text-[10px] font-medium text-slate-400 sm:block">
-                بازار هوشمند ساخت‌وساز
-              </div>
-            </div>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-7 text-sm font-medium lg:flex">
-            <Link
-              href="/"
-              className="font-black text-blue-700"
-            >
-              خانه
-            </Link>
-
-            <Link
-              href="/materials"
-              className="transition hover:text-blue-700"
-            >
-              مصالح و تجهیزات
-            </Link>
-
-            <Link
-              href="/service"
-              className="transition hover:text-blue-700"
-            >
-              خدمات ساختمانی
-            </Link>
-
-            <Link
-              href="/tenders"
-              className="transition hover:text-blue-700"
-            >
-              مناقصات
-            </Link>
-
-            <Link
-              href="/about"
-              className="transition hover:text-blue-700"
-            >
-              درباره سرچنو
-            </Link>
-          </nav>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Link
-              href="/cart"
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
-              title="سبد خرید"
-            >
-              <Icon name="cart" size={21} />
-
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-[10px] font-black text-white">
-                0
-              </span>
-            </Link>
-
-            <Link
-              href="/login"
-              className="hidden rounded-xl px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100 sm:block"
-            >
-              ورود
-            </Link>
-
-            <Link
-              href="/register"
-              className="hidden rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 sm:block"
-            >
-              ثبت‌نام
-            </Link>
-
-            <button
-              type="button"
-              onClick={() => setMobileMenu(!mobileMenu)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 lg:hidden"
-            >
-              <Icon
-                name={mobileMenu ? "close" : "menu"}
-                size={21}
-              />
-            </button>
-          </div>
+      <div>
+        <div className="text-xl font-black tracking-tight text-blue-700 sm:text-2xl">
+          سرچنو
         </div>
 
-        {/* Mobile menu */}
-        {mobileMenu && (
-          <div className="border-t border-slate-100 bg-white px-4 py-4 lg:hidden">
-           <nav className="space-y-1">
-  {[
-    ["خانه", "/"],
-    ["مصالح و تجهیزات", "/materials"],
-    ["خدمات ساختمانی", "/service"],
-    ["مناقصات", "/tenders"],
-    ["درباره سرچنو", "/about"],
-    ["ورود", "/login"],
-    ["ثبت‌نام", "/register"],
-  ].map(([title, href]) => (
-    <Link
-      key={href}
-      href={href}
-      onClick={() => setMobileMenu(false)}
-      className="block rounded-xl px-4 py-3 text-sm font-bold transition hover:bg-slate-50 hover:text-blue-700"
-    >
-      {title}
+        <div className="hidden text-[10px] font-medium text-slate-400 sm:block">
+          بازار هوشمند ساخت‌وساز
+        </div>
+      </div>
     </Link>
-  ))}
 
-  {/* دانلود اپلیکیشن سرچنو */}
-  <a
-    href="https://drive.google.com/uc?export=download&id=1CuC1wRW-3b5tFxBP9ccIj4B9CAZ8wWcT"
-    className="mt-2 block rounded-xl bg-blue-50 px-4 py-3 text-sm font-black text-blue-700 transition hover:bg-blue-100"
-  >
-    دانلود اپلیکیشن سرچنو
-  </a>
-</nav>
-      </header>
+    {/* Desktop Navigation */}
+    <nav className="hidden items-center gap-7 text-sm font-medium lg:flex">
+      <Link
+        href="/"
+        className="font-black text-blue-700"
+      >
+        خانه
+      </Link>
 
+      <Link
+        href="/materials"
+        className="transition hover:text-blue-700"
+      >
+        مصالح و تجهیزات
+      </Link>
+
+      <Link
+        href="/service"
+        className="transition hover:text-blue-700"
+      >
+        خدمات ساختمانی
+      </Link>
+
+      <Link
+        href="/tenders"
+        className="transition hover:text-blue-700"
+      >
+        مناقصات
+      </Link>
+
+      <Link
+        href="/about"
+        className="transition hover:text-blue-700"
+      >
+        درباره سرچنو
+      </Link>
+    </nav>
+
+    {/* Actions */}
+    <div className="flex items-center gap-2">
+
+      <Link
+        href="/cart"
+        className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
+        title="سبد خرید"
+      >
+        <Icon name="cart" size={21} />
+
+        <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-[10px] font-black text-white">
+          0
+        </span>
+      </Link>
+
+      <Link
+        href="/login"
+        className="hidden rounded-xl px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100 sm:block"
+      >
+        ورود
+      </Link>
+
+      <Link
+        href="/register"
+        className="hidden rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 sm:block"
+      >
+        ثبت‌نام
+      </Link>
+
+      {/* Mobile menu button */}
+      <button
+        type="button"
+        onClick={() => setMobileMenu(!mobileMenu)}
+        className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 lg:hidden"
+      >
+        <Icon
+          name={mobileMenu ? "close" : "menu"}
+          size={21}
+        />
+      </button>
+    </div>
+  </div>
+
+  {/* Mobile menu */}
+  {mobileMenu && (
+    <div className="border-t border-slate-100 bg-white px-4 py-4 lg:hidden">
+      <nav className="space-y-1">
+
+        {[
+          ["خانه", "/"],
+          ["مصالح و تجهیزات", "/materials"],
+          ["خدمات ساختمانی", "/service"],
+          ["مناقصات", "/tenders"],
+          ["درباره سرچنو", "/about"],
+          ["ورود", "/login"],
+          ["ثبت‌نام", "/register"],
+        ].map(([title, href]) => (
+          <Link
+            key={href}
+            href={href}
+            onClick={() => setMobileMenu(false)}
+            className="block rounded-xl px-4 py-3 text-sm font-bold transition hover:bg-slate-50 hover:text-blue-700"
+          >
+            {title}
+          </Link>
+        ))}
+
+        {/* Download app */}
+        <a
+          href="https://drive.google.com/uc?export=download&id=1CuC1wRW-3b5tFxBP9ccIj4B9CAZ8wWcT"
+          className="mt-2 block rounded-xl bg-blue-50 px-4 py-3 text-sm font-black text-blue-700 transition hover:bg-blue-100"
+        >
+          دانلود اپلیکیشن سرچنو
+        </a>
+
+      </nav>
+    </div>
+  )}
+</header>
       {/* =====================================================
           HERO
       ===================================================== */}
