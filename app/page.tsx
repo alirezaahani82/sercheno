@@ -853,26 +853,16 @@ export default function Home() {
         {/* Mobile menu */}
         {mobileMenu && (
           <div className="border-t border-slate-100 bg-white px-4 py-4 lg:hidden">
-            <nav className="space-y-1">
-              {[
-  ["خانه", "/"],
-  ["مصالح و تجهیزات", "/materials"],
-  ["خدمات ساختمانی", "/service"],
-  ["مناقصات", "/tenders"],
-  ["درباره سرچنو", "/about"],
-  ["ورود", "/login"],
-  ["ثبت‌نام", "/register"],
-  ["دانلود اپلیکیشن سرچنو", "DOWNLOAD_APP"],
-].map(([title, href]) => (
-  href === "DOWNLOAD_APP" ? (
-    <a
-      key={href}
-      href="https://drive.google.com/uc?export=download&id=1CuC1wRW-3b5tFxBP9ccIj4B9CAZ8wWcT"
-      className="block rounded-xl px-4 py-3 text-sm font-bold transition hover:bg-blue-50 hover:text-blue-700"
-    >
-      دانلود اپلیکیشن سرچنو
-    </a>
-  ) : (
+           <nav className="space-y-1">
+  {[
+    ["خانه", "/"],
+    ["مصالح و تجهیزات", "/materials"],
+    ["خدمات ساختمانی", "/service"],
+    ["مناقصات", "/tenders"],
+    ["درباره سرچنو", "/about"],
+    ["ورود", "/login"],
+    ["ثبت‌نام", "/register"],
+  ].map(([title, href]) => (
     <Link
       key={href}
       href={href}
@@ -881,20 +871,16 @@ export default function Home() {
     >
       {title}
     </Link>
-  )
-))
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setMobileMenu(false)}
-                  className="block rounded-xl px-4 py-3 text-sm font-bold transition hover:bg-slate-50 hover:text-blue-700"
-                >
-                  {title}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        )}
+  ))}
+
+  {/* دانلود اپلیکیشن سرچنو */}
+  <a
+    href="https://drive.google.com/uc?export=download&id=1CuC1wRW-3b5tFxBP9ccIj4B9CAZ8wWcT"
+    className="mt-2 block rounded-xl bg-blue-50 px-4 py-3 text-sm font-black text-blue-700 transition hover:bg-blue-100"
+  >
+    دانلود اپلیکیشن سرچنو
+  </a>
+</nav>
       </header>
 
       {/* =====================================================
