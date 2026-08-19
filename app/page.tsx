@@ -531,7 +531,7 @@ useEffect(() => {
   async function checkMessage() {
     try {
       const response = await fetch(
-        `/api/support?phone=${encodeURIComponent(savedPhone)}`
+        `/api/support?phone=${encodeURIComponent(cleanPhone)}`
       );
 
       if (!response.ok) return;
