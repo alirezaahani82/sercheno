@@ -522,11 +522,13 @@ useEffect(() => {
   const savedPhone =
     localStorage.getItem("sercheno_support_phone");
 
-  if (typeof savedPhone !== "string" || !savedPhone.trim()) {
+  if (!savedPhone || !savedPhone.trim()) {
     return;
   }
 
-  setPhone(savedPhone);
+  const cleanPhone = savedPhone.trim();
+
+  setPhone(cleanPhone);
 
   async function checkMessage() {
     try {
