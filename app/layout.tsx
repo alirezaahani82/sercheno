@@ -14,15 +14,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "سرچنو",
+  title: "سرچنو | پلتفرم هوشمند ساخت‌وساز و ساز",
+
   description:
-    "سرچنو، پلتفرم جست‌وجو و مقایسه مصالح ساختمانی، تجهیزات، فروشندگان، تأمین‌کنندگان و متخصصان صنعت ساختمان.",
+    "سرچنو، پلتفرم هوشمند ساخت‌وساز و ساز برای خرید و فروش مصالح ساختمانی، تجهیزات، خدمات ساختمانی، فروشندگان، تأمین‌کنندگان و متخصصان صنعت ساختمان.",
+
   alternates: {
-  canonical: "https://sercheno-ywf1.vercel.app/",
-},
+    canonical: "https://sercheno-ywf1.vercel.app/",
+  },
 
   keywords: [
     "سرچنو",
+    "سرچنو مصالح ساختمانی",
     "مصالح ساختمانی",
     "خرید مصالح ساختمانی",
     "فروش مصالح ساختمانی",
@@ -42,16 +45,43 @@ export const metadata: Metadata = {
 
   creator: "سرچنو",
   publisher: "سرچنو",
+
   icons: {
-  icon: "/logo.png",
-},
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+
   openGraph: {
-    title: "سرچنو | بازار هوشمند ساخت‌وساز",
+    title: "سرچنو | پلتفرم هوشمند ساخت‌وساز و ساز",
+
     description:
-      "مصالح ساختمانی، تجهیزات، فروشندگان، تأمین‌کنندگان و متخصصان صنعت ساختمان را در سرچنو پیدا کنید.",
+      "سرچنو، پلتفرم هوشمند خرید و فروش مصالح ساختمانی، تجهیزات و خدمات ساختمانی.",
+
     siteName: "سرچنو",
+
     locale: "fa_IR",
+
     type: "website",
+
+    url: "https://sercheno-ywf1.vercel.app/",
+
+    images: [
+      {
+        url: "https://sercheno-ywf1.vercel.app/logo.png",
+        width: 512,
+        height: 512,
+        alt: "لوگوی سرچنو",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "سرچنو | پلتفرم هوشمند ساخت‌وساز و ساز",
+    description:
+      "پلتفرم هوشمند خرید و فروش مصالح ساختمانی، تجهیزات و خدمات ساختمانی.",
+    images: ["https://sercheno-ywf1.vercel.app/logo.png"],
   },
 
   robots: {
