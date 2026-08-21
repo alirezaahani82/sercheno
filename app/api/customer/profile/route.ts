@@ -49,11 +49,10 @@ export async function GET() {
     {
       success: false,
       message: "هیچ پروفایلی برای این کاربر پیدا نشد",
-      debug_user_id: user.id,
     },
     { status: 404 }
   );
-}
+    }
 
     if (!customers || customers.length === 0) {
       return NextResponse.json(
