@@ -45,21 +45,25 @@ export async function GET() {
         `)
         .eq("auth_user_id", user.id);
 
-    if (customerError) {
-      console.error(
-        "CUSTOMER PROFILE ERROR:",
-        customerError
-      );
+    if (updateError) {
+  console.error(
+    "CUSTOMER PROFILE UPDATE ERROR:",
+    updateError
+  );
 
-      return NextResponse.json(
-        {
-          success: false,
-          message: "خطا در دریافت پروفایل مشتری",
-          error: customerError.message,
-        },
-        { status: 500 }
-      );
-    }
+  return NextResponse.json(
+    {
+      success: false,
+      message:
+        "ذخیره اطلاعات پروفایل انجام نشد.",
+      error: updateError.message,
+      details: updateError.details,
+      hint: updateError.hint,
+      code: updateError.code,
+    },
+    { status: 500 }
+  );
+}
 
     if (!customers || customers.length === 0) {
       return NextResponse.json(
