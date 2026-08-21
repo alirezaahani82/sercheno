@@ -5,7 +5,6 @@ export async function GET() {
   try {
     const supabase = await createClient();
 
-    // دریافت کاربر لاگین‌شده
     const {
       data: { user },
       error: authError,
@@ -21,7 +20,6 @@ export async function GET() {
       );
     }
 
-    // دریافت پروفایل مشتری
     const { data: customer, error: customerError } = await supabase
       .from("customers")
       .select(`
