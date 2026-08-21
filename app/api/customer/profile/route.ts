@@ -20,38 +20,45 @@ export async function GET() {
       );
     }
 
-    const { data: customers, error: customerError } = await supabase
-      .from("customers")
-      .select(`
-        id,
-        first_name,
-        last_name,
-        phone,
-        city,
-        username,
-        national_code,
-        birth_date,
-        father_name,
-        job,
-        address,
-        profile_completed,
-        purchase_count,
-        loyalty_points,
-        is_active,
-        created_at,
-        updated_at,
-        auth_user_id
-      `)
-      .eq("auth_user_id", user.id);
+    const { data: customers, error: customerError } =
+      await supabase
+        .from("customers")
+        .select(`
+          id,
+          first_name,
+          last_name,
+          phone,
+          city,
+          username,
+          national_code,
+          birth_date,
+          father_name,
+          job,
+          address,
+          profile_completed,
+          purchase_count,
+          loyalty_points,
+          is_active,
+          created_at,
+          updated_at,
+          auth_user_id
+        `)
+        .eq("auth_user_id", user.id);
 
-    if (!customers || customers.length === 0) {
-  return NextResponse.json(
-    {
-      success: false,
-      message: "هیچ پروفایلی برای این کاربر پیدا نشد",
-    },
-    { status: 404 }
-  );
+    if (customerError) {
+      console.error(
+        "CUSTOMER PROFILE ERROR:",
+        customerError
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: "خطا در دریافت پروفایل مشتری",
+          error: customerError.message,
+        },
+        { status: 500 }
+      );
     }
 
     if (!customers || customers.length === 0) {
@@ -69,25 +76,160 @@ export async function GET() {
         {
           success: false,
           message: "برای این کاربر چند پروفایل وجود دارد",
-          count: customers.length,
         },
         { status: 409 }
       );
     }
 
-    const customer = customers[0];
-
     return NextResponse.json({
       success: true,
-      customer,
+      customer: customers[0],
     });
   } catch (error) {
-    console.error("CUSTOMER PROFILE API ERROR:", error);
+    console.error(
+      "CUSTOMER PROFILE GET ERROR:",
+      error
+    );
 
     return NextResponse.json(
       {
         success: false,
         message: "خطا در دریافت اطلاعات مشتری",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: Request
+) {
+  try {
+    const supabase = await createClient();
+
+    // بررسی کاربر لاگین‌شده
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "کاربر وارد نشده است",
+        },
+        { status: 401 }
+      );
+    }
+
+    // دریافت اطلاعات فرم
+    const body = await request.json();
+
+    const {
+      first_name,
+      last_name,
+      phone,
+      city,
+      national_code,
+      birth_date,
+      father_name,
+      job,
+      address,
+    } = body;
+
+    // اعتبارسنجی اطلاعات ضروری
+    if (
+      !national_code ||
+      !birth_date ||
+      !father_name ||
+      !job ||
+      !address
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "لطفاً تمام اطلاعات هویتی الزامی را تکمیل کنید.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // به‌روزرسانی پروفایل
+    const { data: customer, error: updateError } =
+      await supabase
+        .from("customers")
+        .update({
+          first_name: first_name || null,
+          last_name: last_name || null,
+          phone: phone || null,
+          city: city || null,
+          national_code: national_code.trim(),
+          birth_date: birth_date.trim(),
+          father_name: father_name.trim(),
+          job: job.trim(),
+          address: address.trim(),
+          profile_completed: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("auth_user_id", user.id)
+        .select(`
+          id,
+          first_name,
+          last_name,
+          phone,
+          city,
+          username,
+          national_code,
+          birth_date,
+          father_name,
+          job,
+          address,
+          profile_completed,
+          purchase_count,
+          loyalty_points,
+          is_active,
+          created_at,
+          updated_at,
+          auth_user_id
+        `)
+        .single();
+
+    if (updateError) {
+      console.error(
+        "CUSTOMER PROFILE UPDATE ERROR:",
+        updateError
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "ذخیره اطلاعات پروفایل انجام نشد.",
+          error: updateError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message:
+        "اطلاعات هویتی شما با موفقیت ثبت شد.",
+      customer,
+    });
+  } catch (error) {
+    console.error(
+      "CUSTOMER PROFILE PUT ERROR:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          "خطا در ذخیره اطلاعات پروفایل",
       },
       { status: 500 }
     );
