@@ -44,18 +44,16 @@ export async function GET() {
       `)
       .eq("auth_user_id", user.id);
 
-    if (customerError) {
-      console.error("CUSTOMER PROFILE ERROR:", customerError);
-
-      return NextResponse.json(
-        {
-          success: false,
-          message: "خطا در دریافت پروفایل مشتری",
-          error: customerError.message,
-        },
-        { status: 500 }
-      );
-    }
+    if (!customers || customers.length === 0) {
+  return NextResponse.json(
+    {
+      success: false,
+      message: "هیچ پروفایلی برای این کاربر پیدا نشد",
+      debug_user_id: user.id,
+    },
+    { status: 404 }
+  );
+}
 
     if (!customers || customers.length === 0) {
       return NextResponse.json(
