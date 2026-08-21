@@ -45,25 +45,18 @@ export async function GET() {
         `)
         .eq("auth_user_id", user.id);
 
-    if (updateError) {
-  console.error(
-    "CUSTOMER PROFILE UPDATE ERROR:",
-    updateError
-  );
+    if (customerError) {
+      console.error("CUSTOMER PROFILE ERROR:", customerError);
 
-  return NextResponse.json(
-    {
-      success: false,
-      message:
-        "ذخیره اطلاعات پروفایل انجام نشد.",
-      error: updateError.message,
-      details: updateError.details,
-      hint: updateError.hint,
-      code: updateError.code,
-    },
-    { status: 500 }
-  );
-}
+      return NextResponse.json(
+        {
+          success: false,
+          message: "خطا در دریافت پروفایل مشتری",
+          error: customerError.message,
+        },
+        { status: 500 }
+      );
+    }
 
     if (!customers || customers.length === 0) {
       return NextResponse.json(
@@ -90,10 +83,7 @@ export async function GET() {
       customer: customers[0],
     });
   } catch (error) {
-    console.error(
-      "CUSTOMER PROFILE GET ERROR:",
-      error
-    );
+    console.error("CUSTOMER PROFILE GET ERROR:", error);
 
     return NextResponse.json(
       {
@@ -105,13 +95,10 @@ export async function GET() {
   }
 }
 
-export async function PUT(
-  request: Request
-) {
+export async function PUT(request: Request) {
   try {
     const supabase = await createClient();
 
-    // بررسی کاربر لاگین‌شده
     const {
       data: { user },
       error: authError,
@@ -127,7 +114,6 @@ export async function PUT(
       );
     }
 
-    // دریافت اطلاعات فرم
     const body = await request.json();
 
     const {
@@ -142,7 +128,6 @@ export async function PUT(
       address,
     } = body;
 
-    // اعتبارسنجی اطلاعات ضروری
     if (
       !national_code ||
       !birth_date ||
@@ -153,14 +138,12 @@ export async function PUT(
       return NextResponse.json(
         {
           success: false,
-          message:
-            "لطفاً تمام اطلاعات هویتی الزامی را تکمیل کنید.",
+          message: "لطفاً تمام اطلاعات هویتی الزامی را تکمیل کنید.",
         },
         { status: 400 }
       );
     }
 
-    // به‌روزرسانی پروفایل
     const { data: customer, error: updateError } =
       await supabase
         .from("customers")
@@ -209,9 +192,11 @@ export async function PUT(
       return NextResponse.json(
         {
           success: false,
-          message:
-            "ذخیره اطلاعات پروفایل انجام نشد.",
+          message: "ذخیره اطلاعات پروفایل انجام نشد.",
           error: updateError.message,
+          details: updateError.details,
+          hint: updateError.hint,
+          code: updateError.code,
         },
         { status: 500 }
       );
@@ -219,21 +204,17 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      message:
-        "اطلاعات هویتی شما با موفقیت ثبت شد.",
+      message: "اطلاعات هویتی شما با موفقیت ثبت شد.",
       customer,
     });
   } catch (error) {
-    console.error(
-      "CUSTOMER PROFILE PUT ERROR:",
-      error
-    );
+    console.error("CUSTOMER PROFILE PUT ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message:
-          "خطا در ذخیره اطلاعات پروفایل",
+        message: "خطا در ذخیره اطلاعات پروفایل",
+        error: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
