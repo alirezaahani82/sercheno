@@ -20,7 +20,7 @@ export async function GET() {
       );
     }
 
-    const { data: customer, error: customerError } = await supabase
+    const { data: customers, error: customerError } = await supabase
       .from("customers")
       .select(`
         id,
@@ -42,8 +42,7 @@ export async function GET() {
         updated_at,
         auth_user_id
       `)
-      .eq("auth_user_id", user.id)
-      .single();
+      .eq("auth_user_id", user.id);
 
     if (customerError) {
       console.error("CUSTOMER PROFILE ERROR:", customerError);
@@ -51,12 +50,35 @@ export async function GET() {
       return NextResponse.json(
         {
           success: false,
-          message: "پروفایل مشتری پیدا نشد",
+          message: "خطا در دریافت پروفایل مشتری",
           error: customerError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!customers || customers.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "هیچ پروفایلی برای این کاربر پیدا نشد",
         },
         { status: 404 }
       );
     }
+
+    if (customers.length > 1) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "برای این کاربر چند پروفایل وجود دارد",
+          count: customers.length,
+        },
+        { status: 409 }
+      );
+    }
+
+    const customer = customers[0];
 
     return NextResponse.json({
       success: true,
