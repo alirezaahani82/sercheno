@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const SUPABASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL;
+
 /* =========================================================
    ICON SYSTEM
    بدون ایموجی؛ آیکون‌های SVG سبک و حرفه‌ای
@@ -1100,13 +1103,14 @@ export default function Home() {
         </div>
       </section>
 
-   {/* =====================================================
+{/* =====================================================
     QUICK ACTIONS / INTERNAL ADVERTISEMENTS
 ===================================================== */}
 
 <section className="mx-auto max-w-7xl px-5 pt-16">
   <div className="grid gap-4 lg:grid-cols-2">
 
+    {/* فروشگاه */}
     <Link
       href="/store/register"
       className="group block overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
@@ -1114,17 +1118,18 @@ export default function Home() {
       <picture>
         <source
           media="(max-width: 767px)"
-          srcSet="/advertisements/internal/store-mobile.png"
+          srcSet={`${SUPABASE_URL}/storage/v1/object/public/advertisements/internal/store-mobile.png`}
         />
 
         <img
-          src="/advertisements/internal/store-desktop.png"
+          src={`${SUPABASE_URL}/storage/v1/object/public/advertisements/internal/store-desktop.png`}
           alt="ثبت فروشگاه و تأمین‌کننده در سرچنو"
           className="block h-auto w-full object-cover transition duration-500 group-hover:scale-[1.02]"
         />
       </picture>
     </Link>
 
+    {/* خدمات */}
     <Link
       href="/service/register"
       className="group block overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
@@ -1132,11 +1137,11 @@ export default function Home() {
       <picture>
         <source
           media="(max-width: 767px)"
-          srcSet="/advertisements/internal/service-mobile.png"
+          srcSet={`${SUPABASE_URL}/storage/v1/object/public/advertisements/internal/service-mobile.png`}
         />
 
         <img
-          src="/advertisements/internal/service-desktop.png"
+          src={`${SUPABASE_URL}/storage/v1/object/public/advertisements/internal/service-desktop.png`}
           alt="ثبت خدمات ساختمانی در سرچنو"
           className="block h-auto w-full object-cover transition duration-500 group-hover:scale-[1.02]"
         />
