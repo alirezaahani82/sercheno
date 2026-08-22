@@ -149,34 +149,6 @@ export default function MobileBottomNav() {
 
   return (
     <>
-      {/* دکمه پشتیبانی */}
-      <button
-        type="button"
-        aria-label="پشتیبانی سرچنو"
-        className="
-          fixed
-          bottom-[78px]
-          right-4
-          z-[60]
-          flex
-          h-14
-          w-14
-          items-center
-          justify-center
-          rounded-full
-          bg-[#2563eb]
-          text-white
-          shadow-[0_5px_20px_rgba(0,0,0,0.20)]
-          transition-transform
-          active:scale-95
-          md:hidden
-        "
-        onClick={() => {
-          alert("پشتیبانی سرچنو");
-        }}
-      >
-        <SupportIcon />
-      </button>
 
       {/* نوار پایین موبایل */}
       <nav
