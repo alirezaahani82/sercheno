@@ -1100,79 +1100,57 @@ export default function Home() {
         </div>
       </section>
 
-      {/* =====================================================
-          QUICK ACTIONS
-      ===================================================== */}
+   {/* =====================================================
+    QUICK ACTIONS / INTERNAL ADVERTISEMENTS
+===================================================== */}
 
-      <section className="mx-auto max-w-7xl px-5 pt-16">
-        <div className="grid overflow-hidden rounded-[2rem] bg-white shadow-xl lg:grid-cols-2">
-          <Link
-            href="/store/register"
-            className="group relative min-h-[280px] overflow-hidden"
-          >
-            <img
-              src="/gah.jpg"
-              alt="ثبت فروشگاه"
-              className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
-            />
+<section className="mx-auto max-w-7xl px-5 pt-16">
+  <div className="grid gap-4 lg:grid-cols-2">
 
-            <div className="absolute inset-0 bg-gradient-to-l from-blue-950/95 via-blue-900/70 to-blue-950/20" />
+    {/* فروشگاه */}
+    <Link
+      href="/store/register"
+      className="group block overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
+    >
+      <picture>
+        {/* Mobile */}
+        <source
+          media="(max-width: 767px)"
+          srcSet="/advertisements/internal/store-mobile.png"
+        />
 
-            <div className="relative z-10 flex h-full flex-col justify-end p-7 text-white sm:p-9">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">
-                <Icon name="store" size={28} />
-              </div>
+        {/* Desktop */}
+        <img
+          src="/advertisements/internal/store-desktop.png"
+          alt="ثبت فروشگاه و تأمین‌کننده در سرچنو"
+          className="block h-auto w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+        />
+      </picture>
+    </Link>
 
-              <h2 className="mt-5 text-2xl font-black">
-                فروشنده یا تأمین‌کننده هستید؟
-              </h2>
+    {/* خدمات ساختمانی */}
+    <Link
+      href="/service/register"
+      className="group block overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
+    >
+      <picture>
+        {/* Mobile */}
+        <source
+          media="(max-width: 767px)"
+          srcSet="/advertisements/internal/service-mobile.png"
+        />
 
-              <p className="mt-2 max-w-lg text-sm leading-7 text-blue-100">
-                فروشگاه و محصولات خود را در سرچنو معرفی کنید و
-                مشتریان جدید پیدا کنید.
-              </p>
+        {/* Desktop */}
+        <img
+          src="/advertisements/internal/service-desktop.png"
+          alt="ثبت خدمات ساختمانی در سرچنو"
+          className="block h-auto w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+        />
+      </picture>
+    </Link>
 
-              <div className="mt-5 inline-flex w-fit items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-blue-800">
-                ثبت فروشگاه
-                <Icon name="arrow" size={17} />
-              </div>
-            </div>
-          </Link>
-
-          <Link
-            href="/service/register"
-            className="group relative min-h-[280px] overflow-hidden"
-          >
-            <img
-              src="/ostadkar.jpg"
-              alt="ثبت خدمات ساختمانی"
-              className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
-            />
-
-            <div className="absolute inset-0 bg-gradient-to-l from-emerald-950/95 via-emerald-900/70 to-emerald-950/20" />
-
-            <div className="relative z-10 flex h-full flex-col justify-end p-7 text-white sm:p-9">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">
-                <Icon name="worker" size={28} />
-              </div>
-
-              <h2 className="mt-5 text-2xl font-black">
-                استادکار یا متخصص هستید؟
-              </h2>
-
-              <p className="mt-2 max-w-lg text-sm leading-7 text-emerald-100">
-                تخصص، سابقه و محدوده فعالیت خود را ثبت کنید و
-                مشتریان جدید بگیرید.
-              </p>
-
-              <div className="mt-5 inline-flex w-fit items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-emerald-800">
-                ثبت خدمات
-                <Icon name="arrow" size={17} />
-              </div>
-            </div>
-          </Link>
-        </div>
-      </section>
+  </div>
+</section>
 
       {/* =====================================================
           MATERIALS
