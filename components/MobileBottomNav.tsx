@@ -107,7 +107,7 @@ export default function MobileBottomNav() {
     },
     {
       title: "دسته‌بندی",
-      href: "/categories",
+      href: "/materials",
       icon: CategoryIcon,
     },
     {
@@ -122,7 +122,7 @@ export default function MobileBottomNav() {
     },
     {
       title: "سرچنو من",
-      href: "/profile",
+      href: "/login",
       icon: UserIcon,
     },
   ];
