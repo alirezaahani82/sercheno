@@ -566,7 +566,7 @@ useEffect(() => {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 left-6 z-[9999] flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-white shadow-2xl shadow-blue-900/30 transition hover:-translate-y-1 hover:bg-blue-800"
+        className="fixed bottom-24 left-6 z-[9999] flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-white shadow-2xl shadow-blue-900/30 transition hover:-translate-y-1 hover:bg-blue-800"
         title="پشتیبانی سرچنو"
       >
         <Icon name="message" size={25} />
