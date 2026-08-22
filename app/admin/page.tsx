@@ -90,7 +90,7 @@ const panels = [
   {
     title: "تبلیغات",
     description: "مدیریت تبلیغات و جایگاه‌های تبلیغاتی",
-    href: "/admin/ads",
+    href: "/admin/advertisements",
     icon: "📢",
   },
   {
