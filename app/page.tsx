@@ -1107,19 +1107,16 @@ export default function Home() {
 <section className="mx-auto max-w-7xl px-5 pt-16">
   <div className="grid gap-4 lg:grid-cols-2">
 
-    {/* فروشگاه */}
     <Link
       href="/store/register"
       className="group block overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
     >
       <picture>
-        {/* Mobile */}
         <source
           media="(max-width: 767px)"
           srcSet="/advertisements/internal/store-mobile.png"
         />
 
-        {/* Desktop */}
         <img
           src="/advertisements/internal/store-desktop.png"
           alt="ثبت فروشگاه و تأمین‌کننده در سرچنو"
@@ -1128,19 +1125,16 @@ export default function Home() {
       </picture>
     </Link>
 
-    {/* خدمات ساختمانی */}
     <Link
       href="/service/register"
       className="group block overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
     >
       <picture>
-        {/* Mobile */}
         <source
           media="(max-width: 767px)"
           srcSet="/advertisements/internal/service-mobile.png"
         />
 
-        {/* Desktop */}
         <img
           src="/advertisements/internal/service-desktop.png"
           alt="ثبت خدمات ساختمانی در سرچنو"
