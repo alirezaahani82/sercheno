@@ -463,7 +463,7 @@ export default function MBAPage() {
 
             <div className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 shadow-2xl">
               <img
-                src="/mba-sercheno-hero.png"
+                src="/hero-searchino.jpg"
                 alt="سرچنو و تجربه مشتری"
                 className="h-[480px] w-full object-cover"
               />
@@ -568,7 +568,7 @@ export default function MBAPage() {
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1.4fr]">
             <div className="overflow-hidden rounded-[2.5rem] bg-slate-900">
               <img
-                src="/mba-customer-journey.png"
+                src="/hush.jpg"
                 alt="Customer Journey"
                 className="h-full min-h-[360px] w-full object-cover opacity-90"
               />
@@ -711,7 +711,7 @@ export default function MBAPage() {
           <div className="mt-14 grid gap-6 lg:grid-cols-2">
             <div className="overflow-hidden rounded-[2.5rem] bg-slate-900">
               <img
-                src="/mba-customer-experience.png"
+                src="/gah.jpg"
                 alt="Customer Experience"
                 className="h-full min-h-[500px] w-full object-cover"
               />
@@ -839,7 +839,7 @@ export default function MBAPage() {
           <div className="mt-14 grid gap-6 lg:grid-cols-2">
             <div className="overflow-hidden rounded-[2.5rem] bg-slate-900">
               <img
-                src="/mba-survey.png"
+                src="/hero-searchino.jpg"
                 alt="Customer Survey"
                 className="h-full min-h-[500px] w-full object-cover"
               />
@@ -934,7 +934,7 @@ export default function MBAPage() {
 
           <div className="mt-14 overflow-hidden rounded-[2.5rem]">
             <img
-              src="/mba-data-knowledge-wisdom.png"
+              src="/monagese.jpg"
               alt="Data Knowledge Wisdom"
               className="h-[300px] w-full object-cover opacity-90 md:h-[450px]"
             />
@@ -1036,7 +1036,7 @@ export default function MBAPage() {
 
               <div className="order-1 lg:order-2">
                 <img
-                  src="/mba-construction-customer.png"
+                  src="/monagese.jpg"
                   alt="Construction customer"
                   className="h-full min-h-[550px] w-full object-cover"
                 />
@@ -1088,7 +1088,7 @@ export default function MBAPage() {
       <section className="py-24">
         <div className="mx-auto max-w-5xl px-5 text-center">
           <img
-            src="/mba-sercheno-team.png"
+            src="/logo.png"
             alt="Sercheno"
             className="mx-auto h-40 w-40 rounded-[2rem] object-cover shadow-xl"
           />
