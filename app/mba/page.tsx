@@ -316,7 +316,11 @@ export default function MBAPage() {
             className="flex items-center gap-3"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-700 text-xl shadow-lg shadow-blue-700/20">
-              🐦
+              <img
+    src="/logo.png"
+    alt="لوگو سرچنو"
+    className="h-10 w-10 object-contain"
+  />
             </div>
 
             <div className="text-right">
