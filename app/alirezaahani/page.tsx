@@ -792,6 +792,21 @@ export default function AlirezaAhaniPage() {
           transform: translateY(-3px);
           background: #171c32;
         }
+        .sercheno-card {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+.sercheno-project-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 24px;
+}
 
         /* TITLES */
 
