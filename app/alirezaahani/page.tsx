@@ -167,7 +167,7 @@ export default function AlirezaAhaniPage() {
           </div>
 
           <div className={styles.aboutGrid}>
-            <div className={styles.aboutImage}>
+            <div className={styles.about-img.jpg}>
               <div className={styles.imagePlaceholder}>
                 <span>علیرضا آهنی</span>
               </div>
