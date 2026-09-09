@@ -349,106 +349,114 @@ export default function AlirezaAhaniPage() {
 
         {/* ================= PROJECTS ================= */}
 
-        <section id="projects" className="section projects-section">
-          <div className="container">
-            <div className="section-title center">
-              <span>PROJECTS</span>
-              <h2>پروژه‌ها و فعالیت‌های شاخص</h2>
-            </div>
+<section id="projects" className="section projects-section">
+  <div className="container">
 
-            <div className="projects-grid">
+    <div className="section-title center">
+      <span>PROJECTS</span>
+      <h2>پروژه‌ها و فعالیت‌های شاخص</h2>
+    </div>
 
-              {/* Project 1 */}
+    <div className="projects-grid">
 
-              <article className="project-card">
-                <div className="project-image project-sercheno">
-                  <div>
-                    <span>🐦</span>
-                    <strong>سرچنو</strong>
-                    <small>SERCHENO</small>
-                  </div>
-                </div>
+      {/* Project 1 - Sercheno */}
 
-                <div className="project-content">
-                  <span>01</span>
+      <article className="project-card">
 
-                  <h3>سرچنو</h3>
+        <div className="project-image">
+          <img
+            src="/logo.png"
+            alt="سرچنو | پلتفرم هوشمند ساخت‌وساز"
+          />
+        </div>
 
-                  <p>
-                    پلتفرم هوشمند ساخت‌وساز برای جست‌وجو، ارتباط و
-                    دسترسی آسان‌تر به مصالح، خدمات و متخصصان صنعت
-                    ساختمان.
-                  </p>
+        <div className="project-content">
+          <span>01</span>
 
-                  <a
-                    href="https://sercheno-ywf1.vercel.app/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    مشاهده پروژه ←
-                  </a>
-                </div>
-              </article>
+          <h3>سرچنو</h3>
 
-              {/* Project 2 */}
+          <p>
+            پلتفرم هوشمند ساخت‌وساز برای جست‌وجو، ارتباط و
+            دسترسی آسان‌تر به مصالح، خدمات و متخصصان صنعت
+            ساختمان.
+          </p>
 
-              <article className="project-card">
-                <div className="project-image project-ai">
-                  <div>
-                    <span>AI</span>
-                    <strong>هوش مصنوعی سرچنو</strong>
-                    <small>SMART CONSTRUCTION AI</small>
-                  </div>
-                </div>
+          <a
+            href="https://sercheno-ywf1.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            مشاهده پروژه ←
+          </a>
+        </div>
 
-                <div className="project-content">
-                  <span>02</span>
+      </article>
 
-                  <h3>پروژه هوش مصنوعی سرچنو</h3>
 
-                  <p>
-                    توسعه قابلیت‌های هوش مصنوعی برای پاسخ‌گویی به
-                    نیازهای کاربران و کمک به تحلیل، انتخاب و تصمیم‌گیری
-                    در پروژه‌های ساختمانی.
-                  </p>
+      {/* Project 2 - Sercheno AI */}
 
-                  <a href="#sercheno">
-                    مشاهده پروژه ←
-                  </a>
-                </div>
-              </article>
+      <article className="project-card">
 
-              {/* Project 3 */}
+        <div className="project-image">
+          <img
+            src="/hush.jpg"
+            alt="هوش مصنوعی سرچنو | Smart Construction AI"
+          />
+        </div>
 
-              <article className="project-card">
-                <div className="project-image project-melkoko">
-                  <div>
-                    <span>⌂</span>
-                    <strong>ملک‌کو</strong>
-                    <small>REAL ESTATE PLATFORM</small>
-                  </div>
-                </div>
+        <div className="project-content">
+          <span>02</span>
 
-                <div className="project-content">
-                  <span>03</span>
+          <h3>پروژه هوش مصنوعی سرچنو</h3>
 
-                  <h3>پروژه هوشمند ملک‌کو</h3>
+          <p>
+            توسعه قابلیت‌های هوش مصنوعی برای پاسخ‌گویی به
+            نیازهای کاربران و کمک به تحلیل، انتخاب و تصمیم‌گیری
+            در پروژه‌های ساختمانی.
+          </p>
 
-                  <p>
-                    ایده و پروژه‌ای در حوزه جست‌وجوی ملک، زمین، خانه و
-                    املاک با نگاه به ایجاد تجربه‌ای هوشمندتر برای
-                    کاربران بازار املاک.
-                  </p>
+          <a href="#sercheno">
+            مشاهده پروژه ←
+          </a>
+        </div>
 
-                  <a href="#projects">
-                    مشاهده پروژه ←
-                  </a>
-                </div>
-              </article>
+      </article>
 
-            </div>
-          </div>
-        </section>
+
+      {/* Project 3 - Melkoko */}
+
+      <article className="project-card">
+
+        <div className="project-image">
+          <img
+            src="/melkku.png"
+            alt="ملک‌کو | پلتفرم هوشمند املاک"
+          />
+        </div>
+
+        <div className="project-content">
+          <span>03</span>
+
+          <h3>پروژه هوشمند ملک‌کو</h3>
+
+          <p>
+            ایده و پروژه‌ای در حوزه جست‌وجوی ملک، زمین، خانه و
+            املاک با نگاه به ایجاد تجربه‌ای هوشمندتر برای
+            کاربران بازار املاک.
+          </p>
+
+          <a href="#projects">
+            مشاهده پروژه ←
+          </a>
+        </div>
+
+      </article>
+
+    </div>
+  </div>
+</section>
+                  
+
 
         {/* ================= CONTACT ================= */}
 
