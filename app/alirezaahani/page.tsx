@@ -310,27 +310,13 @@ export default function AlirezaAhaniPage() {
                 </a>
               </div>
 
-              <div className="sercheno-card">
-                <div className="sercheno-logo-symbol">
-                  🐦
-                </div>
-
-                <h3>سرچنو</h3>
-
-                <span>SERCHENO</span>
-
-                <div className="sercheno-line" />
-
-                <p>
-                  بازار هوشمند ساخت‌وساز ایران
-                </p>
-
-                <strong>
-                  هر چیزی برای ساختن،
-                  <br />
-                  در سرچنو پیدا کن.
-                </strong>
-              </div>
+<div className="sercheno-card">
+  <img
+    src="/hero-searchino.jpg"
+    alt="سرچنو | پلتفرم هوشمند ساخت‌وساز"
+    className="sercheno-project-image"
+  />
+</div>
             </div>
           </div>
         </section>
