@@ -590,7 +590,7 @@ export default function AlirezaAhaniPage() {
 
       {/* ================= STYLES ================= */}
 
-      <style jsx global>{`
+      <style>{`
         * {
           box-sizing: border-box;
           scroll-behavior: smooth;
