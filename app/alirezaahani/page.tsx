@@ -1,41 +1,5 @@
-import type { Metadata } from "next";
+"use client";
 import Image from "next/image";
-
-export const metadata: Metadata = {
-  title: "علیرضا آهنی | کارآفرین، مدیر و بنیان‌گذار سرچنو",
-  description:
-    "وب‌سایت شخصی و رزومه علیرضا آهنی؛ کارآفرین، مدیر و فعال حوزه فناوری و صنعت ساختمان و بنیان‌گذار پلتفرم هوشمند سرچنو.",
-  keywords: [
-    "علیرضا آهنی",
-    "Alireza Ahani",
-    "سرچنو",
-    "Sercheno",
-    "امیر توان پویای گستر",
-    "بنیانگذار سرچنو",
-    "کارآفرین",
-    "فناوری",
-    "هوش مصنوعی",
-    "ساخت و ساز",
-    "برنامه نویسی",
-    "Python",
-  ],
-  alternates: {
-    canonical: "https://sercheno-ywf1.vercel.app/alirezaahani",
-  },
-  openGraph: {
-    title: "علیرضا آهنی | کارآفرین و بنیان‌گذار سرچنو",
-    description:
-      "وب‌سایت شخصی علیرضا آهنی؛ فعال حوزه فناوری و صنعت ساختمان و بنیان‌گذار سرچنو.",
-    url: "https://sercheno-ywf1.vercel.app/alirezaahani",
-    siteName: "علیرضا آهنی",
-    locale: "fa_IR",
-    type: "profile",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
 
 const personSchema = {
   "@context": "https://schema.org",
