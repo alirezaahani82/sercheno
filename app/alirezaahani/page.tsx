@@ -1,34 +1,70 @@
 "use client";
 import Image from "next/image";
-
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
+
+  "@id":
+    "https://sercheno-ywf1.vercel.app/alirezaahani#person",
+
   name: "علیرضا آهنی",
-  alternateName: "Alireza Ahani",
-  url: "https://sercheno-ywf1.vercel.app/alirezaahani",
-  jobTitle: "کارآفرین، مدیر و بنیان‌گذار سرچنو",
+
+  givenName: "علیرضا",
+  familyName: "آهنی",
+
+  alternateName: [
+    "Alireza Ahani",
+    "Alireza Ahani Sercheno",
+  ],
+
+  url:
+    "https://sercheno-ywf1.vercel.app/alirezaahani",
+
+  image:
+    "https://sercheno-ywf1.vercel.app/A.png",
+
+  description:
+    "علیرضا آهنی، کارآفرین، مدیر، فعال حوزه فناوری و صنعت ساختمان و بنیان‌گذار پلتفرم هوشمند سرچنو.",
+
+  jobTitle:
+    "کارآفرین، مدیر و بنیان‌گذار سرچنو",
+
   worksFor: {
     "@type": "Organization",
+
     name: "شرکت امیر توان پویای گستر",
+
+    url:
+      "https://sercheno-ywf1.vercel.app/",
   },
+
   founder: {
     "@type": "Organization",
+
     name: "سرچنو",
+
+    url:
+      "https://sercheno-ywf1.vercel.app/",
   },
+
   knowsAbout: [
-    "مدیریت و توسعه کسب و کار",
-    "فناوری",
-    "برنامه نویسی",
-    "هوش مصنوعی",
-    "صنعت ساختمان",
-    "توسعه وب",
+    "مهندسی عمران",
+    "مدیریت اجرایی",
+    "مدیریت کسب‌وکار",
+    "برنامه‌نویسی",
     "Python",
+    "هوش مصنوعی",
+    "توسعه وب",
+    "فناوری",
+    "صنعت ساختمان",
+    "مصالح ساختمانی",
+    "درب و پنجره UPVC",
     "بازاریابی",
-    "ایده پردازی",
+    "کارآفرینی",
     "نوآوری",
   ],
 };
+
 
 const expertise = [
   {
