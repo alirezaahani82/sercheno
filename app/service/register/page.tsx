@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-const serviceCategories = [
+const services = [
   "بنا و استادکار",
   "نصاب درب و پنجره",
   "نصاب کاشی و سرامیک",
@@ -23,61 +24,68 @@ const provinces = [
   "آذربایجان شرقی",
   "آذربایجان غربی",
   "اردبیل",
-  "زنجان",
-  "تهران",
-  "البرز",
   "اصفهان",
-  "فارس",
-  "خراسان رضوی",
-  "گیلان",
-  "مازندران",
-  "کردستان",
-  "کرمانشاه",
-  "قم",
-  "مرکزی",
-  "یزد",
-  "کرمان",
-  "همدان",
-  "قزوین",
-  "گلستان",
-  "سمنان",
-  "لرستان",
-  "خوزستان",
-  "بوشهر",
-  "هرمزگان",
-  "سیستان و بلوچستان",
-  "چهارمحال و بختیاری",
-  "کهگیلویه و بویراحمد",
+  "البرز",
   "ایلام",
-  "خراسان شمالی",
+  "بوشهر",
+  "تهران",
+  "چهارمحال و بختیاری",
   "خراسان جنوبی",
+  "خراسان رضوی",
+  "خراسان شمالی",
+  "خوزستان",
+  "زنجان",
+  "سمنان",
+  "سیستان و بلوچستان",
+  "فارس",
+  "قزوین",
+  "قم",
+  "کردستان",
+  "کرمان",
+  "کرمانشاه",
+  "کهگیلویه و بویراحمد",
+  "گلستان",
+  "گیلان",
+  "لرستان",
+  "مازندران",
+  "مرکزی",
+  "هرمزگان",
+  "همدان",
+  "یزد",
 ];
 
-const experienceOptions = [
+const experiences = [
   "کمتر از ۱ سال",
   "۱ تا ۳ سال",
   "۳ تا ۵ سال",
   "۵ تا ۱۰ سال",
-  "بیشتر از ۱۰ سال",
+  "بیش از ۱۰ سال",
 ];
 
-const cooperationOptions = [
+const cooperationTypes = [
   "پروژه‌ای",
-  "روزانه",
-  "ساعتی",
+  "روزمزد",
   "قراردادی",
   "تمام‌وقت",
   "پاره‌وقت",
+  "قابل مذاکره",
 ];
 
-const availabilityOptions = [
-  "همه روزه",
+const availabilities = [
+  "همه‌روزه",
   "شنبه تا پنجشنبه",
   "فقط روزهای کاری",
   "با هماهنگی قبلی",
 ];
 
+type PreviewFile = {
+  file: File;
+  preview: string;
+};
+
 export default function ServiceRegisterPage() {
+  const router = useRouter();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -93,35 +101,32 @@ export default function ServiceRegisterPage() {
 
   const [experience, setExperience] = useState("");
   const [description, setDescription] = useState("");
-
   const [cooperationType, setCooperationType] = useState("");
   const [availability, setAvailability] = useState("");
-
   const [certificates, setCertificates] = useState("");
   const [priceInfo, setPriceInfo] = useState("");
 
   const [showPhone, setShowPhone] = useState(true);
   const [acceptRules, setAcceptRules] = useState(false);
 
-  const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [workImages, setWorkImages] = useState<File[]>([]);
-
-  const [profilePreview, setProfilePreview] = useState("");
-  const [workPreviews, setWorkPreviews] = useState<string[]>([]);
+  const [profile, setProfile] = useState<PreviewFile | null>(null);
+  const [portfolio, setPortfolio] = useState<PreviewFile[]>([]);
 
   const [loading, setLoading] = useState(false);
-
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const handleProfileImage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
+  const remainingPortfolio = useMemo(
+    () => 3 - portfolio.length,
+    [portfolio.length]
+  );
 
+  function handleProfile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setErrorMessage("فایل عکس پرسنلی باید تصویر باشد.");
+      setErrorMessage("فایل عکس پرسنلی باید تصویری باشد.");
       return;
     }
 
@@ -130,935 +135,628 @@ export default function ServiceRegisterPage() {
       return;
     }
 
-    setProfileImage(file);
-    setProfilePreview(URL.createObjectURL(file));
     setErrorMessage("");
-  };
 
-  const handleWorkImages = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = Array.from(event.target.files || []);
+    if (profile?.preview) {
+      URL.revokeObjectURL(profile.preview);
+    }
 
-    if (files.length > 3) {
-      setErrorMessage("حداکثر ۳ نمونه‌کار می‌توانید انتخاب کنید.");
+    setProfile({
+      file,
+      preview: URL.createObjectURL(file),
+    });
+  }
+
+  function handlePortfolio(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+
+    if (!files.length) return;
+
+    const available = 3 - portfolio.length;
+
+    if (files.length > available) {
+      setErrorMessage(`حداکثر ۳ عکس نمونه‌کار می‌توانید انتخاب کنید.`);
       return;
     }
 
     for (const file of files) {
       if (!file.type.startsWith("image/")) {
-        setErrorMessage("نمونه‌کارها باید به صورت تصویر باشند.");
+        setErrorMessage("تمام فایل‌های نمونه‌کار باید عکس باشند.");
         return;
       }
 
       if (file.size > 7 * 1024 * 1024) {
-        setErrorMessage(
-          "حجم هر نمونه‌کار نباید بیشتر از ۷ مگابایت باشد."
-        );
+        setErrorMessage("حجم هر عکس نمونه‌کار نباید بیشتر از ۷ مگابایت باشد.");
         return;
       }
     }
 
-    setWorkImages(files);
-    setWorkPreviews(
-      files.map((file) => URL.createObjectURL(file))
-    );
-
     setErrorMessage("");
-  };
 
-  const validateForm = () => {
-    if (!firstName.trim()) {
-      return "لطفاً نام خود را وارد کنید.";
+    const newFiles = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setPortfolio((prev) => [...prev, ...newFiles]);
+  }
+
+  function removePortfolio(index: number) {
+    const item = portfolio[index];
+
+    if (item?.preview) {
+      URL.revokeObjectURL(item.preview);
     }
 
-    if (!lastName.trim()) {
-      return "لطفاً نام خانوادگی خود را وارد کنید.";
+    setPortfolio((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function validate() {
+    if (!firstName.trim()) return "نام را وارد کنید.";
+    if (!lastName.trim()) return "نام خانوادگی را وارد کنید.";
+
+    if (!/^09\d{9}$/.test(phone.trim())) {
+      return "شماره موبایل صحیح نیست. مثال: 09123456789";
     }
 
-    if (!phone.trim()) {
-      return "لطفاً شماره موبایل خود را وارد کنید.";
-    }
-
-    if (!/^09\d{9}$/.test(phone.replace(/\s/g, ""))) {
-      return "شماره موبایل صحیح نیست.";
-    }
-
-    if (!nationalCode.trim()) {
-      return "لطفاً کد ملی را وارد کنید.";
-    }
-
-    if (!/^\d{10}$/.test(nationalCode)) {
+    if (!/^\d{10}$/.test(nationalCode.trim())) {
       return "کد ملی باید ۱۰ رقم باشد.";
     }
 
-    if (!category) {
-      return "لطفاً دسته‌بندی تخصص خود را انتخاب کنید.";
-    }
-
-    if (!province || !city) {
-      return "لطفاً محل فعالیت خود را مشخص کنید.";
-    }
-
-    if (!experience) {
-      return "لطفاً میزان سابقه خود را انتخاب کنید.";
-    }
-
-    if (!description.trim()) {
-      return "لطفاً درباره تخصص و تجربه خود توضیح دهید.";
-    }
-
-    if (!profileImage) {
-      return "لطفاً عکس پرسنلی ۳×۴ خود را بارگذاری کنید.";
-    }
-
-    if (!acceptRules) {
-      return "برای ثبت اطلاعات باید قوانین سرچنو را بپذیرید.";
-    }
+    if (!category) return "دسته خدمات خود را انتخاب کنید.";
+    if (!province) return "استان را انتخاب کنید.";
+    if (!city.trim()) return "شهر را وارد کنید.";
+    if (!experience) return "سابقه فعالیت را انتخاب کنید.";
+    if (!description.trim()) return "توضیحات حرفه‌ای خود را وارد کنید.";
+    if (!profile) return "عکس پرسنلی خود را انتخاب کنید.";
+    if (!acceptRules) return "لطفاً قوانین ثبت خدمات را تأیید کنید.";
 
     return "";
-  };
+  }
 
-  const uploadImage = async (
-    file: File,
-    folder: string
-  ) => {
-    const extension =
-      file.name.split(".").pop()?.toLowerCase() || "jpg";
+  async function uploadImage(file: File, folder: string) {
+    const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
 
-    const fileName = `${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2)}.${extension}`;
+    const randomPart = crypto.randomUUID();
 
-    const filePath = `${folder}/${fileName}`;
+    const path = `${folder}/${randomPart}.${extension}`;
 
     const { error } = await supabase.storage
       .from("professionals")
-      .upload(filePath, file, {
+      .upload(path, file, {
         cacheControl: "3600",
         upsert: false,
+        contentType: file.type,
       });
 
     if (error) {
-      throw error;
+      throw new Error(error.message);
     }
 
-    const { data } = supabase.storage
-      .from("professionals")
-      .getPublicUrl(filePath);
+    return path;
+  }
 
-    return data.publicUrl;
-  };
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
 
-  const submitForm = async () => {
     setErrorMessage("");
+    setSuccessMessage("");
 
-    const validationError = validateForm();
+    const validationError = validate();
 
     if (validationError) {
       setErrorMessage(validationError);
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
     try {
       setLoading(true);
 
-      let profileImageUrl = "";
-      const workImageUrls: string[] = [];
+      /*
+       * برای هر ثبت‌نام یک پوشه تصادفی می‌سازیم.
+       * status اصلاً از فرم ارسال نمی‌شود.
+       * دیتابیس خودش مقدار pending را قرار می‌دهد.
+       */
+      const registrationId = crypto.randomUUID();
 
-      if (profileImage) {
-        profileImageUrl = await uploadImage(
-          profileImage,
-          "profile"
-        );
-      }
-
-      for (const image of workImages) {
-        const url = await uploadImage(
-          image,
-          "portfolio"
-        );
-
-        workImageUrls.push(url);
-      }
-
-      const { error } = await supabase
-        .from("professionals")
-        .insert({
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
-          national_code: nationalCode,
-          birth_date: birthDate,
-
-          service: category,
-          skills: skills,
-
-          province: province,
-          city: city,
-          activity_area: activityArea,
-
-          experience: experience,
-          description: description,
-
-          cooperation_type: cooperationType,
-          availability: availability,
-
-          certificates: certificates,
-          price_info: priceInfo,
-
-          show_phone: showPhone,
-
-          profile_image: profileImageUrl,
-          work_image_1: workImageUrls[0] || null,
-          work_image_2: workImageUrls[1] || null,
-          work_image_3: workImageUrls[2] || null,
-
-          status: "pending",
-        });
-
-      if (error) {
-        console.error("SUPABASE ERROR:", error);
-        throw error;
-      }
-
-      alert(
-        "اطلاعات شما با موفقیت ثبت شد و پس از بررسی مدیریت در سرچنو منتشر خواهد شد."
+      const profilePath = await uploadImage(
+        profile!.file,
+        `applications/${registrationId}/profile`
       );
 
-      window.location.href = "/service";
-    } catch (error: any) {
+      const portfolioPaths: string[] = [];
+
+      for (let i = 0; i < portfolio.length; i++) {
+        const path = await uploadImage(
+          portfolio[i].file,
+          `applications/${registrationId}/portfolio`
+        );
+
+        portfolioPaths.push(path);
+      }
+
+      const { error } = await supabase.from("professionals").insert({
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        phone: phone.trim(),
+        national_code: nationalCode.trim(),
+        birth_date: birthDate || null,
+
+        service: category,
+        skills: skills.trim() || null,
+
+        province,
+        city: city.trim(),
+        activity_area: activityArea.trim() || null,
+
+        experience,
+        description: description.trim(),
+
+        cooperation_type: cooperationType || null,
+        availability: availability || null,
+        certificates: certificates.trim() || null,
+        price_info: priceInfo.trim() || null,
+
+        show_phone: showPhone,
+
+        profile_image: profilePath,
+        work_image_1: portfolioPaths[0] || null,
+        work_image_2: portfolioPaths[1] || null,
+        work_image_3: portfolioPaths[2] || null,
+
+        // status عمداً ارسال نمی‌شود.
+        // DEFAULT دیتابیس = pending
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setSuccessMessage(
+        "درخواست شما با موفقیت ثبت شد و پس از بررسی مدیر در سرچنو منتشر خواهد شد."
+      );
+
+      setTimeout(() => {
+        router.push("/service");
+      }, 2500);
+    } catch (error) {
       console.error(error);
 
       setErrorMessage(
-        error?.message ||
-          "در ثبت اطلاعات مشکلی به وجود آمد. لطفاً دوباره تلاش کنید."
+        "ثبت درخواست انجام نشد. لطفاً اتصال اینترنت و اطلاعات واردشده را بررسی کنید."
       );
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <main
-      dir="rtl"
-      className="min-h-screen bg-[#f5f7fb] text-slate-900"
-    >
-      {/* HEADER */}
-
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-          <a
-            href="/"
-            className="flex items-center gap-3"
-          >
-            <img
-              src="/logo.png"
-              alt="سرچنو"
-              className="h-12 w-12 rounded-2xl object-contain"
-            />
-
-            <div>
-              <div className="text-xl font-black text-blue-700">
-                سرچنو
-              </div>
-
-              <div className="text-xs text-slate-500">
-                پلتفرم هوشمند ساخت‌وساز
-              </div>
-            </div>
-          </a>
-
-          <a
-            href="/service"
-            className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
-          >
-            مشاهده متخصصان
-          </a>
-        </div>
-      </header>
-
-      {/* HERO */}
-
-      <section className="relative overflow-hidden bg-slate-950">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-blue-500 blur-3xl" />
-          <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-emerald-500 blur-3xl" />
-        </div>
-
-        <div className="relative mx-auto max-w-6xl px-5 py-16 text-center sm:py-20">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-white/10 text-4xl ring-1 ring-white/10">
-            👷
+    <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
+      <section className="bg-slate-950 text-white">
+        <div className="mx-auto max-w-6xl px-5 py-14">
+          <div className="mb-6 inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm">
+            سرچنو | پلتفرم هوشمند ساخت‌وساز
           </div>
 
-          <h1 className="text-3xl font-black leading-tight text-white sm:text-5xl">
-            پروفایل حرفه‌ای خود را در سرچنو بسازید
+          <h1 className="max-w-3xl text-3xl font-black leading-[1.7] md:text-5xl">
+            خدمات ساختمانی خود را در سرچنو ثبت کنید
           </h1>
 
-          <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
-            اگر در حوزه ساخت‌وساز فعالیت می‌کنید، تخصص، سوابق و
-            نمونه‌کارهای خود را ثبت کنید تا پس از تأیید مدیریت،
-            مشتریان بتوانند شما را در سرچنو پیدا کنند.
+          <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
+            اطلاعات حرفه‌ای خود را ثبت کنید تا پس از بررسی و تأیید، در دسته
+            تخصصی خودتان به کاربران سرچنو معرفی شوید.
           </p>
-
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-white">
-              ✓ ثبت رایگان
-            </span>
-
-            <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-white">
-              ✓ بررسی توسط مدیریت
-            </span>
-
-            <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-white">
-              ✓ معرفی تخصص و نمونه‌کار
-            </span>
-          </div>
         </div>
       </section>
 
-      {/* MAIN */}
-
-      <section className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
-
+      <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">
         {errorMessage && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-bold leading-7 text-red-700">
-            ⚠️ {errorMessage}
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+            {errorMessage}
           </div>
         )}
 
-        {/* PERSONAL */}
-
-        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-
-          <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-xl">
-                👤
-              </div>
-
-              <div>
-                <h2 className="text-xl font-black">
-                  اطلاعات شخصی
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  اطلاعات هویتی شما برای بررسی و اعتبارسنجی پروفایل استفاده می‌شود.
-                </p>
-              </div>
-            </div>
+        {successMessage && (
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700">
+            {successMessage}
           </div>
+        )}
 
-          <div className="grid gap-5 p-6 sm:grid-cols-2 sm:p-8">
-
-            <Input
-              label="نام"
-              required
-              placeholder="مثلاً علیرضا"
-              value={firstName}
-              onChange={setFirstName}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* اطلاعات شخصی */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-8">
+            <SectionTitle
+              number="01"
+              title="اطلاعات شخصی"
+              subtitle="اطلاعات واقعی خود را وارد کنید."
             />
 
-            <Input
-              label="نام خانوادگی"
-              required
-              placeholder="مثلاً آهنی"
-              value={lastName}
-              onChange={setLastName}
-            />
-
-            <Input
-              label="شماره موبایل"
-              required
-              placeholder="۰۹۱۲۱۲۳۴۵۶۷"
-              value={phone}
-              onChange={setPhone}
-              type="tel"
-            />
-
-            <Input
-              label="کد ملی"
-              required
-              placeholder="۱۰ رقم"
-              value={nationalCode}
-              onChange={setNationalCode}
-              maxLength={10}
-            />
-
-            <Input
-              label="تاریخ تولد"
-              placeholder="مثلاً ۱۳۷۵/۰۵/۲۲"
-              value={birthDate}
-              onChange={setBirthDate}
-            />
-
-          </div>
-        </div>
-
-        {/* PROFILE PHOTO */}
-
-        <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-
-          <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl">
-                📷
-              </div>
-
-              <div>
-                <h2 className="text-xl font-black">
-                  عکس پرسنلی
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  یک عکس واضح و رسمی از خودتان بارگذاری کنید.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 sm:p-8">
-
-            <label className="block cursor-pointer">
-
-              <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center transition hover:border-blue-400 hover:bg-blue-50">
-
-                {profilePreview ? (
-                  <img
-                    src={profilePreview}
-                    alt="عکس پرسنلی"
-                    className="h-52 w-40 rounded-2xl object-cover shadow-md"
-                  />
-                ) : (
-                  <>
-                    <div className="text-5xl">🪪</div>
-
-                    <h3 className="mt-4 font-black">
-                      بارگذاری عکس ۳×۴
-                    </h3>
-
-                    <p className="mt-2 text-sm text-slate-500">
-                      فرمت JPG یا PNG — حداکثر ۵ مگابایت
-                    </p>
-
-                    <span className="mt-5 rounded-xl bg-blue-700 px-6 py-3 text-sm font-black text-white">
-                      انتخاب عکس
-                    </span>
-                  </>
-                )}
-
-              </div>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleProfileImage}
-                className="hidden"
+            <div className="grid gap-5 md:grid-cols-2">
+              <Field
+                label="نام"
+                value={firstName}
+                onChange={setFirstName}
+                placeholder="مثلاً علیرضا"
+                required
               />
 
-            </label>
+              <Field
+                label="نام خانوادگی"
+                value={lastName}
+                onChange={setLastName}
+                placeholder="مثلاً آهنی"
+                required
+              />
 
-          </div>
-        </div>
+              <Field
+                label="شماره موبایل"
+                value={phone}
+                onChange={setPhone}
+                placeholder="09123456789"
+                inputMode="numeric"
+                required
+              />
 
-        {/* SERVICE */}
+              <Field
+                label="کد ملی"
+                value={nationalCode}
+                onChange={setNationalCode}
+                placeholder="۱۰ رقم"
+                inputMode="numeric"
+                required
+              />
 
-        <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+              <Field
+                label="تاریخ تولد"
+                value={birthDate}
+                onChange={setBirthDate}
+                placeholder="مثلاً 1375/01/15"
+              />
 
-          <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-xl">
-                🛠️
-              </div>
-
-              <div>
-                <h2 className="text-xl font-black">
-                  تخصص و خدمات
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  مشخص کنید در چه زمینه‌ای فعالیت می‌کنید.
-                </p>
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm leading-7 text-slate-600">
+                کد ملی و تاریخ تولد برای بررسی اطلاعات ثبت می‌شوند و در پروفایل
+                عمومی متخصص نمایش داده نخواهند شد.
               </div>
             </div>
-          </div>
 
-          <div className="p-6 sm:p-8">
+            <div className="mt-6 grid gap-5 md:grid-cols-[1fr_auto]">
+              <div>
+                <label className="mb-2 block text-sm font-bold">
+                  عکس پرسنلی
+                  <span className="mr-1 text-red-500">*</span>
+                </label>
 
-            <label className="mb-3 block text-sm font-black">
-              دسته‌بندی اصلی <span className="text-red-500">*</span>
-            </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfile}
+                  className="block w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm"
+                />
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                <p className="mt-2 text-xs text-slate-500">
+                  ترجیحاً عکس واضح، رسمی و شبیه عکس پرسنلی — حداکثر ۵ مگابایت
+                </p>
+              </div>
 
-              {serviceCategories.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setCategory(item)}
-                  className={`rounded-2xl border p-4 text-sm font-bold transition ${
-                    category === item
-                      ? "border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-100"
-                      : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-slate-50"
-                  }`}
-                >
-                  {category === item && (
-                    <span className="ml-1">✓</span>
-                  )}
+              {profile && (
+                <img
+                  src={profile.preview}
+                  alt="پیش‌نمایش عکس پرسنلی"
+                  className="h-32 w-24 rounded-2xl object-cover shadow-md"
+                />
+              )}
+            </div>
+          </section>
 
-                  {item}
-                </button>
-              ))}
+          {/* تخصص */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-8">
+            <SectionTitle
+              number="02"
+              title="تخصص و زمینه فعالیت"
+              subtitle="دسته اصلی فعالیت خود را انتخاب کنید."
+            />
 
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {services.map((item) => {
+                const selected = category === item;
+
+                return (
+                  <button
+                    type="button"
+                    key={item}
+                    onClick={() => setCategory(item)}
+                    className={`rounded-2xl border p-4 text-right text-sm font-bold transition ${
+                      selected
+                        ? "border-slate-950 bg-slate-950 text-white"
+                        : "border-slate-200 bg-white hover:border-slate-400"
+                    }`}
+                  >
+                    {item}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="mt-6">
-              <label className="mb-2 block text-sm font-bold">
-                تخصص‌ها و مهارت‌های تکمیلی
-              </label>
-
-              <input
-                type="text"
+              <TextArea
+                label="مهارت‌ها و تخصص‌های جزئی"
                 value={skills}
-                onChange={(e) => setSkills(e.target.value)}
-                placeholder="مثلاً نصب پنجره UPVC، تعمیر یراق‌آلات، رگلاژ و..."
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+                onChange={setSkills}
+                placeholder="مثلاً نصب پنجره دوجداره، رگلاژ، تعویض یراق‌آلات و..."
               />
             </div>
+          </section>
 
-          </div>
-        </div>
-
-        {/* LOCATION */}
-
-        <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-
-          <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-xl">
-                📍
-              </div>
-
-              <div>
-                <h2 className="text-xl font-black">
-                  محل فعالیت
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  مشتریان باید بدانند در چه منطقه‌ای خدمات ارائه می‌دهید.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-5 p-6 sm:grid-cols-2 sm:p-8">
-
-            <Select
-              label="استان"
-              value={province}
-              onChange={setProvince}
-              options={provinces}
+          {/* محل فعالیت */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-8">
+            <SectionTitle
+              number="03"
+              title="محدوده فعالیت"
+              subtitle="کاربران بر اساس موقعیت مکانی بتوانند شما را پیدا کنند."
             />
 
-            <Input
-              label="شهر"
-              required
-              placeholder="مثلاً تبریز"
-              value={city}
-              onChange={setCity}
-            />
-
-            <div className="sm:col-span-2">
-              <Input
-                label="محدوده فعالیت"
-                placeholder="مثلاً تبریز، باسمنج، سردرود و حومه"
-                value={activityArea}
-                onChange={setActivityArea}
+            <div className="grid gap-5 md:grid-cols-2">
+              <Select
+                label="استان"
+                value={province}
+                onChange={setProvince}
+                options={provinces}
+                required
               />
-            </div>
 
-          </div>
-        </div>
-
-        {/* EXPERIENCE */}
-
-        <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-
-          <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-xl">
-                🏆
-              </div>
-
-              <div>
-                <h2 className="text-xl font-black">
-                  سابقه و اعتبار حرفه‌ای
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  سابقه کاری و مدارک حرفه‌ای خود را معرفی کنید.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-5 p-6 sm:grid-cols-2 sm:p-8">
-
-            <Select
-              label="میزان سابقه"
-              value={experience}
-              onChange={setExperience}
-              options={experienceOptions}
-              placeholder="انتخاب سابقه"
-            />
-
-            <Select
-              label="نوع همکاری موردنظر"
-              value={cooperationType}
-              onChange={setCooperationType}
-              options={cooperationOptions}
-              placeholder="انتخاب نوع همکاری"
-            />
-
-            <Select
-              label="زمان فعالیت"
-              value={availability}
-              onChange={setAvailability}
-              options={availabilityOptions}
-              placeholder="انتخاب زمان فعالیت"
-            />
-
-            <Input
-              label="مدارک و گواهینامه‌ها"
-              placeholder="مثلاً فنی و حرفه‌ای، نظام مهندسی و..."
-              value={certificates}
-              onChange={setCertificates}
-            />
-
-            <div className="sm:col-span-2">
-              <label className="mb-2 block text-sm font-bold">
-                معرفی کامل تخصص و تجربه
-                <span className="mr-1 text-red-500">*</span>
-              </label>
-
-              <textarea
-                rows={7}
-                value={description}
-                onChange={(e) =>
-                  setDescription(e.target.value)
-                }
-                placeholder="تجربه کاری، نوع پروژه‌هایی که انجام داده‌اید، مهارت‌های ویژه و هر چیزی که باعث می‌شود مشتری بهتر شما را بشناسد..."
-                className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 leading-8 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+              <Field
+                label="شهر"
+                value={city}
+                onChange={setCity}
+                placeholder="مثلاً تبریز"
+                required
               />
-            </div>
 
-            <Input
-              label="توضیح درباره قیمت خدمات"
-              placeholder="مثلاً توافقی، بر اساس متراژ یا پس از بازدید"
-              value={priceInfo}
-              onChange={setPriceInfo}
+              <div className="md:col-span-2">
+                <Field
+                  label="محدوده فعالیت"
+                  value={activityArea}
+                  onChange={setActivityArea}
+                  placeholder="مثلاً تبریز، ولیعصر، ائل‌گلی و مناطق اطراف"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* سابقه */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-8">
+            <SectionTitle
+              number="04"
+              title="سوابق و شرایط همکاری"
+              subtitle="اطلاعاتی که باعث اعتماد بیشتر مشتری می‌شود."
             />
 
-          </div>
-        </div>
+            <div className="grid gap-5 md:grid-cols-2">
+              <Select
+                label="سابقه فعالیت"
+                value={experience}
+                onChange={setExperience}
+                options={experiences}
+                placeholder="انتخاب سابقه"
+                required
+              />
 
-        {/* PORTFOLIO */}
+              <Select
+                label="نوع همکاری"
+                value={cooperationType}
+                onChange={setCooperationType}
+                options={cooperationTypes}
+                placeholder="انتخاب نوع همکاری"
+              />
 
-        <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+              <Select
+                label="زمان فعالیت"
+                value={availability}
+                onChange={setAvailability}
+                options={availabilities}
+                placeholder="انتخاب زمان فعالیت"
+              />
 
-          <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-50 text-xl">
-                🖼️
+              <Field
+                label="اطلاعات تقریبی دستمزد / قیمت"
+                value={priceInfo}
+                onChange={setPriceInfo}
+                placeholder="مثلاً توافقی یا بر اساس پروژه"
+              />
+
+              <div className="md:col-span-2">
+                <TextArea
+                  label="معرفی حرفه‌ای"
+                  value={description}
+                  onChange={setDescription}
+                  placeholder="سابقه، نوع پروژه‌هایی که انجام داده‌اید، توانایی‌ها و هر نکته‌ای که مشتری باید درباره شما بداند..."
+                  required
+                />
               </div>
 
-              <div>
-                <h2 className="text-xl font-black">
-                  نمونه‌کارها
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  حداکثر ۳ تصویر از بهترین پروژه‌های خود را قرار دهید.
-                </p>
+              <div className="md:col-span-2">
+                <TextArea
+                  label="مدارک و گواهی‌ها"
+                  value={certificates}
+                  onChange={setCertificates}
+                  placeholder="مثلاً مدرک فنی حرفه‌ای، گواهی نصب، سابقه شرکت‌ها و..."
+                />
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="p-6 sm:p-8">
+          {/* نمونه کار */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-8">
+            <SectionTitle
+              number="05"
+              title="نمونه‌کارها"
+              subtitle="حداکثر ۳ تصویر از پروژه‌ها یا کارهای انجام‌شده."
+            />
 
-            <label className="block cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handlePortfolio}
+              disabled={portfolio.length >= 3}
+              className="block w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm"
+            />
 
-              <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 transition hover:border-blue-400 hover:bg-blue-50">
+            <p className="mt-2 text-xs text-slate-500">
+              {remainingPortfolio > 0
+                ? `${remainingPortfolio} جای خالی باقی مانده است.`
+                : "تعداد مجاز نمونه‌کار تکمیل شده است."}
+            </p>
 
-                {workPreviews.length === 0 ? (
-                  <div className="py-12 text-center">
+            {portfolio.length > 0 && (
+              <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-3">
+                {portfolio.map((item, index) => (
+                  <div key={item.preview} className="relative">
+                    <img
+                      src={item.preview}
+                      alt={`نمونه‌کار ${index + 1}`}
+                      className="aspect-square w-full rounded-2xl object-cover"
+                    />
 
-                    <div className="text-5xl">
-                      🏗️
-                    </div>
-
-                    <h3 className="mt-4 font-black">
-                      نمونه‌کارهای خود را اضافه کنید
-                    </h3>
-
-                    <p className="mt-2 text-sm text-slate-500">
-                      حداکثر ۳ عکس از پروژه‌های واقعی شما
-                    </p>
-
-                    <span className="mt-5 inline-block rounded-xl bg-slate-900 px-6 py-3 text-sm font-black text-white">
-                      انتخاب تصاویر
-                    </span>
-
+                    <button
+                      type="button"
+                      onClick={() => removePortfolio(index)}
+                      className="absolute right-2 top-2 rounded-full bg-white px-3 py-1 text-xs font-bold text-red-600 shadow"
+                    >
+                      حذف
+                    </button>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-
-                    {workPreviews.map((image, index) => (
-                      <div
-                        key={image}
-                        className="relative overflow-hidden rounded-2xl bg-white shadow-sm"
-                      >
-                        <img
-                          src={image}
-                          alt={`نمونه کار ${index + 1}`}
-                          className="h-52 w-full object-cover"
-                        />
-
-                        <div className="absolute bottom-2 right-2 rounded-lg bg-black/60 px-3 py-1 text-xs font-bold text-white">
-                          نمونه‌کار {index + 1}
-                        </div>
-                      </div>
-                    ))}
-
-                  </div>
-                )}
-
+                ))}
               </div>
+            )}
+          </section>
 
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleWorkImages}
-                className="hidden"
-              />
+          {/* حریم خصوصی */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-8">
+            <SectionTitle
+              number="06"
+              title="نحوه نمایش اطلاعات"
+              subtitle="کنترل بیشتری روی اطلاعات تماس خود داشته باشید."
+            />
 
-            </label>
-
-          </div>
-        </div>
-
-        {/* PRIVACY */}
-
-        <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-
-          <div className="border-b border-slate-100 px-6 py-6 sm:px-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 text-xl">
-                🔐
-              </div>
-
-              <div>
-                <h2 className="text-xl font-black">
-                  نحوه نمایش اطلاعات
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  کنترل کنید مشتری چگونه بتواند با شما ارتباط بگیرد.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 p-6 sm:p-8">
-
-            <label className="flex cursor-pointer items-start gap-4 rounded-2xl border border-slate-200 p-5 transition hover:bg-slate-50">
-
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-slate-50 p-4">
               <input
                 type="checkbox"
                 checked={showPhone}
-                onChange={(e) =>
-                  setShowPhone(e.target.checked)
-                }
-                className="mt-1 h-5 w-5 accent-blue-700"
+                onChange={(e) => setShowPhone(e.target.checked)}
+                className="mt-1 h-5 w-5"
               />
 
-              <div>
-                <div className="font-black">
-                  نمایش شماره تماس به مشتری
-                </div>
-
-                <div className="mt-1 text-sm leading-7 text-slate-500">
-                  در صورت فعال بودن، شماره موبایل شما در پروفایل عمومی
-                  متخصص نمایش داده می‌شود.
-                </div>
-              </div>
-
+              <span>
+                <strong className="block text-sm">نمایش شماره تماس</strong>
+                <span className="mt-1 block text-xs leading-6 text-slate-500">
+                  در صورت تأیید، شماره تماس شما برای کاربران سایت قابل نمایش
+                  خواهد بود.
+                </span>
+              </span>
             </label>
 
-            <label className="flex cursor-pointer items-start gap-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-5">
-
+            <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 p-4">
               <input
                 type="checkbox"
                 checked={acceptRules}
-                onChange={(e) =>
-                  setAcceptRules(e.target.checked)
-                }
-                className="mt-1 h-5 w-5 accent-blue-700"
+                onChange={(e) => setAcceptRules(e.target.checked)}
+                className="mt-1 h-5 w-5"
               />
 
-              <div>
-                <div className="font-black">
-                  قوانین ثبت متخصص در سرچنو را می‌پذیرم
-                  <span className="mr-1 text-red-500">*</span>
-                </div>
+              <span className="text-sm leading-7">
+                اطلاعات واردشده صحیح است و با قوانین ثبت خدمات سرچنو موافقم.
+                <span className="mr-1 text-red-500">*</span>
+              </span>
+            </label>
+          </section>
 
-                <div className="mt-1 text-sm leading-7 text-slate-600">
-                  تأیید نهایی پروفایل توسط مدیریت سرچنو انجام می‌شود و
-                  اطلاعات نادرست یا خلاف قوانین ممکن است رد یا حذف شود.
-                </div>
+          {/* ارسال */}
+          <section className="rounded-3xl bg-slate-950 p-6 text-white shadow-xl md:p-8">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h2 className="text-xl font-black">
+                  آماده ارسال درخواست هستید؟
+                </h2>
+
+                <p className="mt-2 text-sm leading-7 text-slate-300">
+                  درخواست شما ابتدا بررسی می‌شود و پس از تأیید در سرچنو منتشر
+                  خواهد شد.
+                </p>
               </div>
 
-            </label>
-
-          </div>
-        </div>
-
-        {/* SUBMIT */}
-
-        <div className="mt-8 overflow-hidden rounded-3xl bg-slate-950 p-6 shadow-xl sm:p-10">
-
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-
-            <div className="text-center sm:text-right">
-              <h2 className="text-xl font-black text-white">
-                آماده ثبت پروفایل هستید؟
-              </h2>
-
-              <p className="mt-2 text-sm leading-7 text-slate-400">
-                اطلاعات شما ابتدا توسط مدیریت سرچنو بررسی می‌شود.
-              </p>
+              <button
+                type="submit"
+                disabled={loading}
+                className="rounded-2xl bg-white px-8 py-4 text-sm font-black text-slate-950 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? "در حال ثبت..." : "ثبت درخواست خدمات"}
+              </button>
             </div>
-
-            <button
-              type="button"
-              disabled={loading}
-              onClick={submitForm}
-              className="w-full rounded-2xl bg-blue-600 px-10 py-4 font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-            >
-              {loading
-                ? "در حال ثبت اطلاعات..."
-                : "ثبت پروفایل در سرچنو"}
-            </button>
-
-          </div>
-
-        </div>
-
-        {/* TRUST */}
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-
-          <TrustItem
-            icon="🔒"
-            title="اطلاعات امن"
-            text="اطلاعات شما برای بررسی و ایجاد پروفایل استفاده می‌شود."
-          />
-
-          <TrustItem
-            icon="✓"
-            title="تأیید مدیریت"
-            text="پروفایل قبل از انتشار توسط مدیریت سرچنو بررسی می‌شود."
-          />
-
-          <TrustItem
-            icon="⭐"
-            title="پروفایل حرفه‌ای"
-            text="تخصص و نمونه‌کارهای شما در معرض دید مشتریان قرار می‌گیرد."
-          />
-
-        </div>
-
-      </section>
-
-      {/* FOOTER */}
-
-      <footer className="mt-10 bg-slate-950 px-5 py-10 text-center">
-
-        <img
-          src="/logo.png"
-          alt="سرچنو"
-          className="mx-auto h-14 w-14 rounded-2xl object-contain"
-        />
-
-        <div className="mt-4 font-black text-white">
-          سرچنو
-        </div>
-
-        <p className="mt-2 text-sm text-slate-500">
-          پلتفرم هوشمند ساخت‌وساز
-        </p>
-
-        <p className="mt-5 text-xs text-slate-600">
-          © ۱۴۰۵ سرچنو — بازار هوشمند ساخت‌وساز
-        </p>
-
-      </footer>
-
+          </section>
+        </form>
+      </div>
     </main>
   );
 }
 
+function SectionTitle({
+  number,
+  title,
+  subtitle,
+}: {
+  number: string;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <div className="mb-7">
+      <div className="mb-2 flex items-center gap-3">
+        <span className="text-xs font-black tracking-widest text-slate-400">
+          {number}
+        </span>
 
-/* ================= COMPONENTS ================= */
+        <h2 className="text-xl font-black md:text-2xl">{title}</h2>
+      </div>
 
-function Input({
+      <p className="text-sm leading-7 text-slate-500">{subtitle}</p>
+    </div>
+  );
+}
+
+function Field({
   label,
   value,
   onChange,
   placeholder,
   required = false,
-  type = "text",
-  maxLength,
+  inputMode,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
-  type?: string;
-  maxLength?: number;
+  inputMode?: "text" | "numeric" | "tel" | "email" | "url";
 }) {
   return (
     <div>
       <label className="mb-2 block text-sm font-bold">
         {label}
-
-        {required && (
-          <span className="mr-1 text-red-500">
-            *
-          </span>
-        )}
+        {required && <span className="mr-1 text-red-500">*</span>}
       </label>
 
       <input
-        type={type}
         value={value}
-        maxLength={maxLength}
-        placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+        placeholder={placeholder}
+        inputMode={inputMode}
+        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-950 focus:bg-white"
       />
     </div>
   );
 }
-
 
 function Select({
   label,
@@ -1066,29 +764,28 @@ function Select({
   onChange,
   options,
   placeholder,
+  required = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: string[];
   placeholder?: string;
+  required?: boolean;
 }) {
   return (
     <div>
       <label className="mb-2 block text-sm font-bold">
         {label}
+        {required && <span className="mr-1 text-red-500">*</span>}
       </label>
 
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50"
+        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none focus:border-slate-950 focus:bg-white"
       >
-        {placeholder && (
-          <option value="">
-            {placeholder}
-          </option>
-        )}
+        {placeholder && <option value="">{placeholder}</option>}
 
         {options.map((option) => (
           <option key={option} value={option}>
@@ -1100,29 +797,33 @@ function Select({
   );
 }
 
-
-function TrustItem({
-  icon,
-  title,
-  text,
+function TextArea({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required = false,
 }: {
-  icon: string;
-  title: string;
-  text: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center">
-      <div className="text-2xl">
-        {icon}
-      </div>
+    <div>
+      <label className="mb-2 block text-sm font-bold">
+        {label}
+        {required && <span className="mr-1 text-red-500">*</span>}
+      </label>
 
-      <div className="mt-3 font-black">
-        {title}
-      </div>
-
-      <p className="mt-2 text-xs leading-6 text-slate-500">
-        {text}
-      </p>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={5}
+        className="w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm leading-7 outline-none transition focus:border-slate-950 focus:bg-white"
+      />
     </div>
   );
         }
