@@ -16,6 +16,7 @@ const serviceCategories = [
   "نماکار",
   "کناف‌کار",
   "مهندس و پیمانکار",
+  "سایر خدمات",
 ];
 
 const provinces = [
