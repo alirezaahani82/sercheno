@@ -258,7 +258,7 @@ export default function ServiceRegisterPage() {
   }
 
   async function uploadImage(
-  async function uploadImage(
+  
   file: File,
   folder: string
 ): Promise<string> {
