@@ -320,7 +320,7 @@ export default function ServiceRegisterPage() {
       setTimeout(() => {
         router.push("/service");
       }, 2500);
-    } catch (error) {
+  } catch (error) {
   console.error("SERVICE REGISTER ERROR:", error);
 
   const message =
@@ -329,11 +329,9 @@ export default function ServiceRegisterPage() {
       : "خطای نامشخص در ثبت درخواست";
 
   setErrorMessage(`خطای ثبت: ${message}`);
+} finally {
+  setLoading(false);
     }
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
