@@ -258,28 +258,33 @@ export default function ServiceRegisterPage() {
   }
 
   async function uploadImage(
-    file: File,
-    folder: string
-  ): Promise<string> {
-    const extension =
-      file.name.split(".").pop()?.toLowerCase() || "jpg";
+  async function uploadImage(
+  file: File,
+  folder: string
+): Promise<string> {
+  const extension =
+    file.name.split(".").pop()?.toLowerCase() || "jpg";
 
-    const fileName = `${crypto.randomUUID()}.${extension}`;
+  const fileName = `${crypto.randomUUID()}.${extension}`;
 
-    const path = `${folder}/${fileName}`;
+  const path = `${folder}/${fileName}`;
 
-    const path = await uploadImage(
-  portfolio[i].file,
-  `applications/${registrationId}/profile`
-);
-    if (error) {
-      throw new Error(
-        `خطا در آپلود تصویر: ${error.message}`
-      );
-    }
+  const { error } = await supabase.storage
+    .from("professionals")
+    .upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type,
+    });
 
-    return path;
+  if (error) {
+    throw new Error(
+      `خطا در آپلود تصویر: ${error.message}`
+    );
   }
+
+  return path;
+}
 
   async function handleSubmit(
     e: FormEvent<HTMLFormElement>
