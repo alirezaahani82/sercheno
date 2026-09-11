@@ -321,11 +321,15 @@ export default function ServiceRegisterPage() {
         router.push("/service");
       }, 2500);
     } catch (error) {
-      console.error(error);
+  console.error("SERVICE REGISTER ERROR:", error);
 
-      setErrorMessage(
-        "ثبت درخواست انجام نشد. لطفاً اتصال اینترنت و اطلاعات واردشده را بررسی کنید."
-      );
+  const message =
+    error instanceof Error
+      ? error.message
+      : "خطای نامشخص در ثبت درخواست";
+
+  setErrorMessage(`خطای ثبت: ${message}`);
+    }
     } finally {
       setLoading(false);
     }
