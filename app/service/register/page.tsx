@@ -268,14 +268,10 @@ export default function ServiceRegisterPage() {
 
     const path = `${folder}/${fileName}`;
 
-    const { error } = await supabase.storage
-      .from("professionals")
-      .upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-        contentType: file.type,
-      });
-
+    const path = await uploadImage(
+  portfolio[i].file,
+  `applications/${registrationId}/profile`
+);
     if (error) {
       throw new Error(
         `خطا در آپلود تصویر: ${error.message}`
