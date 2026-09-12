@@ -61,7 +61,6 @@ export default function ServicePage() {
   const [error, setError] =
     useState("");
 
-
   /* ================= FETCH PROFESSIONALS ================= */
 
   useEffect(() => {
@@ -91,7 +90,6 @@ export default function ServicePage() {
             ? data
             : []
         );
-
       } catch (err) {
         console.error(
           "SERVICE PAGE ERROR:",
@@ -101,7 +99,6 @@ export default function ServicePage() {
         setError(
           "دریافت اطلاعات متخصصان با مشکل مواجه شد."
         );
-
       } finally {
         setLoading(false);
       }
@@ -110,12 +107,10 @@ export default function ServicePage() {
     fetchProfessionals();
   }, []);
 
-
   /* ================= FILTER ================= */
 
   const filteredProfessionals =
     professionals.filter((person) => {
-
       const categoryMatch =
         selectedCategory === "همه خدمات" ||
         person.service === selectedCategory;
@@ -152,7 +147,6 @@ export default function ServicePage() {
       );
     });
 
-
   return (
     <main
       dir="rtl"
@@ -169,7 +163,6 @@ export default function ServicePage() {
             href="/"
             className="flex items-center gap-3"
           >
-
             <img
               src="/logo.png"
               alt="لوگوی سرچنو"
@@ -177,7 +170,6 @@ export default function ServicePage() {
             />
 
             <div>
-
               <div className="text-2xl font-black text-blue-700">
                 سرچنو
               </div>
@@ -185,11 +177,8 @@ export default function ServicePage() {
               <div className="text-xs text-slate-500">
                 بازار هوشمند ساخت‌وساز
               </div>
-
             </div>
-
           </Link>
-
 
           <nav className="hidden items-center gap-8 text-sm font-bold lg:flex">
 
@@ -216,7 +205,6 @@ export default function ServicePage() {
 
           </nav>
 
-
           <div className="flex items-center gap-2">
 
             <button
@@ -239,189 +227,103 @@ export default function ServicePage() {
 
       </header>
 
+      {/* ================= HERO ================= */}
 
-   {/* ================= HERO ================= */}
+      <section className="relative overflow-hidden">
 
-<section className="relative overflow-hidden">
+        <div className="relative min-h-[430px] md:min-h-[560px]">
 
-  <div className="relative min-h-[430px] md:min-h-[560px]">
+          <img
+            src="/materials/service.png"
+            alt="خدمات ساختمانی سرچنو"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
 
-    {/* تصویر اصلی صفحه خدمات */}
+          <div className="absolute inset-0 bg-black/55" />
 
-    <img
-      src="/materials/service.png"
-      alt="خدمات ساختمانی سرچنو"
-      className="absolute inset-0 h-full w-full object-cover"
-    />
+          <div className="relative z-10 flex min-h-[430px] items-center justify-center px-5 md:min-h-[560px]">
 
-    {/* لایه تاریک برای خوانایی متن */}
+            <div className="mx-auto max-w-4xl text-center text-white">
 
-    <div className="absolute inset-0 bg-black/55" />
+              <div className="mb-6 inline-flex rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold backdrop-blur-sm">
+                🛠️ خدمات ساختمانی سرچنو
+              </div>
 
-    {/* محتوا */}
+              <h1 className="text-4xl font-black leading-tight sm:text-5xl md:text-6xl">
 
-    <div className="relative z-10 flex min-h-[430px] md:min-h-[560px] items-center justify-center px-5">
+                متخصص مورد نیاز پروژه‌تان را
 
-      <div className="mx-auto max-w-4xl text-center text-white">
+                <span className="mt-3 block text-cyan-300">
+                  پیدا کنید
+                </span>
 
-        <div className="mb-6 inline-flex rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold backdrop-blur-sm">
-          🛠️ خدمات ساختمانی سرچنو
-        </div>
+              </h1>
 
-        <h1 className="text-4xl font-black leading-tight sm:text-5xl md:text-6xl">
+              <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/90 md:text-lg">
 
-          متخصص مورد نیاز پروژه‌تان را
+                از بنا و استادکار تا نصاب، جوشکار، برق‌کار،
+                مهندس، پیمانکار و سایر متخصصان؛
+                متخصص مورد نیاز خود را در سرچنو پیدا کنید.
 
-          <span className="block mt-3 text-cyan-300">
-            پیدا کنید
-          </span>
+              </p>
 
-        </h1>
+              {/* ================= HERO SEARCH ================= */}
 
-        <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/90 md:text-lg">
+              <div className="mx-auto mt-8 max-w-4xl rounded-3xl bg-white/95 p-3 shadow-2xl backdrop-blur">
 
-          از بنا و استادکار تا نصاب، جوشکار، برق‌کار،
-          مهندس، پیمانکار و سایر متخصصان؛
-          متخصص مورد نیاز خود را در سرچنو پیدا کنید.
+                <div className="flex flex-col gap-3 md:flex-row">
 
-        </p>
+                  <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4">
 
-        {/* جستجو */}
+                    <span className="text-xl">
+                      🔍
+                    </span>
 
-        <div className="mx-auto mt-8 max-w-4xl rounded-3xl bg-white/95 p-3 shadow-2xl backdrop-blur">
+                    <input
+                      value={search}
+                      onChange={(event) =>
+                        setSearch(event.target.value)
+                      }
+                      placeholder="مثلاً نصاب کاشی، برق‌کار یا جوشکار..."
+                      className="w-full bg-transparent text-sm text-slate-800 outline-none"
+                    />
 
-          <div className="flex flex-col gap-3 md:flex-row">
+                  </div>
 
-            <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4">
-
-              <span className="text-xl">
-                🔍
-              </span>
-
-              <input
-                value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
-                placeholder="مثلاً نصاب کاشی، برق‌کار یا جوشکار..."
-                className="w-full bg-transparent text-sm text-slate-800 outline-none"
-              />
-
-            </div>
-
-            <select
-              value={selectedCity}
-              onChange={(event) =>
-                setSelectedCity(event.target.value)
-              }
-              className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none"
-            >
-
-              {cities.map((city) => (
-
-                <option
-                  key={city}
-                  value={city}
-                >
-                  📍 {city}
-                </option>
-
-              ))}
-
-            </select>
-
-            <button
-              type="button"
-              onClick={() => {
-                document
-                  .getElementById("service-results")
-                  ?.scrollIntoView({
-                    behavior: "smooth",
-                  });
-              }}
-              className="rounded-2xl bg-blue-700 px-8 py-4 font-bold text-white hover:bg-blue-800"
-            >
-              جست‌وجوی متخصص
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-            {/* ================= SEARCH ================= */}
-
-            <div className="mx-auto mt-10 rounded-3xl bg-white p-3 shadow-2xl">
-
-              <div className="flex flex-col gap-3 md:flex-row">
-
-                <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4">
-
-                  <span className="text-xl">
-                    🔍
-                  </span>
-
-                  <input
-                    value={search}
+                  <select
+                    value={selectedCity}
                     onChange={(event) =>
-                      setSearch(
-                        event.target.value
-                      )
+                      setSelectedCity(event.target.value)
                     }
-                    placeholder="مثلاً نصاب کاشی، برق‌کار یا جوشکار..."
-                    className="w-full bg-transparent text-sm text-slate-800 outline-none"
-                  />
+                    className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none"
+                  >
+
+                    {cities.map((city) => (
+                      <option
+                        key={city}
+                        value={city}
+                      >
+                        📍 {city}
+                      </option>
+                    ))}
+
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      document
+                        .getElementById("service-results")
+                        ?.scrollIntoView({
+                          behavior: "smooth",
+                        });
+                    }}
+                    className="rounded-2xl bg-blue-700 px-8 py-4 font-bold text-white hover:bg-blue-800"
+                  >
+                    جست‌وجوی متخصص
+                  </button>
 
                 </div>
-
-
-                <select
-                  value={selectedCity}
-                  onChange={(event) =>
-                    setSelectedCity(
-                      event.target.value
-                    )
-                  }
-                  className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none"
-                >
-
-                  {cities.map((city) => (
-
-                    <option
-                      key={city}
-                      value={city}
-                    >
-                      📍 {city}
-                    </option>
-
-                  ))}
-
-                </select>
-
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const results =
-                      document.getElementById(
-                        "service-results"
-                      );
-
-                    results?.scrollIntoView({
-                      behavior: "smooth",
-                    });
-                  }}
-                  className="rounded-2xl bg-blue-700 px-8 py-4 font-bold text-white hover:bg-blue-800"
-                >
-                  جست‌وجوی متخصص
-                </button>
 
               </div>
 
@@ -432,7 +334,6 @@ export default function ServicePage() {
         </div>
 
       </section>
-
 
       {/* ================= CATEGORY CARDS ================= */}
 
@@ -456,7 +357,6 @@ export default function ServicePage() {
           </p>
 
         </div>
-
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
 
@@ -489,7 +389,6 @@ export default function ServicePage() {
 
                 </div>
 
-
                 <div className="p-4">
 
                   <p className="line-clamp-2 text-xs leading-6 text-slate-500">
@@ -511,7 +410,6 @@ export default function ServicePage() {
 
       </section>
 
-
       {/* ================= MAIN ================= */}
 
       <section
@@ -521,7 +419,6 @@ export default function ServicePage() {
 
         <div className="grid gap-8 lg:grid-cols-4">
 
-
           {/* ================= SIDEBAR ================= */}
 
           <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -530,26 +427,21 @@ export default function ServicePage() {
               دسته‌بندی خدمات
             </h2>
 
-
             <div className="space-y-2">
 
               <button
                 type="button"
                 onClick={() =>
-                  setSelectedCategory(
-                    "همه خدمات"
-                  )
+                  setSelectedCategory("همه خدمات")
                 }
                 className={`w-full rounded-xl px-4 py-3 text-right text-sm font-bold transition ${
-                  selectedCategory ===
-                  "همه خدمات"
+                  selectedCategory === "همه خدمات"
                     ? "bg-blue-700 text-white shadow-lg shadow-blue-700/20"
                     : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 همه خدمات
               </button>
-
 
               {SERVICE_CATEGORIES.map(
                 (category) => (
@@ -563,8 +455,7 @@ export default function ServicePage() {
                       )
                     }
                     className={`w-full rounded-xl px-4 py-3 text-right text-sm font-bold transition ${
-                      selectedCategory ===
-                      category.name
+                      selectedCategory === category.name
                         ? "bg-blue-700 text-white shadow-lg shadow-blue-700/20"
                         : "text-slate-600 hover:bg-slate-100"
                     }`}
@@ -576,7 +467,6 @@ export default function ServicePage() {
               )}
 
             </div>
-
 
             {/* ================= PROVIDER CTA ================= */}
 
@@ -606,7 +496,6 @@ export default function ServicePage() {
 
           </aside>
 
-
           {/* ================= RESULTS ================= */}
 
           <div className="lg:col-span-3">
@@ -625,7 +514,6 @@ export default function ServicePage() {
 
               </div>
 
-
               <div className="rounded-xl bg-white px-4 py-3 text-sm text-slate-500 shadow-sm">
 
                 <span className="font-black text-slate-900">
@@ -636,7 +524,6 @@ export default function ServicePage() {
               </div>
 
             </div>
-
 
             {/* ================= LOADING ================= */}
 
@@ -655,7 +542,6 @@ export default function ServicePage() {
               </div>
 
             )}
-
 
             {/* ================= ERROR ================= */}
 
@@ -678,7 +564,6 @@ export default function ServicePage() {
               </div>
 
             )}
-
 
             {/* ================= EMPTY ================= */}
 
@@ -704,7 +589,6 @@ export default function ServicePage() {
 
               )}
 
-
             {/* ================= PROFESSIONAL CARDS ================= */}
 
             {!loading &&
@@ -724,9 +608,7 @@ export default function ServicePage() {
 
                         <article className="h-full rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-xl">
 
-
                           <div className="flex items-start gap-4">
-
 
                             {/* ================= PHOTO ================= */}
 
@@ -735,9 +617,7 @@ export default function ServicePage() {
                               {person.profile_image_url ? (
 
                                 <img
-                                  src={
-                                    person.profile_image_url
-                                  }
+                                  src={person.profile_image_url}
                                   alt={`${person.first_name} ${person.last_name}`}
                                   className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                                 />
@@ -752,7 +632,6 @@ export default function ServicePage() {
 
                             </div>
 
-
                             <div className="min-w-0 flex-1">
 
                               <div className="flex items-start justify-between gap-2">
@@ -764,33 +643,27 @@ export default function ServicePage() {
 
                                 <span className="whitespace-nowrap text-sm">
                                   ⭐{" "}
-                                  {person.rating ||
-                                    4.8}
+                                  {person.rating || 4.8}
                                 </span>
 
                               </div>
-
 
                               <p className="mt-1 text-sm font-bold text-blue-700">
                                 {person.service}
                               </p>
 
-
                               <p className="mt-1 text-xs text-slate-400">
                                 📍{" "}
-                                {person.city ||
-                                  "نامشخص"}
+                                {person.city || "نامشخص"}
                               </p>
 
                             </div>
-
 
                             <div className="hidden rounded-lg bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-600 sm:block">
                               ✓ تأیید شده
                             </div>
 
                           </div>
-
 
                           {/* ================= DETAILS ================= */}
 
@@ -802,11 +675,9 @@ export default function ServicePage() {
                                 محدوده فعالیت:
                               </span>{" "}
 
-                              {person.activity_area ||
-                                "ثبت نشده"}
+                              {person.activity_area || "ثبت نشده"}
 
                             </p>
-
 
                             <p>
 
@@ -814,13 +685,11 @@ export default function ServicePage() {
                                 سابقه فعالیت:
                               </span>{" "}
 
-                              {person.experience ||
-                                "ثبت نشده"}
+                              {person.experience || "ثبت نشده"}
 
                             </p>
 
                           </div>
-
 
                           <p className="mt-5 line-clamp-3 text-sm leading-7 text-slate-500">
 
@@ -829,15 +698,12 @@ export default function ServicePage() {
 
                           </p>
 
-
                           <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-5">
 
                             <span className="text-xs text-slate-400">
                               رتبه:{" "}
-                              {person.rank ||
-                                "ویژه"}
+                              {person.rank || "ویژه"}
                             </span>
-
 
                             <span className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white group-hover:bg-blue-800">
                               مشاهده پروفایل
@@ -861,7 +727,6 @@ export default function ServicePage() {
         </div>
 
       </section>
-
 
       {/* ================= REQUEST SERVICE ================= */}
 
@@ -888,19 +753,16 @@ export default function ServicePage() {
 
             </div>
 
-
             <div className="rounded-3xl bg-white p-6 text-slate-900">
 
               <h3 className="text-xl font-black">
                 چه خدمتی نیاز دارید؟
               </h3>
 
-
               <input
                 placeholder="مثلاً نصب ۲۰۰ متر کاشی"
                 className="mt-5 w-full rounded-xl bg-slate-100 px-4 py-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"
               />
-
 
               <select className="mt-3 w-full rounded-xl bg-slate-100 px-4 py-4 text-sm outline-none">
 
@@ -926,7 +788,6 @@ export default function ServicePage() {
 
               </select>
 
-
               <button
                 type="button"
                 className="mt-3 w-full rounded-xl bg-blue-700 py-4 font-bold text-white hover:bg-blue-800"
@@ -941,7 +802,6 @@ export default function ServicePage() {
         </div>
 
       </section>
-
 
       {/* ================= PROVIDER CTA ================= */}
 
@@ -974,7 +834,6 @@ export default function ServicePage() {
         </div>
 
       </section>
-
 
       {/* ================= FOOTER ================= */}
 
@@ -1011,7 +870,6 @@ export default function ServicePage() {
 
               </Link>
 
-
               <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
 
                 پلتفرم جست‌وجو، مقایسه و ارتباط با فروشندگان
@@ -1020,7 +878,6 @@ export default function ServicePage() {
               </p>
 
             </div>
-
 
             <div>
 
@@ -1055,7 +912,6 @@ export default function ServicePage() {
 
             </div>
 
-
             <div>
 
               <h3 className="font-bold text-white">
@@ -1085,7 +941,6 @@ export default function ServicePage() {
             </div>
 
           </div>
-
 
           <div className="mt-12 border-t border-white/10 pt-7 text-center text-xs text-slate-500">
 
