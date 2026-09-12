@@ -88,6 +88,10 @@ type PreviewFile = {
   preview: string;
 };
 
+const MAX_SOURCE_FILE_SIZE = 15 * 1024 * 1024;
+const MAX_COMPRESSED_FILE_SIZE = 1.5 * 1024 * 1024;
+const MAX_PORTFOLIO_COUNT = 3;
+
 export default function ServiceRegisterPage() {
   const router = useRouter();
 
@@ -114,31 +118,226 @@ export default function ServiceRegisterPage() {
   const [showPhone, setShowPhone] = useState(true);
   const [acceptRules, setAcceptRules] = useState(false);
 
-  const [profile, setProfile] = useState<PreviewFile | null>(null);
-  const [portfolio, setPortfolio] = useState<PreviewFile[]>([]);
+  const [profile, setProfile] =
+    useState<PreviewFile | null>(null);
+
+  const [portfolio, setPortfolio] =
+    useState<PreviewFile[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   const remainingPortfolio = useMemo(
-    () => 3 - portfolio.length,
+    () => MAX_PORTFOLIO_COUNT - portfolio.length,
     [portfolio.length]
   );
 
-  function handleProfile(e: ChangeEvent<HTMLInputElement>) {
+  /*
+   * تبدیل و فشرده‌سازی عکس
+   *
+   * عکس‌های دوربین موبایل ممکن است چندین مگابایت باشند.
+   * قبل از ارسال به Supabase آن‌ها را به JPEG تبدیل می‌کنیم
+   * و حجم را تا حد مناسبی پایین می‌آوریم.
+   */
+  async function compressImage(
+    file: File
+  ): Promise<File> {
+    if (!file.type.startsWith("image/")) {
+      throw new Error("فایل انتخاب‌شده تصویر نیست.");
+    }
+
+    /*
+     * اگر عکس از قبل کوچک باشد،
+     * باز هم آن را استاندارد می‌کنیم تا آپلود پایدارتر شود.
+     */
+
+    const imageUrl = URL.createObjectURL(file);
+
+    try {
+      const image = new Image();
+
+      await new Promise<void>(
+        (resolve, reject) => {
+          image.onload = () => resolve();
+          image.onerror = () =>
+            reject(
+              new Error(
+                "امکان خواندن تصویر انتخاب‌شده وجود ندارد."
+              )
+            );
+
+          image.src = imageUrl;
+        }
+      );
+
+      const maxDimension = 1600;
+
+      let width = image.naturalWidth;
+      let height = image.naturalHeight;
+
+      if (
+        width > maxDimension ||
+        height > maxDimension
+      ) {
+        const ratio = Math.min(
+          maxDimension / width,
+          maxDimension / height
+        );
+
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      const canvas =
+        document.createElement("canvas");
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        throw new Error(
+          "امکان پردازش تصویر در مرورگر وجود ندارد."
+        );
+      }
+
+      context.drawImage(
+        image,
+        0,
+        0,
+        width,
+        height
+      );
+
+      let quality = 0.82;
+
+      let blob = await new Promise<Blob | null>(
+        (resolve) =>
+          canvas.toBlob(
+            resolve,
+            "image/jpeg",
+            quality
+          )
+      );
+
+      if (!blob) {
+        throw new Error(
+          "امکان آماده‌سازی تصویر وجود ندارد."
+        );
+      }
+
+      /*
+       * اگر حجم هنوز زیاد بود،
+       * کیفیت را مرحله‌به‌مرحله کم می‌کنیم.
+       */
+      while (
+        blob.size > MAX_COMPRESSED_FILE_SIZE &&
+        quality > 0.45
+      ) {
+        quality -= 0.07;
+
+        blob = await new Promise<Blob | null>(
+          (resolve) =>
+            canvas.toBlob(
+              resolve,
+              "image/jpeg",
+              quality
+            )
+        );
+
+        if (!blob) {
+          throw new Error(
+            "امکان فشرده‌سازی تصویر وجود ندارد."
+          );
+        }
+      }
+
+      /*
+       * اگر هنوز بیش از حد بزرگ بود،
+       * اندازه تصویر را هم کاهش می‌دهیم.
+       */
+      if (
+        blob.size > MAX_COMPRESSED_FILE_SIZE
+      ) {
+        const smallerCanvas =
+          document.createElement("canvas");
+
+        const smallerRatio = 0.75;
+
+        smallerCanvas.width = Math.max(
+          600,
+          Math.round(width * smallerRatio)
+        );
+
+        smallerCanvas.height = Math.max(
+          600,
+          Math.round(height * smallerRatio)
+        );
+
+        const smallerContext =
+          smallerCanvas.getContext("2d");
+
+        if (!smallerContext) {
+          throw new Error(
+            "امکان پردازش تصویر وجود ندارد."
+          );
+        }
+
+        smallerContext.drawImage(
+          image,
+          0,
+          0,
+          smallerCanvas.width,
+          smallerCanvas.height
+        );
+
+        const smallerBlob =
+          await new Promise<Blob | null>(
+            (resolve) =>
+              smallerCanvas.toBlob(
+                resolve,
+                "image/jpeg",
+                0.68
+              )
+          );
+
+        if (smallerBlob) {
+          blob = smallerBlob;
+        }
+      }
+
+      return new File(
+        [blob],
+        `image-${Date.now()}.jpg`,
+        {
+          type: "image/jpeg",
+          lastModified: Date.now(),
+        }
+      );
+    } finally {
+      URL.revokeObjectURL(imageUrl);
+    }
+  }
+
+  function handleProfile(
+    e: ChangeEvent<HTMLInputElement>
+  ) {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setErrorMessage("فایل عکس پرسنلی باید تصویری باشد.");
+      setErrorMessage(
+        "فایل عکس پرسنلی باید تصویری باشد."
+      );
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > MAX_SOURCE_FILE_SIZE) {
       setErrorMessage(
-        "حجم عکس پرسنلی نباید بیشتر از ۵ مگابایت باشد."
+        "حجم عکس پرسنلی نباید بیشتر از ۱۵ مگابایت باشد."
       );
       return;
     }
@@ -153,19 +352,28 @@ export default function ServiceRegisterPage() {
       file,
       preview: URL.createObjectURL(file),
     });
+
+    e.target.value = "";
   }
 
-  function handlePortfolio(e: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || []);
+  function handlePortfolio(
+    e: ChangeEvent<HTMLInputElement>
+  ) {
+    const files = Array.from(
+      e.target.files || []
+    );
 
     if (!files.length) return;
 
-    const available = 3 - portfolio.length;
+    const available =
+      MAX_PORTFOLIO_COUNT - portfolio.length;
 
     if (files.length > available) {
       setErrorMessage(
-        "حداکثر ۳ عکس نمونه‌کار می‌توانید انتخاب کنید."
+        `حداکثر ${MAX_PORTFOLIO_COUNT} عکس نمونه‌کار می‌توانید انتخاب کنید.`
       );
+
+      e.target.value = "";
       return;
     }
 
@@ -174,25 +382,33 @@ export default function ServiceRegisterPage() {
         setErrorMessage(
           "تمام فایل‌های نمونه‌کار باید عکس باشند."
         );
+
+        e.target.value = "";
         return;
       }
 
-      if (file.size > 7 * 1024 * 1024) {
+      if (file.size > MAX_SOURCE_FILE_SIZE) {
         setErrorMessage(
-          "حجم هر عکس نمونه‌کار نباید بیشتر از ۷ مگابایت باشد."
+          "حجم هر عکس نمونه‌کار نباید بیشتر از ۱۵ مگابایت باشد."
         );
+
+        e.target.value = "";
         return;
       }
     }
 
     setErrorMessage("");
 
-    const newFiles: PreviewFile[] = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
+    const newFiles: PreviewFile[] =
+      files.map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+      }));
 
-    setPortfolio((prev) => [...prev, ...newFiles]);
+    setPortfolio((prev) => [
+      ...prev,
+      ...newFiles,
+    ]);
 
     e.target.value = "";
   }
@@ -250,6 +466,17 @@ export default function ServiceRegisterPage() {
       return "عکس پرسنلی خود را انتخاب کنید.";
     }
 
+    /*
+     * نمونه‌کار را هم اجباری کردیم.
+     */
+    if (portfolio.length === 0) {
+      return "لطفاً حداقل یک عکس نمونه‌کار آپلود کنید.";
+    }
+
+    if (portfolio.length > MAX_PORTFOLIO_COUNT) {
+      return "حداکثر ۳ عکس نمونه‌کار مجاز است.";
+    }
+
     if (!acceptRules) {
       return "لطفاً قوانین ثبت خدمات را تأیید کنید.";
     }
@@ -257,34 +484,80 @@ export default function ServiceRegisterPage() {
     return "";
   }
 
+  /*
+   * آپلود امن‌تر عکس
+   *
+   * قبل از آپلود:
+   * 1. عکس فشرده می‌شود.
+   * 2. نام تصادفی ساخته می‌شود.
+   * 3. خطا به پیام فارسی تبدیل می‌شود.
+   */
   async function uploadImage(
-  
-  file: File,
-  folder: string
-): Promise<string> {
-  const extension =
-    file.name.split(".").pop()?.toLowerCase() || "jpg";
+    file: File,
+    folder: string,
+    title: string
+  ): Promise<string> {
+    try {
+      const compressedFile =
+        await compressImage(file);
 
-  const fileName = `${crypto.randomUUID()}.${extension}`;
+      const fileName =
+        `${crypto.randomUUID()}.jpg`;
 
-  const path = `${folder}/${fileName}`;
+      const path =
+        `${folder}/${fileName}`;
 
-  const { error } = await supabase.storage
-    .from("professionals")
-    .upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type,
-    });
+      const { error } =
+        await supabase.storage
+          .from("professionals")
+          .upload(
+            path,
+            compressedFile,
+            {
+              cacheControl: "3600",
+              upsert: false,
+              contentType: "image/jpeg",
+            }
+          );
 
-  if (error) {
-    throw new Error(
-      `خطا در آپلود تصویر: ${error.message}`
-    );
+      if (error) {
+        console.error(
+          "SUPABASE IMAGE UPLOAD ERROR:",
+          {
+            title,
+            message: error.message,
+            folder,
+          }
+        );
+
+        throw new Error(
+          `آپلود ${title} انجام نشد. لطفاً دوباره عکس را انتخاب کنید.`
+        );
+      }
+
+      return path;
+    } catch (error) {
+      console.error(
+        "IMAGE UPLOAD EXCEPTION:",
+        {
+          title,
+          folder,
+          error,
+        }
+      );
+
+      if (
+        error instanceof Error &&
+        error.message.startsWith("آپلود")
+      ) {
+        throw error;
+      }
+
+      throw new Error(
+        `در آپلود ${title} مشکلی ایجاد شد. لطفاً یک عکس دیگر با حجم کمتر انتخاب کنید.`
+      );
+    }
   }
-
-  return path;
-}
 
   async function handleSubmit(
     e: FormEvent<HTMLFormElement>
@@ -298,86 +571,146 @@ export default function ServiceRegisterPage() {
 
     if (validationError) {
       setErrorMessage(validationError);
+
       window.scrollTo({
         top: 0,
         behavior: "smooth",
       });
+
       return;
     }
 
     setLoading(true);
 
     try {
-      const registrationId = crypto.randomUUID();
+      const registrationId =
+        crypto.randomUUID();
 
-      const profilePath = await uploadImage(
-        profile!.file,
-        `applications/${registrationId}/profile`
-      );
+      /*
+       * -------------------------
+       * عکس پرسنلی
+       * -------------------------
+       */
+      let profilePath: string;
+
+      try {
+        profilePath = await uploadImage(
+          profile!.file,
+          `applications/${registrationId}/profile`,
+          "عکس پرسنلی"
+        );
+      } catch (error) {
+        throw error;
+      }
+
+      /*
+       * -------------------------
+       * نمونه‌کارها
+       * -------------------------
+       */
 
       const portfolioPaths: string[] = [];
 
-      for (let i = 0; i < portfolio.length; i++) {
-        const path = await uploadImage(
-          portfolio[i].file,
-          `applications/${registrationId}/portfolio`
-        );
+      for (
+        let i = 0;
+        i < portfolio.length;
+        i++
+      ) {
+        const path =
+          await uploadImage(
+            portfolio[i].file,
+            `applications/${registrationId}/portfolio`,
+            `نمونه‌کار شماره ${i + 1}`
+          );
 
         portfolioPaths.push(path);
       }
 
-      const { error } = await supabase
-        .from("professionals")
-        .insert({
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-          phone: phone.trim(),
-          national_code: nationalCode.trim(),
-          birth_date: birthDate || null,
+      /*
+       * -------------------------
+       * ثبت اطلاعات در دیتابیس
+       * -------------------------
+       */
 
-          service: category,
-          skills: skills.trim() || null,
+      const { error } =
+        await supabase
+          .from("professionals")
+          .insert({
+            first_name:
+              firstName.trim(),
 
-          province,
-          city: city.trim(),
-          activity_area:
-            activityArea.trim() || null,
+            last_name:
+              lastName.trim(),
 
-          experience,
-          description: description.trim(),
+            phone:
+              phone.trim(),
 
-          cooperation_type:
-            cooperationType || null,
+            national_code:
+              nationalCode.trim(),
 
-          availability:
-            availability || null,
+            birth_date:
+              birthDate || null,
 
-          certificates:
-            certificates.trim() || null,
+            service:
+              category,
 
-          price_info:
-            priceInfo.trim() || null,
+            skills:
+              skills.trim() || null,
 
-          show_phone: showPhone,
+            province,
 
-          profile_image: profilePath,
+            city:
+              city.trim(),
 
-          work_image_1:
-            portfolioPaths[0] || null,
+            activity_area:
+              activityArea.trim() || null,
 
-          work_image_2:
-            portfolioPaths[1] || null,
+            experience,
 
-          work_image_3:
-            portfolioPaths[2] || null,
+            description:
+              description.trim(),
 
-          // status عمداً ارسال نمی‌شود.
-          // مقدار پیش‌فرض دیتابیس = pending
-        });
+            cooperation_type:
+              cooperationType || null,
+
+            availability:
+              availability || null,
+
+            certificates:
+              certificates.trim() || null,
+
+            price_info:
+              priceInfo.trim() || null,
+
+            show_phone:
+              showPhone,
+
+            profile_image:
+              profilePath,
+
+            work_image_1:
+              portfolioPaths[0] || null,
+
+            work_image_2:
+              portfolioPaths[1] || null,
+
+            work_image_3:
+              portfolioPaths[2] || null,
+
+            /*
+             * status عمداً ارسال نمی‌شود.
+             * مقدار پیش‌فرض دیتابیس = pending
+             */
+          });
 
       if (error) {
+        console.error(
+          "PROFESSIONAL INSERT ERROR:",
+          error
+        );
+
         throw new Error(
-          `خطا در ثبت اطلاعات: ${error.message}`
+          "تصاویر با موفقیت آپلود شدند، اما ثبت اطلاعات در سامانه انجام نشد. لطفاً دوباره تلاش کنید."
         );
       }
 
@@ -402,7 +735,7 @@ export default function ServiceRegisterPage() {
       const message =
         error instanceof Error
           ? error.message
-          : "خطای نامشخص در ثبت درخواست";
+          : "خطای نامشخص در ثبت درخواست.";
 
       setErrorMessage(
         `خطای ثبت: ${message}`
@@ -434,9 +767,9 @@ export default function ServiceRegisterPage() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
-            اطلاعات حرفه‌ای خود را ثبت کنید تا پس از بررسی و
-            تأیید، در دسته تخصصی خودتان به کاربران سرچنو معرفی
-            شوید.
+            اطلاعات حرفه‌ای خود را ثبت کنید تا پس از
+            بررسی و تأیید، در دسته تخصصی خودتان به
+            کاربران سرچنو معرفی شوید.
           </p>
         </div>
       </section>
@@ -511,9 +844,9 @@ export default function ServiceRegisterPage() {
               />
 
               <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm leading-7 text-slate-600">
-                کد ملی و تاریخ تولد برای بررسی اطلاعات ثبت
-                می‌شوند و در پروفایل عمومی متخصص نمایش داده
-                نخواهند شد.
+                کد ملی و تاریخ تولد برای بررسی اطلاعات
+                ثبت می‌شوند و در پروفایل عمومی متخصص
+                نمایش داده نخواهند شد.
               </div>
             </div>
 
@@ -534,8 +867,9 @@ export default function ServiceRegisterPage() {
                 />
 
                 <p className="mt-2 text-xs text-slate-500">
-                  ترجیحاً عکس واضح و رسمی — حداکثر ۵
-                  مگابایت
+                  عکس تا ۱۵ مگابایت قابل انتخاب است و
+                  قبل از ارسال به‌صورت خودکار فشرده
+                  می‌شود.
                 </p>
               </div>
 
@@ -694,7 +1028,7 @@ export default function ServiceRegisterPage() {
             <SectionTitle
               number="05"
               title="نمونه‌کارها"
-              subtitle="حداکثر ۳ تصویر از پروژه‌ها یا کارهای انجام‌شده."
+              subtitle="حداقل ۱ و حداکثر ۳ تصویر از پروژه‌ها یا کارهای انجام‌شده."
             />
 
             <input
@@ -703,14 +1037,15 @@ export default function ServiceRegisterPage() {
               multiple
               onChange={handlePortfolio}
               disabled={
-                portfolio.length >= 3
+                portfolio.length >=
+                MAX_PORTFOLIO_COUNT
               }
               className="block w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm"
             />
 
             <p className="mt-2 text-xs text-slate-500">
               {remainingPortfolio > 0
-                ? `${remainingPortfolio} جای خالی باقی مانده است.`
+                ? `${remainingPortfolio} جای خالی باقی مانده است. حداقل یک عکس نمونه‌کار الزامی است.`
                 : "تعداد مجاز نمونه‌کار تکمیل شده است."}
             </p>
 
@@ -1007,4 +1342,4 @@ function TextArea({
       />
     </div>
   );
-              }
+                }
