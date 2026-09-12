@@ -47,19 +47,23 @@ export async function GET() {
       });
 
     if (error) {
-      console.error(
-        "GET PROFESSIONALS ERROR:",
-        error
-      );
+  console.error(
+    "GET PROFESSIONALS ERROR:",
+    error
+  );
 
-      return NextResponse.json(
-        {
-          success: false,
-          message: "خطا در دریافت متخصصان",
-        },
-        { status: 500 }
-      );
-    }
+  return NextResponse.json(
+    {
+      success: false,
+      message: "خطا در دریافت متخصصان",
+      error: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    },
+    { status: 500 }
+  );
+}
 
     /*
      * ساخت URL موقت برای عکس‌های خصوصی
