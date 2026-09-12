@@ -240,39 +240,121 @@ export default function ServicePage() {
       </header>
 
 
-      {/* ================= HERO ================= */}
+   {/* ================= HERO ================= */}
 
-      <section className="bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
+<section className="relative overflow-hidden">
 
-        <div className="mx-auto max-w-7xl px-5 py-20">
+  <div className="relative min-h-[430px] md:min-h-[560px]">
 
-          <div className="mx-auto max-w-4xl text-center text-white">
+    {/* تصویر اصلی صفحه خدمات */}
 
-            <div className="mb-5 inline-flex rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm">
-              🛠️ خدمات ساختمانی سرچنو
-            </div>
+    <img
+      src="/materials/service.png"
+      alt="خدمات ساختمانی سرچنو"
+      className="absolute inset-0 h-full w-full object-cover"
+    />
 
+    {/* لایه تاریک برای خوانایی متن */}
 
-            <h1 className="text-4xl font-black leading-tight sm:text-5xl">
+    <div className="absolute inset-0 bg-black/55" />
 
-              متخصص مورد نیاز پروژه‌تان را
+    {/* محتوا */}
 
-              <span className="text-cyan-300">
-                {" "}پیدا کنید
+    <div className="relative z-10 flex min-h-[430px] md:min-h-[560px] items-center justify-center px-5">
+
+      <div className="mx-auto max-w-4xl text-center text-white">
+
+        <div className="mb-6 inline-flex rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold backdrop-blur-sm">
+          🛠️ خدمات ساختمانی سرچنو
+        </div>
+
+        <h1 className="text-4xl font-black leading-tight sm:text-5xl md:text-6xl">
+
+          متخصص مورد نیاز پروژه‌تان را
+
+          <span className="block mt-3 text-cyan-300">
+            پیدا کنید
+          </span>
+
+        </h1>
+
+        <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/90 md:text-lg">
+
+          از بنا و استادکار تا نصاب، جوشکار، برق‌کار،
+          مهندس، پیمانکار و سایر متخصصان؛
+          متخصص مورد نیاز خود را در سرچنو پیدا کنید.
+
+        </p>
+
+        {/* جستجو */}
+
+        <div className="mx-auto mt-8 max-w-4xl rounded-3xl bg-white/95 p-3 shadow-2xl backdrop-blur">
+
+          <div className="flex flex-col gap-3 md:flex-row">
+
+            <div className="flex flex-1 items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4">
+
+              <span className="text-xl">
+                🔍
               </span>
 
-            </h1>
+              <input
+                value={search}
+                onChange={(event) =>
+                  setSearch(event.target.value)
+                }
+                placeholder="مثلاً نصاب کاشی، برق‌کار یا جوشکار..."
+                className="w-full bg-transparent text-sm text-slate-800 outline-none"
+              />
 
+            </div>
 
-            <p className="mx-auto mt-6 max-w-2xl leading-8 text-blue-100">
+            <select
+              value={selectedCity}
+              onChange={(event) =>
+                setSelectedCity(event.target.value)
+              }
+              className="rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-700 outline-none"
+            >
 
-              از بنا و استادکار تا نصاب، جوشکار،
-              برق‌کار، مهندس و سایر متخصصان؛
-              متخصص مورد نیاز خود را در شهر خود پیدا
-              کنید و با او ارتباط بگیرید.
+              {cities.map((city) => (
 
-            </p>
+                <option
+                  key={city}
+                  value={city}
+                >
+                  📍 {city}
+                </option>
 
+              ))}
+
+            </select>
+
+            <button
+              type="button"
+              onClick={() => {
+                document
+                  .getElementById("service-results")
+                  ?.scrollIntoView({
+                    behavior: "smooth",
+                  });
+              }}
+              className="rounded-2xl bg-blue-700 px-8 py-4 font-bold text-white hover:bg-blue-800"
+            >
+              جست‌وجوی متخصص
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
 
             {/* ================= SEARCH ================= */}
 
