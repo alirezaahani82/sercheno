@@ -101,22 +101,42 @@ export default function ServiceRegisterPage() {
   const [nationalCode, setNationalCode] = useState("");
   const [birthDate, setBirthDate] = useState("");
 
+  /* =========================
+     Login information
+  ========================= */
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
+
   const [category, setCategory] = useState("");
   const [skills, setSkills] = useState("");
 
-  const [province, setProvince] = useState("آذربایجان شرقی");
+  const [province, setProvince] = useState(
+    "آذربایجان شرقی"
+  );
   const [city, setCity] = useState("تبریز");
-  const [activityArea, setActivityArea] = useState("");
+  const [activityArea, setActivityArea] =
+    useState("");
 
-  const [experience, setExperience] = useState("");
-  const [description, setDescription] = useState("");
-  const [cooperationType, setCooperationType] = useState("");
-  const [availability, setAvailability] = useState("");
-  const [certificates, setCertificates] = useState("");
-  const [priceInfo, setPriceInfo] = useState("");
+  const [experience, setExperience] =
+    useState("");
+  const [description, setDescription] =
+    useState("");
+  const [cooperationType, setCooperationType] =
+    useState("");
+  const [availability, setAvailability] =
+    useState("");
+  const [certificates, setCertificates] =
+    useState("");
+  const [priceInfo, setPriceInfo] =
+    useState("");
 
-  const [showPhone, setShowPhone] = useState(true);
-  const [acceptRules, setAcceptRules] = useState(false);
+  const [showPhone, setShowPhone] =
+    useState(true);
+  const [acceptRules, setAcceptRules] =
+    useState(false);
 
   const [profile, setProfile] =
     useState<PreviewFile | null>(null);
@@ -124,35 +144,35 @@ export default function ServiceRegisterPage() {
   const [portfolio, setPortfolio] =
     useState<PreviewFile[]>([]);
 
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] =
+    useState(false);
+  const [errorMessage, setErrorMessage] =
+    useState("");
+  const [successMessage, setSuccessMessage] =
+    useState("");
 
   const remainingPortfolio = useMemo(
-    () => MAX_PORTFOLIO_COUNT - portfolio.length,
+    () =>
+      MAX_PORTFOLIO_COUNT -
+      portfolio.length,
     [portfolio.length]
   );
 
-  /*
-   * تبدیل و فشرده‌سازی عکس
-   *
-   * عکس‌های دوربین موبایل ممکن است چندین مگابایت باشند.
-   * قبل از ارسال به Supabase آن‌ها را به JPEG تبدیل می‌کنیم
-   * و حجم را تا حد مناسبی پایین می‌آوریم.
-   */
+  /* =========================
+     Compress image
+  ========================= */
+
   async function compressImage(
     file: File
   ): Promise<File> {
     if (!file.type.startsWith("image/")) {
-      throw new Error("فایل انتخاب‌شده تصویر نیست.");
+      throw new Error(
+        "فایل انتخاب‌شده تصویر نیست."
+      );
     }
 
-    /*
-     * اگر عکس از قبل کوچک باشد،
-     * باز هم آن را استاندارد می‌کنیم تا آپلود پایدارتر شود.
-     */
-
-    const imageUrl = URL.createObjectURL(file);
+    const imageUrl =
+      URL.createObjectURL(file);
 
     try {
       const image = new Image();
@@ -160,6 +180,7 @@ export default function ServiceRegisterPage() {
       await new Promise<void>(
         (resolve, reject) => {
           image.onload = () => resolve();
+
           image.onerror = () =>
             reject(
               new Error(
@@ -195,7 +216,8 @@ export default function ServiceRegisterPage() {
       canvas.width = width;
       canvas.height = height;
 
-      const context = canvas.getContext("2d");
+      const context =
+        canvas.getContext("2d");
 
       if (!context) {
         throw new Error(
@@ -213,32 +235,8 @@ export default function ServiceRegisterPage() {
 
       let quality = 0.82;
 
-      let blob = await new Promise<Blob | null>(
-        (resolve) =>
-          canvas.toBlob(
-            resolve,
-            "image/jpeg",
-            quality
-          )
-      );
-
-      if (!blob) {
-        throw new Error(
-          "امکان آماده‌سازی تصویر وجود ندارد."
-        );
-      }
-
-      /*
-       * اگر حجم هنوز زیاد بود،
-       * کیفیت را مرحله‌به‌مرحله کم می‌کنیم.
-       */
-      while (
-        blob.size > MAX_COMPRESSED_FILE_SIZE &&
-        quality > 0.45
-      ) {
-        quality -= 0.07;
-
-        blob = await new Promise<Blob | null>(
+      let blob =
+        await new Promise<Blob | null>(
           (resolve) =>
             canvas.toBlob(
               resolve,
@@ -247,6 +245,29 @@ export default function ServiceRegisterPage() {
             )
         );
 
+      if (!blob) {
+        throw new Error(
+          "امکان آماده‌سازی تصویر وجود ندارد."
+        );
+      }
+
+      while (
+        blob.size >
+          MAX_COMPRESSED_FILE_SIZE &&
+        quality > 0.45
+      ) {
+        quality -= 0.07;
+
+        blob =
+          await new Promise<Blob | null>(
+            (resolve) =>
+              canvas.toBlob(
+                resolve,
+                "image/jpeg",
+                quality
+              )
+          );
+
         if (!blob) {
           throw new Error(
             "امکان فشرده‌سازی تصویر وجود ندارد."
@@ -254,26 +275,29 @@ export default function ServiceRegisterPage() {
         }
       }
 
-      /*
-       * اگر هنوز بیش از حد بزرگ بود،
-       * اندازه تصویر را هم کاهش می‌دهیم.
-       */
       if (
-        blob.size > MAX_COMPRESSED_FILE_SIZE
+        blob.size >
+        MAX_COMPRESSED_FILE_SIZE
       ) {
         const smallerCanvas =
-          document.createElement("canvas");
+          document.createElement(
+            "canvas"
+          );
 
         const smallerRatio = 0.75;
 
         smallerCanvas.width = Math.max(
           600,
-          Math.round(width * smallerRatio)
+          Math.round(
+            width * smallerRatio
+          )
         );
 
         smallerCanvas.height = Math.max(
           600,
-          Math.round(height * smallerRatio)
+          Math.round(
+            height * smallerRatio
+          )
         );
 
         const smallerContext =
@@ -321,10 +345,15 @@ export default function ServiceRegisterPage() {
     }
   }
 
+  /* =========================
+     Profile image
+  ========================= */
+
   function handleProfile(
     e: ChangeEvent<HTMLInputElement>
   ) {
-    const file = e.target.files?.[0];
+    const file =
+      e.target.files?.[0];
 
     if (!file) return;
 
@@ -335,7 +364,10 @@ export default function ServiceRegisterPage() {
       return;
     }
 
-    if (file.size > MAX_SOURCE_FILE_SIZE) {
+    if (
+      file.size >
+      MAX_SOURCE_FILE_SIZE
+    ) {
       setErrorMessage(
         "حجم عکس پرسنلی نباید بیشتر از ۱۵ مگابایت باشد."
       );
@@ -345,16 +377,23 @@ export default function ServiceRegisterPage() {
     setErrorMessage("");
 
     if (profile?.preview) {
-      URL.revokeObjectURL(profile.preview);
+      URL.revokeObjectURL(
+        profile.preview
+      );
     }
 
     setProfile({
       file,
-      preview: URL.createObjectURL(file),
+      preview:
+        URL.createObjectURL(file),
     });
 
     e.target.value = "";
   }
+
+  /* =========================
+     Portfolio images
+  ========================= */
 
   function handlePortfolio(
     e: ChangeEvent<HTMLInputElement>
@@ -366,7 +405,8 @@ export default function ServiceRegisterPage() {
     if (!files.length) return;
 
     const available =
-      MAX_PORTFOLIO_COUNT - portfolio.length;
+      MAX_PORTFOLIO_COUNT -
+      portfolio.length;
 
     if (files.length > available) {
       setErrorMessage(
@@ -387,7 +427,10 @@ export default function ServiceRegisterPage() {
         return;
       }
 
-      if (file.size > MAX_SOURCE_FILE_SIZE) {
+      if (
+        file.size >
+        MAX_SOURCE_FILE_SIZE
+      ) {
         setErrorMessage(
           "حجم هر عکس نمونه‌کار نباید بیشتر از ۱۵ مگابایت باشد."
         );
@@ -402,7 +445,8 @@ export default function ServiceRegisterPage() {
     const newFiles: PreviewFile[] =
       files.map((file) => ({
         file,
-        preview: URL.createObjectURL(file),
+        preview:
+          URL.createObjectURL(file),
       }));
 
     setPortfolio((prev) => [
@@ -413,17 +457,27 @@ export default function ServiceRegisterPage() {
     e.target.value = "";
   }
 
-  function removePortfolio(index: number) {
+  function removePortfolio(
+    index: number
+  ) {
     const item = portfolio[index];
 
     if (item?.preview) {
-      URL.revokeObjectURL(item.preview);
+      URL.revokeObjectURL(
+        item.preview
+      );
     }
 
     setPortfolio((prev) =>
-      prev.filter((_, i) => i !== index)
+      prev.filter(
+        (_, i) => i !== index
+      )
     );
   }
+
+  /* =========================
+     Validation
+  ========================= */
 
   function validate() {
     if (!firstName.trim()) {
@@ -434,12 +488,51 @@ export default function ServiceRegisterPage() {
       return "نام خانوادگی را وارد کنید.";
     }
 
-    if (!/^09\d{9}$/.test(phone.trim())) {
+    if (
+      !/^09\d{9}$/.test(
+        phone.trim()
+      )
+    ) {
       return "شماره موبایل صحیح نیست. مثال: 09123456789";
     }
 
-    if (!/^\d{10}$/.test(nationalCode.trim())) {
+    if (
+      !/^\d{10}$/.test(
+        nationalCode.trim()
+      )
+    ) {
       return "کد ملی باید ۱۰ رقم باشد.";
+    }
+
+    /* =========================
+       Username
+    ========================= */
+
+    const normalizedUsername =
+      username.trim().toLowerCase();
+
+    if (!normalizedUsername) {
+      return "نام کاربری را وارد کنید.";
+    }
+
+    if (
+      !/^[a-z0-9_]{4,30}$/.test(
+        normalizedUsername
+      )
+    ) {
+      return "نام کاربری باید ۴ تا ۳۰ کاراکتر و فقط شامل حروف انگلیسی، عدد و _ باشد.";
+    }
+
+    /* =========================
+       Password
+    ========================= */
+
+    if (password.length < 8) {
+      return "رمز عبور باید حداقل ۸ کاراکتر باشد.";
+    }
+
+    if (password !== confirmPassword) {
+      return "تکرار رمز عبور با رمز عبور یکسان نیست.";
     }
 
     if (!category) {
@@ -466,14 +559,14 @@ export default function ServiceRegisterPage() {
       return "عکس پرسنلی خود را انتخاب کنید.";
     }
 
-    /*
-     * نمونه‌کار را هم اجباری کردیم.
-     */
     if (portfolio.length === 0) {
       return "لطفاً حداقل یک عکس نمونه‌کار آپلود کنید.";
     }
 
-    if (portfolio.length > MAX_PORTFOLIO_COUNT) {
+    if (
+      portfolio.length >
+      MAX_PORTFOLIO_COUNT
+    ) {
       return "حداکثر ۳ عکس نمونه‌کار مجاز است.";
     }
 
@@ -484,14 +577,10 @@ export default function ServiceRegisterPage() {
     return "";
   }
 
-  /*
-   * آپلود امن‌تر عکس
-   *
-   * قبل از آپلود:
-   * 1. عکس فشرده می‌شود.
-   * 2. نام تصادفی ساخته می‌شود.
-   * 3. خطا به پیام فارسی تبدیل می‌شود.
-   */
+  /* =========================
+     Upload image
+  ========================= */
+
   async function uploadImage(
     file: File,
     folder: string,
@@ -516,7 +605,8 @@ export default function ServiceRegisterPage() {
             {
               cacheControl: "3600",
               upsert: false,
-              contentType: "image/jpeg",
+              contentType:
+                "image/jpeg",
             }
           );
 
@@ -525,7 +615,8 @@ export default function ServiceRegisterPage() {
           "SUPABASE IMAGE UPLOAD ERROR:",
           {
             title,
-            message: error.message,
+            message:
+              error.message,
             folder,
           }
         );
@@ -548,7 +639,9 @@ export default function ServiceRegisterPage() {
 
       if (
         error instanceof Error &&
-        error.message.startsWith("آپلود")
+        error.message.startsWith(
+          "آپلود"
+        )
       ) {
         throw error;
       }
@@ -559,6 +652,10 @@ export default function ServiceRegisterPage() {
     }
   }
 
+  /* =========================
+     Submit
+  ========================= */
+
   async function handleSubmit(
     e: FormEvent<HTMLFormElement>
   ) {
@@ -567,10 +664,13 @@ export default function ServiceRegisterPage() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    const validationError = validate();
+    const validationError =
+      validate();
 
     if (validationError) {
-      setErrorMessage(validationError);
+      setErrorMessage(
+        validationError
+      );
 
       window.scrollTo({
         top: 0,
@@ -583,33 +683,86 @@ export default function ServiceRegisterPage() {
     setLoading(true);
 
     try {
+      /*
+       * --------------------------------
+       * 1. ساخت حساب ورود متخصص
+       * --------------------------------
+       */
+
+      const normalizedUsername =
+        username
+          .trim()
+          .toLowerCase();
+
+      const authResponse =
+        await fetch(
+          "/api/service/register-auth",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              username:
+                normalizedUsername,
+              password,
+            }),
+          }
+        );
+
+      const authResult =
+        await authResponse.json();
+
+      if (
+        !authResponse.ok ||
+        !authResult.success
+      ) {
+        throw new Error(
+          authResult.message ||
+            "ساخت حساب کاربری انجام نشد."
+        );
+      }
+
+      const authUserId =
+        authResult.userId;
+
+      /*
+       * --------------------------------
+       * 2. شناسه درخواست
+       * --------------------------------
+       */
+
       const registrationId =
         crypto.randomUUID();
 
       /*
-       * -------------------------
-       * عکس پرسنلی
-       * -------------------------
+       * --------------------------------
+       * 3. عکس پرسنلی
+       * --------------------------------
        */
+
       let profilePath: string;
 
       try {
-        profilePath = await uploadImage(
-          profile!.file,
-          `applications/${registrationId}/profile`,
-          "عکس پرسنلی"
-        );
+        profilePath =
+          await uploadImage(
+            profile!.file,
+            `applications/${registrationId}/profile`,
+            "عکس پرسنلی"
+          );
       } catch (error) {
         throw error;
       }
 
       /*
-       * -------------------------
-       * نمونه‌کارها
-       * -------------------------
+       * --------------------------------
+       * 4. نمونه‌کارها
+       * --------------------------------
        */
 
-      const portfolioPaths: string[] = [];
+      const portfolioPaths: string[] =
+        [];
 
       for (
         let i = 0;
@@ -627,9 +780,9 @@ export default function ServiceRegisterPage() {
       }
 
       /*
-       * -------------------------
-       * ثبت اطلاعات در دیتابیس
-       * -------------------------
+       * --------------------------------
+       * 5. ثبت اطلاعات متخصص
+       * --------------------------------
        */
 
       const { error } =
@@ -651,6 +804,12 @@ export default function ServiceRegisterPage() {
             birth_date:
               birthDate || null,
 
+            username:
+              normalizedUsername,
+
+            auth_user_id:
+              authUserId,
+
             service:
               category,
 
@@ -663,7 +822,8 @@ export default function ServiceRegisterPage() {
               city.trim(),
 
             activity_area:
-              activityArea.trim() || null,
+              activityArea.trim() ||
+              null,
 
             experience,
 
@@ -671,16 +831,20 @@ export default function ServiceRegisterPage() {
               description.trim(),
 
             cooperation_type:
-              cooperationType || null,
+              cooperationType ||
+              null,
 
             availability:
-              availability || null,
+              availability ||
+              null,
 
             certificates:
-              certificates.trim() || null,
+              certificates.trim() ||
+              null,
 
             price_info:
-              priceInfo.trim() || null,
+              priceInfo.trim() ||
+              null,
 
             show_phone:
               showPhone,
@@ -689,13 +853,16 @@ export default function ServiceRegisterPage() {
               profilePath,
 
             work_image_1:
-              portfolioPaths[0] || null,
+              portfolioPaths[0] ||
+              null,
 
             work_image_2:
-              portfolioPaths[1] || null,
+              portfolioPaths[1] ||
+              null,
 
             work_image_3:
-              portfolioPaths[2] || null,
+              portfolioPaths[2] ||
+              null,
 
             /*
              * status عمداً ارسال نمی‌شود.
@@ -715,7 +882,7 @@ export default function ServiceRegisterPage() {
       }
 
       setSuccessMessage(
-        "درخواست شما با موفقیت ثبت شد و پس از بررسی مدیر در سرچنو منتشر خواهد شد."
+        "ثبت‌نام شما با موفقیت انجام شد. پس از بررسی و تأیید مدیر، حساب شما فعال خواهد شد."
       );
 
       window.scrollTo({
@@ -724,7 +891,9 @@ export default function ServiceRegisterPage() {
       });
 
       setTimeout(() => {
-        router.push("/service");
+        router.push(
+          "/service"
+        );
       }, 2500);
     } catch (error) {
       console.error(
@@ -775,14 +944,12 @@ export default function ServiceRegisterPage() {
       </section>
 
       <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">
-        {/* Error */}
         {errorMessage && (
           <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium leading-7 text-red-700">
             {errorMessage}
           </div>
         )}
 
-        {/* Success */}
         {successMessage && (
           <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium leading-7 text-emerald-700">
             {successMessage}
@@ -848,6 +1015,64 @@ export default function ServiceRegisterPage() {
                 ثبت می‌شوند و در پروفایل عمومی متخصص
                 نمایش داده نخواهند شد.
               </div>
+            </div>
+
+            {/* Login */}
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div className="mb-5">
+                <h3 className="text-lg font-black">
+                  اطلاعات ورود به پنل متخصص
+                </h3>
+
+                <p className="mt-2 text-xs leading-6 text-slate-500">
+                  با این اطلاعات در آینده وارد پنل
+                  شخصی خود خواهید شد.
+                </p>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field
+                  label="نام کاربری"
+                  value={username}
+                  onChange={(value) =>
+                    setUsername(
+                      value
+                        .toLowerCase()
+                        .replace(
+                          /[^a-z0-9_]/g,
+                          ""
+                        )
+                    )
+                  }
+                  placeholder="مثلاً ali_ahani"
+                  required
+                />
+
+                <div className="hidden md:block" />
+
+                <PasswordField
+                  label="رمز عبور"
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="حداقل ۸ کاراکتر"
+                  required
+                />
+
+                <PasswordField
+                  label="تکرار رمز عبور"
+                  value={confirmPassword}
+                  onChange={
+                    setConfirmPassword
+                  }
+                  placeholder="رمز عبور را دوباره وارد کنید"
+                  required
+                />
+              </div>
+
+              <p className="mt-3 text-xs leading-6 text-slate-500">
+                نام کاربری فقط شامل حروف انگلیسی،
+                عدد و علامت _ باشد.
+              </p>
             </div>
 
             <div className="mt-6 grid gap-5 md:grid-cols-[1fr_auto]">
@@ -1066,7 +1291,9 @@ export default function ServiceRegisterPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          removePortfolio(index)
+                          removePortfolio(
+                            index
+                          )
                         }
                         className="absolute right-2 top-2 rounded-full bg-white px-3 py-1 text-xs font-bold text-red-600 shadow"
                       >
@@ -1246,6 +1473,49 @@ function Field({
 }
 
 /* =========================
+   Password Field
+========================= */
+
+function PasswordField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-bold">
+        {label}
+
+        {required && (
+          <span className="mr-1 text-red-500">
+            *
+          </span>
+        )}
+      </label>
+
+      <input
+        type="password"
+        value={value}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+        placeholder={placeholder}
+        autoComplete="new-password"
+        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm outline-none transition focus:border-slate-950"
+      />
+    </div>
+  );
+}
+
+/* =========================
    Select
 ========================= */
 
@@ -1342,4 +1612,4 @@ function TextArea({
       />
     </div>
   );
-                }
+    }
