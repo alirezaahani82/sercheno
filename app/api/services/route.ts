@@ -8,9 +8,7 @@ const supabaseAdmin = createClient(
 
 export async function GET() {
   try {
-    /*
-     * فقط متخصصان تأییدشده نمایش داده می‌شوند.
-     */
+    // دریافت فقط متخصصانی که توسط ادمین تأیید شده‌اند
     const { data, error } = await supabaseAdmin
       .from("professionals")
       .select(`
@@ -24,8 +22,6 @@ export async function GET() {
         activity_area,
         experience,
         description,
-        national_code,
-        birth_date,
         skills,
         cooperation_type,
         availability,
@@ -36,8 +32,6 @@ export async function GET() {
         work_image_1,
         work_image_2,
         work_image_3,
-        rating,
-        review_count,
         status,
         created_at
       `)
@@ -47,38 +41,36 @@ export async function GET() {
       });
 
     if (error) {
-  console.error(
-    "GET PROFESSIONALS ERROR:",
-    error
-  );
+      console.error(
+        "GET PROFESSIONALS ERROR:",
+        error
+      );
 
-  return NextResponse.json(
-    {
-      success: false,
-      message: "خطا در دریافت متخصصان",
-      error: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code,
-    },
-    { status: 500 }
-  );
-}
+      return NextResponse.json(
+        {
+          success: false,
+          message: "خطا در دریافت متخصصان",
+          error: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        },
+        { status: 500 }
+      );
+    }
 
-    /*
-     * ساخت URL موقت برای عکس‌های خصوصی
-     */
+    // ساخت لینک موقت برای تصاویر خصوصی
     const professionals = await Promise.all(
       (data || []).map(async (professional) => {
+        let profile_image_url: string | null = null;
+        let work_image_1_url: string | null = null;
+        let work_image_2_url: string | null = null;
+        let work_image_3_url: string | null = null;
 
-        let profile_image_url = null;
-        let work_image_1_url = null;
-        let work_image_2_url = null;
-        let work_image_3_url = null;
+        // =========================
+        // عکس پروفایل
+        // =========================
 
-        /*
-         * عکس پروفایل
-         */
         if (professional.profile_image) {
           const { data: signedProfile } =
             await supabaseAdmin.storage
@@ -92,9 +84,10 @@ export async function GET() {
             signedProfile?.signedUrl || null;
         }
 
-        /*
-         * نمونه کار اول
-         */
+        // =========================
+        // نمونه کار اول
+        // =========================
+
         if (professional.work_image_1) {
           const { data: signedImage1 } =
             await supabaseAdmin.storage
@@ -108,9 +101,10 @@ export async function GET() {
             signedImage1?.signedUrl || null;
         }
 
-        /*
-         * نمونه کار دوم
-         */
+        // =========================
+        // نمونه کار دوم
+        // =========================
+
         if (professional.work_image_2) {
           const { data: signedImage2 } =
             await supabaseAdmin.storage
@@ -124,9 +118,10 @@ export async function GET() {
             signedImage2?.signedUrl || null;
         }
 
-        /*
-         * نمونه کار سوم
-         */
+        // =========================
+        // نمونه کار سوم
+        // =========================
+
         if (professional.work_image_3) {
           const { data: signedImage3 } =
             await supabaseAdmin.storage
@@ -140,20 +135,62 @@ export async function GET() {
             signedImage3?.signedUrl || null;
         }
 
+        // =========================
+        // خروجی عمومی
+        // =========================
+
         return {
-          ...professional,
+          id: professional.id,
+
+          first_name: professional.first_name,
+          last_name: professional.last_name,
+
+          service: professional.service,
+
+          province: professional.province,
+          city: professional.city,
+          activity_area: professional.activity_area,
+
+          experience: professional.experience,
+          description: professional.description,
+
+          skills: professional.skills,
+          cooperation_type:
+            professional.cooperation_type,
+          availability:
+            professional.availability,
+          certificates:
+            professional.certificates,
+
+          price_info: professional.price_info,
+
+          show_phone:
+            professional.show_phone,
+
+          // فقط اگر اجازه نمایش شماره داده شده باشد
+          phone:
+            professional.show_phone
+              ? professional.phone
+              : null,
 
           profile_image_url,
+
           work_image_1_url,
           work_image_2_url,
           work_image_3_url,
 
-          /*
-           * امتیاز فعلاً دمو است.
-           * بعداً سیستم واقعی امتیازدهی را اضافه می‌کنیم.
-           */
+          status: professional.status,
+          created_at: professional.created_at,
+
+          // =========================
+          // امتیاز دمو
+          // =========================
+
           rating: 4.8,
           review_count: 12,
+
+          // رتبه دمو
+          rank: "ویژه",
         };
       })
     );
@@ -162,7 +199,6 @@ export async function GET() {
       professionals,
       { status: 200 }
     );
-
   } catch (error) {
     console.error(
       "SERVICES API ERROR:",
