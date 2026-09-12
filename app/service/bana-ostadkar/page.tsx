@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 type Professional = {
   id: string;
@@ -18,6 +17,7 @@ type Professional = {
   profile_image_url?: string | null;
   rating?: number | null;
   review_count?: number | null;
+  rank?: string | null;
 };
 
 export default function BanaOstadkarPage() {
@@ -28,13 +28,17 @@ export default function BanaOstadkarPage() {
   useEffect(() => {
     async function loadProfessionals() {
       try {
-        const response = await fetch("/api/services");
-
-        if (!response.ok) {
-          throw new Error("خطا در دریافت متخصصان");
-        }
+        const response = await fetch("/api/services", {
+          cache: "no-store",
+        });
 
         const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data?.message || "خطا در دریافت متخصصان"
+          );
+        }
 
         const approvedProfessionals = Array.isArray(data)
           ? data.filter(
@@ -46,7 +50,9 @@ export default function BanaOstadkarPage() {
         setProfessionals(approvedProfessionals);
       } catch (err) {
         console.error(err);
-        setError("دریافت اطلاعات متخصصان با مشکل مواجه شد.");
+        setError(
+          "دریافت اطلاعات متخصصان با مشکل مواجه شد."
+        );
       } finally {
         setLoading(false);
       }
@@ -64,12 +70,10 @@ export default function BanaOstadkarPage() {
 
         <div className="relative h-[260px] md:h-[360px]">
 
-          <Image
+          <img
             src="/images/services/bana-ostadkar.jpg"
             alt="بنا و استادکار سرچنو"
-            fill
-            priority
-            className="object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
           />
 
           <div className="absolute inset-0 bg-black/55" />
@@ -157,7 +161,7 @@ export default function BanaOstadkarPage() {
           )}
 
 
-        {/* ================= PROFESSIONALS ================= */}
+        {/* ================= PROFESSIONAL CARDS ================= */}
 
         {!loading &&
           !error &&
@@ -175,17 +179,16 @@ export default function BanaOstadkarPage() {
 
                   <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
 
-                    {/* PHOTO */}
+                    {/* ================= PERSONAL PHOTO ================= */}
 
-                    <div className="relative h-64 bg-gray-100">
+                    <div className="relative h-64 bg-gray-100 overflow-hidden">
 
                       {professional.profile_image_url ? (
 
-                        <Image
+                        <img
                           src={professional.profile_image_url}
                           alt={`${professional.first_name} ${professional.last_name}`}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
 
                       ) : (
@@ -199,15 +202,18 @@ export default function BanaOstadkarPage() {
                     </div>
 
 
-                    {/* INFO */}
+                    {/* ================= INFO ================= */}
 
                     <div className="p-5">
 
                       <div className="flex items-center justify-between gap-2">
 
                         <h3 className="text-lg font-bold text-gray-900">
+
                           {professional.first_name}{" "}
+
                           {professional.last_name}
+
                         </h3>
 
                         <span className="text-sm whitespace-nowrap">
@@ -217,7 +223,7 @@ export default function BanaOstadkarPage() {
                       </div>
 
 
-                      {/* RANK */}
+                      {/* ================= RANK ================= */}
 
                       <div className="mt-2">
 
@@ -228,46 +234,54 @@ export default function BanaOstadkarPage() {
                       </div>
 
 
-                      {/* SPECIALIZATION */}
+                      {/* ================= DETAILS ================= */}
 
                       <div className="mt-4 text-sm text-gray-600">
 
                         <div className="mb-2">
+
                           <span className="font-semibold text-gray-800">
                             تخصص:
                           </span>{" "}
+
                           {professional.service}
+
                         </div>
 
 
-                        {/* LOCATION */}
-
                         <div className="mb-2">
+
                           <span className="font-semibold text-gray-800">
                             محل فعالیت:
                           </span>{" "}
+
                           {professional.city || "نامشخص"}
+
                           {professional.province
                             ? `، ${professional.province}`
                             : ""}
+
                         </div>
 
 
-                        {/* EXPERIENCE */}
-
                         {professional.experience && (
+
                           <div className="mb-2">
+
                             <span className="font-semibold text-gray-800">
                               سابقه:
                             </span>{" "}
+
                             {professional.experience}
+
                           </div>
+
                         )}
 
                       </div>
 
 
-                      {/* PRICE */}
+                      {/* ================= PRICE ================= */}
 
                       {professional.price_info && (
 
@@ -286,12 +300,14 @@ export default function BanaOstadkarPage() {
                       )}
 
 
-                      {/* BUTTON */}
+                      {/* ================= BUTTON ================= */}
 
                       <div className="mt-5">
 
                         <span className="block text-center rounded-xl bg-gray-900 text-white py-3 text-sm font-medium group-hover:bg-black transition">
+
                           مشاهده پروفایل
+
                         </span>
 
                       </div>
