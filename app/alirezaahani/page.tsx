@@ -1,5 +1,7 @@
 "use client";
+
 import Image from "next/image";
+
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -65,7 +67,6 @@ const personSchema = {
   ],
 };
 
-
 const expertise = [
   {
     icon: "▣",
@@ -113,6 +114,7 @@ export default function AlirezaAhaniPage() {
   return (
     <>
       <main dir="rtl" className="alireza-page">
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -124,6 +126,7 @@ export default function AlirezaAhaniPage() {
 
         <header className="site-header">
           <div className="header-container">
+
             <a href="#home" className="brand">
               علیرضا آهنی
             </a>
@@ -132,6 +135,7 @@ export default function AlirezaAhaniPage() {
               <a href="#home">خانه</a>
               <a href="#about">درباره من</a>
               <a href="#expertise">تخصص‌ها</a>
+              <a href="#certificates">مدارک</a>
               <a href="#activities">فعالیت‌ها</a>
               <a href="#projects">پروژه‌ها</a>
               <a href="#sercheno">سرچنو</a>
@@ -141,14 +145,19 @@ export default function AlirezaAhaniPage() {
             <a href="#contact" className="header-contact">
               تماس با من
             </a>
+
           </div>
         </header>
+
 
         {/* ================= HERO ================= */}
 
         <section id="home" className="hero">
+
           <div className="hero-container">
+
             <div className="hero-image-wrapper">
+
               <Image
                 src="/A.png"
                 alt="علیرضا آهنی"
@@ -157,10 +166,14 @@ export default function AlirezaAhaniPage() {
                 priority
                 className="hero-image"
               />
+
             </div>
 
             <div className="hero-content">
-              <span className="hero-small-title">سلام، من</span>
+
+              <span className="hero-small-title">
+                سلام، من
+              </span>
 
               <h1>
                 علیرضا آهنی
@@ -171,85 +184,171 @@ export default function AlirezaAhaniPage() {
               </h2>
 
               <p>
-                در مسیر ساختن کسب‌وکار، توسعه فناوری و ایجاد راهکارهای
-                نوآورانه برای صنعت ساختمان فعالیت می‌کنم. بنیان‌گذار
-                پلتفرم هوشمند «سرچنو» و مدیرعامل شرکت «امیر توان پویای
-                گستر» هستم.
+                در مسیر ساختن کسب‌وکار، توسعه فناوری و ایجاد
+                راهکارهای نوآورانه برای صنعت ساختمان فعالیت می‌کنم.
+                بنیان‌گذار پلتفرم هوشمند «سرچنو» و مدیرعامل شرکت
+                «امیر توان پویای گستر» هستم.
               </p>
 
               <div className="hero-buttons">
-                <a href="#about" className="btn btn-primary">
+
+                <a
+                  href="#about"
+                  className="btn btn-primary"
+                >
                   درباره من
                 </a>
 
-                <a href="#activities" className="btn btn-secondary">
+                <a
+                  href="#activities"
+                  className="btn btn-secondary"
+                >
                   مشاهده فعالیت‌ها
                 </a>
+
               </div>
+
             </div>
+
           </div>
+
         </section>
+
 
         {/* ================= ABOUT ================= */}
 
         <section id="about" className="section about-section">
+
           <div className="container">
+
             <div className="section-title">
+
               <span>ABOUT ME</span>
-              <h2>درباره من</h2>
+
+              <h2>
+                درباره من
+              </h2>
+
             </div>
 
+
             <div className="about-grid">
+
               <div className="about-text">
+
                 <h3>
-                  علیرضا آهنی هستم؛ علاقه‌مند به ساختن، فناوری و توسعه
-                  کسب‌وکار
+                  علیرضا آهنی هستم؛ علاقه‌مند به ساختن،
+                  فناوری و توسعه کسب‌وکار
                 </h3>
 
                 <p>
-                  در مسیر حرفه‌ای خود تلاش کرده‌ام میان دانش مهندسی،
-                  مدیریت، فناوری و نیازهای واقعی بازار ارتباط ایجاد
-                  کنم.
-                </p>
-                <p>
-دارای مدرک کارشناسی مهندسی عمران هستم و هم‌زمان در مسیر توسعه دانش و مهارت‌های مدیریتی و آموزشی خود نیز فعالیت می‌کنم.
-                  </p>
-                <p>
-                  در حال حاضر دانشجوی کارشناسی تربیت معلم و دانشجوی مقطع کارشناسی ارشد مدیریت اجرایی هستم. همچنین به‌عنوان دبیر رسمی آموزش و پرورش در حوزه آموزش و تربیت فعالیت دارم.
-در کنار مسیر دانشگاهی و آموزشی، به‌صورت تخصصی در حوزه‌های فناوری، برنامه‌نویسی، توسعه وب، هوش مصنوعی و مدیریت کسب‌وکار فعالیت می‌کنم و دارای مدارک و گواهینامه‌های بین‌المللی در حوزه‌های Python، AWS و CIW هستم. همچنین دارای گواهینامه بین‌المللی تولید درب و پنجره UPVC هستم و تجربه فعالیت اجرایی در صنعت درب و پنجره و صنعت ساختمان را نیز دارم.
-یکی از مهم‌ترین تجربه‌ها و پروژه‌هایی که در این مسیر شکل داده‌ام، سرچنو است؛ پلتفرمی هوشمند در حوزه صنعت ساخت‌وساز که با هدف ایجاد ارتباط میان خریداران، فروشندگان، تولیدکنندگان، متخصصان و ارائه‌دهندگان خدمات ساختمانی ایجاد شده است.
-در طراحی و توسعه سرچنو تلاش کرده‌ام فناوری را از یک مفهوم صرفاً دیجیتال خارج کرده و آن را به ابزاری برای حل مسائل واقعی صنعت ساختمان تبدیل کنم؛ از جست‌وجو و مقایسه مصالح و تجهیزات ساختمانی گرفته تا دسترسی به متخصصان، خدمات اجرایی، هوش مصنوعی و فرصت‌های کسب‌وکار.
-نگاه من به کارآفرینی، صرفاً ایجاد یک کسب‌وکار نیست؛ بلکه معتقدم یک ایده زمانی ارزشمند است که بتواند نیازی واقعی را شناسایی کند، راهکاری قابل اجرا ارائه دهد و برای افراد و کسب‌وکارها ارزش ایجاد کند.
-ترکیب مهندسی عمران، مدیریت اجرایی، آموزش، برنامه‌نویسی، فناوری و تجربه اجرایی در صنعت ساختمان به من این امکان را داده است که مسائل را از زوایای مختلف ببینم و برای تبدیل ایده‌ها به پروژه‌های واقعی تلاش کنم.
-هدف من ساختن، یادگیری مداوم، توسعه ایده‌های نوآورانه و ایجاد کسب‌وکارهایی است که در دنیای واقعی کاربرد داشته باشند.
+                  در مسیر حرفه‌ای خود تلاش کرده‌ام میان دانش
+                  مهندسی، مدیریت، فناوری و نیازهای واقعی بازار
+                  ارتباط ایجاد کنم.
                 </p>
 
-            
+                <p>
+                  دارای مدرک کارشناسی مهندسی عمران هستم و
+                  هم‌زمان در مسیر توسعه دانش و مهارت‌های مدیریتی
+                  و آموزشی خود نیز فعالیت می‌کنم.
+                </p>
+
+                <p>
+                  در حال حاضر دانشجوی کارشناسی تربیت معلم و
+                  دانشجوی مقطع کارشناسی ارشد مدیریت اجرایی هستم.
+                  همچنین به‌عنوان دبیر رسمی آموزش و پرورش در
+                  حوزه آموزش و تربیت فعالیت دارم.
+                </p>
+
+                <p>
+                  در کنار مسیر دانشگاهی و آموزشی، به‌صورت تخصصی
+                  در حوزه‌های فناوری، برنامه‌نویسی، توسعه وب،
+                  هوش مصنوعی و مدیریت کسب‌وکار فعالیت می‌کنم.
+                  همچنین در مسیر توسعه مهارت‌های بین‌المللی خود،
+                  در دوره‌ها و برنامه‌های حرفه‌ای حوزه فناوری و
+                  هوش مصنوعی شرکت کرده‌ام و تجربه فعالیت در فضای
+                  کسب‌وکار و فناوری بین‌المللی، از جمله ارتباط با
+                  فضای حرفه‌ای ترکیه، را دنبال می‌کنم.
+                </p>
+
+                <p>
+                  یکی از مهم‌ترین تجربه‌ها و پروژه‌هایی که در
+                  این مسیر شکل داده‌ام، سرچنو است؛ پلتفرمی هوشمند
+                  در حوزه صنعت ساخت‌وساز که با هدف ایجاد ارتباط
+                  میان خریداران، فروشندگان، تولیدکنندگان،
+                  متخصصان و ارائه‌دهندگان خدمات ساختمانی ایجاد
+                  شده است.
+                </p>
+
+                <p>
+                  در طراحی و توسعه سرچنو تلاش کرده‌ام فناوری را
+                  از یک مفهوم صرفاً دیجیتال خارج کرده و آن را به
+                  ابزاری برای حل مسائل واقعی صنعت ساختمان تبدیل
+                  کنم؛ از جست‌وجو و مقایسه مصالح و تجهیزات
+                  ساختمانی گرفته تا دسترسی به متخصصان، خدمات
+                  اجرایی، هوش مصنوعی و فرصت‌های کسب‌وکار.
+                </p>
+
+                <p>
+                  نگاه من به کارآفرینی، صرفاً ایجاد یک کسب‌وکار
+                  نیست؛ بلکه معتقدم یک ایده زمانی ارزشمند است که
+                  بتواند نیازی واقعی را شناسایی کند، راهکاری
+                  قابل اجرا ارائه دهد و برای افراد و کسب‌وکارها
+                  ارزش ایجاد کند.
+                </p>
+
+                <p>
+                  ترکیب مهندسی عمران، مدیریت اجرایی، آموزش،
+                  برنامه‌نویسی، فناوری و تجربه اجرایی در صنعت
+                  ساختمان به من این امکان را داده است که مسائل
+                  را از زوایای مختلف ببینم و برای تبدیل ایده‌ها
+                  به پروژه‌های واقعی تلاش کنم.
+                </p>
+
+                <p>
+                  هدف من ساختن، یادگیری مداوم، توسعه ایده‌های
+                  نوآورانه و ایجاد کسب‌وکارهایی است که در دنیای
+                  واقعی کاربرد داشته باشند.
+                </p>
+
 
                 <div className="about-info">
+
                   <div>
                     <span>نام</span>
-                    <strong>علیرضا آهنی</strong>
+                    <strong>
+                      علیرضا آهنی
+                    </strong>
                   </div>
 
                   <div>
                     <span>حوزه اصلی</span>
-                    <strong>فناوری و ساخت‌وساز</strong>
+                    <strong>
+                      فناوری و ساخت‌وساز
+                    </strong>
                   </div>
 
                   <div>
                     <span>سمت</span>
-                    <strong>مدیر و کارآفرین</strong>
+                    <strong>
+                      مدیر و کارآفرین
+                    </strong>
                   </div>
 
                   <div>
                     <span>پروژه شاخص</span>
-                    <strong>سرچنو</strong>
+                    <strong>
+                      سرچنو
+                    </strong>
                   </div>
+
                 </div>
+
               </div>
 
+
               <div className="about-image-box">
+
                 <Image
                   src="/about-img.jpg"
                   alt="علیرضا آهنی - درباره من"
@@ -257,10 +356,15 @@ export default function AlirezaAhaniPage() {
                   height={700}
                   className="about-image"
                 />
+
               </div>
+
             </div>
+
           </div>
+
         </section>
+
 
         {/* ================= ACTIVITIES ================= */}
 
@@ -268,39 +372,273 @@ export default function AlirezaAhaniPage() {
           id="activities"
           className="section activities-section"
         >
+
           <div className="container">
+
             <div className="section-title center">
-              <span>ACTIVITIES</span>
-              <h2>حوزه‌های تخصص و فعالیت</h2>
+
+              <span>
+                ACTIVITIES
+              </span>
+
+              <h2>
+                حوزه‌های تخصص و فعالیت
+              </h2>
 
               <p>
-                حوزه‌هایی که در آن‌ها تجربه، علاقه و فعالیت حرفه‌ای
-                دارم.
+                حوزه‌هایی که در آن‌ها تجربه، علاقه و فعالیت
+                حرفه‌ای دارم.
               </p>
+
             </div>
 
-            <div className="expertise-grid" id="expertise">
+
+            <div
+              className="expertise-grid"
+              id="expertise"
+            >
+
               {expertise.map((item) => (
-                <div className="expertise-card" key={item.title}>
+
+                <div
+                  className="expertise-card"
+                  key={item.title}
+                >
+
                   <div className="expertise-icon">
                     {item.icon}
                   </div>
 
-                  <h3>{item.title}</h3>
+                  <h3>
+                    {item.title}
+                  </h3>
 
-                  <p>{item.text}</p>
+                  <p>
+                    {item.text}
+                  </p>
+
                 </div>
+
               ))}
+
             </div>
+
           </div>
+
         </section>
+
+
+        {/* ================= CERTIFICATES ================= */}
+
+        <section
+          id="certificates"
+          className="section certificates-section"
+        >
+
+          <div className="container">
+
+            <div className="section-title center">
+
+              <span>
+                CERTIFICATES
+              </span>
+
+              <h2>
+                گواهینامه‌ها و مدارک تخصصی
+              </h2>
+
+              <p>
+                بخشی از مسیر یادگیری حرفه‌ای و توسعه مهارت‌های
+                من در حوزه فناوری و هوش مصنوعی.
+              </p>
+
+            </div>
+
+
+            <div className="certificate-card">
+
+              {/* Certificate Image */}
+
+              <div className="certificate-image-wrapper">
+
+                <Image
+                  src="/madrak.png"
+                  alt="گواهینامه AI for Work and Life از University of North Florida"
+                  width={1600}
+                  height={1200}
+                  className="certificate-image"
+                />
+
+              </div>
+
+
+              {/* Certificate Content */}
+
+              <div className="certificate-content">
+
+                <span className="certificate-label">
+                  INTERNATIONAL PROFESSIONAL LEARNING
+                </span>
+
+                <h3>
+                  AI for Work and Life
+                </h3>
+
+                <h4>
+                  University of North Florida
+                </h4>
+
+                <p>
+                  گواهی تکمیل دوره تخصصی «AI for Work and Life»
+                  از بخش Professional and Lifelong Learning
+                  دانشگاه University of North Florida.
+                </p>
+
+                <p>
+                  این دوره در مسیر توسعه مهارت‌های کاربردی در
+                  زمینه هوش مصنوعی و استفاده از فناوری‌های
+                  هوشمند در محیط کار و زندگی حرفه‌ای قرار دارد.
+                  تمرکز این مسیر آموزشی بر شناخت ظرفیت‌های
+                  هوش مصنوعی، افزایش بهره‌وری و استفاده
+                  کاربردی‌تر از ابزارهای هوشمند است.
+                </p>
+
+                <p>
+                  این گواهینامه بخشی از مسیر یادگیری و توسعه
+                  حرفه‌ای من در حوزه فناوری و هوش مصنوعی و
+                  نگاه من به استفاده از فناوری‌های نوین در
+                  کسب‌وکار، مدیریت و پروژه‌های دیجیتال است.
+                </p>
+
+
+                <div className="certificate-focus">
+
+                  <span>
+                    Artificial Intelligence
+                  </span>
+
+                  <span>
+                    Digital Technology
+                  </span>
+
+                  <span>
+                    Productivity
+                  </span>
+
+                  <span>
+                    Professional Development
+                  </span>
+
+                  <span>
+                    International Learning
+                  </span>
+
+                  <span>
+                    Türkiye & Global Business
+                  </span>
+
+                </div>
+
+
+                <div className="certificate-meta">
+
+                  <div>
+
+                    <span>
+                      نوع مدرک
+                    </span>
+
+                    <strong>
+                      Certificate of Completion
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      مرجع آموزشی
+                    </span>
+
+                    <strong>
+                      University of North Florida
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      بخش آموزشی
+                    </span>
+
+                    <strong>
+                      Professional and Lifelong Learning
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      تاریخ صدور
+                    </span>
+
+                    <strong>
+                      November 28, 2022
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <div className="certificate-location">
+
+                  <div className="certificate-location-icon">
+                    🌍
+                  </div>
+
+                  <div>
+
+                    <small>
+                      مسیر حرفه‌ای بین‌المللی
+                    </small>
+
+                    <strong>
+                      فناوری، هوش مصنوعی و ارتباط با
+                      فضای کسب‌وکار منطقه‌ای و ترکیه
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
 
         {/* ================= SERCHENO ================= */}
 
-        <section id="sercheno" className="sercheno-section">
+        <section
+          id="sercheno"
+          className="sercheno-section"
+        >
+
           <div className="container">
+
             <div className="sercheno-grid">
+
               <div className="sercheno-content">
+
                 <span className="gold-label">
                   SERCHENO
                 </span>
@@ -310,32 +648,56 @@ export default function AlirezaAhaniPage() {
                 </h2>
 
                 <p>
-                  سرچنو یک پلتفرم هوشمند در حوزه ساخت‌وساز است که با
-                  هدف ایجاد ارتباط میان مشتریان، فروشندگان مصالح،
-                  تولیدکنندگان، فروشگاه‌ها، متخصصان و ارائه‌دهندگان
-                  خدمات ساختمانی ایجاد شده است.
+                  سرچنو یک پلتفرم هوشمند در حوزه ساخت‌وساز است
+                  که با هدف ایجاد ارتباط میان مشتریان،
+                  فروشندگان مصالح، تولیدکنندگان، فروشگاه‌ها،
+                  متخصصان و ارائه‌دهندگان خدمات ساختمانی ایجاد
+                  شده است.
                 </p>
 
                 <p>
-                  در سرچنو کاربران می‌توانند نیازهای خود در حوزه
-                  ساخت‌وساز را جست‌وجو کنند، محصولات و خدمات را پیدا
-                  کنند و با فعالان این صنعت ارتباط بگیرند.
+                  در سرچنو کاربران می‌توانند نیازهای خود در
+                  حوزه ساخت‌وساز را جست‌وجو کنند، محصولات و
+                  خدمات را پیدا کنند و با فعالان این صنعت
+                  ارتباط بگیرند.
                 </p>
 
                 <p>
-                  یکی از بخش‌های مهم سرچنو، استفاده از ظرفیت هوش
-                  مصنوعی برای کمک به کاربران در زمینه مصالح، روش‌های
-                  اجرا، برآورد اولیه، انتخاب متخصص و تحلیل پروژه است.
+                  یکی از بخش‌های مهم سرچنو، استفاده از ظرفیت
+                  هوش مصنوعی برای کمک به کاربران در زمینه
+                  مصالح، روش‌های اجرا، برآورد اولیه، انتخاب
+                  متخصص و تحلیل پروژه است.
                 </p>
+
 
                 <div className="sercheno-points">
-                  <span>مصالح ساختمانی</span>
-                  <span>خدمات ساختمانی</span>
-                  <span>متخصصان</span>
-                  <span>فروشگاه‌ها</span>
-                  <span>هوش مصنوعی</span>
-                  <span>مناقصات</span>
+
+                  <span>
+                    مصالح ساختمانی
+                  </span>
+
+                  <span>
+                    خدمات ساختمانی
+                  </span>
+
+                  <span>
+                    متخصصان
+                  </span>
+
+                  <span>
+                    فروشگاه‌ها
+                  </span>
+
+                  <span>
+                    هوش مصنوعی
+                  </span>
+
+                  <span>
+                    مناقصات
+                  </span>
+
                 </div>
+
 
                 <a
                   href="https://sercheno-ywf1.vercel.app/"
@@ -345,197 +707,291 @@ export default function AlirezaAhaniPage() {
                 >
                   ورود به سرچنو
                 </a>
+
               </div>
 
-<div className="sercheno-card">
-  <img
-    src="/hero-searchino.jpg"
-    alt="سرچنو | پلتفرم هوشمند ساخت‌وساز"
-    className="sercheno-project-image"
-  />
-</div>
+
+              <div className="sercheno-card">
+
+                <img
+                  src="/hero-searchino.jpg"
+                  alt="سرچنو | پلتفرم هوشمند ساخت‌وساز"
+                  className="sercheno-project-image"
+                />
+
+              </div>
+
             </div>
+
           </div>
+
         </section>
+
 
         {/* ================= IDEA ================= */}
 
         <section className="idea-section">
+
           <div className="container">
+
             <div className="idea-box">
+
               <div>
-                <span>LET&apos;S TALK</span>
+
+                <span>
+                  LET&apos;S TALK
+                </span>
 
                 <h2>
                   یک ایده دارید؟
                 </h2>
 
                 <p>
-                  اگر ایده‌ای برای یک کسب‌وکار، محصول دیجیتال، پروژه
-                  ساختمانی یا راهکار هوشمند دارید، می‌توانیم در مورد
-                  آن صحبت کنیم.
+                  اگر ایده‌ای برای یک کسب‌وکار، محصول دیجیتال،
+                  پروژه ساختمانی یا راهکار هوشمند دارید،
+                  می‌توانیم در مورد آن صحبت کنیم.
                 </p>
+
               </div>
 
-              <a href="#contact" className="btn btn-white">
+
+              <a
+                href="#contact"
+                className="btn btn-white"
+              >
                 تماس با من
               </a>
+
             </div>
+
           </div>
+
         </section>
+
 
         {/* ================= PROJECTS ================= */}
 
-<section id="projects" className="section projects-section">
-  <div className="container">
+        <section
+          id="projects"
+          className="section projects-section"
+        >
 
-    <div className="section-title center">
-      <span>PROJECTS</span>
-      <h2>پروژه‌ها و فعالیت‌های شاخص</h2>
-    </div>
+          <div className="container">
 
-    <div className="projects-grid">
+            <div className="section-title center">
 
-      {/* Project 1 - Sercheno */}
+              <span>
+                PROJECTS
+              </span>
 
-      <article className="project-card">
+              <h2>
+                پروژه‌ها و فعالیت‌های شاخص
+              </h2>
 
-        <div className="project-image">
-          <img
-            src="/logo.png"
-            alt="سرچنو | پلتفرم هوشمند ساخت‌وساز"
-          />
-        </div>
-
-        <div className="project-content">
-          <span>01</span>
-
-          <h3>سرچنو</h3>
-
-          <p>
-            پلتفرم هوشمند ساخت‌وساز برای جست‌وجو، ارتباط و
-            دسترسی آسان‌تر به مصالح، خدمات و متخصصان صنعت
-            ساختمان.
-          </p>
-
-          <a
-            href="https://sercheno-ywf1.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            مشاهده پروژه ←
-          </a>
-        </div>
-
-      </article>
+            </div>
 
 
-      {/* Project 2 - Sercheno AI */}
-
-      <article className="project-card">
-
-        <div className="project-image">
-          <img
-            src="/hush.jpg"
-            alt="هوش مصنوعی سرچنو | Smart Construction AI"
-          />
-        </div>
-
-        <div className="project-content">
-          <span>02</span>
-
-          <h3>پروژه هوش مصنوعی سرچنو</h3>
-
-          <p>
-            توسعه قابلیت‌های هوش مصنوعی برای پاسخ‌گویی به
-            نیازهای کاربران و کمک به تحلیل، انتخاب و تصمیم‌گیری
-            در پروژه‌های ساختمانی.
-          </p>
-
-          <a href="#sercheno">
-            مشاهده پروژه ←
-          </a>
-        </div>
-
-      </article>
+            <div className="projects-grid">
 
 
-      {/* Project 3 - Melkoko */}
+              {/* Project 1 */}
 
-      <article className="project-card">
+              <article className="project-card">
 
-        <div className="project-image">
-          <img
-            src="/melkku.png"
-            alt="ملک‌کو | پلتفرم هوشمند املاک"
-          />
-        </div>
+                <div className="project-image">
 
-        <div className="project-content">
-          <span>03</span>
+                  <img
+                    src="/logo.png"
+                    alt="سرچنو | پلتفرم هوشمند ساخت‌وساز"
+                  />
 
-          <h3>پروژه هوشمند ملک‌کو</h3>
+                </div>
 
-          <p>
-            ایده و پروژه‌ای در حوزه جست‌وجوی ملک، زمین، خانه و
-            املاک با نگاه به ایجاد تجربه‌ای هوشمندتر برای
-            کاربران بازار املاک.
-          </p>
 
-          <a href="#projects">
-            مشاهده پروژه ←
-          </a>
-        </div>
+                <div className="project-content">
 
-      </article>
+                  <span>
+                    01
+                  </span>
 
-    </div>
-  </div>
-</section>
-                  
+                  <h3>
+                    سرچنو
+                  </h3>
+
+                  <p>
+                    پلتفرم هوشمند ساخت‌وساز برای جست‌وجو،
+                    ارتباط و دسترسی آسان‌تر به مصالح،
+                    خدمات و متخصصان صنعت ساختمان.
+                  </p>
+
+                  <a
+                    href="https://sercheno-ywf1.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    مشاهده پروژه ←
+                  </a>
+
+                </div>
+
+              </article>
+
+
+              {/* Project 2 */}
+
+              <article className="project-card">
+
+                <div className="project-image">
+
+                  <img
+                    src="/hush.jpg"
+                    alt="هوش مصنوعی سرچنو | Smart Construction AI"
+                  />
+
+                </div>
+
+
+                <div className="project-content">
+
+                  <span>
+                    02
+                  </span>
+
+                  <h3>
+                    پروژه هوش مصنوعی سرچنو
+                  </h3>
+
+                  <p>
+                    توسعه قابلیت‌های هوش مصنوعی برای
+                    پاسخ‌گویی به نیازهای کاربران و کمک به
+                    تحلیل، انتخاب و تصمیم‌گیری در پروژه‌های
+                    ساختمانی.
+                  </p>
+
+                  <a href="#sercheno">
+                    مشاهده پروژه ←
+                  </a>
+
+                </div>
+
+              </article>
+
+
+              {/* Project 3 */}
+
+              <article className="project-card">
+
+                <div className="project-image">
+
+                  <img
+                    src="/melkku.png"
+                    alt="ملک‌کو | پلتفرم هوشمند املاک"
+                  />
+
+                </div>
+
+
+                <div className="project-content">
+
+                  <span>
+                    03
+                  </span>
+
+                  <h3>
+                    پروژه هوشمند ملک‌کو
+                  </h3>
+
+                  <p>
+                    ایده و پروژه‌ای در حوزه جست‌وجوی ملک،
+                    زمین، خانه و املاک با نگاه به ایجاد
+                    تجربه‌ای هوشمندتر برای کاربران بازار
+                    املاک.
+                  </p>
+
+                  <a href="#projects">
+                    مشاهده پروژه ←
+                  </a>
+
+                </div>
+
+              </article>
+
+            </div>
+
+          </div>
+
+        </section>
 
 
         {/* ================= CONTACT ================= */}
 
-        <section id="contact" className="contact-section">
+        <section
+          id="contact"
+          className="contact-section"
+        >
+
           <div className="container">
+
             <div className="contact-grid">
 
               <div className="contact-text">
-                <span>CONTACT ME</span>
+
+                <span>
+                  CONTACT ME
+                </span>
 
                 <h2>
                   با من در ارتباط باشید
                 </h2>
 
                 <p>
-                  برای همکاری، پیشنهاد پروژه، ایده کسب‌وکار، فناوری،
-                  هوش مصنوعی، ساخت‌وساز یا هر موضوع مرتبط می‌توانید
-                  با من در ارتباط باشید.
+                  برای همکاری، پیشنهاد پروژه، ایده کسب‌وکار،
+                  فناوری، هوش مصنوعی، ساخت‌وساز یا هر موضوع
+                  مرتبط می‌توانید با من در ارتباط باشید.
                 </p>
 
+
                 <div className="contact-number">
-                  <small>شماره تماس</small>
+
+                  <small>
+                    شماره تماس
+                  </small>
 
                   <a href="tel:09144389280">
                     ۰۹۱۴۴۳۸۹۲۸۰
                   </a>
+
                 </div>
+
               </div>
 
+
               <div className="contact-links">
+
 
                 <a
                   href="tel:09144389280"
                   className="contact-link"
                 >
-                  <div className="contact-icon">☎</div>
+
+                  <div className="contact-icon">
+                    ☎
+                  </div>
 
                   <div>
-                    <small>تماس تلفنی</small>
-                    <strong>۰۹۱۴۴۳۸۹۲۸۰</strong>
+
+                    <small>
+                      تماس تلفنی
+                    </small>
+
+                    <strong>
+                      ۰۹۱۴۴۳۸۹۲۸۰
+                    </strong>
+
                   </div>
+
                 </a>
+
 
                 <a
                   href="https://t.me/"
@@ -543,13 +999,25 @@ export default function AlirezaAhaniPage() {
                   rel="noopener noreferrer"
                   className="contact-link"
                 >
-                  <div className="contact-icon">✈</div>
+
+                  <div className="contact-icon">
+                    ✈
+                  </div>
 
                   <div>
-                    <small>تلگرام</small>
-                    <strong>در تلگرام پیام دهید</strong>
+
+                    <small>
+                      تلگرام
+                    </small>
+
+                    <strong>
+                      در تلگرام پیام دهید
+                    </strong>
+
                   </div>
+
                 </a>
+
 
                 <a
                   href="https://instagram.com/sercheno.ir"
@@ -557,13 +1025,25 @@ export default function AlirezaAhaniPage() {
                   rel="noopener noreferrer"
                   className="contact-link"
                 >
-                  <div className="contact-icon">◎</div>
+
+                  <div className="contact-icon">
+                    ◎
+                  </div>
 
                   <div>
-                    <small>اینستاگرام</small>
-                    <strong>sercheno.ir</strong>
+
+                    <small>
+                      اینستاگرام
+                    </small>
+
+                    <strong>
+                      sercheno.ir
+                    </strong>
+
                   </div>
+
                 </a>
+
 
                 <a
                   href="https://sercheno-ywf1.vercel.app/"
@@ -571,50 +1051,93 @@ export default function AlirezaAhaniPage() {
                   rel="noopener noreferrer"
                   className="contact-link"
                 >
-                  <div className="contact-icon">↗</div>
+
+                  <div className="contact-icon">
+                    ↗
+                  </div>
 
                   <div>
-                    <small>پلتفرم</small>
-                    <strong>سرچنو</strong>
+
+                    <small>
+                      پلتفرم
+                    </small>
+
+                    <strong>
+                      سرچنو
+                    </strong>
+
                   </div>
+
                 </a>
 
               </div>
+
             </div>
+
           </div>
+
         </section>
+
 
         {/* ================= FOOTER ================= */}
 
         <footer className="footer">
+
           <div className="container footer-inner">
 
             <div>
-              <strong>علیرضا آهنی</strong>
+
+              <strong>
+                علیرضا آهنی
+              </strong>
 
               <p>
                 کارآفرین، مدیر و بنیان‌گذار سرچنو
               </p>
+
             </div>
 
+
             <div className="footer-center">
-              <a href="#home">خانه</a>
-              <a href="#about">درباره من</a>
-              <a href="#projects">پروژه‌ها</a>
-              <a href="#contact">تماس با من</a>
+
+              <a href="#home">
+                خانه
+              </a>
+
+              <a href="#about">
+                درباره من
+              </a>
+
+              <a href="#certificates">
+                مدارک
+              </a>
+
+              <a href="#projects">
+                پروژه‌ها
+              </a>
+
+              <a href="#contact">
+                تماس با من
+              </a>
+
             </div>
+
 
             <div className="footer-copy">
               © {new Date().getFullYear()} Alireza Ahani
             </div>
 
           </div>
+
         </footer>
+
       </main>
+
 
       {/* ================= STYLES ================= */}
 
       <style>{`
+
         * {
           box-sizing: border-box;
           scroll-behavior: smooth;
@@ -651,7 +1174,8 @@ export default function AlirezaAhaniPage() {
           margin: 0 auto;
         }
 
-        /* HEADER */
+
+        /* ================= HEADER ================= */
 
         .site-header {
           position: sticky;
@@ -684,16 +1208,17 @@ export default function AlirezaAhaniPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 28px;
+          gap: 25px;
           flex: 1;
         }
 
         .desktop-nav a {
           position: relative;
           color: #444b68;
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
           transition: 0.25s;
+          white-space: nowrap;
         }
 
         .desktop-nav a:hover {
@@ -718,7 +1243,8 @@ export default function AlirezaAhaniPage() {
           white-space: nowrap;
         }
 
-        /* HERO */
+
+        /* ================= HERO ================= */
 
         .hero {
           min-height: 680px;
@@ -837,23 +1363,9 @@ export default function AlirezaAhaniPage() {
           transform: translateY(-3px);
           background: #171c32;
         }
-        .sercheno-card {
-  width: 100%;
-  overflow: hidden;
-  border-radius: 24px;
-  background: #fff;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-}
 
-.sercheno-project-image {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 24px;
-}
 
-        /* TITLES */
+        /* ================= TITLES ================= */
 
         .section {
           padding: 110px 0;
@@ -890,7 +1402,8 @@ export default function AlirezaAhaniPage() {
           color: #74798b;
         }
 
-        /* ABOUT */
+
+        /* ================= ABOUT ================= */
 
         .about-section {
           background: #ffffff;
@@ -980,7 +1493,8 @@ export default function AlirezaAhaniPage() {
           font-size: 14px;
         }
 
-        /* ACTIVITIES */
+
+        /* ================= ACTIVITIES ================= */
 
         .activities-section {
           background: #f8f8fc;
@@ -1033,7 +1547,166 @@ export default function AlirezaAhaniPage() {
           line-height: 2;
         }
 
-        /* SERCHENO */
+
+        /* ================= CERTIFICATES ================= */
+
+        .certificates-section {
+          background:
+            linear-gradient(
+              180deg,
+              #f8f8fc 0%,
+              #ffffff 100%
+            );
+        }
+
+        .certificate-card {
+          display: grid;
+          grid-template-columns: 1.05fr 0.95fr;
+          gap: 60px;
+          align-items: center;
+          padding: 45px;
+          background: #ffffff;
+          border: 1px solid #e7e7ef;
+          border-radius: 24px;
+          box-shadow: 0 25px 70px rgba(30, 35, 60, 0.08);
+        }
+
+        .certificate-image-wrapper {
+          padding: 15px;
+          background: #f4f4f8;
+          border-radius: 18px;
+          border: 1px solid #e7e7ef;
+        }
+
+        .certificate-image {
+          display: block;
+          width: 100%;
+          height: auto;
+          border-radius: 9px;
+          box-shadow: 0 15px 40px rgba(20, 25, 50, 0.13);
+        }
+
+        .certificate-content {
+          text-align: right;
+        }
+
+        .certificate-label {
+          display: inline-block;
+          margin-bottom: 8px;
+          color: #625bd4;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 2px;
+        }
+
+        .certificate-content h3 {
+          margin: 0 0 4px;
+          color: #20253e;
+          font-size: 35px;
+          font-weight: 900;
+          line-height: 1.5;
+          direction: ltr;
+          text-align: right;
+        }
+
+        .certificate-content h4 {
+          margin: 0 0 22px;
+          color: #5752ca;
+          font-size: 19px;
+          font-weight: 800;
+        }
+
+        .certificate-content p {
+          margin: 0 0 14px;
+          color: #707589;
+          font-size: 14px;
+          line-height: 2.2;
+        }
+
+        .certificate-focus {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin: 25px 0;
+        }
+
+        .certificate-focus span {
+          padding: 7px 11px;
+          background: #f2f1ff;
+          border: 1px solid #e2e0ff;
+          border-radius: 7px;
+          color: #5b55c8;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .certificate-meta {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-top: 20px;
+        }
+
+        .certificate-meta div {
+          padding: 14px 16px;
+          background: #f7f7fb;
+          border: 1px solid #ececf3;
+          border-radius: 10px;
+        }
+
+        .certificate-meta span {
+          display: block;
+          margin-bottom: 3px;
+          color: #9296a6;
+          font-size: 10px;
+        }
+
+        .certificate-meta strong {
+          display: block;
+          color: #292e47;
+          font-size: 12px;
+          line-height: 1.8;
+        }
+
+        .certificate-location {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 18px;
+          padding: 15px 17px;
+          background: #202640;
+          border-radius: 12px;
+          color: white;
+        }
+
+        .certificate-location-icon {
+          width: 42px;
+          height: 42px;
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.08);
+          font-size: 19px;
+        }
+
+        .certificate-location small {
+          display: block;
+          color: #aeb2c2;
+          font-size: 10px;
+          margin-bottom: 2px;
+        }
+
+        .certificate-location strong {
+          display: block;
+          color: #ffffff;
+          font-size: 12px;
+          line-height: 1.8;
+        }
+
+
+        /* ================= SERCHENO ================= */
 
         .sercheno-section {
           padding: 120px 0;
@@ -1099,7 +1772,9 @@ export default function AlirezaAhaniPage() {
         }
 
         .sercheno-card {
-          padding: 50px 30px;
+          width: 100%;
+          overflow: hidden;
+          padding: 0;
           background: #ffffff;
           color: #222740;
           text-align: center;
@@ -1107,43 +1782,16 @@ export default function AlirezaAhaniPage() {
           box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
         }
 
-        .sercheno-logo-symbol {
-          font-size: 75px;
-          line-height: 1;
-          margin-bottom: 15px;
+        .sercheno-project-image {
+          display: block;
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+          border-radius: 22px;
         }
 
-        .sercheno-card h3 {
-          margin: 0;
-          color: #20253e;
-          font-size: 38px;
-          font-weight: 900;
-        }
 
-        .sercheno-card > span {
-          color: #555a72;
-          font-size: 13px;
-          letter-spacing: 4px;
-        }
-
-        .sercheno-line {
-          width: 50px;
-          height: 2px;
-          margin: 22px auto;
-          background: #d1a84e;
-        }
-
-        .sercheno-card p {
-          color: #72778a;
-          margin: 0 0 7px;
-        }
-
-        .sercheno-card strong {
-          color: #252a42;
-          font-size: 17px;
-        }
-
-        /* IDEA */
+        /* ================= IDEA ================= */
 
         .idea-section {
           padding: 75px 0;
@@ -1190,7 +1838,8 @@ export default function AlirezaAhaniPage() {
           transform: translateY(-3px);
         }
 
-        /* PROJECTS */
+
+        /* ================= PROJECTS ================= */
 
         .projects-section {
           background: #ffffff;
@@ -1223,6 +1872,7 @@ export default function AlirezaAhaniPage() {
           text-align: center;
           position: relative;
           overflow: hidden;
+          background: #f5f5f8;
         }
 
         .project-image::before {
@@ -1234,61 +1884,12 @@ export default function AlirezaAhaniPage() {
           border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        .project-sercheno {
-          background:
-            radial-gradient(
-              circle,
-              #4d518b 0%,
-              #282e50 55%,
-              #1d233c 100%
-            );
-        }
-
-        .project-ai {
-          background:
-            radial-gradient(
-              circle,
-              #5651a5 0%,
-              #272c51 58%,
-              #1c223a 100%
-            );
-        }
-
-        .project-melkoko {
-          background:
-            radial-gradient(
-              circle,
-              #7067b8 0%,
-              #34365d 55%,
-              #222640 100%
-            );
-        }
-
-        .project-image div {
+        .project-image img {
           position: relative;
           z-index: 1;
-          color: white;
-        }
-
-        .project-image span {
-          display: block;
-          font-size: 50px;
-          font-weight: 900;
-          color: #d9b45b;
-        }
-
-        .project-image strong {
-          display: block;
-          margin-top: 5px;
-          font-size: 23px;
-        }
-
-        .project-image small {
-          display: block;
-          color: #cfd2e0;
-          font-size: 9px;
-          letter-spacing: 2px;
-          margin-top: 3px;
+          max-width: 85%;
+          max-height: 85%;
+          object-fit: contain;
         }
 
         .project-content {
@@ -1321,7 +1922,8 @@ export default function AlirezaAhaniPage() {
           font-weight: 800;
         }
 
-        /* CONTACT */
+
+        /* ================= CONTACT ================= */
 
         .contact-section {
           padding: 110px 0;
@@ -1422,7 +2024,8 @@ export default function AlirezaAhaniPage() {
           font-size: 14px;
         }
 
-        /* FOOTER */
+
+        /* ================= FOOTER ================= */
 
         .footer {
           padding: 45px 0;
@@ -1451,6 +2054,7 @@ export default function AlirezaAhaniPage() {
           display: flex;
           justify-content: center;
           gap: 20px;
+          flex-wrap: wrap;
         }
 
         .footer-center a {
@@ -1469,23 +2073,35 @@ export default function AlirezaAhaniPage() {
           direction: ltr;
         }
 
-        /* MOBILE */
+
+        /* ================= TABLET ================= */
 
         @media (max-width: 1050px) {
+
           .desktop-nav {
-            gap: 16px;
+            gap: 13px;
           }
 
           .desktop-nav a {
-            font-size: 12px;
+            font-size: 11px;
           }
 
           .expertise-grid {
             grid-template-columns: repeat(2, 1fr);
           }
+
+          .certificate-card {
+            gap: 35px;
+            padding: 30px;
+          }
+
         }
 
+
+        /* ================= MOBILE ================= */
+
         @media (max-width: 850px) {
+
           .header-contact {
             display: none;
           }
@@ -1528,7 +2144,8 @@ export default function AlirezaAhaniPage() {
 
           .about-grid,
           .sercheno-grid,
-          .contact-grid {
+          .contact-grid,
+          .certificate-card {
             grid-template-columns: 1fr;
             gap: 40px;
           }
@@ -1539,6 +2156,10 @@ export default function AlirezaAhaniPage() {
 
           .about-image-box {
             order: 2;
+          }
+
+          .certificate-content {
+            text-align: right;
           }
 
           .projects-grid {
@@ -1566,9 +2187,14 @@ export default function AlirezaAhaniPage() {
           .footer-copy {
             text-align: center;
           }
+
         }
 
+
+        /* ================= SMALL MOBILE ================= */
+
         @media (max-width: 550px) {
+
           .container,
           .header-container,
           .hero-container {
@@ -1627,8 +2253,40 @@ export default function AlirezaAhaniPage() {
           .contact-number a {
             font-size: 21px;
           }
+
+          .certificate-card {
+            padding: 18px;
+            border-radius: 18px;
+          }
+
+          .certificate-content h3 {
+            font-size: 28px;
+          }
+
+          .certificate-content h4 {
+            font-size: 16px;
+          }
+
+          .certificate-meta {
+            grid-template-columns: 1fr;
+          }
+
+          .certificate-focus {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+          }
+
+          .certificate-focus span {
+            text-align: center;
+          }
+
+          .certificate-location {
+            align-items: flex-start;
+          }
+
         }
+
       `}</style>
     </>
   );
-}
+                }
