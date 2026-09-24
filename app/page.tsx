@@ -1819,7 +1819,7 @@ export default function Home() {
                   شرکت امیر توان پویای گستر
                 </p>
 
-                <<p className="mt-1 text-xs text-slate-600">
+                <p className="mt-1 text-xs text-slate-600">
   مؤسس:{" "}
   <Link
     href="/alirezaahani"
