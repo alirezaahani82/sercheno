@@ -1819,9 +1819,15 @@ export default function Home() {
                   شرکت امیر توان پویای گستر
                 </p>
 
-                <p className="mt-1 text-xs text-slate-600">
-                  مؤسس: علیرضا آهنی
-                </p>
+                <<p className="mt-1 text-xs text-slate-600">
+  مؤسس:{" "}
+  <Link
+    href="/alirezaahani"
+    className="transition hover:text-white"
+  >
+    علیرضا آهنی
+  </Link>
+</p>
               </div>
 
               <div className="flex flex-col items-center">
