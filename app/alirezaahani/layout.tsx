@@ -1,46 +1,72 @@
 import type { Metadata } from "next";
 
+const profileUrl =
+  "https://sercheno-ywf1.vercel.app/alirezaahani";
+
+const profileImage =
+  "https://sercheno-ywf1.vercel.app/A.png";
+
 export const metadata: Metadata = {
-  title:
-    "علیرضا آهنی | بنیان‌گذار سرچنو و مدیرعامل شرکت امیر توان پویای گستر",
+  metadataBase: new URL("https://sercheno-ywf1.vercel.app"),
+
+  title: {
+    default:
+      "علیرضا آهنی | Alireza Ahani | بنیان‌گذار سرچنو و مدیر",
+    template: "%s | علیرضا آهنی",
+  },
 
   description:
-    "علیرضا آهنی، کارآفرین، مدیر، فعال حوزه فناوری و صنعت ساختمان، بنیان‌گذار پلتفرم هوشمند سرچنو و مدیرعامل شرکت امیر توان پویای گستر.",
+    "علیرضا آهنی (Alireza Ahani)، کارآفرین، مدیر و فعال حوزه فناوری، هوش مصنوعی و صنعت ساختمان؛ بنیان‌گذار سرچنو و مدیرعامل شرکت امیر توان پویای گستر.",
 
   keywords: [
     "علیرضا آهنی",
     "Alireza Ahani",
+    "Alireza Ahani Tabriz",
     "علیرضا آهنی تبریز",
     "علیرضا آهنی سرچنو",
-    "بنیانگذار سرچنو",
+    "Alireza Ahani Sercheno",
+    "علیرضا آهنی هوش مصنوعی",
+    "علیرضا آهنی فناوری",
+    "علیرضا آهنی کارآفرین",
+    "علیرضا آهنی مدیر",
+    "علیرضا آهنی رزومه",
     "سرچنو",
+    "بنیانگذار سرچنو",
     "امیر توان پویای گستر",
-    "کارآفرین",
     "هوش مصنوعی",
     "فناوری",
+    "ساخت و ساز",
     "صنعت ساختمان",
   ],
 
   authors: [
     {
       name: "علیرضا آهنی",
-      url: "https://sercheno-ywf1.vercel.app/alirezaahani",
+      url: profileUrl,
     },
   ],
 
   creator: "علیرضا آهنی",
 
+  publisher: "سرچنو",
+
+  category: "profile",
+
   alternates: {
-    canonical:
-      "https://sercheno-ywf1.vercel.app/alirezaahani",
+    canonical: profileUrl,
+    languages: {
+      "fa-IR": profileUrl,
+    },
   },
 
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
+      noimageindex: false,
       "max-image-preview": "large",
       "max-snippet": -1,
       "max-video-preview": -1,
@@ -48,27 +74,23 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    title:
-      "علیرضا آهنی | بنیان‌گذار سرچنو و فعال حوزه فناوری و ساخت‌وساز",
-
-    description:
-      "صفحه رسمی علیرضا آهنی؛ کارآفرین، مدیر و بنیان‌گذار سرچنو.",
-
-    url:
-      "https://sercheno-ywf1.vercel.app/alirezaahani",
-
+    type: "profile",
+    locale: "fa_IR",
+    url: profileUrl,
     siteName: "سرچنو",
 
-    locale: "fa_IR",
+    title:
+      "علیرضا آهنی | Alireza Ahani | بنیان‌گذار سرچنو",
 
-    type: "profile",
+    description:
+      "صفحه رسمی علیرضا آهنی؛ کارآفرین، مدیر و فعال حوزه فناوری، هوش مصنوعی و صنعت ساختمان.",
 
     images: [
       {
-        url: "https://sercheno-ywf1.vercel.app/A.png",
+        url: profileImage,
         width: 760,
         height: 650,
-        alt: "علیرضا آهنی",
+        alt: "علیرضا آهنی | Alireza Ahani",
       },
     ],
   },
@@ -77,14 +99,18 @@ export const metadata: Metadata = {
     card: "summary_large_image",
 
     title:
-      "علیرضا آهنی | بنیان‌گذار سرچنو",
+      "علیرضا آهنی | Alireza Ahani | بنیان‌گذار سرچنو",
 
     description:
-      "علیرضا آهنی، کارآفرین و فعال حوزه فناوری و صنعت ساختمان.",
+      "صفحه رسمی علیرضا آهنی؛ کارآفرین، مدیر و فعال حوزه فناوری و صنعت ساختمان.",
 
-    images: [
-      "https://sercheno-ywf1.vercel.app/A.png",
-    ],
+    images: [profileImage],
+  },
+
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
 
