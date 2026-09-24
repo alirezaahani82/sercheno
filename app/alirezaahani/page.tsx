@@ -1,70 +1,93 @@
-"use client";
-
 import Image from "next/image";
+
+const siteUrl = "https://sercheno-ywf1.vercel.app";
+
+const profileUrl = `${siteUrl}/alirezaahani`;
 
 const personSchema = {
   "@context": "https://schema.org",
-  "@type": "Person",
+  "@type": "ProfilePage",
 
-  "@id":
-    "https://sercheno-ywf1.vercel.app/alirezaahani#person",
+  "@id": `${profileUrl}#profile`,
 
-  name: "علیرضا آهنی",
+  url: profileUrl,
 
-  givenName: "علیرضا",
-  familyName: "آهنی",
-
-  alternateName: [
-    "Alireza Ahani",
-    "Alireza Ahani Sercheno",
-  ],
-
-  url:
-    "https://sercheno-ywf1.vercel.app/alirezaahani",
-
-  image:
-    "https://sercheno-ywf1.vercel.app/A.png",
+  name: "علیرضا آهنی | Alireza Ahani",
 
   description:
-    "علیرضا آهنی، کارآفرین، مدیر، فعال حوزه فناوری و صنعت ساختمان و بنیان‌گذار پلتفرم هوشمند سرچنو.",
+    "صفحه رسمی علیرضا آهنی (Alireza Ahani)، کارآفرین، مدیر و فعال حوزه فناوری، هوش مصنوعی و صنعت ساختمان؛ بنیان‌گذار سرچنو و مدیرعامل شرکت امیر توان پویای گستر.",
 
-  jobTitle:
-    "کارآفرین، مدیر و بنیان‌گذار سرچنو",
+  mainEntity: {
+    "@type": "Person",
 
-  worksFor: {
-    "@type": "Organization",
+    "@id": `${profileUrl}#person`,
 
-    name: "شرکت امیر توان پویای گستر",
+    name: "علیرضا آهنی",
 
-    url:
-      "https://sercheno-ywf1.vercel.app/",
+    givenName: "علیرضا",
+
+    familyName: "آهنی",
+
+    alternateName: [
+      "Alireza Ahani",
+      "Alireza Ahani Sercheno",
+    ],
+
+    url: profileUrl,
+
+    image: {
+      "@type": "ImageObject",
+      url: `${siteUrl}/A.png`,
+      width: 760,
+      height: 650,
+      caption: "علیرضا آهنی | Alireza Ahani",
+    },
+
+    description:
+      "علیرضا آهنی، کارآفرین، مدیر و فعال حوزه فناوری، هوش مصنوعی و صنعت ساختمان؛ بنیان‌گذار پلتفرم هوشمند سرچنو و مدیرعامل شرکت امیر توان پویای گستر.",
+
+    jobTitle:
+      "کارآفرین، مدیر و بنیان‌گذار سرچنو",
+
+    worksFor: {
+      "@type": "Organization",
+
+      name: "شرکت امیر توان پویای گستر",
+
+      url: siteUrl,
+    },
+
+    affiliation: {
+      "@type": "Organization",
+
+      name: "سرچنو",
+
+      url: siteUrl,
+    },
+
+    knowsAbout: [
+      "مهندسی عمران",
+      "مدیریت اجرایی",
+      "مدیریت کسب‌وکار",
+      "برنامه‌نویسی",
+      "Python",
+      "هوش مصنوعی",
+      "توسعه وب",
+      "فناوری",
+      "صنعت ساختمان",
+      "ساخت‌وساز",
+      "مصالح ساختمانی",
+      "درب و پنجره UPVC",
+      "بازاریابی",
+      "کارآفرینی",
+      "نوآوری",
+    ],
+
+    sameAs: [
+      "https://github.com/alirezaahani82",
+      "https://www.instagram.com/sercheno.ir/",
+    ],
   },
-
-  founder: {
-    "@type": "Organization",
-
-    name: "سرچنو",
-
-    url:
-      "https://sercheno-ywf1.vercel.app/",
-  },
-
-  knowsAbout: [
-    "مهندسی عمران",
-    "مدیریت اجرایی",
-    "مدیریت کسب‌وکار",
-    "برنامه‌نویسی",
-    "Python",
-    "هوش مصنوعی",
-    "توسعه وب",
-    "فناوری",
-    "صنعت ساختمان",
-    "مصالح ساختمانی",
-    "درب و پنجره UPVC",
-    "بازاریابی",
-    "کارآفرینی",
-    "نوآوری",
-  ],
 };
 
 const expertise = [
@@ -115,6 +138,8 @@ export default function AlirezaAhaniPage() {
     <>
       <main dir="rtl" className="alireza-page">
 
+        {/* ================= STRUCTURED DATA ================= */}
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -131,7 +156,10 @@ export default function AlirezaAhaniPage() {
               علیرضا آهنی
             </a>
 
-            <nav className="desktop-nav">
+            <nav
+              className="desktop-nav"
+              aria-label="منوی اصلی صفحه علیرضا آهنی"
+            >
               <a href="#home">خانه</a>
               <a href="#about">درباره من</a>
               <a href="#expertise">تخصص‌ها</a>
@@ -149,7 +177,6 @@ export default function AlirezaAhaniPage() {
           </div>
         </header>
 
-
         {/* ================= HERO ================= */}
 
         <section id="home" className="hero">
@@ -160,7 +187,7 @@ export default function AlirezaAhaniPage() {
 
               <Image
                 src="/A.png"
-                alt="علیرضا آهنی"
+                alt="علیرضا آهنی | Alireza Ahani"
                 width={760}
                 height={650}
                 priority
@@ -214,7 +241,6 @@ export default function AlirezaAhaniPage() {
 
         </section>
 
-
         {/* ================= ABOUT ================= */}
 
         <section id="about" className="section about-section">
@@ -226,11 +252,10 @@ export default function AlirezaAhaniPage() {
               <span>ABOUT ME</span>
 
               <h2>
-                درباره من
+                درباره علیرضا آهنی
               </h2>
 
             </div>
-
 
             <div className="about-grid">
 
@@ -311,13 +336,19 @@ export default function AlirezaAhaniPage() {
                   واقعی کاربرد داشته باشند.
                 </p>
 
-
                 <div className="about-info">
 
                   <div>
                     <span>نام</span>
                     <strong>
                       علیرضا آهنی
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>نام انگلیسی</span>
+                    <strong>
+                      Alireza Ahani
                     </strong>
                   </div>
 
@@ -342,10 +373,16 @@ export default function AlirezaAhaniPage() {
                     </strong>
                   </div>
 
+                  <div>
+                    <span>فعالیت تخصصی</span>
+                    <strong>
+                      فناوری، هوش مصنوعی و کسب‌وکار
+                    </strong>
+                  </div>
+
                 </div>
 
               </div>
-
 
               <div className="about-image-box">
 
@@ -365,7 +402,6 @@ export default function AlirezaAhaniPage() {
 
         </section>
 
-
         {/* ================= ACTIVITIES ================= */}
 
         <section
@@ -382,7 +418,7 @@ export default function AlirezaAhaniPage() {
               </span>
 
               <h2>
-                حوزه‌های تخصص و فعالیت
+                حوزه‌های تخصص و فعالیت علیرضا آهنی
               </h2>
 
               <p>
@@ -391,7 +427,6 @@ export default function AlirezaAhaniPage() {
               </p>
 
             </div>
-
 
             <div
               className="expertise-grid"
@@ -427,7 +462,6 @@ export default function AlirezaAhaniPage() {
 
         </section>
 
-
         {/* ================= CERTIFICATES ================= */}
 
         <section
@@ -444,7 +478,7 @@ export default function AlirezaAhaniPage() {
               </span>
 
               <h2>
-                گواهینامه‌ها و مدارک تخصصی
+                گواهینامه‌ها و مدارک تخصصی علیرضا آهنی
               </h2>
 
               <p>
@@ -454,25 +488,19 @@ export default function AlirezaAhaniPage() {
 
             </div>
 
-
             <div className="certificate-card">
-
-              {/* Certificate Image */}
 
               <div className="certificate-image-wrapper">
 
                 <Image
                   src="/madrak.png"
-                  alt="گواهینامه AI for Work and Life از University of North Florida"
+                  alt="گواهینامه AI for Work and Life به نام Alireza Ahani از University of North Florida"
                   width={1600}
                   height={1200}
                   className="certificate-image"
                 />
 
               </div>
-
-
-              {/* Certificate Content */}
 
               <div className="certificate-content">
 
@@ -489,7 +517,7 @@ export default function AlirezaAhaniPage() {
                 </h4>
 
                 <p>
-                  گواهی تکمیل دوره تخصصی «AI for Work and Life»
+                  گواهی تکمیل دوره «AI for Work and Life»
                   از بخش Professional and Lifelong Learning
                   دانشگاه University of North Florida.
                 </p>
@@ -498,9 +526,6 @@ export default function AlirezaAhaniPage() {
                   این دوره در مسیر توسعه مهارت‌های کاربردی در
                   زمینه هوش مصنوعی و استفاده از فناوری‌های
                   هوشمند در محیط کار و زندگی حرفه‌ای قرار دارد.
-                  تمرکز این مسیر آموزشی بر شناخت ظرفیت‌های
-                  هوش مصنوعی، افزایش بهره‌وری و استفاده
-                  کاربردی‌تر از ابزارهای هوشمند است.
                 </p>
 
                 <p>
@@ -509,7 +534,6 @@ export default function AlirezaAhaniPage() {
                   نگاه من به استفاده از فناوری‌های نوین در
                   کسب‌وکار، مدیریت و پروژه‌های دیجیتال است.
                 </p>
-
 
                 <div className="certificate-focus">
 
@@ -539,11 +563,9 @@ export default function AlirezaAhaniPage() {
 
                 </div>
 
-
                 <div className="certificate-meta">
 
                   <div>
-
                     <span>
                       نوع مدرک
                     </span>
@@ -551,12 +573,9 @@ export default function AlirezaAhaniPage() {
                     <strong>
                       Certificate of Completion
                     </strong>
-
                   </div>
 
-
                   <div>
-
                     <span>
                       مرجع آموزشی
                     </span>
@@ -564,12 +583,9 @@ export default function AlirezaAhaniPage() {
                     <strong>
                       University of North Florida
                     </strong>
-
                   </div>
 
-
                   <div>
-
                     <span>
                       بخش آموزشی
                     </span>
@@ -577,12 +593,9 @@ export default function AlirezaAhaniPage() {
                     <strong>
                       Professional and Lifelong Learning
                     </strong>
-
                   </div>
 
-
                   <div>
-
                     <span>
                       تاریخ صدور
                     </span>
@@ -590,11 +603,9 @@ export default function AlirezaAhaniPage() {
                     <strong>
                       November 28, 2022
                     </strong>
-
                   </div>
 
                 </div>
-
 
                 <div className="certificate-location">
 
@@ -624,7 +635,6 @@ export default function AlirezaAhaniPage() {
           </div>
 
         </section>
-
 
         {/* ================= SERCHENO ================= */}
 
@@ -669,7 +679,6 @@ export default function AlirezaAhaniPage() {
                   متخصص و تحلیل پروژه است.
                 </p>
 
-
                 <div className="sercheno-points">
 
                   <span>
@@ -698,9 +707,8 @@ export default function AlirezaAhaniPage() {
 
                 </div>
 
-
                 <a
-                  href="https://sercheno-ywf1.vercel.app/"
+                  href={siteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-gold"
@@ -709,7 +717,6 @@ export default function AlirezaAhaniPage() {
                 </a>
 
               </div>
-
 
               <div className="sercheno-card">
 
@@ -726,7 +733,6 @@ export default function AlirezaAhaniPage() {
           </div>
 
         </section>
-
 
         {/* ================= IDEA ================= */}
 
@@ -754,7 +760,6 @@ export default function AlirezaAhaniPage() {
 
               </div>
 
-
               <a
                 href="#contact"
                 className="btn btn-white"
@@ -767,7 +772,6 @@ export default function AlirezaAhaniPage() {
           </div>
 
         </section>
-
 
         {/* ================= PROJECTS ================= */}
 
@@ -790,11 +794,7 @@ export default function AlirezaAhaniPage() {
 
             </div>
 
-
             <div className="projects-grid">
-
-
-              {/* Project 1 */}
 
               <article className="project-card">
 
@@ -806,7 +806,6 @@ export default function AlirezaAhaniPage() {
                   />
 
                 </div>
-
 
                 <div className="project-content">
 
@@ -825,7 +824,7 @@ export default function AlirezaAhaniPage() {
                   </p>
 
                   <a
-                    href="https://sercheno-ywf1.vercel.app/"
+                    href={siteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -835,9 +834,6 @@ export default function AlirezaAhaniPage() {
                 </div>
 
               </article>
-
-
-              {/* Project 2 */}
 
               <article className="project-card">
 
@@ -849,7 +845,6 @@ export default function AlirezaAhaniPage() {
                   />
 
                 </div>
-
 
                 <div className="project-content">
 
@@ -876,9 +871,6 @@ export default function AlirezaAhaniPage() {
 
               </article>
 
-
-              {/* Project 3 */}
-
               <article className="project-card">
 
                 <div className="project-image">
@@ -889,7 +881,6 @@ export default function AlirezaAhaniPage() {
                   />
 
                 </div>
-
 
                 <div className="project-content">
 
@@ -922,7 +913,6 @@ export default function AlirezaAhaniPage() {
 
         </section>
 
-
         {/* ================= CONTACT ================= */}
 
         <section
@@ -941,7 +931,7 @@ export default function AlirezaAhaniPage() {
                 </span>
 
                 <h2>
-                  با من در ارتباط باشید
+                  با علیرضا آهنی در ارتباط باشید
                 </h2>
 
                 <p>
@@ -949,7 +939,6 @@ export default function AlirezaAhaniPage() {
                   فناوری، هوش مصنوعی، ساخت‌وساز یا هر موضوع
                   مرتبط می‌توانید با من در ارتباط باشید.
                 </p>
-
 
                 <div className="contact-number">
 
@@ -965,9 +954,7 @@ export default function AlirezaAhaniPage() {
 
               </div>
 
-
               <div className="contact-links">
-
 
                 <a
                   href="tel:09144389280"
@@ -991,7 +978,6 @@ export default function AlirezaAhaniPage() {
                   </div>
 
                 </a>
-
 
                 <a
                   href="https://t.me/"
@@ -1018,7 +1004,6 @@ export default function AlirezaAhaniPage() {
 
                 </a>
 
-
                 <a
                   href="https://instagram.com/sercheno.ir"
                   target="_blank"
@@ -1044,9 +1029,8 @@ export default function AlirezaAhaniPage() {
 
                 </a>
 
-
                 <a
-                  href="https://sercheno-ywf1.vercel.app/"
+                  href={siteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="contact-link"
@@ -1078,7 +1062,6 @@ export default function AlirezaAhaniPage() {
 
         </section>
 
-
         {/* ================= FOOTER ================= */}
 
         <footer className="footer">
@@ -1092,11 +1075,10 @@ export default function AlirezaAhaniPage() {
               </strong>
 
               <p>
-                کارآفرین، مدیر و بنیان‌گذار سرچنو
+                Alireza Ahani | کارآفرین، مدیر و بنیان‌گذار سرچنو
               </p>
 
             </div>
-
 
             <div className="footer-center">
 
@@ -1122,7 +1104,6 @@ export default function AlirezaAhaniPage() {
 
             </div>
 
-
             <div className="footer-copy">
               © {new Date().getFullYear()} Alireza Ahani
             </div>
@@ -1132,7 +1113,6 @@ export default function AlirezaAhaniPage() {
         </footer>
 
       </main>
-
 
       {/* ================= STYLES ================= */}
 
@@ -1173,7 +1153,6 @@ export default function AlirezaAhaniPage() {
           width: min(1180px, calc(100% - 40px));
           margin: 0 auto;
         }
-
 
         /* ================= HEADER ================= */
 
@@ -1242,7 +1221,6 @@ export default function AlirezaAhaniPage() {
           font-weight: 700;
           white-space: nowrap;
         }
-
 
         /* ================= HERO ================= */
 
@@ -1364,7 +1342,6 @@ export default function AlirezaAhaniPage() {
           background: #171c32;
         }
 
-
         /* ================= TITLES ================= */
 
         .section {
@@ -1401,7 +1378,6 @@ export default function AlirezaAhaniPage() {
           margin: 12px auto 0;
           color: #74798b;
         }
-
 
         /* ================= ABOUT ================= */
 
@@ -1493,7 +1469,6 @@ export default function AlirezaAhaniPage() {
           font-size: 14px;
         }
 
-
         /* ================= ACTIVITIES ================= */
 
         .activities-section {
@@ -1546,7 +1521,6 @@ export default function AlirezaAhaniPage() {
           font-size: 13px;
           line-height: 2;
         }
-
 
         /* ================= CERTIFICATES ================= */
 
@@ -1705,7 +1679,6 @@ export default function AlirezaAhaniPage() {
           line-height: 1.8;
         }
 
-
         /* ================= SERCHENO ================= */
 
         .sercheno-section {
@@ -1790,7 +1763,6 @@ export default function AlirezaAhaniPage() {
           border-radius: 22px;
         }
 
-
         /* ================= IDEA ================= */
 
         .idea-section {
@@ -1837,7 +1809,6 @@ export default function AlirezaAhaniPage() {
         .btn-white:hover {
           transform: translateY(-3px);
         }
-
 
         /* ================= PROJECTS ================= */
 
@@ -1921,7 +1892,6 @@ export default function AlirezaAhaniPage() {
           font-size: 13px;
           font-weight: 800;
         }
-
 
         /* ================= CONTACT ================= */
 
@@ -2024,7 +1994,6 @@ export default function AlirezaAhaniPage() {
           font-size: 14px;
         }
 
-
         /* ================= FOOTER ================= */
 
         .footer {
@@ -2073,7 +2042,6 @@ export default function AlirezaAhaniPage() {
           direction: ltr;
         }
 
-
         /* ================= TABLET ================= */
 
         @media (max-width: 1050px) {
@@ -2096,7 +2064,6 @@ export default function AlirezaAhaniPage() {
           }
 
         }
-
 
         /* ================= MOBILE ================= */
 
@@ -2189,7 +2156,6 @@ export default function AlirezaAhaniPage() {
           }
 
         }
-
 
         /* ================= SMALL MOBILE ================= */
 
@@ -2289,4 +2255,4 @@ export default function AlirezaAhaniPage() {
       `}</style>
     </>
   );
-                }
+                    }
