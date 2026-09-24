@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   description:
     "سرچنو، پلتفرم هوشمند ساخت‌وساز و ساز برای خرید و فروش مصالح ساختمانی، تجهیزات، خدمات ساختمانی، فروشندگان، تأمین‌کنندگان و متخصصان صنعت ساختمان.",
 
+  verification: {
+    google: "L0NOjGgm_J-BSFf2HQS2VI0rrckdjQh7EuBBrmnzwOI",
+  },
+
   alternates: {
     canonical: "https://sercheno-ywf1.vercel.app/",
   },
