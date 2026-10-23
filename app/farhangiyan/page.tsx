@@ -3,806 +3,572 @@
 
 import { useMemo, useState } from "react";
 
-const lessons = [
-  {
-    title: "سوز و حرص در تعلیم و تربیت",
-    short: "دلسوزی",
-    icon: "♥",
-    color: "rose",
-    quote: "معلم موفق، نسبت به رشد و آینده شاگردان خود بی‌تفاوت نیست.",
-    meaning:
-      "معلم باید رشد علمی، اخلاقی و شخصیتی دانش‌آموزان را جدی بگیرد و برای یادگیری آنان دغدغه داشته باشد.",
-    example:
-      "دانش‌آموزی در درس ضعیف است. معلم به‌جای برچسب زدن، علت مشکل را پیدا می‌کند و برای کمک به او راهی تازه می‌آزماید.",
-    practice: "هر روز برای کمک به دانش‌آموزی که به حمایت بیشتری نیاز دارد، یک اقدام مشخص انجام دهیم.",
-  },
-  {
-    title: "سعه صدر داشته باشد",
-    short: "بردباری",
-    icon: "◉",
-    color: "amber",
-    quote: "کلاس درس به معلمی نیاز دارد که در شرایط دشوار، آرامش خود را حفظ کند.",
-    meaning:
-      "سعه صدر یعنی ظرفیت شنیدن، تحمل شرایط دشوار، برخورد سنجیده با اشتباهات و مدیریت هیجان‌ها.",
-    example:
-      "دانش‌آموزی پاسخ اشتباهی می‌دهد یا پرسشی تکراری می‌پرسد. معلم با آرامش پاسخ می‌دهد و او را تحقیر نمی‌کند.",
-    practice: "پیش از واکنش به رفتار نامناسب، مکث کنیم و علت رفتار دانش‌آموز را بسنجیم.",
-  },
-  {
-    title: "بی‌تکلف باشد",
-    short: "صمیمیت",
-    icon: "✳",
-    color: "teal",
-    quote: "وقار معلم با صمیمیت و سادگی او منافاتی ندارد.",
-    meaning:
-      "معلم می‌تواند بدون رفتارهای تصنعی و تشریفات غیرضروری، محترمانه و صمیمی با شاگردان ارتباط برقرار کند.",
-    example:
-      "معلم هنگام گفت‌وگو با دانش‌آموزان، به حرف آن‌ها گوش می‌دهد و بدون فاصله‌گذاری غیرضروری، فضای امنی برای پرسش ایجاد می‌کند.",
-    practice: "در ارتباط با دانش‌آموزان، طبیعی، محترمانه و قابل‌اعتماد باشیم.",
-  },
-  {
-    title: "مخلص باشد",
-    short: "اخلاص",
-    icon: "✦",
-    color: "violet",
-    quote: "ارزش کار تربیتی تنها به دیده‌شدن آن وابسته نیست.",
-    meaning:
-      "اخلاص یعنی هدف اصلی فعالیت آموزشی و تربیتی، انجام درست مسئولیت و خدمت صادقانه باشد، نه صرفاً جلب توجه دیگران.",
-    example:
-      "معلم برای یادگیری بهتر کلاس وقت می‌گذارد، حتی وقتی این تلاش در معرض تشویق یا تقدیر عمومی قرار نمی‌گیرد.",
-    practice: "پیش از هر فعالیت آموزشی، هدف خود را از انجام آن روشن کنیم.",
-  },
-  {
-    title: "خود را فارغ‌التحصیل نداند",
-    short: "یادگیری مداوم",
-    icon: "↗",
-    color: "blue",
-    quote: "معلم خوب، هم‌زمان با آموزش دادن، یادگیرنده نیز باقی می‌ماند.",
-    meaning:
-      "پایان تحصیلات رسمی به معنای پایان یادگیری نیست. معلم باید دانش، روش تدریس و شناخت خود از دانش‌آموزان را به‌روز کند.",
-    example:
-      "معلم پس از مشاهده بی‌علاقگی کلاس، روش تدریس خود را بررسی می‌کند و راهکارهای تازه‌ای می‌آموزد.",
-    practice: "هر هفته زمانی برای مطالعه، بازنگری تدریس و یادگیری یک مهارت تازه اختصاص دهیم.",
-  },
-  {
-    title: "توفیقاتش را از خدا بداند",
-    short: "توکل و قدردانی",
-    icon: "☼",
-    color: "amber",
-    quote: "تلاش، برنامه‌ریزی و توکل می‌توانند در کنار یکدیگر معنا پیدا کنند.",
-    meaning:
-      "در نگاه دینی کتاب، معلم موفق نعمت‌ها و فرصت‌های خود را فراموش نمی‌کند و در کنار تلاش و مسئولیت‌پذیری، به خدا توکل دارد.",
-    example:
-      "معلم پس از موفقیت دانش‌آموزان، هم از تلاش آنان و هم از همکاران و فرصت‌های فراهم‌شده قدردانی می‌کند.",
-    practice: "موفقیت را فرصتی برای شکرگزاری و تلاش بیشتر بدانیم، نه دلیلی برای غرور.",
-  },
-  {
-    title: "شجاعت و شهامت داشته باشد",
-    short: "شهامت",
-    icon: "⬡",
-    color: "rose",
-    quote: "معلم مسئولیت‌پذیر، در موقعیت‌های دشوار از انجام وظیفه درست کنار نمی‌کشد.",
-    meaning:
-      "شهامت در معلمی یعنی بیان سنجیده حقیقت، دفاع از حق دانش‌آموز و تصمیم‌گیری مسئولانه، بدون بی‌احترامی یا شتاب‌زدگی.",
-    example:
-      "وقتی دانش‌آموزی مورد تمسخر قرار می‌گیرد، معلم با قاطعیت و احترام از کرامت او دفاع می‌کند.",
-    practice: "در موقعیت‌های دشوار، اصول اخلاقی و عدالت را مبنای تصمیم خود قرار دهیم.",
-  },
-  {
-    title: "اعتمادبه‌نفس داشته باشد",
-    short: "خودباوری",
-    icon: "◎",
-    color: "teal",
-    quote: "معلم باید به توانایی رشد خود و شاگردانش باور داشته باشد.",
-    meaning:
-      "اعتمادبه‌نفس یعنی توانایی تصمیم‌گیری و تدریس با اطمینان معقول، همراه با پذیرش اشتباه و آمادگی برای اصلاح آن.",
-    example:
-      "اگر معلم پاسخ پرسشی را نداند، صادقانه اعلام می‌کند که موضوع را بررسی خواهد کرد و در جلسه بعد پاسخ می‌دهد.",
-    practice: "توانایی‌های خود را تقویت کنیم و ندانستن یک موضوع را فرصتی برای یادگیری بدانیم.",
-  },
-  {
-    title: "اهل مطالعه و افزایش دانش باشد",
-    short: "دانش‌افزایی",
-    icon: "▤",
-    color: "blue",
-    quote: "برای آموزش درست، باید پیوسته آموخت.",
-    meaning:
-      "مطالعه منابع معتبر و آشنایی با نیازهای آموزشی، پایه‌ای برای تدریس دقیق‌تر و پاسخ‌گویی بهتر به پرسش‌هاست.",
-    example:
-      "معلم پیش از شروع یک مبحث، منابع مناسب را بررسی می‌کند و مثال‌هایی متناسب با زندگی روزمره دانش‌آموزان می‌یابد.",
-    practice: "مطالعه را به بخشی منظم از برنامه هفتگی خود تبدیل کنیم.",
-  },
-  {
-    title: "با اخلاق و خوش‌رفتار باشد",
-    short: "اخلاق حرفه‌ای",
-    icon: "❋",
-    color: "violet",
-    quote: "رفتار معلم بخشی از آموزش اوست.",
-    meaning:
-      "احترام، انصاف، راست‌گویی و رعایت کرامت دانش‌آموزان، اعتماد متقابل و محیطی امن برای یادگیری ایجاد می‌کند.",
-    example:
-      "معلم هنگام اصلاح اشتباه، درباره پاسخ یا رفتار دانش‌آموز صحبت می‌کند، نه اینکه شخصیت او را زیر سؤال ببرد.",
-    practice: "میان نقد رفتار نادرست و بی‌احترامی به شخصیت دانش‌آموز تفاوت بگذاریم.",
-  },
-  {
-    title: "عدالت را رعایت کند",
-    short: "عدالت",
-    icon: "⚖",
-    color: "amber",
-    quote: "هر دانش‌آموز شایسته احترام و فرصت منصفانه برای یادگیری است.",
-    meaning:
-      "عدالت یعنی پرهیز از تبعیض و ارزیابی منصفانه؛ در عین حال، توجه به نیازهای متفاوت دانش‌آموزان نیز ضروری است.",
-    example:
-      "معلم هنگام نمره‌دهی، معیارهای مشخصی دارد و علاقه شخصی یا وضعیت خانوادگی را جایگزین عملکرد آموزشی نمی‌کند.",
-    practice: "معیارهای ارزشیابی را شفاف و قابل توضیح برای همه دانش‌آموزان تنظیم کنیم.",
-  },
-  {
-    title: "صبور و امیدوار باشد",
-    short: "صبر",
-    icon: "⌛",
-    color: "teal",
-    quote: "رشد آموزشی همیشه فوری و یکسان نیست.",
-    meaning:
-      "صبر به معلم کمک می‌کند تفاوت‌های فردی را بپذیرد، از پیشرفت‌های کوچک غافل نشود و در مسیر آموزش استمرار داشته باشد.",
-    example:
-      "دانش‌آموزی با چند بار تمرین هنوز مسئله را حل نمی‌کند. معلم به‌جای سرزنش، شیوه توضیح را تغییر می‌دهد.",
-    practice: "پیشرفت هر دانش‌آموز را با مسیر رشد خودش نیز مقایسه کنیم.",
-  },
-  {
-    title: "اهل عمل و مسئولیت‌پذیر باشد",
-    short: "عمل‌گرایی",
-    icon: "✓",
-    color: "blue",
-    quote: "دانش و توصیه زمانی اثرگذارند که به رفتار تبدیل شوند.",
-    meaning:
-      "معلم باید در انجام وظایف خود پیگیر باشد و میان آنچه به شاگردان آموزش می‌دهد و رفتار شخصی‌اش هماهنگی ایجاد کند.",
-    example:
-      "معلمی که درباره نظم صحبت می‌کند، خودش نیز برای حضور به‌موقع، آمادگی کلاس و انجام تعهدات اهمیت قائل است.",
-    practice: "برای هر توصیه تربیتی، نمونه‌ای از اجرای آن در رفتار خود پیدا کنیم.",
-  },
+const presenters = [
+  "علیرضا آهنی",
+  "عرفان اکبرزاده",
+  "علی اکبری",
+  "سید حسین میرقاسمی",
+];
+
+const qualities = [
+  { n: 1, title: "سوز و حرص داشته باشد", group: "تعهد تربیتی", desc: "معلم نسبت به یادگیری و رشد دانش‌آموزان دغدغه‌مند است و بی‌تفاوت از کنار مشکلات آنان نمی‌گذرد.", example: "دانش‌آموزی در یادگیری ضعیف است؛ معلم به‌جای برچسب‌زدن، علت مشکل را پیدا می‌کند و راه دیگری برای آموزش می‌آزماید.", question: "چگونه می‌توان به پیشرفت همه دانش‌آموزان اهمیت داد، بدون آنکه به آن‌ها فشار روانی وارد کنیم؟" },
+  { n: 2, title: "سعهٔ صدر داشته باشد", group: "تعهد تربیتی", desc: "گشاده‌رویی، تحمل دشواری‌ها و توان شنیدن نظرهای متفاوت، زمینهٔ ارتباط و آموزش بهتر را فراهم می‌کند.", example: "دانش‌آموزی با اعتراض تند سؤال می‌پرسد؛ معلم ابتدا آرامش خود را حفظ می‌کند و سپس موضوع را بررسی می‌کند.", question: "تفاوت سعهٔ صدر با پذیرفتن رفتار نادرست چیست؟" },
+  { n: 3, title: "بی‌تکلف باشد", group: "تعهد تربیتی", desc: "معلم در رفتار و ارتباط با شاگردان، صادقانه و طبیعی باشد و برای خود فاصله‌ای تصنعی ایجاد نکند.", example: "اگر معلم پاسخ پرسشی را نمی‌داند، به‌جای تظاهر به دانایی، صادقانه اعلام می‌کند که بررسی خواهد کرد.", question: "چگونه می‌توان هم صمیمی بود و هم جایگاه حرفه‌ای معلم را حفظ کرد؟" },
+  { n: 4, title: "مخلص باشد", group: "تعهد تربیتی", desc: "هدف اصلی فعالیت آموزشی، خدمت صادقانه و رشد فراگیران باشد، نه صرفاً شهرت، تحسین یا منفعت شخصی.", example: "معلم موفقیت دانش‌آموز را مهم‌تر از آن می‌داند که تمام اعتبار کار به نام خودش ثبت شود.", question: "چه نشانه‌هایی می‌تواند اخلاص در کار معلمی را نشان دهد؟" },
+  { n: 5, title: "خود را فارغ‌التحصیل نداند", group: "تعهد تربیتی", desc: "پایان تحصیلات رسمی، پایان یادگیری نیست؛ معلم باید دانش و مهارت خود را پیوسته به‌روز کند.", example: "معلم از همکار باتجربه بازخورد می‌گیرد و روش تازه‌ای را برای تدریس یک مفهوم امتحان می‌کند.", question: "چرا معلمی که خودش یاد نمی‌گیرد، در آموزش دیگران با محدودیت روبه‌رو می‌شود؟" },
+  { n: 6, title: "توفیقاتش را از خدا بداند", group: "تعهد تربیتی", desc: "در نگاه دینی کتاب، معلم در کنار تلاش و مسئولیت‌پذیری، موفقیت را نعمتی می‌داند که شایستهٔ شکرگزاری است.", example: "معلم پس از موفقیت کلاس، علاوه بر تلاش خود، از کمک همکاران و حمایت خانواده‌ها نیز قدردانی می‌کند.", question: "چگونه می‌توان توکل را با تلاش، برنامه‌ریزی و مسئولیت‌پذیری همراه کرد؟" },
+  { n: 7, title: "باشهامت باشد", group: "رشد حرفه‌ای", desc: "معلم برای انجام وظیفهٔ درست، بیان محترمانهٔ حقیقت و اصلاح روش‌های نادرست به شجاعت نیاز دارد.", example: "معلم با رعایت احترام، دربارهٔ روشی که باعث محروم‌شدن برخی دانش‌آموزان از یادگیری شده است، تذکر می‌دهد.", question: "مرز شجاعت حرفه‌ای و بی‌احترامی کجاست؟" },
+  { n: 8, title: "اعتمادبه‌نفس داشته باشد", group: "رشد حرفه‌ای", desc: "باور واقع‌بینانه به توانایی‌های خود، معلم را در مدیریت کلاس و مواجهه با مسائل تازه یاری می‌کند.", example: "هنگامی که طرح درس طبق انتظار پیش نمی‌رود، معلم دستپاچه نمی‌شود و راه جایگزین انتخاب می‌کند.", question: "اعتمادبه‌نفس چه تفاوتی با غرور و خودبرتربینی دارد؟" },
+  { n: 9, title: "مردمی باشد", group: "ارتباط انسانی", desc: "معلم با زندگی و مسائل واقعی مردم آشنا باشد و آموزش را از نیازهای جامعه جدا نکند.", example: "برای آموزش محاسبات، از مثال‌های خرید، بودجهٔ خانواده و مسائل روزمره استفاده می‌کند.", question: "چگونه می‌توان آموزش مدرسه را به زندگی واقعی پیوند زد؟" },
+  { n: 10, title: "صراحت لهجه داشته باشد", group: "ارتباط انسانی", desc: "معلم باید روشن، قابل‌فهم و صریح سخن بگوید؛ بدون ابهام‌آفرینی یا تحقیر مخاطب.", example: "به‌جای گفتن «اصلاً درس نمی‌خوانی»، دقیق توضیح می‌دهد کدام بخش تکلیف ناقص است و چگونه اصلاح شود.", question: "چطور می‌توان صریح بود، اما احساسات دانش‌آموز را جریحه‌دار نکرد؟" },
+  { n: 11, title: "منصف باشد", group: "عدالت و اخلاق", desc: "قضاوت معلم باید بر شواهد و معیارهای روشن تکیه داشته باشد، نه علاقهٔ شخصی یا پیش‌داوری.", example: "در بررسی اختلاف دو دانش‌آموز، به حرف هر دو گوش می‌دهد و پیش از نتیجه‌گیری شواهد را بررسی می‌کند.", question: "چگونه می‌توان در موقعیت‌های مبهم، منصفانه تصمیم گرفت؟" },
+  { n: 12, title: "بامحبت و صمیمی باشد", group: "ارتباط انسانی", desc: "محبت و صمیمیت سالم، احساس امنیت و تعلق را در کلاس تقویت می‌کند.", example: "معلم متوجه غیبت مکرر دانش‌آموز می‌شود و به‌جای سرزنش فوری، علت را با احترام جویا می‌شود.", question: "چگونه می‌توان میان محبت و حفظ حدود حرفه‌ای تعادل برقرار کرد؟" },
+  { n: 13, title: "اهل هدایت و عمل باشد", group: "الگوبودن", desc: "معلم باید تا حد امکان میان آنچه آموزش می‌دهد و رفتاری که از خود نشان می‌دهد هماهنگی ایجاد کند.", example: "معلمی که نظم را آموزش می‌دهد، خود نیز به زمان کلاس و تعهداتش پایبند است.", question: "اگر رفتار معلم با توصیه‌هایش تناقض داشته باشد، چه اثری بر یادگیری می‌گذارد؟" },
+  { n: 14, title: "آراسته باشد", group: "الگوبودن", desc: "پاکیزگی، آراستگی متناسب و نظم محیط آموزشی، احترام به مخاطب و فضای یادگیری را نشان می‌دهد.", example: "معلم با پوشش مرتب و کلاس منظم، بدون تجمل‌گرایی، محیطی مناسب برای آموزش فراهم می‌کند.", question: "چرا آراستگی را نباید با تجمل‌گرایی یکی دانست؟" },
+  { n: 15, title: "اخلاق خوب داشته باشد", group: "الگوبودن", desc: "ادب، خوش‌رفتاری، کنترل خشم و رعایت حرمت انسان‌ها از پایه‌های اعتماد در کلاس هستند.", example: "معلم اشتباه دانش‌آموز را اصلاح می‌کند، اما شخصیت او را زیر سؤال نمی‌برد.", question: "کدام رفتار اخلاقی معلم بیشترین اثر را بر فضای کلاس دارد؟" },
+  { n: 16, title: "متواضع باشد", group: "الگوبودن", desc: "معلم توانایی‌ها و دانش خود را می‌شناسد، اما خود را بی‌نیاز از آموختن و نقد نمی‌بیند.", example: "پیشنهاد مناسب دانش‌آموز را می‌پذیرد و اگر در محاسبه‌ای اشتباه کرده باشد، آن را اصلاح می‌کند.", question: "چگونه می‌توان متواضع بود، بدون آنکه اقتدار آموزشی از بین برود؟" },
+  { n: 17, title: "سابقهٔ نیک داشته باشد", group: "الگوبودن", desc: "رفتار مسئولانه و خوش‌نامی معلم در طول زمان، سرمایه‌ای برای اعتماد و اثرگذاری تربیتی است.", example: "پایبندی به قول‌ها و رعایت انصاف در موقعیت‌های مختلف، اعتبار حرفه‌ای معلم را تقویت می‌کند.", question: "اعتماد دانش‌آموزان چگونه در طول زمان ساخته یا تخریب می‌شود؟" },
+  { n: 18, title: "دلبستهٔ مقام و پست نباشد", group: "تعهد تربیتی", desc: "مسئولیت آموزشی نباید صرفاً وسیله‌ای برای کسب عنوان، قدرت یا امتیاز شخصی باشد.", example: "معلم کاری را که به رشد کلاس کمک می‌کند، حتی اگر دیده نشود، با مسئولیت‌پذیری انجام می‌دهد.", question: "چگونه می‌توان پیشرفت شغلی را با خدمت صادقانه جمع کرد؟" },
+  { n: 19, title: "آمادهٔ پاسخگویی باشد", group: "رشد حرفه‌ای", desc: "معلم باید بتواند دربارهٔ تصمیم‌ها، روش تدریس و ارزیابی‌های خود توضیح روشن و مسئولانه بدهد.", example: "دانش‌آموز دربارهٔ نمره‌اش سؤال می‌کند؛ معلم معیار تصحیح را توضیح می‌دهد و در صورت لزوم برگه را دوباره بررسی می‌کند.", question: "چرا پاسخگویی با سرزنش‌پذیری یا ضعف اقتدار یکسان نیست؟" },
+  { n: 20, title: "شناخت و بصیرت عمیق داشته باشد", group: "رشد حرفه‌ای", desc: "معلم باید موضوع درس، شرایط فراگیران و پیامدهای تربیتی تصمیم‌های خود را عمیق‌تر بشناسد.", example: "پیش از انتخاب روش تدریس، سطح آمادگی کلاس و تفاوت‌های فردی دانش‌آموزان را بررسی می‌کند.", question: "چه تفاوتی میان داشتن اطلاعات و برخورداری از بصیرت وجود دارد؟" },
+  { n: 21, title: "دلسوز شاگردان باشد", group: "تعهد تربیتی", desc: "دلسوزی یعنی توجه جدی به نیازهای آموزشی و انسانی دانش‌آموز و پیگیری رشد او.", example: "برای دانش‌آموزی که از درس عقب مانده، برنامهٔ جبرانی واقع‌بینانه‌ای تنظیم می‌کند.", question: "دلسوزی چگونه می‌تواند به استقلال دانش‌آموز کمک کند؟" },
+  { n: 22, title: "واقع‌گرا باشد", group: "رشد حرفه‌ای", desc: "معلم امکانات، محدودیت‌ها و شرایط واقعی کلاس را می‌بیند و بر همان اساس برنامه‌ریزی می‌کند.", example: "برای کلاسی با امکانات محدود، فعالیتی کم‌هزینه و متناسب با هدف یادگیری طراحی می‌کند.", question: "چگونه می‌توان واقع‌گرا بود و در عین حال به بهبود شرایط امید داشت؟" },
+  { n: 23, title: "صبور باشد", group: "ارتباط انسانی", desc: "یادگیری به زمان نیاز دارد؛ معلم باید در برابر خطا و تفاوت سرعت یادگیری، واکنشی سنجیده نشان دهد.", example: "مفهومی را با مثال دیگری توضیح می‌دهد، به‌جای آنکه از تکرار سؤال دانش‌آموز عصبانی شود.", question: "صبر چه تفاوتی با نادیده‌گرفتن مشکل دارد؟" },
+  { n: 24, title: "دردآشنا باشد", group: "ارتباط انسانی", desc: "معلم باید دشواری‌های واقعی زندگی فراگیران را درک کند و شرایط آنان را در تصمیم‌های آموزشی ببیند.", example: "قبل از قضاوت دربارهٔ تکلیف انجام‌نشده، دربارهٔ موانع احتمالی دانش‌آموز گفت‌وگو می‌کند.", question: "چگونه می‌توان شرایط دانش‌آموز را درک کرد، بدون آنکه معیارهای آموزشی را کنار گذاشت؟" },
+  { n: 25, title: "تکلیف‌گرا باشد", group: "تعهد تربیتی", desc: "معلم به‌جای تمرکز صرف بر گلایه از مشکلات، مسئولیت خود را در شرایط موجود شناسایی می‌کند.", example: "با وجود کمبود امکانات، بخش‌هایی از درس را با ابزار ساده و فعالیت گروهی پیش می‌برد.", question: "چگونه می‌توان محدودیت‌های واقعی را پذیرفت و همچنان مسئولانه عمل کرد؟" },
+  { n: 26, title: "باظرفیت باشد", group: "ارتباط انسانی", desc: "ظرفیت روحی به معلم کمک می‌کند انتقاد، اختلاف‌نظر و دشواری‌های کلاس را با پختگی مدیریت کند.", example: "با شنیدن انتقاد دانش‌آموز، ابتدا موضوع را می‌فهمد و بعد پاسخ می‌دهد.", question: "چه تمرین‌هایی می‌تواند ظرفیت شنیدن نقد را افزایش دهد؟" },
+  { n: 27, title: "منضبط باشد", group: "رشد حرفه‌ای", desc: "نظم در زمان، برنامه، پیگیری امور و رعایت تعهدات، کیفیت و پیش‌بینی‌پذیری آموزش را بالا می‌برد.", example: "معلم کلاس را به‌موقع آغاز می‌کند و اهداف و مراحل فعالیت را از قبل مشخص می‌سازد.", question: "نظم چگونه می‌تواند با انعطاف‌پذیری همراه باشد؟" },
+  { n: 28, title: "عزم قوی داشته باشد", group: "رشد حرفه‌ای", desc: "اراده و استمرار، معلم را در مسیر اصلاح روش‌ها و عبور از دشواری‌های آموزشی یاری می‌کند.", example: "پس از نتیجهٔ ضعیف یک آزمون، به‌جای رهاکردن موضوع، علت را تحلیل و برنامهٔ تازه‌ای اجرا می‌کند.", question: "چگونه می‌توان میان پافشاری بر هدف و اصلاح روش تفاوت گذاشت؟" },
+  { n: 29, title: "به هدف ایمان داشته باشد", group: "تعهد تربیتی", desc: "باور به ارزش یادگیری و رشد انسان، انگیزهٔ معلم را در مسیر طولانی تربیت حفظ می‌کند.", example: "حتی وقتی پیشرفت دانش‌آموز تدریجی است، با ارزیابی واقع‌بینانه و تشویق مناسب مسیر را ادامه می‌دهد.", question: "چگونه می‌توان امید به رشد را با ارزیابی واقع‌بینانه همراه کرد؟" },
+  { n: 30, title: "عادل باشد", group: "عدالت و اخلاق", desc: "عدالت یعنی تصمیم‌گیری بر پایهٔ معیارهای روشن و پرهیز از تبعیض؛ با توجه به تفاوت‌های مرتبط با نیازهای آموزشی.", example: "معلم برای همه معیار ارزیابی مشخص دارد و حمایت لازم را برای دسترسی منصفانه به یادگیری فراهم می‌کند.", question: "آیا عدالت همیشه به معنای رفتار کاملاً یکسان با همه است؟" },
+  { n: 31, title: "حامی محرومان باشد", group: "عدالت و اخلاق", desc: "معلم به دانش‌آموزانی که با محرومیت یا موانع بیشتری روبه‌رو هستند، توجه و حمایت متناسب نشان می‌دهد.", example: "برای دانش‌آموز فاقد ابزار آموزشی، راه جایگزین و محترمانه‌ای فراهم می‌کند تا از فعالیت کنار نماند.", question: "چگونه می‌توان حمایت کرد، بدون آنکه دانش‌آموز احساس برچسب‌خوردن کند؟" },
+  { n: 32, title: "توکل داشته باشد", group: "تعهد تربیتی", desc: "در نگاه دینی کتاب، توکل به معنای اتکا به خدا در کنار کوشش، تدبیر و انجام مسئولیت است.", example: "معلم با برنامه‌ریزی و پیگیری وظیفه‌اش را انجام می‌دهد و در برابر نتیجه، امید و آرامش خود را حفظ می‌کند.", question: "تفاوت توکل با کنارگذاشتن تلاش چیست؟" },
+  { n: 33, title: "بانشاط باشد", group: "ارتباط انسانی", desc: "نشاط سنجیدهٔ معلم می‌تواند فضای یادگیری را پویاتر کند و مشارکت دانش‌آموزان را افزایش دهد.", example: "معلم با شروعی پرانرژی، پرسشی جذاب و فعالیت کوتاه، توجه کلاس را جلب می‌کند.", question: "چگونه می‌توان نشاط کلاس را بدون سطحی‌شدن آموزش حفظ کرد؟" },
+];
+
+const themes = [
+  { title: "تعهد تربیتی", icon: "✦", desc: "انگیزه، اخلاص و مسئولیت در رشد انسان", color: "#e9d8ad" },
+  { title: "ارتباط انسانی", icon: "◈", desc: "محبت، صبر، ظرفیت و شناخت شرایط شاگرد", color: "#d8e5db" },
+  { title: "عدالت و اخلاق", icon: "⚖", desc: "انصاف، عدالت و حمایت از محرومان", color: "#d9e3f3" },
+  { title: "رشد حرفه‌ای", icon: "↗", desc: "یادگیری مداوم، نظم و توانمندی حرفه‌ای", color: "#f1ded6" },
+  { title: "الگوبودن", icon: "◎", desc: "هماهنگی گفتار و رفتار و اخلاق نیک", color: "#e4d8ef" },
 ];
 
 const questions = [
   {
-    q: "کدام رفتار نمونه‌ای از سعه صدر است؟",
-    options: [
-      "سرزنش دانش‌آموز به دلیل پرسش تکراری",
-      "گوش‌دادن به پرسش و توضیح دوباره با آرامش",
-      "نادیده‌گرفتن همه مشکلات کلاس",
-      "مقایسه تحقیرآمیز دانش‌آموزان",
-    ],
-    correct: 1,
-    why: "سعه صدر با آرامش، تحمل و واکنش سنجیده در موقعیت دشوار ارتباط دارد.",
+    q: "اگر دانش‌آموزی بارها یک اشتباه را تکرار کند، معلم چگونه باید برخورد کند؟",
+    a: "با صبر و سعهٔ صدر، علت خطا را بررسی کند، روش توضیح را تغییر دهد و بازخورد روشن ارائه دهد؛ بدون تحقیر دانش‌آموز.",
   },
   {
-    q: "معلمی که خود را فارغ‌التحصیل نهایی نمی‌داند، چه می‌کند؟",
-    options: [
-      "به روش‌های قدیمی خود بسنده می‌کند",
-      "فقط از دانش‌آموزان انتظار تغییر دارد",
-      "پیوسته مطالعه می‌کند و روش تدریسش را بهبود می‌دهد",
-      "از پذیرش اشتباه خودداری می‌کند",
-    ],
-    correct: 2,
-    why: "یادگیری مداوم به معلم کمک می‌کند دانش و شیوه تدریس خود را بهبود دهد.",
+    q: "آیا عدالت یعنی با همهٔ دانش‌آموزان دقیقاً یکسان رفتار کنیم؟",
+    a: "نه لزوماً. معیارها باید منصفانه و شفاف باشند؛ اما گاهی برای فراهم‌شدن فرصت برابر یادگیری، حمایت‌های متفاوت لازم است.",
   },
   {
-    q: "کدام گزینه با اخلاص در کار معلمی سازگارتر است؟",
-    options: [
-      "انجام وظیفه فقط برای دریافت تحسین",
-      "توجه به رشد شاگرد و انجام صادقانه مسئولیت",
-      "نادیده‌گرفتن نیازهای دانش‌آموز",
-      "رقابت ناسالم با همکاران",
-    ],
-    correct: 1,
-    why: "اخلاص بر نیت درست و خدمت صادقانه تأکید دارد.",
+    q: "اگر معلم پاسخ سؤالی را نداند، چه رفتاری مناسب‌تر است؟",
+    a: "صادقانه بگوید که پاسخ دقیق را بررسی می‌کند و در زمان مناسب نتیجه را ارائه دهد. این رفتار با صداقت و یادگیری مستمر سازگار است.",
   },
   {
-    q: "اعتمادبه‌نفس حرفه‌ای کدام رفتار را تقویت می‌کند؟",
-    options: [
-      "پذیرفتن اینکه معلم هرگز اشتباه نمی‌کند",
-      "پنهان‌کردن ندانستن پاسخ",
-      "پذیرش ندانستن و پیگیری پاسخ درست",
-      "ردکردن پرسش‌های دشوار",
-    ],
-    correct: 2,
-    why: "خودباوری واقعی با صداقت و آمادگی برای یادگیری همراه است.",
-  },
-  {
-    q: "عدالت در ارزشیابی دانش‌آموزان یعنی چه؟",
-    options: [
-      "دادن نمره برابر بدون توجه به معیارها",
-      "توجه صرف به دانش‌آموزان ممتاز",
-      "استفاده از معیارهای روشن و منصفانه",
-      "تأثیر دادن علاقه شخصی در نمره",
-    ],
-    correct: 2,
-    why: "معیارهای شفاف و پرهیز از تبعیض، پایه ارزشیابی منصفانه هستند.",
+    q: "کدام صفات معلمی بیشتر از همه در رفتار روزانه دیده می‌شوند؟",
+    a: "پاسخ قطعی و یکسانی وجود ندارد؛ نظم، انصاف، صبر، محبت و هماهنگی گفتار و رفتار از نمونه‌هایی هستند که دانش‌آموزان مستقیماً تجربه می‌کنند.",
   },
 ];
 
 export default function FarhangiyanPage() {
-  const [active, setActive] = useState(0);
+  const [activeTab, setActiveTab] = useState("شروع");
   const [search, setSearch] = useState("");
-  const [read, setRead] = useState<number[]>([]);
-  const [quizOpen, setQuizOpen] = useState(false);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [finished, setFinished] = useState(false);
-  const [showPresentation, setShowPresentation] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState("همه");
+  const [expanded, setExpanded] = useState<number | null>(1);
+  const [presentation, setPresentation] = useState(false);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
-  const filtered = useMemo(
-    () =>
-      lessons
-        .map((lesson, index) => ({ ...lesson, index }))
-        .filter((lesson) =>
-          `${lesson.title} ${lesson.short} ${lesson.meaning}`
-            .toLowerCase()
-            .includes(search.toLowerCase())
-        ),
-    [search]
-  );
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return qualities.filter((item) => {
+      const matchesTheme = selectedTheme === "همه" || item.group === selectedTheme;
+      const matchesSearch =
+        !term ||
+        item.title.toLowerCase().includes(term) ||
+        item.desc.toLowerCase().includes(term) ||
+        item.example.toLowerCase().includes(term);
+      return matchesTheme && matchesSearch;
+    });
+  }, [search, selectedTheme]);
 
-  const current = lessons[active];
-  const progress = Math.round((read.length / lessons.length) * 100);
-  const score = questions.reduce(
-    (sum, question, index) =>
-      sum + (answers[index] === question.correct ? 1 : 0),
-    0
-  );
+  const goTo = (id: string) => {
+    setActiveTab(id);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
-  function selectLesson(index: number) {
-    setActive(index);
-    setQuizOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function markRead() {
-    setRead((previous) =>
-      previous.includes(active) ? previous : [...previous, active]
-    );
-  }
-
-  function nextLesson() {
-    markRead();
-    setActive((previous) => Math.min(previous + 1, lessons.length - 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  const printPage = () => window.print();
 
   return (
-    <main
-      dir="rtl"
-      className={`min-h-screen bg-[#f5f1e8] text-[#172b35] ${
-        showPresentation ? "presentation-mode" : ""
-      }`}
-    >
+    <main dir="rtl" className={presentation ? "farhangi presentation-mode" : "farhangi"}>
       <style jsx global>{`
-        @import url("https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap");
-
-        .presentation-mode .site-header,
-        .presentation-mode .site-sidebar,
-        .presentation-mode .site-footer,
-        .presentation-mode .presentation-toggle {
-          display: none !important;
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
+        :root { scroll-behavior: smooth; }
+        body { margin: 0; }
+        .farhangi { --navy: #152c35; --navy2: #203d46; --gold: #c7a66a; --paper: #f7f4ed; --ink: #26383c; --muted: #718087; font-family: 'Vazirmatn', Tahoma, sans-serif; color: var(--ink); background: var(--paper); min-height: 100vh; }
+        .farhangi * { box-sizing: border-box; }
+        .farhangi button, .farhangi input { font: inherit; }
+        .farhangi button { cursor: pointer; }
+        .f-container { max-width: 1180px; margin: auto; padding: 0 24px; }
+        .f-nav { position: sticky; top: 0; z-index: 30; background: rgba(21,44,53,.97); color: #fff; border-bottom: 1px solid rgba(199,166,106,.35); backdrop-filter: blur(12px); }
+        .f-nav-inner { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:68px; }
+        .f-brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:-.4px; }
+        .f-brand-mark { display:grid; place-items:center; width:39px; height:39px; border:1px solid var(--gold); color:var(--gold); border-radius:12px; font-size:21px; }
+        .f-nav-links { display:flex; gap:5px; flex-wrap:wrap; }
+        .f-nav-links button { background:transparent; border:0; color:#d8e0df; padding:9px 12px; border-radius:9px; font-size:12px; }
+        .f-nav-links button:hover,.f-nav-links button.active { background:rgba(255,255,255,.1); color:#fff; }
+        .f-actions { display:flex; gap:8px; }
+        .f-btn { border:1px solid rgba(255,255,255,.25); color:#fff; background:transparent; padding:9px 13px; border-radius:10px; font-size:12px; }
+        .f-btn.gold { background:var(--gold); border-color:var(--gold); color:var(--navy); font-weight:800; }
+        .f-hero { background:radial-gradient(ellipse at 80% 20%,#2a4c55 0%,transparent 48%),linear-gradient(125deg,#142b34,#203d45 60%,#182e37); color:#fff; position:relative; overflow:hidden; }
+        .f-hero:after { content:""; position:absolute; width:400px;height:400px;border:1px solid rgba(199,166,106,.15);border-radius:50%;left:-100px;top:-160px;box-shadow:0 0 0 45px rgba(199,166,106,.025),0 0 0 90px rgba(199,166,106,.025); }
+        .f-hero-grid { position:relative; z-index:1; display:grid; grid-template-columns:1.25fr .75fr; gap:40px; align-items:center; padding-top:90px; padding-bottom:85px; }
+        .f-kicker { color:var(--gold); font-size:12px; font-weight:700; letter-spacing:1px; display:flex; align-items:center; gap:10px; }
+        .f-kicker:before { content:""; width:28px;height:1px;background:var(--gold); }
+        .f-hero h1 { font-size:clamp(34px,5vw,60px); line-height:1.55; margin:20px 0 14px; font-weight:900; letter-spacing:-1.5px; }
+        .f-hero h1 span { color:var(--gold); }
+        .f-lead { color:#d5dfdf; line-height:2.2; font-size:15px; max-width:680px; }
+        .f-presenters { display:flex; flex-wrap:wrap; gap:8px; margin-top:26px; }
+        .f-presenter { padding:8px 13px; border:1px solid rgba(255,255,255,.19); border-radius:30px; background:rgba(255,255,255,.05); font-size:12px; }
+        .f-hero-buttons { display:flex; gap:10px; flex-wrap:wrap; margin-top:30px; }
+        .f-hero-buttons button { padding:13px 19px; border-radius:11px; border:1px solid var(--gold); background:var(--gold); color:var(--navy); font-weight:800; }
+        .f-hero-buttons button.secondary { background:transparent; color:white; border-color:rgba(255,255,255,.3); }
+        .f-book { border:1px solid rgba(199,166,106,.45); border-radius:20px; padding:32px; background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.025)); position:relative; max-width:360px; justify-self:center; width:100%; box-shadow:0 30px 80px #091a2040; }
+        .f-book:before { content:""; position:absolute; top:0; right:26px; width:3px; height:100%; background:var(--gold); opacity:.7; }
+        .f-book-label { color:var(--gold); font-size:11px; letter-spacing:1px; }
+        .f-book h2 { font-size:30px; line-height:1.8; margin:18px 0; }
+        .f-book p { font-size:12px; color:#c6d1d0; line-height:2.1; }
+        .f-book-bottom { border-top:1px solid #ffffff22; margin-top:25px; padding-top:18px; color:var(--gold); font-size:11px; }
+        .f-section { padding:76px 0; scroll-margin-top:80px; }
+        .f-section.light { background:#fff; }
+        .f-section.dark { background:var(--navy); color:white; }
+        .f-section-head { display:flex; align-items:end; justify-content:space-between; gap:24px; margin-bottom:32px; }
+        .f-section-head h2 { font-size:clamp(25px,3vw,36px); margin:10px 0; line-height:1.7; color:var(--navy); }
+        .f-section.dark .f-section-head h2 { color:white; }
+        .f-section-head p { color:var(--muted); line-height:2; font-size:13px; max-width:580px; margin:0; }
+        .f-section.dark .f-section-head p { color:#b8c7c9; }
+        .f-eyebrow { color:#9a7940; font-size:11px; font-weight:800; letter-spacing:.5px; }
+        .f-intro-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+        .f-paper-card { padding:28px; background:#fff; border:1px solid #e8e4da; border-radius:16px; }
+        .f-paper-card h3 { margin:0 0 12px; font-size:17px; color:var(--navy); }
+        .f-paper-card p { margin:0; line-height:2.2; font-size:13px; color:#58676b; }
+        .f-callout { border-right:3px solid var(--gold); background:#f0eadc; padding:20px 24px; border-radius:10px; line-height:2.2; font-size:14px; margin-top:20px; }
+        .f-theme-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+        .f-theme { text-align:right; border:1px solid #e5e0d5; border-radius:14px; background:#fff; padding:18px 15px; min-height:145px; color:var(--ink); transition:transform .2s,border-color .2s; }
+        .f-theme:hover { transform:translateY(-3px); border-color:var(--gold); }
+        .f-theme-icon { width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:20px;margin-bottom:12px; }
+        .f-theme strong { display:block;font-size:13px;margin-bottom:7px; }
+        .f-theme span { font-size:11px;color:var(--muted);line-height:1.9;display:block; }
+        .f-toolbar { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin:25px 0; }
+        .f-search { background:white; border:1px solid #ddd8cc; border-radius:11px; padding:12px 15px; width:min(100%,360px); outline:none; color:var(--ink); }
+        .f-search:focus { border-color:var(--gold); box-shadow:0 0 0 3px #c7a66a22; }
+        .f-filters { display:flex; gap:7px; flex-wrap:wrap; }
+        .f-filter { border:1px solid #ddd8cc; border-radius:30px; padding:8px 12px; background:#fff; font-size:11px; color:#526368; }
+        .f-filter.active { background:var(--navy); color:white; border-color:var(--navy); }
+        .f-quality-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+        .f-quality { border:1px solid #e5e0d5; background:#fff; border-radius:14px; overflow:hidden; }
+        .f-quality-top { display:flex; gap:14px; align-items:flex-start; padding:19px; }
+        .f-number { width:38px; height:38px; flex-shrink:0; display:grid; place-items:center; border-radius:11px; background:#f0eadc; color:#896a34; font-weight:900; font-size:13px; }
+        .f-quality-main { flex:1; min-width:0; }
+        .f-quality-main h3 { margin:2px 0 7px; font-size:15px; color:var(--navy); }
+        .f-quality-main p { margin:0; font-size:12px; line-height:2.1; color:#667579; }
+        .f-quality-tag { display:inline-block; font-size:10px; color:#8b713f; background:#f5f0e5; border-radius:20px; padding:5px 9px; margin-top:10px; }
+        .f-expand { border:0; background:transparent; color:#8c713e; font-size:11px; padding:7px 10px; }
+        .f-quality-detail { border-top:1px solid #eee9df; padding:18px 20px 20px; background:#fcfbf8; }
+        .f-quality-detail h4 { margin:0 0 7px; color:var(--navy); font-size:12px; }
+        .f-quality-detail p { font-size:12px; color:#596b70; line-height:2.15; margin:0 0 16px; }
+        .f-quality-detail p:last-child { margin-bottom:0; }
+        .f-quote { max-width:820px; margin:auto; text-align:center; padding:20px 0; }
+        .f-quote-mark { font-family:Georgia,serif; font-size:60px; color:var(--gold); height:48px; }
+        .f-quote h2 { font-size:clamp(22px,3vw,34px); line-height:2; margin:15px 0 20px; }
+        .f-quote p { color:#bfcccd; font-size:13px; line-height:2.2; }
+        .f-pill { display:inline-flex; padding:7px 12px; border:1px solid #ffffff2b; border-radius:30px; font-size:11px; color:var(--gold); }
+        .f-case-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+        .f-case { border:1px solid #e5e0d5; background:white; border-radius:15px; padding:24px; }
+        .f-case .f-case-icon { color:#a8874e; font-size:23px; }
+        .f-case h3 { font-size:15px; color:var(--navy); margin:12px 0 10px; }
+        .f-case p { font-size:12px; line-height:2.2; color:#637277; }
+        .f-case button { border:0; background:#f3eee3; color:#6f552b; padding:9px 12px; border-radius:8px; font-size:11px; }
+        .f-question { background:white; border:1px solid #e6e1d6; border-radius:16px; padding:26px; }
+        .f-question-count { color:#927340; font-size:11px; font-weight:800; }
+        .f-question h3 { font-size:20px; line-height:2; color:var(--navy); margin:14px 0 20px; }
+        .f-answer { padding:16px 18px; border-right:3px solid var(--gold); background:#f5f0e6; font-size:13px; line-height:2.2; border-radius:8px; }
+        .f-question-actions { display:flex; justify-content:space-between; gap:10px; margin-top:22px; flex-wrap:wrap; }
+        .f-question-actions button { border:1px solid #ddd5c5; background:white; border-radius:9px; padding:10px 14px; font-size:12px; color:var(--navy); }
+        .f-question-actions button.primary { background:var(--navy); color:white; border-color:var(--navy); }
+        .f-conclusion-grid { display:grid; grid-template-columns:1fr 1fr; gap:25px; align-items:center; }
+        .f-conclusion-grid h2 { font-size:clamp(25px,3vw,36px); line-height:1.8; margin:12px 0; }
+        .f-conclusion-grid p { font-size:13px; line-height:2.3; color:#c5d0d1; }
+        .f-checklist { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+        .f-checklist li { padding:14px 16px; background:#ffffff0a; border:1px solid #ffffff18; border-radius:10px; color:#e1e7e6; font-size:12px; line-height:2; }
+        .f-checklist li:before { content:"✓"; color:var(--gold); font-weight:900; margin-left:10px; }
+        .f-source { border-top:1px solid #e5e0d5; padding-top:20px; margin-top:30px; color:#738084; font-size:11px; line-height:2.2; }
+        .f-footer { background:#10242c; color:#b9c7c8; padding:30px 0; font-size:11px; }
+        .f-footer-inner { display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
+        .presentation-mode .f-nav { display:none; }
+        .presentation-mode .f-hero-grid { min-height:85vh; }
+        .presentation-mode .f-container { max-width:1280px; }
+        .presentation-mode .f-section { padding:95px 0; }
+        .presentation-mode .f-quality-grid { grid-template-columns:1fr; }
+        .presentation-mode .f-quality { max-width:900px; }
+        .presentation-mode .f-presenter { font-size:14px; }
+        .f-present-mode-exit { position:fixed;z-index:100;left:18px;top:18px;background:#c7a66a;color:#152c35;border:0;padding:10px 14px;border-radius:10px;font-weight:800;box-shadow:0 4px 20px #0003; }
+        @media(max-width:850px) {
+          .f-nav-links { display:none; }
+          .f-hero-grid { grid-template-columns:1fr; padding-top:55px; padding-bottom:55px; }
+          .f-book { display:none; }
+          .f-theme-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+          .f-theme:last-child { grid-column:span 2; }
+          .f-case-grid { grid-template-columns:1fr; }
+          .f-intro-grid,.f-conclusion-grid { grid-template-columns:1fr; }
+          .f-section { padding:55px 0; }
+          .f-section-head { align-items:flex-start; flex-direction:column; gap:10px; }
         }
-
-        .presentation-mode .lesson-content {
-          max-width: 1100px;
-          margin: 0 auto;
+        @media(max-width:580px) {
+          .f-container { padding:0 16px; }
+          .f-actions .f-btn { padding:8px; font-size:10px; }
+          .f-brand { font-size:12px; }
+          .f-quality-grid { grid-template-columns:1fr; }
+          .f-toolbar { align-items:stretch; }
+          .f-search { width:100%; }
+          .f-filters { gap:6px; }
+          .f-filter { font-size:10px; padding:7px 9px; }
+          .f-hero h1 { font-size:36px; }
+          .f-lead { font-size:13px; }
+          .f-paper-card { padding:21px; }
         }
-
-        html {
-          scroll-behavior: smooth;
-        }
-
-        body {
-          font-family: "Vazirmatn", Tahoma, sans-serif;
-        }
-
         @media print {
-          .site-header,
-          .site-sidebar,
-          .site-footer,
-          .presentation-toggle,
-          .interactive-controls {
-            display: none !important;
-          }
-
-          main {
-            background: white !important;
-            color: black !important;
-          }
-
-          .lesson-content {
-            max-width: 100% !important;
-          }
-
-          .print-card {
-            break-inside: avoid;
-          }
+          body,.farhangi { background:white!important; color:#222!important; }
+          .f-nav,.f-hero-buttons,.f-toolbar,.f-expand,.f-question-actions,.f-footer,.f-present-mode-exit { display:none!important; }
+          .f-hero { background:white!important; color:#111!important; border-bottom:2px solid #c7a66a; }
+          .f-hero-grid { display:block; padding:20px 0!important; min-height:0!important; }
+          .f-hero h1,.f-book h2,.f-section-head h2,.f-conclusion-grid h2 { color:#172e36!important; }
+          .f-lead,.f-book p,.f-section.dark p,.f-conclusion-grid p { color:#333!important; }
+          .f-book { display:none!important; }
+          .f-section,.f-section.dark,.f-section.light { background:white!important; color:#222!important; padding:22px 0!important; break-inside:avoid; }
+          .f-theme-grid { grid-template-columns:repeat(3,1fr); }
+          .f-quality-grid { grid-template-columns:1fr 1fr; }
+          .f-quality { break-inside:avoid; }
+          .f-quality-detail { display:block!important; }
+          .f-case-grid { grid-template-columns:repeat(3,1fr); }
+          .f-question { break-inside:avoid; }
+          .f-source { color:#444!important; }
         }
       `}</style>
 
-      <header className="site-header border-b border-[#d9cfbb] bg-[#172b35] text-[#f7f1e5]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 md:px-8">
-          <a href="/" className="text-xl font-black tracking-tight">
-            سرچنو
-            <span className="mr-2 text-xs font-medium text-[#d5b777]">
-              / فضای یادگیری
-            </span>
-          </a>
+      {presentation && (
+        <button className="f-present-mode-exit" onClick={() => setPresentation(false)}>
+          ✕ خروج از حالت ارائه
+        </button>
+      )}
 
-          <button
-            type="button"
-            onClick={() => setShowPresentation((value) => !value)}
-            className="presentation-toggle rounded-full border border-[#d5b777]/60 px-4 py-2 text-sm transition hover:bg-white/10"
-          >
-            {showPresentation ? "بازگشت به صفحه کامل" : "حالت ارائه کلاسی ↗"}
-          </button>
+      <header className="f-nav">
+        <div className="f-container f-nav-inner">
+          <div className="f-brand">
+            <span className="f-brand-mark">م</span>
+            <span>کارگاه صفات معلمی</span>
+          </div>
+          <nav className="f-nav-links">
+            {["شروع", "مقدمه", "محورها", "صفات", "گفت‌وگو", "جمع‌بندی"].map((id) => (
+              <button
+                key={id}
+                className={activeTab === id ? "active" : ""}
+                onClick={() => goTo(id)}
+              >
+                {id}
+              </button>
+            ))}
+          </nav>
+          <div className="f-actions">
+            <button className="f-btn" onClick={printPage}>چاپ / PDF</button>
+            <button className="f-btn gold" onClick={() => setPresentation(!presentation)}>
+              {presentation ? "نمای عادی" : "حالت ارائه"}
+            </button>
+          </div>
         </div>
       </header>
 
-      <section className="relative overflow-hidden bg-[#172b35] px-5 pb-16 pt-10 text-[#f7f1e5] md:px-8 md:pb-24 md:pt-16">
-        <div className="absolute -left-20 -top-28 h-80 w-80 rounded-full border border-[#d5b777]/15" />
-        <div className="absolute -left-8 -top-16 h-56 w-56 rounded-full border border-[#d5b777]/20" />
-
-        <div className="relative mx-auto max-w-7xl">
-          <div className="mb-7 flex flex-wrap items-center gap-2 text-xs text-[#d5b777] md:text-sm">
-            <span>دانشگاه فرهنگیان</span>
-            <span>/</span>
-            <span>مهارت‌های معلمی</span>
-            <span>/</span>
-            <span>فصل دوم</span>
+      <section className="f-hero" id="شروع">
+        <div className="f-container f-hero-grid">
+          <div>
+            <div className="f-kicker">دانشگاه فرهنگیان · ارائهٔ پژوهشی</div>
+            <h1>معلم خوب،<br /><span>چه ویژگی‌هایی</span> دارد؟</h1>
+            <p className="f-lead">
+              بررسی تحلیلی صفات معلمی از نگاه استاد محسن قرائتی؛
+              از دغدغهٔ تربیت و عدالت تا اخلاق حرفه‌ای، رشد مداوم و رابطهٔ انسانی با دانش‌آموز.
+            </p>
+            <div className="f-presenters">
+              {presenters.map((name) => <span className="f-presenter" key={name}>{name}</span>)}
+            </div>
+            <div className="f-hero-buttons">
+              <button onClick={() => goTo("مقدمه")}>ورود به ارائه ←</button>
+              <button className="secondary" onClick={() => goTo("صفات")}>مرور ۳۳ صفت</button>
+            </div>
           </div>
+          <div className="f-book">
+            <div className="f-book-label">پژوهش و تحلیل آموزشی</div>
+            <h2>صفات<br />معلمی</h2>
+            <p>فصل دوم کتاب «مهارت معلمی»</p>
+            <p>نویسنده: استاد محسن قرائتی</p>
+            <div className="f-book-bottom">از ویژگی‌های فردی تا مسئولیت اجتماعی معلم</div>
+          </div>
+        </div>
+      </section>
 
-          <div className="grid items-end gap-10 md:grid-cols-[1.5fr_0.7fr]">
+      <section className="f-section" id="مقدمه">
+        <div className="f-container">
+          <div className="f-section-head">
             <div>
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#d5b777]/30 px-4 py-2 text-xs text-[#e5cf9b]">
-                <span>✦</span>
-                <span>روایت یک مسیر؛ از دانستن تا معلم‌شدن</span>
-              </div>
-
-              <h1 className="max-w-3xl text-4xl font-black leading-[1.5] md:text-6xl md:leading-[1.45]">
-                صفات معلم
-                <span className="block text-[#d5b777]">شخصیت، رسالت، اثرگذاری</span>
-              </h1>
-
-              <p className="mt-6 max-w-2xl text-sm leading-8 text-[#e0e5e2] md:text-base md:leading-9">
-                نگاهی آموزشی و کاربردی به فصل دوم کتاب مهارت‌های معلمی
-                استاد محسن قرائتی؛ برای دانشجومعلمانی که می‌خواهند علاوه بر
-                آموزش، در رشد انسان‌ها نیز اثرگذار باشند.
+              <div className="f-eyebrow">بخش اول · طرح مسئله</div>
+              <h2>چرا صفات معلم اهمیت دارند؟</h2>
+            </div>
+            <p>آموزش فقط انتقال اطلاعات نیست؛ شخصیت، رفتار و شیوهٔ ارتباط معلم نیز بر تجربهٔ یادگیری اثر می‌گذارد.</p>
+          </div>
+          <div className="f-intro-grid">
+            <article className="f-paper-card">
+              <h3>۱. بیان مسئله</h3>
+              <p>
+                چرا دو معلم با دانش تخصصی نزدیک به هم ممکن است تجربه‌های آموزشی متفاوتی برای دانش‌آموزان بسازند؟
+                بخشی از پاسخ را باید در صفاتی مانند صبر، انصاف، مسئولیت‌پذیری، شناخت مخاطب و هماهنگی گفتار و رفتار جست‌وجو کرد.
               </p>
+            </article>
+            <article className="f-paper-card">
+              <h3>۲. هدف ارائه</h3>
+              <p>
+                هدف، معرفی و تحلیل صفات مطرح‌شده در فصل دوم کتاب، پیوند دادن آن‌ها با موقعیت‌های واقعی کلاس درس
+                و فراهم‌کردن زمینه‌ای برای گفت‌وگوی انتقادی دربارهٔ معلم شایسته است.
+              </p>
+            </article>
+            <article className="f-paper-card">
+              <h3>۳. پرسش محوری</h3>
+              <p>
+                صفات فردی و اخلاقی معلم چگونه می‌توانند بر کیفیت رابطهٔ آموزشی، عدالت در کلاس و رشد علمی و انسانی دانش‌آموزان اثر بگذارند؟
+              </p>
+            </article>
+            <article className="f-paper-card">
+              <h3>۴. روش ارائه</h3>
+              <p>
+                روش کار، مطالعهٔ محتوای فصل، دسته‌بندی موضوعی صفات، تحلیل موقعیت‌های فرضی کلاس و گفت‌وگوی مشارکتی است.
+                مثال‌های این صفحه برای کاربردی‌کردن مفاهیم طراحی شده‌اند.
+              </p>
+            </article>
+          </div>
+          <div className="f-callout">
+            <strong>ایدهٔ مرکزی:</strong> معلم شایسته تنها کسی نیست که درس را خوب می‌داند؛ او باید بتواند دانش خود را با اخلاق،
+            مسئولیت‌پذیری و شناخت انسان همراه کند.
+          </div>
+        </div>
+      </section>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <button
-                  onClick={() => {
-                    setShowPresentation(false);
-                    selectLesson(0);
-                  }}
-                  className="rounded-xl bg-[#d5b777] px-6 py-3 font-bold text-[#172b35] transition hover:bg-[#e7cb8d]"
-                >
-                  شروع مطالعه <span className="mr-2">←</span>
-                </button>
-                <button
-                  onClick={() =>
-                    document
-                      .getElementById("lesson-list")
-                      ?.scrollIntoView({ behavior: "smooth" })
-                  }
-                  className="rounded-xl border border-white/20 px-6 py-3 text-sm transition hover:bg-white/10"
-                >
-                  مشاهده فهرست مطالب
-                </button>
-              </div>
+      <section className="f-section light" id="محورها">
+        <div className="f-container">
+          <div className="f-section-head">
+            <div>
+              <div className="f-eyebrow">بخش دوم · چارچوب مفهومی</div>
+              <h2>صفات معلمی در پنج محور</h2>
             </div>
+            <p>این دسته‌بندی، چارچوب تحلیلی ارائه‌دهندگان است تا ارتباط میان صفات روشن‌تر شود؛ عنوان‌های اصلی کتاب در بخش بعد آمده‌اند.</p>
+          </div>
+          <div className="f-theme-grid">
+            {themes.map((theme) => (
+              <button className="f-theme" key={theme.title} onClick={() => { setSelectedTheme(theme.title); goTo("صفات"); }}>
+                <span className="f-theme-icon" style={{ background: theme.color }}>{theme.icon}</span>
+                <strong>{theme.title}</strong>
+                <span>{theme.desc}</span>
+              </button>
+            ))}
+          </div>
+          <div style={{ marginTop: 15 }}>
+            <button className="f-filter" onClick={() => { setSelectedTheme("همه"); goTo("صفات"); }}>
+              نمایش همهٔ صفات ←
+            </button>
+          </div>
+        </div>
+      </section>
 
-            <div className="hidden md:block">
-              <div className="rounded-[2rem] border border-[#d5b777]/25 bg-white/[0.04] p-7">
-                <div className="mb-5 text-sm text-[#d5b777]">
-                  اندیشه آغازین
-                </div>
-                <div className="text-5xl text-[#d5b777]">“</div>
-                <p className="text-xl font-semibold leading-10">
-                  معلمی فقط انتقال دانش نیست؛ ساختن فرصت رشد برای انسان‌هاست.
-                </p>
-                <div className="mt-6 h-px bg-[#d5b777]/30" />
-                <div className="mt-4 text-xs leading-7 text-[#c8d0cf]">
-                  یادگیری · اخلاق · مسئولیت · تربیت
-                </div>
-              </div>
+      <section className="f-section" id="صفات">
+        <div className="f-container">
+          <div className="f-section-head">
+            <div>
+              <div className="f-eyebrow">بخش سوم · متن اصلی پژوهش</div>
+              <h2>۳۳ صفت معلم در کتاب مهارت معلمی</h2>
+            </div>
+            <p>هر مورد شامل شرح کوتاه، نمونهٔ کاربردی و یک پرسش برای تحلیل جمعی است. برای دیدن جزئیات، هر کارت را باز کنید.</p>
+          </div>
+          <div className="f-toolbar">
+            <input
+              className="f-search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="جست‌وجو در صفات و توضیحات..."
+              aria-label="جست‌وجو در صفات معلمی"
+            />
+            <div className="f-filters">
+              {["همه", ...themes.map((t) => t.title)].map((theme) => (
+                <button key={theme} className={"f-filter " + (selectedTheme === theme ? "active" : "")}
+                  onClick={() => setSelectedTheme(theme)}>
+                  {theme}
+                </button>
+              ))}
             </div>
           </div>
+          <div style={{ fontSize: 12, color: "#778488", marginBottom: 14 }}>
+            {filtered.length} مورد از {qualities.length} صفت
+          </div>
+          <div className="f-quality-grid">
+            {filtered.map((item) => (
+              <article className="f-quality" key={item.n}>
+                <div className="f-quality-top">
+                  <span className="f-number">{String(item.n).padStart(2, "0")}</span>
+                  <div className="f-quality-main">
+                    <h3>{item.title}</h3>
+                    <p>{item.desc}</p>
+                    <span className="f-quality-tag">{item.group}</span>
+                  </div>
+                  <button className="f-expand" onClick={() => setExpanded(expanded === item.n ? null : item.n)}>
+                    {expanded === item.n ? "بستن −" : "تحلیل +"}
+                  </button>
+                </div>
+                {(expanded === item.n || showAll) && (
+                  <div className="f-quality-detail">
+                    <h4>نمونه در کلاس درس</h4>
+                    <p>{item.example}</p>
+                    <h4>پرسش برای گفت‌وگو</h4>
+                    <p>{item.question}</p>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+          {filtered.length === 0 && (
+            <div className="f-paper-card" style={{ marginTop: 15 }}>
+              موردی با این عبارت پیدا نشد؛ عبارت دیگری را جست‌وجو کنید.
+            </div>
+          )}
+          <div style={{ textAlign: "center", marginTop: 25 }}>
+            <button className="f-filter" onClick={() => setShowAll(!showAll)}>
+              {showAll ? "بستن جزئیات همهٔ صفات" : "نمایش جزئیات همهٔ صفات"}
+            </button>
+          </div>
+        </div>
+      </section>
 
-          <div className="mt-12 grid grid-cols-3 gap-3 border-t border-white/15 pt-6 md:max-w-2xl md:gap-8">
+      <section className="f-section dark">
+        <div className="f-container">
+          <div className="f-quote">
+            <div className="f-quote-mark">“</div>
+            <span className="f-pill">مکث و تأمل</span>
+            <h2>دانستنِ راه درست کافی نیست؛<br />معلم باید آن را در رفتار خود نشان دهد.</h2>
+            <p>
+              این عبارت، جمع‌بندی مفهومی ارائه‌دهندگان از اهمیت هماهنگی گفتار و رفتار است و نقل‌قول مستقیم از کتاب محسوب نمی‌شود.
+              در نگاه حرفه‌ای، رفتار معلم بخشی از محیط یادگیری است.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="f-section" id="گفت‌وگو">
+        <div className="f-container">
+          <div className="f-section-head">
             <div>
-              <div className="text-2xl font-black text-[#d5b777]">
-                {lessons.length}
-              </div>
-              <div className="mt-1 text-xs text-[#d3d9d7]">بخش آموزشی</div>
+              <div className="f-eyebrow">بخش چهارم · مشارکت مخاطبان</div>
+              <h2>کارگاه تحلیل موقعیت‌های کلاسی</h2>
             </div>
+            <p>در کنفرانس، از دانشجویان بخواهید موقعیت را تحلیل کنند و سپس پاسخ پیشنهادی را ببینند.</p>
+          </div>
+          <div className="f-case-grid">
+            <article className="f-case">
+              <div className="f-case-icon">01 / گفت‌وگو</div>
+              <h3>دانش‌آموز معترض</h3>
+              <p>دانش‌آموزی در برابر نمرهٔ خود اعتراض می‌کند و لحن مناسبی ندارد. معلم چگونه هم احترام را حفظ کند و هم موضوع را منصفانه بررسی کند؟</p>
+              <button onClick={() => { setQuestionIndex(1); setShowAnswer(false); goTo("پرسش‌پایانی"); }}>بحث دربارهٔ عدالت ←</button>
+            </article>
+            <article className="f-case">
+              <div className="f-case-icon">02 / مسئولیت</div>
+              <h3>دانش‌آموز کم‌برخوردار</h3>
+              <p>دانش‌آموزی به دلیل نداشتن امکانات، تکلیفش را کامل انجام نداده است. چه راهکاری میان عدالت، دلسوزی و مسئولیت‌پذیری تعادل ایجاد می‌کند؟</p>
+              <button onClick={() => { setQuestionIndex(0); setShowAnswer(false); goTo("پرسش‌پایانی"); }}>بحث دربارهٔ حمایت ←</button>
+            </article>
+            <article className="f-case">
+              <div className="f-case-icon">03 / رشد حرفه‌ای</div>
+              <h3>معلم و اشتباه علمی</h3>
+              <p>معلم متوجه می‌شود توضیحی که جلسهٔ قبل داده، دقیق نبوده است. کدام صفات به او کمک می‌کنند اشتباه را اصلاح کند؟</p>
+              <button onClick={() => { setQuestionIndex(2); setShowAnswer(false); goTo("پرسش‌پایانی"); }}>بحث دربارهٔ صداقت ←</button>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="f-section light" id="پرسش‌پایانی">
+        <div className="f-container">
+          <div className="f-section-head">
             <div>
-              <div className="text-2xl font-black text-[#d5b777]">
-                {questions.length}
-              </div>
-              <div className="mt-1 text-xs text-[#d3d9d7]">پرسش ارزیابی</div>
+              <div className="f-eyebrow">بخش پنجم · ارزیابی مفهومی</div>
+              <h2>پرسش‌های پایانی برای گفت‌وگو</h2>
             </div>
-            <div>
-              <div className="text-2xl font-black text-[#d5b777]">۱</div>
-              <div className="mt-1 text-xs text-[#d3d9d7]">مسیر رشد معلم</div>
+            <p>این بخش برای مشارکت و تبادل نظر طراحی شده است، نه آزمون نمره‌دار.</p>
+          </div>
+          <div className="f-question">
+            <div className="f-question-count">پرسش {questionIndex + 1} از {questions.length}</div>
+            <h3>{questions[questionIndex].q}</h3>
+            {showAnswer && <div className="f-answer">{questions[questionIndex].a}</div>}
+            <div className="f-question-actions">
+              <button onClick={() => setShowAnswer(!showAnswer)}>
+                {showAnswer ? "پنهان‌کردن پاسخ پیشنهادی" : "مشاهدهٔ پاسخ پیشنهادی"}
+              </button>
+              <button className="primary" onClick={() => { setQuestionIndex((questionIndex + 1) % questions.length); setShowAnswer(false); }}>
+                پرسش بعدی ←
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 md:grid-cols-[290px_minmax(0,1fr)] md:px-8 md:py-14">
-        <aside
-          id="lesson-list"
-          className="site-sidebar h-fit space-y-5 md:sticky md:top-5"
-        >
-          <div className="rounded-2xl border border-[#e0d7c6] bg-white p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-extrabold">مسیر یادگیری</h2>
-              <span className="text-xs text-[#8a7958]">
-                {read.length} از {lessons.length}
-              </span>
-            </div>
-
-            <div className="h-2 overflow-hidden rounded-full bg-[#eee8dc]">
-              <div
-                className="h-full rounded-full bg-[#b89a5c] transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-
-            <p className="mt-3 text-xs leading-6 text-[#77766d]">
-              با مطالعه هر بخش، آن را تکمیل کن و مسیر پیشرفتت را ببین.
+      <section className="f-section dark" id="جمع‌بندی">
+        <div className="f-container f-conclusion-grid">
+          <div>
+            <div className="f-eyebrow">نتیجه‌گیری پژوهش</div>
+            <h2>معلمی، ترکیب دانش، اخلاق و مسئولیت است.</h2>
+            <p>
+              بررسی صفات مطرح‌شده در فصل دوم نشان می‌دهد که شایستگی معلم را نمی‌توان تنها به تسلط بر محتوای درسی محدود کرد.
+              رابطهٔ انسانی، انصاف، یادگیری مداوم، انضباط و پایبندی عملی به ارزش‌ها نیز در این تصویر جای دارند.
             </p>
-
-            <label className="mt-5 block text-xs font-semibold text-[#52616a]">
-              جست‌وجو در موضوعات
-            </label>
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="مثلاً سعه صدر..."
-              className="mt-2 w-full rounded-xl border border-[#e2daca] bg-[#faf8f3] px-4 py-3 text-sm outline-none transition focus:border-[#b89a5c]"
-            />
-
-            <nav className="mt-4 space-y-1.5">
-              {filtered.map((lesson) => (
-                <button
-                  key={lesson.index}
-                  onClick={() => selectLesson(lesson.index)}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-right transition ${
-                    active === lesson.index
-                      ? "bg-[#172b35] text-white"
-                      : "text-[#44545b] hover:bg-[#f5f1e8]"
-                  }`}
-                >
-                  <span
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm ${
-                      active === lesson.index
-                        ? "bg-[#d5b777] text-[#172b35]"
-                        : "bg-[#f1ebdf] text-[#8c774a]"
-                    }`}
-                  >
-                    {read.includes(lesson.index) ? "✓" : lesson.index + 1}
-                  </span>
-                  <span className="flex-1 text-sm font-medium">
-                    {lesson.short}
-                  </span>
-                  {active === lesson.index && (
-                    <span className="text-[#d5b777]">←</span>
-                  )}
-                </button>
-              ))}
-
-              {filtered.length === 0 && (
-                <p className="py-5 text-center text-sm text-[#77766d]">
-                  موضوعی پیدا نشد.
-                </p>
-              )}
-            </nav>
-          </div>
-
-          <div className="rounded-2xl bg-[#e9e0ce] p-5">
-            <div className="text-xs font-bold text-[#8a7040]">
-              مکثی برای اندیشیدن
-            </div>
-            <p className="mt-3 text-sm leading-8 text-[#394b50]">
-              اگر امروز وارد کلاس شوی، دوست داری دانش‌آموزانت در کنار تو چه
-              احساسی داشته باشند؟
+            <p>
+              هیچ معلمی یک‌شبه به همهٔ این صفات دست نمی‌یابد؛ رشد حرفه‌ای فرایندی مستمر است که با خودارزیابی،
+              تجربه، مطالعه و دریافت بازخورد تقویت می‌شود.
             </p>
           </div>
-        </aside>
-
-        <section className="lesson-content min-w-0">
-          <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
-            <div className="text-xs text-[#8c8069] md:text-sm">
-              فصل دوم کتاب مهارت‌های معلمی
-              <span className="mx-2">/</span>
-              بخش {active + 1}
-            </div>
-
-            <button
-              onClick={() => window.print()}
-              className="interactive-controls rounded-lg border border-[#dcd2bf] bg-white px-4 py-2 text-xs font-semibold transition hover:bg-[#f9f6ef]"
-            >
-              چاپ یا ذخیره PDF
-            </button>
+          <ul className="f-checklist">
+            <li>دانش تخصصی را با یادگیری مستمر همراه کنیم.</li>
+            <li>با همهٔ دانش‌آموزان محترمانه و منصفانه رفتار کنیم.</li>
+            <li>پیش از قضاوت، شرایط و تفاوت‌های فردی را بشناسیم.</li>
+            <li>میان آنچه می‌گوییم و آنچه انجام می‌دهیم هماهنگی ایجاد کنیم.</li>
+            <li>هر روز یک رفتار حرفه‌ای خود را ارزیابی و اصلاح کنیم.</li>
+          </ul>
+        </div>
+        <div className="f-container">
+          <div className="f-source">
+            <strong>منبع اصلی:</strong> قرائتی، محسن، <em>مهارت معلمی</em>، فصل دوم: «صفات معلم»،
+            بخش صفحات ۳۲ تا ۷۳ در نسخهٔ بررسی‌شده.
+            <br />
+            <strong>روش استفاده از منبع:</strong> عنوان صفات بر اساس فهرست فصل تنظیم شده است؛ شرح‌های کوتاه،
+            مثال‌های کلاسی و پرسش‌ها برای این ارائه بازنویسی و تدوین شده‌اند و نقل‌قول مستقیم از کتاب نیستند.
+            برای استناد دقیق به آیات، روایات یا عبارت‌های نویسنده، متن چاپ مورد استفادهٔ کلاس را بررسی کنید.
           </div>
+        </div>
+      </section>
 
-          <article className="print-card overflow-hidden rounded-[1.75rem] border border-[#e0d7c6] bg-white">
-            <div className="relative overflow-hidden bg-[#172b35] p-7 text-white md:p-10">
-              <div className="absolute -left-10 -top-10 h-40 w-40 rounded-full border border-[#d5b777]/20" />
-              <div className="relative">
-                <div className="mb-5 flex items-center gap-3">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#d5b777] text-2xl text-[#172b35]">
-                    {current.icon}
-                  </span>
-                  <span className="text-sm text-[#d5b777]">
-                    صفت {String(active + 1).padStart(2, "0")}
-                  </span>
-                </div>
-
-                <h2 className="text-2xl font-black leading-relaxed md:text-4xl">
-                  {current.title}
-                </h2>
-
-                <p className="mt-5 max-w-2xl text-sm leading-8 text-[#dce3e1] md:text-base">
-                  {current.quote}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-7 p-6 md:p-10">
-              <section>
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="text-lg text-[#b89a5c]">◈</span>
-                  <h3 className="font-extrabold">مفهوم و تبیین آموزشی</h3>
-                </div>
-                <p className="text-sm leading-9 text-[#46565b] md:text-base md:leading-10">
-                  {current.meaning}
-                </p>
-              </section>
-
-              <div className="h-px bg-[#eee8dc]" />
-
-              <section>
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="text-lg text-[#b89a5c]">◇</span>
-                  <h3 className="font-extrabold">این صفت در کلاس چه شکلی دارد؟</h3>
-                </div>
-                <div className="rounded-2xl bg-[#f7f4ed] p-5 md:p-6">
-                  <div className="mb-3 text-xs font-bold text-[#947b48]">
-                    یک موقعیت واقعی
-                  </div>
-                  <p className="text-sm leading-9 text-[#46565b]">
-                    {current.example}
-                  </p>
-                </div>
-              </section>
-
-              <section>
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="text-lg text-[#b89a5c]">✦</span>
-                  <h3 className="font-extrabold">تمرین برای دانشجومعلم</h3>
-                </div>
-                <p className="rounded-2xl border border-[#e8dcc3] p-5 text-sm leading-9 text-[#46565b]">
-                  {current.practice}
-                </p>
-              </section>
-
-              <div className="interactive-controls flex flex-wrap items-center justify-between gap-3 border-t border-[#eee8dc] pt-6">
-                <button
-                  onClick={() => setActive((value) => Math.max(value - 1, 0))}
-                  disabled={active === 0}
-                  className="rounded-xl border border-[#ded5c5] px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-35"
-                >
-                  بخش قبلی
-                </button>
-
-                <button
-                  onClick={markRead}
-                  disabled={read.includes(active)}
-                  className="rounded-xl border border-[#b89a5c] px-5 py-3 text-sm font-semibold text-[#796139] transition hover:bg-[#f7f1e4] disabled:opacity-60"
-                >
-                  {read.includes(active) ? "✓ مطالعه شد" : "علامت‌گذاری مطالعه"}
-                </button>
-
-                <button
-                  onClick={nextLesson}
-                  disabled={active === lessons.length - 1}
-                  className="rounded-xl bg-[#172b35] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#29434e] disabled:opacity-35"
-                >
-                  بخش بعدی ←
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <section className="mt-8 rounded-[1.75rem] border border-[#e0d7c6] bg-white p-6 md:p-9">
-            <div className="text-xs font-bold text-[#a08751]">
-              جمع‌بندی فصل
-            </div>
-            <h2 className="mt-3 text-2xl font-black leading-relaxed">
-              معلم خوب، در عمل شناخته می‌شود.
-            </h2>
-            <p className="mt-4 text-sm leading-9 text-[#52616a]">
-              صفات معلمی زمانی ارزش آموزشی پیدا می‌کنند که در رفتار روزمره
-              نمود داشته باشند؛ در نحوه شنیدن، شیوه توضیح دادن، برخورد با
-              اشتباه، رعایت عدالت و تلاش برای یادگیری بیشتر. این ویژگی‌ها
-              باید در کنار دانش تخصصی، مهارت تدریس و شناخت دانش‌آموزان رشد کنند.
-            </p>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {[
-                ["۱", "خودشناسی", "نقاط قوت و ضعف حرفه‌ای خود را بشناسیم."],
-                ["۲", "تمرین", "هر صفت را به یک رفتار عملی تبدیل کنیم."],
-                ["۳", "بازنگری", "از تجربه تدریس و بازخورد دیگران بیاموزیم."],
-                ["۴", "استمرار", "رشد معلمی را مسیری همیشگی بدانیم."],
-              ].map(([number, title, description]) => (
-                <div
-                  key={number}
-                  className="rounded-xl bg-[#f7f4ed] p-4"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#e7dcc3] text-sm font-black text-[#7d663d]">
-                      {number}
-                    </span>
-                    <span className="font-bold">{title}</span>
-                  </div>
-                  <p className="mt-3 text-xs leading-7 text-[#69777a]">
-                    {description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="interactive-controls mt-8 overflow-hidden rounded-[1.75rem] bg-[#172b35] p-6 text-white md:p-9">
-            <div className="text-xs font-bold text-[#d5b777]">
-              خودآزمایی پایانی
-            </div>
-            <h2 className="mt-3 text-2xl font-black">
-              چقدر از مفاهیم آموخته‌شده را به خاطر سپرده‌ای؟
-            </h2>
-            <p className="mt-3 text-sm leading-8 text-[#dce3e1]">
-              به پنج پرسش پاسخ بده و نتیجه را همراه با توضیح هر پاسخ ببین.
-            </p>
-
-            {!quizOpen ? (
-              <button
-                onClick={() => {
-                  setQuizOpen(true);
-                  setFinished(false);
-                  setAnswers({});
-                }}
-                className="mt-6 rounded-xl bg-[#d5b777] px-6 py-3 font-bold text-[#172b35] transition hover:bg-[#e7cb8d]"
-              >
-                شروع آزمون ←
-              </button>
-            ) : (
-              <div className="mt-7 space-y-6">
-                {questions.map((question, index) => (
-                  <div
-                    key={question.q}
-                    className="rounded-2xl border border-white/15 p-5"
-                  >
-                    <div className="text-xs text-[#d5b777]">
-                      پرسش {index + 1} از {questions.length}
-                    </div>
-                    <h3 className="mt-3 font-bold leading-8">
-                      {question.q}
-                    </h3>
-                    <div className="mt-4 space-y-2">
-                      {question.options.map((option, optionIndex) => {
-                        const selected = answers[index] === optionIndex;
-                        const isCorrect = question.correct === optionIndex;
-
-                        return (
-                          <button
-                            key={option}
-                            onClick={() => {
-                              if (finished) return;
-                              setAnswers((previous) => ({
-                                ...previous,
-                                [index]: optionIndex,
-                              }));
-                            }}
-                            className={`w-full rounded-xl border px-4 py-3 text-right text-sm leading-7 transition ${
-                              finished && isCorrect
-                                ? "border-emerald-400 bg-emerald-400/10"
-                                : selected
-                                  ? "border-[#d5b777] bg-[#d5b777]/10"
-                                  : "border-white/10 hover:bg-white/5"
-                            }`}
-                          >
-                            <span className="ml-2 text-[#d5b777]">
-                              {["الف", "ب", "ج", "د"][optionIndex]}.
-                            </span>
-                            {option}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {finished && (
-                      <p className="mt-4 text-sm leading-8 text-[#dce3e1]">
-                        <span className="font-bold text-[#d5b777]">
-                          توضیح:
-                        </span>{" "}
-                        {question.why}
-                      </p>
-                    )}
-                  </div>
-                ))}
-
-                {!finished ? (
-                  <button
-                    disabled={Object.keys(answers).length !== questions.length}
-                    onClick={() => setFinished(true)}
-                    className="rounded-xl bg-[#d5b777] px-6 py-3 font-bold text-[#172b35] disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    بررسی پاسخ‌ها
-                  </button>
-                ) : (
-                  <div className="rounded-2xl border border-[#d5b777]/40 p-6">
-                    <div className="text-sm text-[#d5b777]">نتیجه آزمون</div>
-                    <div className="mt-2 text-4xl font-black">
-                      {score} از {questions.length}
-                    </div>
-                    <p className="mt-3 text-sm leading-8 text-[#dce3e1]">
-                      {score === questions.length
-                        ? "عالی است! به همه پرسش‌ها درست پاسخ دادی."
-                        : "پاسخ‌ها و توضیحات را مرور کن و برای تثبیت یادگیری دوباره تلاش کن."}
-                    </p>
-                    <button
-                      onClick={() => {
-                        setAnswers({});
-                        setFinished(false);
-                      }}
-                      className="mt-5 rounded-xl border border-white/20 px-5 py-3 text-sm hover:bg-white/10"
-                    >
-                      تلاش دوباره
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </section>
-
-          <section className="mt-8 rounded-2xl border border-[#e0d7c6] bg-white p-6">
-            <h2 className="font-extrabold">مشخصات ارائه</h2>
-            <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-              <div className="rounded-xl bg-[#f7f4ed] p-4">
-                <div className="text-xs text-[#8a806f]">درس</div>
-                <div className="mt-2 font-semibold">مهارت‌های معلمی</div>
-              </div>
-              <div className="rounded-xl bg-[#f7f4ed] p-4">
-                <div className="text-xs text-[#8a806f]">موضوع</div>
-                <div className="mt-2 font-semibold">فصل دوم؛ صفات معلم</div>
-              </div>
-              <div className="rounded-xl bg-[#f7f4ed] p-4">
-                <div className="text-xs text-[#8a806f]">استاد درس</div>
-                <div className="mt-2 font-semibold">استاد واسع</div>
-              </div>
-              <div className="rounded-xl bg-[#f7f4ed] p-4">
-                <div className="text-xs text-[#8a806f]">ارائه‌دهنده</div>
-                <div className="mt-2 font-semibold">علیرضا آهنی</div>
-              </div>
-            </div>
-            <p className="mt-5 text-xs leading-7 text-[#817d72]">
-              منبع اصلی: محسن قرائتی، کتاب مهارت‌های معلمی، فصل دوم «صفات
-              معلم». توضیحات و مثال‌های این صفحه با هدف آموزش و کاربردی‌سازی
-              مفاهیم تنظیم شده‌اند و نقل‌قول مستقیم از متن کتاب محسوب نمی‌شوند.
-            </p>
-          </section>
-
-          <footer className="site-footer py-8 text-center text-xs leading-7 text-[#8a806f]">
-            تهیه‌شده برای ارائه دانشگاهی درس مهارت‌های معلمی
-            <div>طراحی آموزشی در بستر سرچنو</div>
-          </footer>
-        </section>
-      </div>
+      <footer className="f-footer">
+        <div className="f-container f-footer-inner">
+          <div>ارائهٔ پژوهشی فصل دوم کتاب مهارت معلمی · صفات معلم</div>
+          <div>ارائه‌دهندگان: {presenters.join(" · ")}</div>
+          <button className="f-btn" onClick={() => goTo("شروع")}>بازگشت به ابتدای صفحه ↑</button>
+        </div>
+      </footer>
     </main>
   );
 }
